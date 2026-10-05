@@ -31,7 +31,8 @@
       "2026-02": 20.0,
       "2026-06": 20.0,
       "2026-07": 380.0,
-      "2026-09": 50.0
+      "2026-09": 110.0,
+      "2026-10": 80.0
     }
   },
   "charges_reconciliation_by_month": {
@@ -399,7 +400,44 @@
       },
       "openrouter": {
         "charges_provenance": "reported",
-        "charges_real": 50.0,
+        "charges_real": 110.0,
+        "cost_effective": 0.0,
+        "fee_month_total": 0.0,
+        "subscription_fee_implicit": 0.0
+      }
+    },
+    "2026-10": {
+      "amp": {
+        "charges_provenance": "reported",
+        "charges_real": 0.0,
+        "cost_effective": 0.0,
+        "fee_month_total": 0.0,
+        "subscription_fee_implicit": 0.0
+      },
+      "claude-cli": {
+        "charges_provenance": "reported",
+        "charges_real": 0.0,
+        "cost_effective": 0.0,
+        "fee_month_total": 0.0,
+        "subscription_fee_implicit": 0.0
+      },
+      "codex": {
+        "charges_provenance": "reported",
+        "charges_real": 0.0,
+        "cost_effective": 0.0,
+        "fee_month_total": 0.0,
+        "subscription_fee_implicit": 0.0
+      },
+      "gemini-cli": {
+        "charges_provenance": "reported",
+        "charges_real": 0.0,
+        "cost_effective": 0.0,
+        "fee_month_total": 0.0,
+        "subscription_fee_implicit": 0.0
+      },
+      "openrouter": {
+        "charges_provenance": "reported",
+        "charges_real": 80.0,
         "cost_effective": 0.0,
         "fee_month_total": 0.0,
         "subscription_fee_implicit": 0.0
@@ -558,7 +596,7 @@
     "charges_provenance": "reported",
     "charges_reason": null,
     "charges_source": "data/charges.json",
-    "charges_total_real": 1356.72,
+    "charges_total_real": 1496.72,
     "config_source": "config/fpa.json",
     "cost_real_total_tracker": 0.0,
     "cost_total_effective": 0.03,
@@ -994,17 +1032,35 @@
     "charly-atril": {
       "2026-05": {
         "cost_effective": 0.01,
-        "interactions": 1
+        "cost_real": 0.0,
+        "interactions": 1,
+        "tokens": {
+          "cache_read": 0,
+          "in": 1000,
+          "out": 500
+        }
       }
     },
     "charly-coffee": {
       "2026-05": {
         "cost_effective": 0.01,
-        "interactions": 1
+        "cost_real": 0.0,
+        "interactions": 1,
+        "tokens": {
+          "cache_read": 0,
+          "in": 1000,
+          "out": 500
+        }
       },
       "2026-06": {
         "cost_effective": 0.01,
-        "interactions": 1
+        "cost_real": 0.0,
+        "interactions": 1,
+        "tokens": {
+          "cache_read": 0,
+          "in": 1000,
+          "out": 500
+        }
       }
     }
   },

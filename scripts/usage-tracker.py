@@ -1459,8 +1459,11 @@ def aggregate(interactions, sessions, skills_total=None, skills_by_project=None,
         "interactions": 0, "cost_effective": 0.0,
         "in": 0, "out": 0, "cache_read": 0, "cache_write": 0}))
     # FPA-012/021: proyecto × mes y proyecto × modelo
+    # add-project-cost-token-timeline (d1): tokens por proyecto×mes para la
+    # timeline de volumen y coste del dashboard (d2)
     project_monthly = defaultdict(lambda: defaultdict(lambda: {
-        "interactions": 0, "cost_effective": 0.0}))
+        "interactions": 0, "cost_effective": 0.0, "cost_real": 0.0,
+        "tokens": {"in": 0, "out": 0, "cache_read": 0}}))
     project_models = defaultdict(lambda: defaultdict(lambda: {
         "interactions": 0, "cost_effective": 0.0}))
 
@@ -1502,6 +1505,10 @@ def aggregate(interactions, sessions, skills_total=None, skills_by_project=None,
         pmm = project_monthly[proj][m]
         pmm["interactions"] += 1
         pmm["cost_effective"] += r.get("cost_effective", 0) or 0
+        pmm["cost_real"] += real
+        pmm["tokens"]["in"] += r.get("input_tokens", 0) or 0
+        pmm["tokens"]["out"] += r.get("output_tokens", 0) or 0
+        pmm["tokens"]["cache_read"] += r.get("cache_read_tokens", 0) or 0
         pmo = project_models[proj][r["model_raw"]]
         pmo["interactions"] += 1
         pmo["cost_effective"] += r.get("cost_effective", 0) or 0

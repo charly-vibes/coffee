@@ -393,6 +393,61 @@ class TestAggregate(unittest.TestCase):
         self.assertNotIn("tools_summary", self.report)
 
 
+class TestProjectMonthlyTokens(unittest.TestCase):
+    """add-project-cost-token-timeline (d1/t1.2): project_monthly acumula
+    tokens (in/out/cache_read) y cost_real por proyecto×mes, para la timeline
+    de volumen y coste por proyecto del dashboard (d2)."""
+
+    @classmethod
+    def setUpClass(cls):
+        rows = [
+            row(ts="2026-05-10T14:23:00+00:00", project="charly-coffee",
+                tool="gemini-cli", model_raw="gemini-3-pro",
+                model_family="gemini", model_version="gemini-3-pro",
+                input_tokens=1000, output_tokens=500,
+                cache_read_tokens=200, cost_effective=0.01),
+            row(ts="2026-05-11T09:00:00+00:00", project="charly-coffee",
+                tool="gemini-cli", model_raw="gemini-3-pro",
+                model_family="gemini", model_version="gemini-3-pro",
+                input_tokens=0, output_tokens=0, cache_read_tokens=0,
+                cost_effective=0.0),
+            row(ts="2026-06-01T09:00:00+00:00", project="charly-coffee",
+                tool="gemini-cli", model_raw="gemini-3-pro",
+                model_family="gemini", model_version="gemini-3-pro",
+                input_tokens=100, output_tokens=50, cache_read_tokens=0,
+                cost_effective=0.005),
+        ]
+        rep = ut.aggregate(rows, synthetic_sessions())
+        cls.pm = rep["project_monthly"]["charly-coffee"]
+
+    def test_tokens_acumulan_por_proyecto_mes(self):
+        # gemini-cli no está suscripto en el calendario sintético → real = effective
+        may = self.pm["2026-05"]
+        self.assertEqual(1000, may["tokens"]["in"])
+        self.assertEqual(500, may["tokens"]["out"])
+        self.assertEqual(200, may["tokens"]["cache_read"])
+
+    def test_project_multiple_months(self):
+        self.assertEqual(set(self.pm.keys()), {"2026-05", "2026-06"})
+        self.assertEqual(100, self.pm["2026-06"]["tokens"]["in"])
+
+    def test_mes_coste_cero_con_tokens(self):
+        # mes con coste 0.0 pero tokens > 0: el volumen timeline no depende del coste
+        # (aquí la row 2026-06 tiene coste pero 0 tokens: usa la row de 2026-05 con 0)
+        # para la aserción dedicada usamos el mes donde el coste es 0 y tokens no:
+        # tomamos la row 2 (2026-05, 0 tokens) vs mes completo: el caso limpio es
+        # un mes entero sin coste — sintetizamos dentro del test.
+        rows = [row(ts="2026-07-01T09:00:00+00:00", project="charly-coffee",
+                    tool="gemini-cli", model_raw="gemini-3-pro",
+                    model_family="gemini", model_version="gemini-3-pro",
+                    input_tokens=42, output_tokens=0, cache_read_tokens=0,
+                    cost_effective=0.0)]
+        pm = ut.aggregate(rows, synthetic_sessions())["project_monthly"]
+        july = pm["charly-coffee"]["2026-07"]
+        self.assertEqual(0.0, july["cost_effective"])
+        self.assertEqual(42, july["tokens"]["in"])
+
+
 # ============================ golden ============================
 
 class TestPiCostEstimate(unittest.TestCase):

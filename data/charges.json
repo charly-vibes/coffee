@@ -1,5 +1,5 @@
 {
-  "description": "Ledger de cargos reales (facturas de proveedores), transcripto de captures de billing el 2026-09-20. Provenance: reported (FPA-003). kind: subscription | credits | refund | api_cycle (factura $0). Solo gasto de IA: los cargos de storage (Google One 100 GB) quedan fuera del ledger por decisión de Sasha 2026-09-20. Los amounts son USD reales pagados en la fecha.",
+  "description": "Ledger de cargos reales (facturas de proveedores), transcripto de captures de billing el 2026-09-20 (claude/codex/gemini/amp) y el 2026-10-04 (openrouter, coffe-6q5). Provenance: reported (FPA-003). kind: subscription | credits | refund | api_cycle (factura $0). Solo gasto de IA: los cargos de storage (Google One 100 GB) quedan fuera del ledger por decisión de Sasha 2026-09-20. Los amounts son USD reales pagados en la fecha.",
   "currency": "USD",
   "providers": {
     "claude-cli": [
@@ -301,6 +301,30 @@
       },
       {
         "date": "2026-09-17",
+        "amount": 30,
+        "kind": "credits",
+        "note": "recarga de créditos"
+      },
+      {
+        "date": "2026-09-28",
+        "amount": 30,
+        "kind": "credits",
+        "note": "recarga de créditos"
+      },
+      {
+        "date": "2026-09-29",
+        "amount": 30,
+        "kind": "credits",
+        "note": "recarga de créditos"
+      },
+      {
+        "date": "2026-10-01",
+        "amount": 50,
+        "kind": "credits",
+        "note": "recarga de créditos"
+      },
+      {
+        "date": "2026-10-04",
         "amount": 30,
         "kind": "credits",
         "note": "recarga de créditos"

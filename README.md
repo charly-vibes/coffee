@@ -29,7 +29,7 @@ de los últimos meses.
 
 | Archivo | Tamaño | Contenido |
 |---------|--------|-----------|
-| `data/usage_report_v3.json` | 766K | **Reporte principal.** Interacciones del scope in-scope (charly/sk/ak, coffe-vp8). Incluye hourly, daily, monthly, projects, sessions, skills, commands, multitasking, project_daily (matriz para el Gantt) y energía estimada por modelo (coffe-7mj, *assumed*). Última regeneración: 2026-09-24 (153,741 interacciones). |
+| `data/usage_report_v3.json` | 1.0M | **Reporte principal.** Interacciones del scope in-scope (charly/sk/ak, coffe-vp8). Incluye hourly, daily, monthly, projects, sessions, skills, commands, multitasking, project_daily (matriz para el Gantt) y energía estimada por modelo (coffe-7mj, *assumed*). Última regeneración: 2026-10-05 (193,608 interacciones). |
 Jerarquía del sitio (coffe-gen.5): el dashboard principal es **Uso y
 costos de IA** (`data/fpa-dashboard.html`); el dashboard de insights
 (`data/dashboard.html`, antes generado por `scripts/viz-dashboard.py`)
@@ -39,7 +39,7 @@ El Gantt se conserva como visualización única de su tipo.
 
 | Archivo | Tamaño | Contenido |
 |---------|--------|-----------|
-| `data/usage_report_v3.json` | 766K | **Reporte principal.** Interacciones del scope in-scope (charly/sk/ak, coffe-vp8). Incluye hourly, daily, monthly, projects, sessions, skills, commands, multitasking, project_daily (matriz para el Gantt) y energía estimada por modelo (coffe-7mj, *assumed*). Última regeneración: 2026-09-24 (153,741 interacciones). |
+| `data/usage_report_v3.json` | 1.0M | **Reporte principal.** Interacciones del scope in-scope (charly/sk/ak, coffe-vp8). Incluye hourly, daily, monthly, projects, sessions, skills, commands, multitasking, project_daily (matriz para el Gantt) y energía estimada por modelo (coffe-7mj, *assumed*). Última regeneración: 2026-10-05 (193,608 interacciones). |
 | `data/fpa-dashboard.html` | 1.7M | **Dashboard principal — Uso y costos de IA.** Resumen ejecutivo, KPIs, presupuestos, bridge precio-volumen-mix (con selector de mes), forecast, alertas, economía de suscripción, patrones de uso. 6 vistas (una a la vez a todo ancho, tabs + deep-link por hash) + selector de periodo; export CSV/SVG; share-URL; disclosure por defecto solo en la sección primaria de cada vista; marginalia con guía a 4 niveles. En <https://charly-vibes.github.io/coffee/data/fpa-dashboard.html>. |
 | `data/fpa-guide.html` | — | **Guía de análisis.** Los 19 análisis del dashboard explicados a 4 niveles (ELI5 → experto), en español, con grounding verificado por `--check-docs`. En <https://charly-vibes.github.io/coffee/data/fpa-guide.html>. |
 | `data/gantt-multitasking.html` | 41K | **Visualización Gantt.** Actividad por proyecto/día, fila de concurrencia diaria, toggle interacciones/presencia, tooltips. Abrir en navegador (o en <https://charly-vibes.github.io/coffee/data/gantt-multitasking.html>). |
@@ -101,13 +101,13 @@ El deploy es vía **GitHub Actions** (no hay branch `gh-pages`): `.github/workfl
 ## Estado de los datos
 
 <!-- CHECK-DOCS:BEGIN -->
-- Interacciones: 154,146
-- Proyectos: 55
-- Costo efectivo: $5,167.83
-- Costo real: $718.82
-- Cash real (ledger): $1,156.72
-- Sesiones: 3,089
-- Periodo: 2025-12-23 → 2026-09-24
+- Interacciones: 193,608
+- Proyectos: 57
+- Costo efectivo: $5,296.01
+- Costo real: $847.00
+- Cash real (ledger): $1,296.72
+- Sesiones: 3,412
+- Periodo: 2025-12-23 → 2026-10-05
 <!-- CHECK-DOCS:END -->
 
 Nota: `Costo real` es la suma mensual del tracker (fees implícitos del
