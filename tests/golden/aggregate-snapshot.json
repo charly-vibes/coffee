@@ -1220,6 +1220,12 @@
         "label": "ChatGPT Plus $20/mes",
         "monthly_fee": 20,
         "start": "2026-05-02"
+      },
+      {
+        "end": "2026-11-06",
+        "label": "ChatGPT Plus trial (1 mes free)",
+        "monthly_fee": 0,
+        "start": "2026-10-06"
       }
     ],
     "gemini-cli": [

@@ -262,7 +262,7 @@
       "q_base": 170.0,
       "rate_base": 0.407843
     },
-    "default_plan": "claude-cli:none",
+    "default_plan": "codex:none",
     "future_months": [
       "2026-08",
       "2026-09",
@@ -296,28 +296,28 @@
     },
     "plans": [
       {
-        "fee": 100,
-        "key": "claude-cli:0",
-        "label": "Max $100/mes",
-        "tool": "claude-cli"
-      },
-      {
-        "fee": 100,
-        "key": "claude-cli:1",
-        "label": "Max $100/mes",
-        "tool": "claude-cli"
+        "fee": 20,
+        "key": "codex:0",
+        "label": "ChatGPT Plus $20/mes",
+        "tool": "codex"
       },
       {
         "fee": 20,
-        "key": "claude-cli:2",
-        "label": "Pro $20/mes",
-        "tool": "claude-cli"
+        "key": "codex:1",
+        "label": "ChatGPT Plus $20/mes",
+        "tool": "codex"
+      },
+      {
+        "fee": 0,
+        "key": "codex:2",
+        "label": "ChatGPT Plus trial (1 mes free)",
+        "tool": "codex"
       },
       {
         "fee": 0.0,
-        "key": "claude-cli:none",
+        "key": "codex:none",
         "label": "Sin suscripción (pay-per-token)",
-        "tool": "claude-cli"
+        "tool": "codex"
       }
     ],
     "provenance": "assumed",

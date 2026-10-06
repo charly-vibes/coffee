@@ -82,11 +82,13 @@ class TestConfigRealValido(unittest.TestCase):
         ], [(s["start"], s["end"], s["monthly_fee"]) for s in subs])
 
     def test_suscripciones_codex_facturas(self):
-        """FPA-082/reales: ChatGPT Plus $20 el 2-abr y el 2-may; Free después."""
+        """FPA-082/reales: ChatGPT Plus $20 el 2-abr y el 2-may; Free después
+        hasta el trial de coffe-wo1 (1 mes free desde el 6-oct)."""
         subs = fpa_config.load_fpa_config()["subscriptions"]["codex"]
         self.assertEqual([
             ("2026-04-02", "2026-05-02", 20),
             ("2026-05-02", "2026-06-02", 20),
+            ("2026-10-06", "2026-11-06", 0),  # coffe-wo1: trial 1 mes free
         ], [(s["start"], s["end"], s["monthly_fee"]) for s in subs])
 
     def test_suscripciones_gemini_facturas(self):

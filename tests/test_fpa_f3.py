@@ -372,12 +372,16 @@ class TestForecast(F3Base):
         self.assertEqual("assumed", self.model["budget"]["provenance"])
 
     def test_planes_del_config(self):
-        """FPA-071: planes futuros desde las suscripciones del config."""
+        """FPA-071: planes futuros desde las suscripciones del config.
+
+        coffe-wo1: el primary es la tool con la suscripción que termina más
+        tarde — con el trial de codex (fin 2026-11-06) es codex, no claude."""
         fc = self.model["forecast"]
         keys = {p["key"] for p in fc["plans"]}
         self.assertIn(fc["default_plan"], keys)
         labels = " ".join(p["label"] for p in fc["plans"])
-        self.assertIn("Max $100/mes", labels)
+        self.assertIn("ChatGPT Plus", labels)
+        self.assertTrue(any("trial" in p["label"].lower() for p in fc["plans"]))
         for p in fc["plans"]:
             self.assertIsInstance(p["fee"], (int, float))
 

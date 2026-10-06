@@ -163,6 +163,20 @@
         "utilization_reason": null
       },
       {
+        "break_even": 0,
+        "eff_cost": null,
+        "end": "2026-11-06",
+        "headroom": null,
+        "label": "ChatGPT Plus trial (1 mes free)",
+        "monthly_fee": 0,
+        "price": 0.0,
+        "provenance": "assumed",
+        "start": "2026-10-06",
+        "tool": "codex",
+        "utilization": null,
+        "utilization_reason": "sin datos horarios de coste para el periodo"
+      },
+      {
         "break_even": 19.99,
         "eff_cost": null,
         "end": "2026-06-03",
