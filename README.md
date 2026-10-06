@@ -18,7 +18,7 @@ de los últimos meses.
 
 | Archivo | Propósito |
 |---------|-----------|
-| `scripts/usage-tracker.py` | Extractor de uso de IA v4.3. Lee datos de Claude, Pi (incluye Gemini vía google-gemini-cli) y Amp. Filtra solo proyectos charly. Produce reporte JSON con hourly/daily/monthly/projects/sessions/skills/commands/multitasking/project_daily. Flags: `--output RUTA`, `--force`, `--filter {charly,all}` (default charly), `--since/--until YYYY-MM-DD` (ventana inclusive, coffe-snj), `--config RUTA` (ver "Uso"). SUBSCRIPTIONS/MODEL_PRICING se cargan de `config/fpa.json` (coffe-mbz). |
+| `scripts/usage-tracker.py` | Extractor de uso de IA v4.5. Lee datos de Claude, Pi (incluye Gemini vía google-gemini-cli), Amp y Codex CLI standalone (~/.codex/sessions, coffe-2sy; antes solo entraba Codex-via-Pi). Filtra solo proyectos charly. Produce reporte JSON con hourly/daily/monthly/projects/sessions/skills/commands/multitasking/project_daily. Flags: `--output RUTA`, `--force`, `--filter {charly,all}` (default charly), `--since/--until YYYY-MM-DD` (ventana inclusive, coffe-snj), `--config RUTA` (ver "Uso"). SUBSCRIPTIONS/MODEL_PRICING se cargan de `config/fpa.json` (coffe-mbz). |
 | `scripts/viz-gantt.py` | Genera `data/gantt-multitasking.html`: Gantt de actividad proyecto × día con concurrencia diaria. Autocontenido, sin dependencias. |
 | `scripts/viz-fpa.py` | Genera `data/fpa-dashboard.html`: dashboard principal "Uso y costos de IA" (nombre llano del `site_name` del config; presupuestos, bridge PVM, forecast, alertas, economía de suscripción). Un solo HTML autocontenido, **SVG inline, sin librería de charts externa** (FPA-145); las matemáticas se pre-calculan en Python y el JS solo re-escala. Tema compartido del sitio en `scripts/site_theme.py` (coffe-gen.2). Config en `config/fpa.json`. Flags: `--check-docs` (consistencia README↔JSON FPA-143 + grounding de la guía, coffe-gen.3). |
 | `scripts/viz_fpa_guide.py` | Parser de `docs/fpa-analyses-guide.md` (guía de análisis a 4 niveles, en español) → `data/fpa-guide.html` + marginalia con chips expandibles en el dashboard y el Gantt (coffe-gen.3/4). `--check` valida el grounding (mapeo + umbrales vs config). |
@@ -141,7 +141,7 @@ congelado).
 ### ✅ Extraído y documentado
 
 - **81,887 interacciones** de enero 11 a junio 10 (solo charly)
-- **3 fuentes:** Claude CLI, Pi (Codex + Gemini CLI + OpenRouter), Amp
+- **4 fuentes:** Claude CLI, Pi (Codex + Gemini CLI + OpenRouter), Amp, Codex CLI standalone (coffe-2sy)
 - **Filtro in-scope (coffe-vp8):** incluye repos de los tres orgs — charly, sk- y ak- (excluye phorma, ~/Downloads, etc.)
 - **Mensual:** enero (929 Amp), febrero (719), marzo (263), abril (20,671), mayo (57,647), junio (1,658)
 - **Modelos:** Sonnet 4.6 (~55K), Opus 4.6/4.7 (~12K), GPT-5.4 (~9K), GPT-5.5 (~3K), Gemini 3 Pro (~500), DeepSeek V4 (~400)

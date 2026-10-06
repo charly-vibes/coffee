@@ -43,6 +43,7 @@ from pathlib import Path
 CLAUDE_DIR = Path.home() / ".claude"
 PI_DIR = Path.home() / ".pi" / "agent"  # Gemini llega vía logs de Pi (google-gemini-cli), no hay extractor propio
 AMP_DIR = Path.home() / ".amp"
+CODEX_DIR = Path.home() / ".codex"  # coffe-2sy: rollouts del CLI standalone (sesiones/*/*/*/rollout-*.jsonl)
 OUTPUT_DIR = Path("data")
 LOCAL_TZ = datetime.now().astimezone().tzinfo  # OJO: los buckets hourly/daily usan la TZ local de la máquina que extrae
 
@@ -526,6 +527,8 @@ def model_details(model_id):
     if "claude-opus-4-5" in m: return ("claude", "opus-4.5")
     if "claude-sonnet-4-6" in m: return ("claude", "sonnet-4.6")
     if "claude-haiku" in m: return ("claude", "haiku")
+    if "gpt-6.1" in m: return ("codex", "gpt-6.1")  # coffe-2sy: gpt-6.1-sol etc. (precio API desconocido → default_rates, *assumed*)
+    if "gpt-6" in m: return ("codex", "gpt-6")  # coffe-2sy: variantes (gpt-6-luna); familia codex, no "other"
     if "gpt-5.5" in m: return ("codex", "gpt-5.5")
     if "gpt-5.4" in m: return ("codex", "gpt-5.4")
     if "gpt-5.3" in m: return ("codex", "gpt-5.3")
@@ -886,6 +889,168 @@ def extract_amp():
     return rows
 
 
+def extract_codex(sessions_dir=None, skipped=None):
+    """Extrae de Codex CLI standalone (~/.codex/sessions, coffe-2sy).
+
+    Hasta v4.4 solo entraba Codex-via-Pi (provider openai-codex); las
+    sesiones del TUI/CLI eran invisibles. Formato: 1 rollout-*.jsonl = 1
+    sesión bajo sessions/YYYY/MM/DD/. Cada event_msg token_count trae
+    total_token_usage (acumulativo) y last_token_usage (delta del turno)
+    — la fila usa el delta, así el uso acumulado no se doble-cuenta.
+
+    Semántica de tokens: input_tokens de Codex YA incluye los cached
+    (verificado con total vs suma de deltas) → fresh = input - cached,
+    cache_read = cached (como reporta Anthropic). reasoning_output es
+    parte del output. Cache_write siempre 0 en este log.
+
+    Sin cost en el log (como gemini-cli, coffe-8t8): costo estimado
+    pay-per-token con rates vigentes por fecha. El precio de los modelos
+    gpt-6.x no es conocido → default_rates, provenance *assumed*.
+
+    El filtro es is_charly(cwd) (respeta --filter) y el label es el
+    proyecto derivado del cwd vía amp_proj_from_uri (org-repo), igual
+    que Amp; fallback "codex-unknown" si el cwd no es derivable.
+    """
+    rows = []
+    sessions_dir = sessions_dir or (CODEX_DIR / "sessions")
+    if not sessions_dir.exists(): return rows
+    for day_dir in sorted(sessions_dir.glob("*/*/*")):
+        if not day_dir.is_dir(): continue
+        for f in sorted(day_dir.glob("rollout-*.jsonl")):
+            try:
+                _parse_codex_rollout(f, rows, skipped)
+            except OSError as e:
+                if skipped is not None:
+                    skipped[f"codex:{f.name}"] = skipped.get(f"codex:{f.name}", 0) + 1
+                elif os.environ.get("TRACKER_DEBUG"):
+                    print(f"  [skipped codex] {f.name}: {e}", file=sys.stderr)
+    return rows
+
+
+def _parse_codex_rollout(f, rows, skipped=None):
+    """1 rollout → filas por turno (token_count) en `rows`.
+
+    Malformed lines se descartan (best-effort); una línea rota no tira la
+    sesión entera. Sin meta (session_meta) o sin token_count → 0 filas.
+    """
+    cwd = model = None
+    turns = []  # (ts, last_token_usage) por turno
+    with open(f) as fh:
+        for line in fh:
+            try:
+                entry = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+            typ = entry.get("type")
+            p = entry.get("payload") or {}
+            if typ == "session_meta":
+                cwd = p.get("cwd") or cwd
+            elif p.get("type") == "thread_settings_applied":
+                model = ((p.get("thread_settings") or {}).get("model")) or model
+            elif p.get("model"):
+                # formato viejo (abr-2026): turn_context trae el modelo plano
+                model = p["model"]
+            elif p.get("type") == "token_count":
+                ts = parse_ts(entry.get("timestamp"))
+                last = (p.get("info") or {}).get("last_token_usage") or {}
+                if ts and last:
+                    turns.append((ts, last))
+    if cwd is None or not turns:
+        return
+    if not is_charly(cwd):  # coffe-2sy: unifica con --filter
+        return
+    proj = amp_proj_from_uri(cwd) or "codex-unknown"
+    fam, ver = model_details(model or "unknown")
+    for ts, u in turns:
+        if not in_window(ts): continue  # coffe-snj: ventana
+        inp = u.get("input_tokens") or 0
+        cached = min(u.get("cached_input_tokens") or 0, inp)  # sanity
+        fresh = inp - cached
+        out = u.get("output_tokens") or 0
+        cost = estimate_cost(fam, ver, fresh, out, cached, 0, when=ts.date())
+        rows.append({
+            "source": "codex", "tool": "codex",
+            "model_raw": model or "unknown",
+            "model_family": fam, "model_version": ver,
+            "project": proj,
+            "timestamp": ts.isoformat(), "hour": hour_key(ts),
+            "input_tokens": fresh, "output_tokens": out,
+            "cache_read_tokens": cached,
+            "cache_write_tokens": u.get("cache_write_input_tokens") or 0,
+            "cost_effective": cost,
+        })
+
+
+def extract_codex_sessions(sessions_dir=None):
+    """coffe-2sy: sesiones codex — 1 rollout = 1 sesión.
+
+    duration_msgs = prompts de usuario reales (se excluyen los preámbulos
+    inyectados por el harness: AGENTS.md, environment/turn context, skills
+    — best-effort sobre el texto). n_turns = token_count events
+    (turnos con uso). has_agent=False: los subagentes son semántica de
+    Claude; el alcance se declara en sessions.agent_semantics. La ventana
+    --since/--until se aplica en extract_sessions() (filter_sessions).
+    """
+    sessions = []
+    sessions_dir = sessions_dir or (CODEX_DIR / "sessions")
+    if not sessions_dir.exists(): return sessions
+    _PREAMBLE = ("<environment_context", "<turn_context", "<user_instructions",
+                 "<skill>", "# AGENTS.md")
+    for day_dir in sorted(sessions_dir.glob("*/*/*")):
+        if not day_dir.is_dir(): continue
+        for f in sorted(day_dir.glob("rollout-*.jsonl")):
+            try:
+                cwd = None
+                prompts = turns = 0
+                first_ts = last_ts = None
+                with open(f) as fh:
+                    for line in fh:
+                        try:
+                            entry = json.loads(line)
+                        except json.JSONDecodeError:
+                            continue
+                        p = entry.get("payload") or {}
+                        pt = p.get("type")
+                        if entry.get("type") == "session_meta":
+                            cwd = p.get("cwd") or cwd
+                        elif pt == "token_count":
+                            ts = parse_ts(entry.get("timestamp"))
+                            if ts:
+                                turns += 1
+                                if first_ts is None: first_ts = ts
+                                last_ts = ts
+                        elif (pt == "message" and p.get("role") == "user"):
+                            ts = parse_ts(entry.get("timestamp"))
+                            if ts:
+                                if first_ts is None: first_ts = ts
+                                last_ts = ts
+                            text = "".join(
+                                c.get("text", "") for c in (p.get("content") or [])
+                                if isinstance(c, dict))
+                            if not text.lstrip().startswith(_PREAMBLE):
+                                prompts += 1
+                if cwd is None or not turns: continue
+                if not is_charly(cwd): continue
+                sessions.append({
+                    "tool": "codex", "source": "codex_session_files",
+                    "project": amp_proj_from_uri(cwd) or "codex-unknown",
+                    "first_ts": (first_ts or last_ts).isoformat()[:10],
+                    "first_ts_full": (first_ts or last_ts).isoformat(),
+                    "last_ts_full": last_ts.isoformat() if last_ts else None,
+                    "duration_msgs": prompts,
+                    "n_turns": turns,
+                    "n_tools": 0,
+                    "has_agent": False,
+                    "n_skills": None,
+                    "n_errors": None,
+                    "n_compactions": None,
+                })
+            except (json.JSONDecodeError, OSError, ValueError, TypeError, KeyError) as e:
+                if os.environ.get("TRACKER_DEBUG"):
+                    print(f"  [skipped codex-session] {f.name}: {e}", file=sys.stderr)
+    return sessions
+
+
 def extract_session_stats():
     """Extrae estadísticas de sesión desde el cache de Claude."""
     sessions = []
@@ -1055,7 +1220,8 @@ def extract_sessions():
     fuentes (el claude cache ya la aplica en extract_session_stats)."""
     return (extract_session_stats()
             + filter_sessions(extract_pi_sessions(), SINCE, UNTIL)
-            + filter_sessions(extract_amp_sessions(), SINCE, UNTIL))
+            + filter_sessions(extract_amp_sessions(), SINCE, UNTIL)
+            + filter_sessions(extract_codex_sessions(), SINCE, UNTIL))  # coffe-2sy
 
 
 def collect_outcomes():
@@ -1856,6 +2022,7 @@ def main():
         ("Claude", claude_rows),
         ("Pi", pi_rows),
         ("Amp", extract_amp()),
+        ("Codex", extract_codex(skipped)),  # coffe-2sy: CLI standalone
     ]
     excluded.extend(claude_excluded)
     excluded.extend(pi_excluded)
