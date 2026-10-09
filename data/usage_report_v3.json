@@ -5,14 +5,14 @@
       "end": "2026-10-09"
     },
     "filter": "in-scope",
-    "total_interactions": 232160,
-    "total_input_tokens": 1807717832,
-    "total_output_tokens": 85611203,
-    "total_cache_read_tokens": 17241549043,
+    "total_interactions": 232243,
+    "total_input_tokens": 1808157244,
+    "total_output_tokens": 85649734,
+    "total_cache_read_tokens": 17252231143,
     "total_cache_write_tokens": 73315918,
-    "cost_total_effective": 5739.58,
-    "cost_total_real": 1049.14,
-    "cost_real_total_tracker": 749.16,
+    "cost_total_effective": 5740.36,
+    "cost_total_real": 1049.93,
+    "cost_real_total_tracker": 749.94,
     "subscription_fees": 299.98,
     "charges_total_real": 1496.72,
     "charges_source": "data/charges.json",
@@ -28,7 +28,7 @@
     "energy_method": "tokens (input+output+cache_write a peso completo; cache_read \u00d7 cache_read_energy_factor) \u00d7 J/token del tier (config energy_coefficients versionado) / 3.6e6 \u2014 coeficientes de laboratorio (Luccioni et al. / AI Energy Score), orden de magnitud, nunca medici\u00f3n",
     "timezone": "-03",
     "pay_per_token_note": "pay_per_token_charges es *reported* cuando el ledger tiene cargas pay-per-token reales del mes (cr\u00e9ditos/reembolsos, FPA-013); *assumed* (estimado tokens \u00d7 pricing) si no",
-    "outcomes": "unavailable: mapeo proyecto\u2192repo GitHub pendiente (ver README)",
+    "outcomes": "unavailable: no hay GITHUB_TOKEN \u2014 commits/releases no emisionados",
     "token_accounting": "cache_read/cache_write se reportan aparte de input/output. cache_read no se factura a input rate (10x mas barato); total tokens = input + output + cache_read + cache_write",
     "total_hours": 1153,
     "total_days": 197,
@@ -29832,36 +29832,36 @@
       "projects_active": 11
     },
     "2026-10-09 18:00": {
-      "interactions": 251,
-      "input_tokens": 1846098,
-      "output_tokens": 70976,
-      "cache_read_tokens": 45164708,
+      "interactions": 334,
+      "input_tokens": 2285510,
+      "output_tokens": 109507,
+      "cache_read_tokens": 55846808,
       "cache_write_tokens": 0,
-      "cost_effective": 2.8,
-      "cost_real": 2.8,
+      "cost_effective": 3.58,
+      "cost_real": 3.58,
       "tools": {
         "openrouter": {
-          "req": 223,
-          "in": 1720204,
-          "out": 60317,
-          "cache_read": 42868900,
+          "req": 299,
+          "in": 2146296,
+          "out": 93400,
+          "cache_read": 52585880,
           "cache_write": 0,
-          "cost_eff": 1.5742561,
-          "cost_real": 1.5742561
+          "cost_eff": 1.9462208,
+          "cost_real": 1.9462208
         },
         "codex": {
-          "req": 28,
-          "in": 125894,
-          "out": 10659,
-          "cache_read": 2295808,
+          "req": 35,
+          "in": 139214,
+          "out": 16107,
+          "cache_read": 3260928,
           "cache_write": 0,
-          "cost_eff": 1.2263094,
-          "cost_real": 1.2263094
+          "cost_eff": 1.6375254,
+          "cost_real": 1.6375254
         }
       },
       "models": {
-        "z-ai/glm-5.3-flash": 223,
-        "gpt-6-astra": 28
+        "z-ai/glm-5.3-flash": 299,
+        "gpt-6-astra": 35
       },
       "projects_active": 8
     }
@@ -33024,20 +33024,20 @@
       }
     },
     "2026-10-09": {
-      "interactions": 10215,
-      "input_tokens": 53338054,
-      "output_tokens": 4087025,
-      "cache_read_tokens": 1074252040,
+      "interactions": 10298,
+      "input_tokens": 53777466,
+      "output_tokens": 4125556,
+      "cache_read_tokens": 1084934140,
       "cache_write_tokens": 0,
-      "cost_effective": 48.77,
-      "cost_real": 48.77,
+      "cost_effective": 49.56,
+      "cost_real": 49.56,
       "tools": {
-        "openrouter": 10096,
-        "codex": 119
+        "openrouter": 10172,
+        "codex": 126
       },
       "models": {
-        "z-ai/glm-5.3-flash": 10096,
-        "gpt-6-astra": 119
+        "z-ai/glm-5.3-flash": 10172,
+        "gpt-6-astra": 126
       }
     }
   },
@@ -34439,22 +34439,22 @@
       }
     },
     "2026-10": {
-      "interactions": 53655,
-      "input_tokens": 312716520,
-      "output_tokens": 22397999,
-      "cache_read_tokens": 4831659380,
+      "interactions": 53738,
+      "input_tokens": 313155932,
+      "output_tokens": 22436530,
+      "cache_read_tokens": 4842341480,
       "cache_write_tokens": 0,
-      "cost_effective": 261.77,
-      "cost_real": 261.77,
+      "cost_effective": 262.56,
+      "cost_real": 262.56,
       "tools": {
         "codex": {
-          "interactions": 1188,
-          "cost_effective": 63.9757986,
-          "cost_real": 63.9757986,
+          "interactions": 1195,
+          "cost_effective": 64.3870146,
+          "cost_real": 64.3870146,
           "models": {
             "gpt-6-astra": {
-              "interactions": 322,
-              "cost_effective": 18.7451988
+              "interactions": 329,
+              "cost_effective": 19.1564148
             },
             "gpt-6-luna": {
               "interactions": 155,
@@ -34467,9 +34467,9 @@
           }
         },
         "openrouter": {
-          "interactions": 52467,
-          "cost_effective": 197.79735969,
-          "cost_real": 197.79735969,
+          "interactions": 52543,
+          "cost_effective": 198.16932439,
+          "cost_real": 198.16932439,
           "models": {
             "deepseek/deepseek-v4.1-flash": {
               "interactions": 96,
@@ -34480,8 +34480,8 @@
               "cost_effective": 0.118362
             },
             "z-ai/glm-5.3-flash": {
-              "interactions": 52364,
-              "cost_effective": 197.5966353
+              "interactions": 52440,
+              "cost_effective": 197.9686
             },
             "z-ai/glm-5.3-flash:batch": {
               "interactions": 1,
@@ -34504,8 +34504,8 @@
           "cost_effective": 0.118362
         },
         "gpt-6-astra": {
-          "interactions": 322,
-          "cost_effective": 18.7451988
+          "interactions": 329,
+          "cost_effective": 19.1564148
         },
         "gpt-6-luna": {
           "interactions": 155,
@@ -34516,8 +34516,8 @@
           "cost_effective": 34.078125
         },
         "z-ai/glm-5.3-flash": {
-          "interactions": 52364,
-          "cost_effective": 197.5966353
+          "interactions": 52440,
+          "cost_effective": 197.9686
         },
         "z-ai/glm-5.3-flash:batch": {
           "interactions": 1,
@@ -34529,7 +34529,7 @@
         }
       },
       "subscription_fees": 0.0,
-      "cost_real_tracker": 261.77,
+      "cost_real_tracker": 262.56,
       "pay_per_token_provenance": "reported",
       "tokens_by_model": {
         "deepseek/deepseek-v4.1-flash": {
@@ -34545,9 +34545,9 @@
           "cache_write": 0
         },
         "gpt-6-astra": {
-          "in": 1438701,
-          "out": 198197,
-          "cache_read": 38187136,
+          "in": 1452021,
+          "out": 203645,
+          "cache_read": 39152256,
           "cache_write": 0
         },
         "gpt-6-luna": {
@@ -34563,9 +34563,9 @@
           "cache_write": 0
         },
         "z-ai/glm-5.3-flash": {
-          "in": 307468622,
-          "out": 21616974,
-          "cache_read": 4688928500,
+          "in": 307894714,
+          "out": 21650057,
+          "cache_read": 4698645480,
           "cache_write": 0
         },
         "z-ai/glm-5.3-flash:batch": {
@@ -34583,9 +34583,9 @@
       },
       "pay_per_token_charges": 80.0,
       "interaction_kinds": {
-        "tool_call": 50727,
-        "assistant_turn": 1815,
-        "user_prompt": 1909
+        "tool_call": 50801,
+        "assistant_turn": 1817,
+        "user_prompt": 1911
       },
       "outcomes_by_project": {},
       "energy_kwh_by_model": {
@@ -34598,7 +34598,7 @@
           "tier": "flash"
         },
         "gpt-6-astra": {
-          "kwh": 0.152,
+          "kwh": 0.155,
           "tier": "mid"
         },
         "gpt-6-luna": {
@@ -34610,7 +34610,7 @@
           "tier": "mid"
         },
         "z-ai/glm-5.3-flash": {
-          "kwh": 6.65,
+          "kwh": 6.662,
           "tier": "flash"
         },
         "z-ai/glm-5.3-flash:batch": {
@@ -34622,10 +34622,10 @@
           "tier": "mid"
         }
       },
-      "energy_kwh": 7.21,
+      "energy_kwh": 7.225,
       "energy_kwh_band": {
-        "low": 2.906,
-        "high": 45.945
+        "low": 2.911,
+        "high": 46.058
       }
     }
   },
@@ -34861,20 +34861,20 @@
       }
     },
     "charly-espectacular": {
-      "interactions": 11036,
-      "input_tokens": 74309111,
-      "output_tokens": 4492215,
-      "cache_read_tokens": 851696735,
+      "interactions": 11058,
+      "input_tokens": 74338778,
+      "output_tokens": 4499247,
+      "cache_read_tokens": 854342815,
       "cache_write_tokens": 7469003,
-      "cost_effective": 244.7,
-      "cost_real": 36.56,
+      "cost_effective": 244.79,
+      "cost_real": 36.65,
       "tools": {
-        "openrouter": 7095,
+        "openrouter": 7117,
         "claude-cli": 3423,
         "codex": 518
       },
       "models": {
-        "z-ai/glm-5.3-flash": 4901,
+        "z-ai/glm-5.3-flash": 4923,
         "claude-sonnet-4-6": 3043,
         "deepseek/deepseek-v4-flash": 2055,
         "claude-opus-4-7": 376,
@@ -34958,17 +34958,17 @@
       }
     },
     "charly": {
-      "interactions": 6739,
-      "input_tokens": 59445477,
-      "output_tokens": 3097461,
-      "cache_read_tokens": 499075023,
+      "interactions": 6746,
+      "input_tokens": 59458797,
+      "output_tokens": 3102909,
+      "cache_read_tokens": 500040143,
       "cache_write_tokens": 3159949,
-      "cost_effective": 123.74,
-      "cost_real": 43.8,
+      "cost_effective": 124.15,
+      "cost_real": 44.21,
       "tools": {
         "openrouter": 5160,
         "claude-cli": 1402,
-        "codex": 177
+        "codex": 184
       },
       "models": {
         "z-ai/glm-5.3-flash": 3126,
@@ -34978,7 +34978,7 @@
         "anthropic/claude-sonnet-4.6": 223,
         "gpt-5.4": 149,
         "claude-opus-4-6": 105,
-        "gpt-6-astra": 28,
+        "gpt-6-astra": 35,
         "<synthetic>": 2
       },
       "first_seen": "2026-04-29",
@@ -35121,19 +35121,19 @@
       }
     },
     "charly-specodelic": {
-      "interactions": 20775,
-      "input_tokens": 103955646,
-      "output_tokens": 8157602,
-      "cache_read_tokens": 1884942909,
+      "interactions": 20785,
+      "input_tokens": 104094719,
+      "output_tokens": 8161679,
+      "cache_read_tokens": 1888787204,
       "cache_write_tokens": 0,
-      "cost_effective": 82.56,
-      "cost_real": 82.56,
+      "cost_effective": 82.7,
+      "cost_real": 82.7,
       "tools": {
-        "openrouter": 20669,
+        "openrouter": 20679,
         "codex": 106
       },
       "models": {
-        "z-ai/glm-5.3-flash": 20669,
+        "z-ai/glm-5.3-flash": 20679,
         "gpt-6-astra": 105,
         "gpt-6-luna": 1
       },
@@ -35360,19 +35360,19 @@
       "skills": {}
     },
     "charly-wild": {
-      "interactions": 2678,
-      "input_tokens": 18788370,
-      "output_tokens": 1206724,
-      "cache_read_tokens": 339403537,
+      "interactions": 2690,
+      "input_tokens": 18898716,
+      "output_tokens": 1210093,
+      "cache_read_tokens": 340546801,
       "cache_write_tokens": 0,
-      "cost_effective": 32.65,
-      "cost_real": 32.65,
+      "cost_effective": 32.7,
+      "cost_real": 32.7,
       "tools": {
-        "openrouter": 2363,
+        "openrouter": 2375,
         "codex": 315
       },
       "models": {
-        "z-ai/glm-5.3-flash": 2362,
+        "z-ai/glm-5.3-flash": 2374,
         "gpt-6-luna": 154,
         "gpt-6-astra": 91,
         "gpt-6.1-sol": 70,
@@ -35564,36 +35564,36 @@
       "skills": {}
     },
     "charly-coffee": {
-      "interactions": 5418,
-      "input_tokens": 28756667,
-      "output_tokens": 2201016,
-      "cache_read_tokens": 401493986,
+      "interactions": 5422,
+      "input_tokens": 28772378,
+      "output_tokens": 2202782,
+      "cache_read_tokens": 401686998,
       "cache_write_tokens": 0,
-      "cost_effective": 13.6,
-      "cost_real": 13.6,
+      "cost_effective": 13.61,
+      "cost_real": 13.61,
       "tools": {
-        "openrouter": 5418
+        "openrouter": 5422
       },
       "models": {
-        "z-ai/glm-5.3-flash": 5418
+        "z-ai/glm-5.3-flash": 5422
       },
       "first_seen": "2026-09-19",
       "last_seen": "2026-10-09",
       "skills": {}
     },
     "charly-genesis": {
-      "interactions": 4841,
-      "input_tokens": 32796598,
-      "output_tokens": 1832775,
-      "cache_read_tokens": 448174002,
+      "interactions": 4855,
+      "input_tokens": 32820101,
+      "output_tokens": 1844433,
+      "cache_read_tokens": 448745394,
       "cache_write_tokens": 0,
-      "cost_effective": 13.56,
-      "cost_real": 13.56,
+      "cost_effective": 13.59,
+      "cost_real": 13.59,
       "tools": {
-        "openrouter": 4841
+        "openrouter": 4855
       },
       "models": {
-        "z-ai/glm-5.3-flash": 2636,
+        "z-ai/glm-5.3-flash": 2650,
         "deepseek/deepseek-v4-flash": 2156,
         "z-ai/glm-5.2": 49
       },
@@ -35622,18 +35622,18 @@
       "skills": {}
     },
     "charly-gently": {
-      "interactions": 2715,
-      "input_tokens": 14108594,
-      "output_tokens": 1645900,
-      "cache_read_tokens": 306148653,
+      "interactions": 2724,
+      "input_tokens": 14179718,
+      "output_tokens": 1647074,
+      "cache_read_tokens": 306887148,
       "cache_write_tokens": 0,
-      "cost_effective": 12.12,
-      "cost_real": 12.12,
+      "cost_effective": 12.16,
+      "cost_real": 12.16,
       "tools": {
-        "openrouter": 2715
+        "openrouter": 2724
       },
       "models": {
-        "z-ai/glm-5.3-flash": 2715
+        "z-ai/glm-5.3-flash": 2724
       },
       "first_seen": "2026-10-08",
       "last_seen": "2026-10-09",
@@ -35829,18 +35829,18 @@
       "skills": {}
     },
     "charly-evallerina": {
-      "interactions": 1126,
-      "input_tokens": 2961282,
-      "output_tokens": 398938,
-      "cache_read_tokens": 60044173,
+      "interactions": 1131,
+      "input_tokens": 2997950,
+      "output_tokens": 402945,
+      "cache_read_tokens": 60624615,
       "cache_write_tokens": 0,
-      "cost_effective": 2.44,
-      "cost_real": 2.44,
+      "cost_effective": 2.47,
+      "cost_real": 2.47,
       "tools": {
-        "openrouter": 1126
+        "openrouter": 1131
       },
       "models": {
-        "z-ai/glm-5.3-flash": 1126
+        "z-ai/glm-5.3-flash": 1131
       },
       "first_seen": "2026-10-09",
       "last_seen": "2026-10-09",
@@ -36511,10 +36511,10 @@
     "/permissions": 2
   },
   "sessions": {
-    "total_sessions": 3798,
+    "total_sessions": 3799,
     "length_distribution": {
       "1-10": 1320,
-      "11-50": 1130,
+      "11-50": 1131,
       "101-300": 686,
       "51-100": 580,
       "301-500": 76,
@@ -36523,8 +36523,8 @@
     "with_agent": 605,
     "total_api_errors": 2,
     "total_compactions": 9,
-    "avg_turns": 59.16008425487099,
-    "avg_tools": 2.5205371248025275,
+    "avg_turns": 59.16635956830745,
+    "avg_tools": 2.5211897867859965,
     "avg_skills": 0.15856236786469344,
     "agent_semantics": "claude-cli: sesi\u00f3n con herramienta Agent (subagentes); amp: aut\u00f3nomo por definici\u00f3n (has_agent=True); pi: sin se\u00f1al de subagentes (has_agent=False)",
     "by_tool": {
@@ -36537,11 +36537,11 @@
         }
       },
       "pi": {
-        "total": 1602,
+        "total": 1603,
         "with_agent": 0,
         "resets": {
           "signal": "archivos de sesi\u00f3n pi (1 archivo = 1 /new)",
-          "count": 1602
+          "count": 1603
         }
       },
       "amp": {
@@ -36905,7 +36905,7 @@
             "charly-wanna",
             "charly-wild"
           ],
-          "interactions": 10215
+          "interactions": 10298
         },
         {
           "date": "2026-07-27",
@@ -37044,13 +37044,13 @@
       ]
     },
     "context_switches": {
-      "total": 110387,
-      "avg_per_active_day": 560.3,
+      "total": 110460,
+      "avg_per_active_day": 560.7,
       "max_in_one_day": 11161,
       "top_10_days": {
         "2026-07-28": 11161,
         "2026-10-08": 8939,
-        "2026-10-09": 8315,
+        "2026-10-09": 8388,
         "2026-09-30": 6781,
         "2026-07-29": 5263,
         "2026-09-29": 5259,
@@ -37647,7 +37647,7 @@
         808,
         2585,
         2372,
-        2016
+        2026
       ],
       "charly-dont": [
         0,
@@ -39112,7 +39112,7 @@
         0,
         0,
         0,
-        973
+        995
       ],
       "sk-REPLy-jl": [
         0,
@@ -40870,7 +40870,7 @@
         0,
         0,
         373,
-        556
+        563
       ],
       "charly-atril": [
         0,
@@ -41456,7 +41456,7 @@
         101,
         0,
         0,
-        40
+        44
       ],
       "sk-Tray-jl": [
         0,
@@ -42042,7 +42042,7 @@
         0,
         44,
         0,
-        150
+        164
       ],
       "sk-titi": [
         0,
@@ -44386,7 +44386,7 @@
         0,
         0,
         1071,
-        1644
+        1653
       ],
       "charly-wild": [
         0,
@@ -44679,7 +44679,7 @@
         70,
         87,
         458,
-        1578
+        1590
       ],
       "sk-cositos": [
         0,
@@ -48781,7 +48781,7 @@
         0,
         0,
         0,
-        1126
+        1131
       ],
       "charly-specodelic-gre-wt": [
         0,
@@ -62268,13 +62268,13 @@
         }
       },
       "2026-10": {
-        "interactions": 1882,
-        "cost_effective": 8.11529666000001,
-        "cost_real": 8.11529666000001,
+        "interactions": 1889,
+        "cost_effective": 8.526512660000009,
+        "cost_real": 8.526512660000009,
         "tokens": {
-          "in": 9441511,
-          "out": 719035,
-          "cache_read": 173544365,
+          "in": 9454831,
+          "out": 724483,
+          "cache_read": 174509485,
           "cache_write": 0
         }
       }
@@ -62548,13 +62548,13 @@
         }
       },
       "2026-10": {
-        "interactions": 3102,
-        "cost_effective": 10.709841950000007,
-        "cost_real": 10.709841950000007,
+        "interactions": 3124,
+        "cost_effective": 10.797190400000005,
+        "cost_real": 10.797190400000005,
         "tokens": {
-          "in": 11434337,
-          "out": 1151035,
-          "cache_read": 280639130,
+          "in": 11464004,
+          "out": 1158067,
+          "cache_read": 283285210,
           "cache_write": 0
         }
       }
@@ -62861,13 +62861,13 @@
         }
       },
       "2026-10": {
-        "interactions": 886,
-        "cost_effective": 1.7550458700000007,
-        "cost_real": 1.7550458700000007,
+        "interactions": 900,
+        "cost_effective": 1.7815420800000004,
+        "cost_real": 1.7815420800000004,
         "tokens": {
-          "in": 2255607,
-          "out": 320817,
-          "cache_read": 41876544,
+          "in": 2279110,
+          "out": 332475,
+          "cache_read": 42447936,
           "cache_write": 0
         }
       }
@@ -63116,13 +63116,13 @@
         }
       },
       "2026-10": {
-        "interactions": 498,
-        "cost_effective": 1.9245567599999975,
-        "cost_real": 1.9245567599999975,
+        "interactions": 502,
+        "cost_effective": 1.9335867699999976,
+        "cost_real": 1.9335867699999976,
         "tokens": {
-          "in": 3059557,
-          "out": 140037,
-          "cache_read": 46520157,
+          "in": 3075268,
+          "out": 141803,
+          "cache_read": 46713169,
           "cache_write": 0
         }
       }
@@ -63140,13 +63140,13 @@
         }
       },
       "2026-10": {
-        "interactions": 14650,
-        "cost_effective": 63.417970109999764,
-        "cost_real": 63.417970109999764,
+        "interactions": 14660,
+        "cost_effective": 63.556198409999766,
+        "cost_real": 63.556198409999766,
         "tokens": {
-          "in": 81254659,
-          "out": 5482618,
-          "cache_read": 1404904301,
+          "in": 81393732,
+          "out": 5486695,
+          "cache_read": 1408748596,
           "cache_write": 0
         }
       }
@@ -63177,13 +63177,13 @@
     },
     "charly-wild": {
       "2026-10": {
-        "interactions": 2678,
-        "cost_effective": 32.64609525,
-        "cost_real": 32.64609525,
+        "interactions": 2690,
+        "cost_effective": 32.69862957000001,
+        "cost_real": 32.69862957000001,
         "tokens": {
-          "in": 18788370,
-          "out": 1206724,
-          "cache_read": 339403537,
+          "in": 18898716,
+          "out": 1210093,
+          "cache_read": 340546801,
           "cache_write": 0
         }
       }
@@ -63463,26 +63463,26 @@
     },
     "charly-gently": {
       "2026-10": {
-        "interactions": 2715,
-        "cost_effective": 12.12369868999995,
-        "cost_real": 12.12369868999995,
+        "interactions": 2724,
+        "cost_effective": 12.15710913999995,
+        "cost_real": 12.15710913999995,
         "tokens": {
-          "in": 14108594,
-          "out": 1645900,
-          "cache_read": 306148653,
+          "in": 14179718,
+          "out": 1647074,
+          "cache_read": 306887148,
           "cache_write": 0
         }
       }
     },
     "charly-evallerina": {
       "2026-10": {
-        "interactions": 1126,
-        "cost_effective": 2.4449864900000007,
-        "cost_real": 2.4449864900000007,
+        "interactions": 1131,
+        "cost_effective": 2.4699034500000008,
+        "cost_real": 2.4699034500000008,
         "tokens": {
-          "in": 2961282,
-          "out": 398938,
-          "cache_read": 60044173,
+          "in": 2997950,
+          "out": 402945,
+          "cache_read": 60624615,
           "cache_write": 0
         }
       }
@@ -64091,8 +64091,8 @@
         "cost_effective": 5.0707955
       },
       "gpt-6-astra": {
-        "interactions": 28,
-        "cost_effective": 1.2263094
+        "interactions": 35,
+        "cost_effective": 1.6375254
       },
       "z-ai/glm-5.2": {
         "interactions": 297,
@@ -64279,8 +64279,8 @@
         "cost_effective": 1.51559659
       },
       "z-ai/glm-5.3-flash": {
-        "interactions": 4901,
-        "cost_effective": 16.06601859
+        "interactions": 4923,
+        "cost_effective": 16.15336704
       }
     },
     "charly-canticos": {
@@ -64415,8 +64415,8 @@
         "cost_effective": 0.34473766
       },
       "z-ai/glm-5.3-flash": {
-        "interactions": 2636,
-        "cost_effective": 5.4550164
+        "interactions": 2650,
+        "cost_effective": 5.48151261
       }
     },
     "ak-suipacha": {
@@ -64519,8 +64519,8 @@
     },
     "charly-coffee": {
       "z-ai/glm-5.3-flash": {
-        "interactions": 5418,
-        "cost_effective": 13.60234111
+        "interactions": 5422,
+        "cost_effective": 13.61137112
       }
     },
     "charly-specodelic": {
@@ -64533,8 +64533,8 @@
         "cost_effective": 0.0497568
       },
       "z-ai/glm-5.3-flash": {
-        "interactions": 20669,
-        "cost_effective": 75.7184702
+        "interactions": 20679,
+        "cost_effective": 75.8566985
       }
     },
     "charly-bajan": {
@@ -64557,8 +64557,8 @@
         "cost_effective": 3.6782424
       },
       "z-ai/glm-5.3-flash": {
-        "interactions": 2362,
-        "cost_effective": 12.02610165
+        "interactions": 2374,
+        "cost_effective": 12.07863597
       },
       "z-ai/glm-5.3-flash:batch": {
         "interactions": 1,
@@ -64697,14 +64697,14 @@
     },
     "charly-gently": {
       "z-ai/glm-5.3-flash": {
-        "interactions": 2715,
-        "cost_effective": 12.12369869
+        "interactions": 2724,
+        "cost_effective": 12.15710914
       }
     },
     "charly-evallerina": {
       "z-ai/glm-5.3-flash": {
-        "interactions": 1126,
-        "cost_effective": 2.44498649
+        "interactions": 1131,
+        "cost_effective": 2.46990345
       }
     }
   },
@@ -64721,7 +64721,7 @@
     },
     "project_switches_per_active_hour": {
       "measure": "human-context-switching",
-      "value": 95.74
+      "value": 95.8
     }
   },
   "filtered_out": {
@@ -64775,7 +64775,7 @@
       "with_agent": 0
     },
     "2026-10": {
-      "total": 482,
+      "total": 483,
       "with_agent": 0
     }
   },
@@ -65374,7 +65374,7 @@
         "charges_real": 0.0,
         "charges_provenance": "reported",
         "subscription_fee_implicit": 0.0,
-        "cost_effective": 63.9757986,
+        "cost_effective": 64.3870146,
         "fee_month_total": 0.0
       },
       "copilot": {
@@ -65395,7 +65395,7 @@
         "charges_real": 80.0,
         "charges_provenance": "reported",
         "subscription_fee_implicit": 0.0,
-        "cost_effective": 197.79735969,
+        "cost_effective": 198.16932439,
         "fee_month_total": 0.0
       }
     }
