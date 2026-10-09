@@ -96,6 +96,10 @@ Notas de reproducibilidad entre máquinas:
 - Los buckets hourly/daily usan la **TZ local** de la máquina que extrae (`LOCAL_TZ` en el script): dos máquinas con TZ distinta producen agregaciones horarias distintas.
 - Las cuotas de suscripción y los precios por modelo ya NO están hardcoded: el tracker los carga de **`config/fpa.json`** (`subscriptions` y `model_pricing` versionado por fecha efectiva, coffe-mbz). Para cambiar precios/planes editá el config. Si no hay config disponible, usa constantes hardcodeadas como fallback con un warning; `--config RUTA` (o env `TRACKER_CONFIG`) apunta a otro config — una ruta explícita inexistente aborta con error. El reporte lo documenta: `metadata.config_source` y `model_pricing_config` reflejan lo cargado.
 
+### Regeneración nocturna (coffe-nly1)
+
+`scripts/nightly-update.sh` corre el pipeline completo de regeneración (tracker → Gantt → dashboard → guía → index → README) y pushea a `main` si hay cambios; `scripts/update-readme-docs.py` refresca el bloque CHECK-DOCS del README reutilizando `expected_doc_figures()` de `viz-fpa.py` (única fuente del formato). Corre vía timer de systemd user (`coffee-nightly.timer`, diario 03:30, `Persistent=true`), instalado en `~/.config/systemd/user/`. Logs: `journalctl --user -u coffee-nightly.service`. Flag `--no-push` para correr sin commit/push.
+
 ### GitHub Pages
 
 El deploy es vía **GitHub Actions** (no hay branch `gh-pages`): `.github/workflows/deploy-pages.yml` publica un índice (`index.html`), el Gantt (regenerado en CI) y los JSON de `data/` en cada push a `main`. Único requisito manual: Settings → Pages → Source: *GitHub Actions*.
