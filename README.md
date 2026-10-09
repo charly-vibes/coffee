@@ -24,6 +24,8 @@ de los últimos meses.
 | `scripts/viz_fpa_guide.py` | Parser de `docs/fpa-analyses-guide.md` (guía de análisis a 4 niveles, en español) → `data/fpa-guide.html` + marginalia con chips expandibles en el dashboard y el Gantt (coffe-gen.3/4). `--check` valida el grounding (mapeo + umbrales vs config). |
 | `scripts/site_theme.py` | Tokens del tema compartido del sitio ("Corporate Infographics™ 1996"): única fuente de la paleta/tipografía para viz-fpa, viz-index y viz-gantt. |
 | `scripts/viz-index.py` | Genera `index.html`: entrada del sitio en Pages (estética 90s-corporate). Deriva las cifras del marquee y la fecha de actualización del reporte, así el índice nunca queda stale. Se regenera en el deploy de CI. |
+| `scripts/update-readme-docs.py` | Refresca el bloque CHECK-DOCS del README con las cifras del reporte actual. Reutiliza `expected_doc_figures()` de `viz-fpa.py` (FPA-143) vía importlib — misma fuente que `--check-docs`, así el bloque nunca diverge. Lo usa el nightly; también a mano tras regenerar el reporte. |
+| `scripts/nightly-update.sh` | **Job nocturno**: regenera reporte + Gantt + dashboard + guía + índice, sincroniza el CHECK-DOCS del README y, si hay cambios, commitea y pushea (deploy a Pages sale del push vía CI). Corre vía systemd user timer `coffee-nightly.timer` (03:30, `Persistent=true`). `--no-push` para probar sin tocar git. |
 
 ### Datos generados
 
@@ -101,13 +103,13 @@ El deploy es vía **GitHub Actions** (no hay branch `gh-pages`): `.github/workfl
 ## Estado de los datos
 
 <!-- CHECK-DOCS:BEGIN -->
-- Interacciones: 194,876
-- Proyectos: 58
-- Costo efectivo: $5,301.26
-- Costo real: $852.25
+- Interacciones: 232,160
+- Proyectos: 81
+- Costo efectivo: $5,739.58
+- Costo real: $1,049.14
 - Cash real (ledger): $1,296.72
-- Sesiones: 3,421
-- Periodo: 2025-12-23 → 2026-10-05
+- Sesiones: 3,798
+- Periodo: 2025-12-23 → 2026-10-09
 <!-- CHECK-DOCS:END -->
 
 Nota: `Costo real` es la suma mensual del tracker (fees implícitos del
