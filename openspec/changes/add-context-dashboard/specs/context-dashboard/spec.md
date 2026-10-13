@@ -1,5 +1,17 @@
 ## ADDED Requirements
 
+### Requirement: alcance Pi-only declarado
+
+El dashboard SHALL (debe) cubrir solo las métricas de contexto de Pi
+(`context_metrics`), documentando el alcance (Claude/Amp/Codex quedan fuera) y el
+carácter no-goal de la integración de marginalia de guía (patrón
+`viz_fpa_guide.py`), para fijar expectativas.
+
+#### Scenario: alcance visible
+
+- **WHEN** se abre el dashboard
+- **THEN** el header indica que las métricas son de sesiones de Pi únicamente
+
 ### Requirement: generador stdlib-only autocontenido
 
 El dashboard de contexto SHALL (debe) generarse con un script Python stdlib-only
@@ -29,7 +41,8 @@ sin mezclarse en percentiles de coste.
 
 El dashboard SHALL (debe) incluir una vista con el histograma del pico de contexto
 por sesión y la banda p50/p75/p90/p95/p99, calculada sobre el set limpio
-(sin patológicas) con el conteo de excluidas visible.
+(sin patológicas, solo `turns > 0`) con el conteo de excluidas y stubs visible,
+y umbrales tomados de config.
 
 #### Scenario: histograma con exclusión visible
 
@@ -90,7 +103,8 @@ tok/turno, de modo que la tasa de crecimiento sea comparable entre eras.
 
 El dashboard SHALL (debe) listar las sesiones patológicas excluidas (glitches,
 usage inválido) con la razón de la exclusión, sin números silenciosamente faltantes
-(consistente con FPA-008).
+(consistente con FPA-008). Las sesiones con coste `null` SHALL (debe)n mostrar la
+razón en vez de un cero silencioso.
 
 #### Scenario: outlier listado con razón
 
