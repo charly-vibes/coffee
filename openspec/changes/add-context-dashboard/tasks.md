@@ -1,5 +1,9 @@
 ## 1. Tracker
 
+Tickets: coffe-7gg (1.1) · coffe-sht (1.2) · coffe-5uu (1.3) · coffe-gp8 (1.4) ·
+coffe-64z (1.5) · coffe-2xj (1.6+1.7) · coffe-kup (1.8+1.9, bloqueado por todos
+los anteriores + coffe-9w0 — suite pre-existente en rojo).
+
 - [ ] 1.1 Reducer puro `reduce_context(entries) -> metrics` (no toca disco, mismo
       estilo que `aggregate()`): acumula `turns`, pico/final de contexto por
       **segmento de compactación** (reset del acumulador en cada
@@ -35,6 +39,9 @@
 
 ## 2. Dashboard
 
+Tickets: coffe-0tw (2.1+2.2) · coffe-opo (2.3+2.4) · coffe-dv6 (2.5+2.7) ·
+coffe-r3c (2.6+2.8) · coffe-ruk (smoke + --check-docs) — cadena secuencial.
+
 - [ ] 2.1 `scripts/viz-ctx.py`: lee `usage_report_v3.json` → pre-calcular en Python
       (histograma, shares, pendientes OLS por modelo, tablas mes × modelo)
 - [ ] 2.2 Vista *Distribución*: histograma del pico + banda de percentiles, tags
@@ -53,6 +60,8 @@
       smoke en Chromium vía `tests/test_viz.py` (0 pageerrors, charts renderizan)
 
 ## 3. Cierre
+
+Ticket: coffe-v5f (3.3+3.4; 3.5 es la mecánica de cierre de cada sesión).
 
 - [ ] 3.1 `python3 tests/test_tracker.py` y `python3 tests/test_viz.py` verdes
 - [ ] 3.2 `--check-docs` de viz-ctx.py: consistencia README ↔ JSON
