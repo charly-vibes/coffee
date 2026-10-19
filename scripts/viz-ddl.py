@@ -309,6 +309,17 @@ def sections_html(report):
     return "\n".join(out)
 
 
+DISCLOSURE = (
+    '<aside class="disclosure" role="note">'
+    '<p><strong>Qué NO dice este dashboard:</strong> el diseño es '
+    '<em>asociativo, no causal</em>. Los confusores medidos declarados son la '
+    'madurez del repo (edad, commits totales) y la mezcla de modelos del '
+    'período. La adopción de ddl correlaciona con la <strong>atención del '
+    'mantenedor</strong> — confusor no controlable: los repos con ddl son '
+    'repos que Sasha cuida más, el efecto medido incluye ese cuidado.'
+    '</p></aside>')
+
+
 CSS_EXTRA = """
 body { max-width: 960px; margin: 0 auto; padding: 0 1rem; }
 .tabs { display: flex; flex-wrap: wrap; gap: .25rem; margin: 1rem 0; }
@@ -320,6 +331,8 @@ body { max-width: 960px; margin: 0 auto; padding: 0 1rem; }
 .prov-tag { font-size: .7rem; border: 1px solid currentColor;
             padding: 0 .3rem; margin-left: .3rem; }
 .export-csv, .dl-svg { margin: .5rem 0; }
+.disclosure { border: 3px double var(--bad, #800000); background: var(--card,
+              #fff); padding: .8rem 1rem; margin: 1rem 0; }
 """
 
 JS = """
@@ -405,6 +418,7 @@ def build_html(report):
   <h1>{esc(title)}</h1>
 </header>
 <main>
+{DISCLOSURE}
 {body}
 </main>
 <script>{JS % {"views": json.dumps(list(VIEWS))}}</script>

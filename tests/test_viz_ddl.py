@@ -211,6 +211,32 @@ class VistaAdopcionDosisTest(unittest.TestCase):
         self.assertIn('data-provenance="reported"', self.html)
 
 
+class DisclosureBandTest(unittest.TestCase):
+    """5.6 (coffe-8yf): banda fija de disclosure de confusores, no-colapsable."""
+
+    def test_banda_presente_con_datos_completos(self):
+        html = viz_ddl.build_html(VistaAdopcionDosisTest.REPORT)
+        self.assertIn('class="disclosure"', html)
+
+    def test_banda_presente_con_todo_missing(self):
+        # spec: presente aunque todas las métricas tengan provenance missing
+        html = viz_ddl.build_html(viz_ddl.SKELETON_REPORT)
+        self.assertIn('class="disclosure"', html)
+
+    def test_banda_no_colapsable(self):
+        html = viz_ddl.build_html(viz_ddl.SKELETON_REPORT)
+        self.assertNotIn("details", html.split('class="disclosure"')[1]
+                         .split("</aside>")[0])
+
+    def test_tres_puntos_del_disclaimer(self):
+        html = viz_ddl.build_html(viz_ddl.SKELETON_REPORT)
+        banda = html.split('class="disclosure"')[1].split("</aside>")[0]
+        self.assertIn("asociativo", banda)          # (1) no causal
+        self.assertIn("madurez", banda)             # (2) confusores medidos
+        self.assertIn("mezcla de modelos", banda)   # (2)
+        self.assertIn("atención del mantenedor", banda)  # (3) no controlable
+
+
 class VizDdlCliTest(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
