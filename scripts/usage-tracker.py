@@ -1307,6 +1307,128 @@ def calc_subscription_fees(monthly_data):
     return sub_fees
 
 
+# --- ctx-tracker: reducer puro de contexto (epic add-context-dashboard) ------
+# Bloque aislado (co-modificación coordinada de los tickets ctx-tracker):
+# reduce_context(entries) -> metrics, mismo estilo que aggregate(): no toca
+# disco, testeado con líneas JSONL sintéticas (tests/test_tracker_context.py).
+
+DEFAULT_CONTEXT_THRESHOLDS = {
+    "big_result_chars": 100_000,      # toolResult que cuenta como big_result
+    "big_session_tokens": 100_000,    # sesión grande para agregados monthly_model
+    "pathological_chars": 500_000,    # bloque assistant glitch → excluida
+    "chars_per_token": 4,             # factor assumed (subestima: español/code ~3)
+}
+
+
+def reduce_context(entries, config=None):
+    """Reducer puro de contexto por sesión de Pi (ctx-tracker, coffe-7gg).
+
+    entries: iterable de dicts ya parseados de un JSONL de Pi (1 archivo =
+    1 sesión). config: umbrales (DEFAULT_CONTEXT_THRESHOLDS como fallback;
+    CLAR-002: nada hardcodeado — la config manda).
+
+    Semántica (CORR-001): el acumulador de chars se RESETea en cada entrada
+    type=="compaction" — los archivos de Pi retienen los mensajes previos a
+    la compactación, así que peak_ctx es el máximo DENTRO del segmento de
+    mayor uso, no del archivo completo.
+
+    Atribución por fuente (suma == transcript observado, sin duplicar ni
+    omitir roles): user_text, asst_text, asst_thinking, asst_args (argumentos
+    de toolCall serializados) y tool:<toolName> por cada toolResult.
+
+    Loss visible: turnos assistant sin usage (abortados) cuentan en
+    turns_no_usage — nunca se silencian como 0 fake.
+    """
+    th = dict(DEFAULT_CONTEXT_THRESHOLDS)
+    if config:
+        th.update(config)
+
+    turns = 0
+    turns_no_usage = 0
+    chars_by_source = {}
+    big_results_by_tool = {}
+    compactions = 0
+    segment_count = 1
+    seg_chars = 0          # acumulador del segmento actual
+    peak_chars = 0         # máximo del acumulador dentro del segmento mayor
+    max_assistant_block = 0  # chars del mayor bloque assistant individual (gp8)
+
+    def _add(source, n):
+        chars_by_source[source] = chars_by_source.get(source, 0) + n
+
+    for entry in entries:
+        etype = entry.get("type")
+        if etype == "compaction":
+            compactions += 1
+            segment_count += 1
+            seg_chars = 0  # reset del acumulador: segmento nuevo
+            continue
+        if etype != "message":
+            continue
+        msg = entry.get("message", {}) or {}
+        role = msg.get("role")
+        if role == "user":
+            for part in (msg.get("content") or []):
+                if isinstance(part, dict) and part.get("type") == "text":
+                    n = len(part.get("text") or "")
+                    _add("user_text", n)
+                    seg_chars += n
+        elif role == "assistant":
+            turns += 1
+            block_chars = 0
+            for part in (msg.get("content") or []):
+                if not isinstance(part, dict):
+                    continue
+                ptype = part.get("type")
+                if ptype == "text":
+                    n = len(part.get("text") or "")
+                    _add("asst_text", n)
+                elif ptype == "thinking":
+                    n = len(part.get("thinking") or part.get("text") or "")
+                    _add("asst_thinking", n)
+                elif ptype == "toolCall":
+                    n = len(json.dumps(part.get("arguments", {}),
+                                       ensure_ascii=False, sort_keys=True))
+                    _add("asst_args", n)
+                else:
+                    continue
+                block_chars += n
+                seg_chars += n
+            max_assistant_block = max(max_assistant_block, block_chars)
+            if not msg.get("usage"):
+                turns_no_usage += 1
+        elif role == "toolResult":
+            name = str(msg.get("toolName") or "unknown")
+            n = 0
+            for part in (msg.get("content") or []):
+                if isinstance(part, dict) and part.get("type") == "text":
+                    n += len(part.get("text") or "")
+            _add(f"tool:{name}", n)
+            seg_chars += n
+            if n > th["big_result_chars"]:
+                big_results_by_tool[name] = big_results_by_tool.get(name, 0) + 1
+        if seg_chars > peak_chars:
+            peak_chars = seg_chars  # máximo dentro del segmento actual
+    cpt = th["chars_per_token"]
+    return {
+        "turns": turns,
+        "turns_no_usage": turns_no_usage,
+        "chars_by_source": chars_by_source,
+        "big_results": sum(big_results_by_tool.values()),
+        "big_results_by_tool": big_results_by_tool,
+        "compactions": compactions,
+        "segment_count": segment_count,
+        "peak_ctx_chars": peak_chars,
+        "final_ctx_chars": seg_chars,
+        "peak_ctx_est": peak_chars // cpt,
+        "final_ctx_est": seg_chars // cpt,
+        "max_assistant_block_chars": max_assistant_block,
+        "chars_per_token": cpt,
+    }
+
+# --- fin bloque ctx-tracker --------------------------------------------------
+
+
 class Bucket:
     """Acumulador de métricas para un bucket de agregación (día, mes, proyecto).
 

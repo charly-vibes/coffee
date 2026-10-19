@@ -4,7 +4,7 @@ Tickets: coffe-7gg (1.1) · coffe-sht (1.2) · coffe-5uu (1.3) · coffe-gp8 (1.4
 coffe-64z (1.5) · coffe-2xj (1.6+1.7) · coffe-kup (1.8+1.9, bloqueado por todos
 los anteriores + coffe-9w0 — suite pre-existente en rojo).
 
-- [ ] 1.1 Reducer puro `reduce_context(entries) -> metrics` (no toca disco, mismo
+- [x] 1.1 Reducer puro `reduce_context(entries) -> metrics` (no toca disco, mismo
       estilo que `aggregate()`): acumula `turns`, pico/final de contexto por
       **segmento de compactación** (reset del acumulador en cada
       `type=="compaction"`), atribución de chars por fuente (`asst_text`,
