@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "generated_at": "2026-10-19T22:01:34+00:00",
+    "generated_at": "2026-10-19T23:44:23+00:00",
     "seed_bootstrap": 42,
     "managed_tools": [
       "wai",
@@ -93,7 +93,7 @@
         "coffee": {
           "git": true,
           "gh": true,
-          "sessions": 66
+          "sessions": 67
         }
       },
       "gh": {
@@ -145,7 +145,7 @@
       },
       "sessions_bias": "sessions cuenta s\u00f3lo sesiones pi (las otras fuentes no exponen cwd por sesi\u00f3n; coffe-i31)"
     },
-    "clamped_negative_latencies": 200
+    "clamped_negative_latencies": 207
   },
   "repos": [
     {
@@ -1181,7 +1181,7 @@
       "recovery_p50_interactions": 1,
       "recovery_censored_rate": 0.0034482758620689655,
       "recovery_n": 290,
-      "session_commit_latency_p50_h": 575.1704294444445,
+      "session_commit_latency_p50_h": 575.5462627777778,
       "ci_fail_rate": 0.050505050505050504,
       "runs_total": 99,
       "runs_failed": 5,
@@ -1216,20 +1216,20 @@
     {
       "repo": "coffee",
       "month": "2026-10",
-      "sessions": 10,
-      "interactions": 712,
+      "sessions": 11,
+      "interactions": 1392,
       "errors_api_per_100": null,
       "errors_terapia_per_100": null,
-      "recovery_p50_interactions": 1,
-      "recovery_censored_rate": 0.017857142857142856,
-      "recovery_n": 56,
+      "recovery_p50_interactions": 1.0,
+      "recovery_censored_rate": 0.01694915254237288,
+      "recovery_n": 59,
       "session_commit_latency_p50_h": 0.0,
       "ci_fail_rate": 0.041666666666666664,
       "runs_total": 24,
       "runs_failed": 1,
       "revert_ratio": 0.0,
       "fix_ratio": null,
-      "test_commit_ratio": 0.35294117647058826,
+      "test_commit_ratio": 0.3764705882352941,
       "dose": 0.38461538461538464,
       "src": {
         "sessions": "reported",
@@ -1679,7 +1679,7 @@
       "repo": "funkalization",
       "month": "2026-10",
       "sessions": 6,
-      "interactions": 338,
+      "interactions": 501,
       "errors_api_per_100": null,
       "errors_terapia_per_100": null,
       "recovery_p50_interactions": 1,
@@ -2288,7 +2288,7 @@
       "recovery_p50_interactions": 1,
       "recovery_censored_rate": 0.0,
       "recovery_n": 281,
-      "session_commit_latency_p50_h": 171.59828222222222,
+      "session_commit_latency_p50_h": 181.47536555555553,
       "ci_fail_rate": 0.43414634146341463,
       "runs_total": 205,
       "runs_failed": 89,
@@ -2324,19 +2324,19 @@
       "repo": "specodelic",
       "month": "2026-10",
       "sessions": 194,
-      "interactions": 19965,
+      "interactions": 21083,
       "errors_api_per_100": null,
       "errors_terapia_per_100": null,
-      "recovery_p50_interactions": 1,
+      "recovery_p50_interactions": 1.0,
       "recovery_censored_rate": 0.0,
-      "recovery_n": 721,
+      "recovery_n": 732,
       "session_commit_latency_p50_h": 0.0,
       "ci_fail_rate": 0.2608695652173913,
       "runs_total": 552,
       "runs_failed": 144,
       "revert_ratio": 0.0,
       "fix_ratio": 3.5833333333333335,
-      "test_commit_ratio": 0.23903818953323905,
+      "test_commit_ratio": 0.23578363384188628,
       "dose": 0.6923076923076923,
       "src": {
         "sessions": "reported",
@@ -3095,7 +3095,7 @@
       "repo": "wai",
       "month": "2026-10",
       "sessions": 41,
-      "interactions": 5075,
+      "interactions": 5789,
       "errors_api_per_100": null,
       "errors_terapia_per_100": null,
       "recovery_p50_interactions": 1.0,
@@ -3751,7 +3751,7 @@
           {
             "repo": "specodelic",
             "dose": 0.6923076923076923,
-            "outcome": 85.79914111111111
+            "outcome": 90.73768277777776
           },
           {
             "repo": "wild",
@@ -3766,7 +3766,7 @@
           {
             "repo": "coffee",
             "dose": 0.38461538461538464,
-            "outcome": 287.58521472222225
+            "outcome": 287.7731313888889
           }
         ]
       },
@@ -4024,7 +4024,7 @@
           {
             "repo": "specodelic",
             "dose": 0.6923076923076923,
-            "outcome": 0.316050886674134
+            "outcome": 0.3144236088284576
           },
           {
             "repo": "funkalization",
@@ -4044,7 +4044,7 @@
           {
             "repo": "coffee",
             "dose": 0.38461538461538464,
-            "outcome": 0.3614020950846092
+            "outcome": 0.3731668009669621
           }
         ]
       }

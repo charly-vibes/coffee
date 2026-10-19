@@ -29,6 +29,19 @@ null+"sin telemetría de tokens") + monthly.energy_kwh + metadata.energy_*.
 La energía es SIEMPRE provenance "assumed": coeficientes de laboratorio
 (Luccioni et al. / AI Energy Score), orden de magnitud, nunca medición;
 jamás se mezcla con los costes USD (FPA-002).
+v4.7 (epic add-context-dashboard, coffe-7gg/sht/5uu/gp8/64z/2xj/kup):
+context_metrics por sesión de Pi — reducer puro reduce_context() (pico por
+SEGMENTO de compactación: los archivos de Pi retienen los mensajes previos,
+un pico continuo sobreestima el contexto post-compactación; atribución de
+chars por fuente user_text/asst_text/asst_thinking/asst_args/tool:<name>;
+models_turns para sesiones con model_change) + aggregate_context()
+(monthly_model[] por mes×modelo dominante, set limpio: turns>0 sin
+patológicas). Estimación de contexto: chars/chars_per_token (assumed, 4 —
+SUBESTIMA ~25%, ver validation_ratio_median contra el usage del último
+turno). Propósito: higiene de sesiones → presupuesto de contexto. Coste
+ausente → null con razón (nunca 0 fake). Patologías (bloque assistant >
+context_thresholds.pathological_chars de config) contadas, nunca
+silenciosas. Pi-only: Claude/Amp/Codex fuera del alcance.
 """
 
 import argparse
@@ -36,6 +49,7 @@ import importlib.util
 import json
 import os
 import sys
+import time
 from collections import Counter, defaultdict
 from datetime import date, datetime, timezone, timedelta
 from pathlib import Path
@@ -1368,7 +1382,8 @@ def reduce_context(entries, config=None, month=None):
     cost_sums = {"input": 0.0, "output": 0.0, "cacheRead": 0.0,
                  "cacheWrite": 0.0}
     turns_with_cost = 0
-    tokens_reported = 0  # uso real del usage (ratio de validación, 1.7)
+    tokens_reported = 0     # suma de usage de la sesión (telemetría reportada)
+    final_turn_tokens = 0   # usage del ÚLTIMO turno con usage (validación 1.7)
 
     def _add(source, n):
         chars_by_source[source] = chars_by_source.get(source, 0) + n
@@ -1405,12 +1420,16 @@ def reduce_context(entries, config=None, month=None):
             if msg.get("provider"):
                 cur_provider = msg["provider"]
             u = msg.get("usage") or {}
+            turn_tokens = 0
             if isinstance(u.get("totalTokens"), (int, float)):
-                tokens_reported += int(u["totalTokens"])
+                turn_tokens = int(u["totalTokens"])
             elif isinstance(u.get("input"), (int, float)):
-                tokens_reported += int(u["input"] + (u.get("output") or 0)
-                                       + (u.get("cacheRead") or 0)
-                                       + (u.get("cacheWrite") or 0))
+                turn_tokens = int(u["input"] + (u.get("output") or 0)
+                                  + (u.get("cacheRead") or 0)
+                                  + (u.get("cacheWrite") or 0))
+            if turn_tokens:
+                tokens_reported += turn_tokens
+                final_turn_tokens = turn_tokens  # el último turno manda
             cost = u.get("cost")
             if isinstance(cost, dict):
                 turns_with_cost += 1
@@ -1474,6 +1493,7 @@ def reduce_context(entries, config=None, month=None):
         "models_turns": models_turns,
         "provider": cur_provider,
         "tokens_reported": tokens_reported,
+        "final_turn_tokens": final_turn_tokens,
     }
     # patologías (coffe-gp8): bloque assistant > umbral de config → flag en
     # la fila (el emisor la excluye de percentiles y cuenta en
@@ -1572,12 +1592,14 @@ def aggregate_context(session_rows, config=None):
         }
         monthly_model.append(row)
 
-    # ratio de validación: tokens reales / est, solo sesiones pi con usage
+    # ratio de validación: tokens del ÚLTIMO turno con usage / final_ctx_est
+    # (el último turno ≈ contexto final real; la suma acumulada de la sesión
+    # no es comparable con el contexto de un punto en el tiempo)
     ratios = sorted(
-        r["tokens_reported"] / r["peak_ctx_est"]
+        r["final_turn_tokens"] / r["final_ctx_est"]
         for r in clean
-        if r.get("context_source") == "pi" and r.get("tokens_reported")
-        and r["peak_ctx_est"] > 0)
+        if r.get("context_source") == "pi" and r.get("final_turn_tokens")
+        and r["final_ctx_est"] > 0)
 
     return {
         "monthly_model": monthly_model,
@@ -1594,6 +1616,72 @@ def aggregate_context(session_rows, config=None):
             "excluded_pathological": excluded_pathological,
         },
     }
+
+def extract_context_metrics(sessions_dir=None):
+    """coffe-kup (tasks 1.8): camina los JSONL de Pi (mismo patrón que
+    extract_pi_sessions: 1 archivo = 1 sesión, scope in_scope, month desde
+    el FILENAME del archivo) y reduce_context() por sesión.
+
+    Emite la sección context_metrics del reporte: sessions[] (filas con
+    turns > 0 — stubs fuera, contados en meta.stubs), monthly_model[] y
+    meta desde aggregate_context(). Si el dir de sesiones no existe emite
+    available=False con razón (missing honesto, no array fantasma).
+
+    Segundo walk aceptado por diseño (design.md del epic: "el walk extra
+    agrega duración al nightly — se mide y, si pesa, --since").
+    """
+    sessions_dir = sessions_dir or (PI_DIR / "sessions")
+    if not sessions_dir.exists():
+        return {"available": False,
+                "reason": f"unavailable: no existe {sessions_dir} "
+                          "(máquina sin logs de Pi)",
+                "sessions": [], "monthly_model": [], "meta": {}}
+    cfg = load_config() or {}
+    th = dict(DEFAULT_CONTEXT_THRESHOLDS)
+    th.update(cfg.get("context_thresholds") or {})
+
+    rows = []
+    n_stubs = 0
+    n_files = 0
+    for sd in sorted(sessions_dir.iterdir()):
+        if not sd.is_dir():
+            continue
+        proj = sd.name
+        if not in_scope(proj):
+            continue
+        for f in sorted(sd.glob("*.jsonl")):
+            # ventana --since/--until (coffe-snj): solape por fecha del
+            # filename (los filenames de sesión de Pi empiezan con la fecha)
+            fdate = f.name[:10]
+            if SINCE and fdate and fdate < SINCE.isoformat():
+                continue
+            if UNTIL and fdate and fdate > UNTIL.isoformat():
+                continue
+            try:
+                entries = [json.loads(line) for line in open(f)
+                           if line.strip()]
+            except (json.JSONDecodeError, OSError) as e:
+                if os.environ.get("TRACKER_DEBUG"):
+                    print(f"  [skipped ctx] {f.name}: {e}", file=sys.stderr)
+                continue
+            n_files += 1
+            row = reduce_context(entries, config=th, month=f.name[:7])
+            row["project"] = proj
+            if row["turns"] > 0:
+                rows.append(row)
+            else:
+                n_stubs += 1
+    if not n_files:
+        return {"available": False,
+                "reason": "unavailable: sin archivos de sesión de Pi "
+                          "in-scope",
+                "sessions": [], "monthly_model": [], "meta": {}}
+    agg = aggregate_context(rows, config=th)
+    agg["meta"]["stubs"] = n_stubs  # del walk completo (los rows ya vienen limpios)
+    agg["available"] = True
+    agg["reason"] = None
+    agg["sessions"] = rows
+    return agg
 
 # --- fin bloque ctx-tracker --------------------------------------------------
 
@@ -1897,7 +1985,7 @@ def collect_skills_and_commands():
 
 def aggregate(interactions, sessions, skills_total=None, skills_by_project=None,
               commands=None, excluded=None, interaction_kinds=None,
-              outcomes=None, outcomes_reason=None):
+              outcomes=None, outcomes_reason=None, context_metrics=None):
     """Agrega rows → reporte completo. Pura: los datos de skills/comandos
     se inyectan (ver collect_skills_and_commands())."""
     hourly = {}
@@ -2225,6 +2313,28 @@ def aggregate(interactions, sessions, skills_total=None, skills_by_project=None,
         "skills": dict(skills_total.most_common(50)),
         "commands": dict(commands.most_common(30)),
         "sessions": session_stats,
+        # ctx-tracker (coffe-kup): sección requerida por el schema — inyectada
+        # por main() desde extract_context_metrics(); si no viene, missing
+        # honesto (nunca array fantasma)
+        "context_metrics": context_metrics or {
+            "available": False,
+            "reason": "unavailable: extract_context_metrics() no corrido en "
+                      "esta agregación",
+            "sessions": [], "monthly_model": [],
+            # meta completo igual: la sección es requerida por el schema y
+            # los reports sintéticos se validan contra él
+            "meta": {
+                "chars_per_token": DEFAULT_CONTEXT_THRESHOLDS["chars_per_token"],
+                "chars_per_token_tag": "assumed",
+                "chars_per_token_bias": (
+                    "subestima el contexto real: español/código ~3 "
+                    "chars/token y overhead de serialización"),
+                "validation_ratio_median": None,
+                "thresholds": dict(DEFAULT_CONTEXT_THRESHOLDS),
+                "stubs": 0,
+                "excluded_pathological": 0,
+            },
+        },
         "multitasking": multitasking,
         "project_daily": project_daily,
         "project_monthly": {p: dict(ms) for p, ms in project_monthly.items()},
@@ -2350,11 +2460,24 @@ def main():
     sessions = extract_sessions()  # coffe-i31: claude + pi + amp con provenance
     print(f"  {len(sessions)} charly sessions", flush=True)
 
+    print("Context metrics...", flush=True)  # ctx-tracker (coffe-kup)
+    t_ctx = time.time()
+    context_metrics = extract_context_metrics()
+    if context_metrics["available"]:
+        print(f"  {len(context_metrics['sessions'])} sesiones pi con turnos "
+              f"({context_metrics['meta'].get('excluded_pathological', 0)} "
+              f"patológicas excluidas, "
+              f"{context_metrics['meta'].get('stubs', 0)} stubs) "
+              f"[{time.time() - t_ctx:.1f}s]", flush=True)
+    else:
+        print(f"  {context_metrics['reason']}", flush=True)
+
     print("Aggregating...", flush=True)
     outcomes, outcomes_reason = collect_outcomes()
     report = aggregate(unique, sessions, *collect_skills_and_commands(),
                        excluded=excluded, interaction_kinds=kinds,
-                       outcomes=outcomes, outcomes_reason=outcomes_reason)
+                       outcomes=outcomes, outcomes_reason=outcomes_reason,
+                       context_metrics=context_metrics)
     if skipped:
         report["metadata"]["skipped"] = dict(skipped)
         report["metadata"]["skipped_lines"] = sum(skipped.values())

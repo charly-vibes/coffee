@@ -492,6 +492,26 @@
       "value": 1.0
     }
   },
+  "context_metrics": {
+    "available": false,
+    "meta": {
+      "chars_per_token": 4,
+      "chars_per_token_bias": "subestima el contexto real: espa\u00f1ol/c\u00f3digo ~3 chars/token y overhead de serializaci\u00f3n",
+      "chars_per_token_tag": "assumed",
+      "excluded_pathological": 0,
+      "stubs": 0,
+      "thresholds": {
+        "big_result_chars": 100000,
+        "big_session_tokens": 100000,
+        "chars_per_token": 4,
+        "pathological_chars": 500000
+      },
+      "validation_ratio_median": null
+    },
+    "monthly_model": [],
+    "reason": "unavailable: extract_context_metrics() no corrido en esta agregaci\u00f3n",
+    "sessions": []
+  },
   "daily": {
     "2026-05-10": {
       "cache_read_tokens": 0,

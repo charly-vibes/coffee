@@ -4,22 +4,69 @@
   "title": "usage_report_v3.json — contrato tracker → visualizaciones",
   "description": "Esquema del reporte que produce scripts/usage-tracker.py y consume viz-gantt.py y viz-fpa.py (el dashboard de insights fue eliminado en coffe-gen.5). Cambiar aquí implica regenerar golden (REGEN_GOLDEN=1) y bump de versión.",
   "type": "object",
-  "required": ["metadata", "hourly", "daily", "monthly", "projects", "skills", "commands", "sessions", "multitasking", "project_daily", "subscription_config", "subscription_fees_by_month"],
+  "required": [
+    "metadata",
+    "hourly",
+    "daily",
+    "monthly",
+    "projects",
+    "skills",
+    "commands",
+    "sessions",
+    "multitasking",
+    "project_daily",
+    "subscription_config",
+    "subscription_fees_by_month",
+    "context_metrics"
+  ],
   "properties": {
     "metadata": {
       "type": "object",
-      "required": ["date_range", "filter", "total_interactions", "total_days", "total_hours", "total_projects", "cost_total_effective", "cost_total_real", "subscription_fees"],
+      "required": [
+        "date_range",
+        "filter",
+        "total_interactions",
+        "total_days",
+        "total_hours",
+        "total_projects",
+        "cost_total_effective",
+        "cost_total_real",
+        "subscription_fees"
+      ],
       "properties": {
         "date_range": {
           "type": "object",
-          "required": ["start", "end"],
+          "required": [
+            "start",
+            "end"
+          ],
           "properties": {
-            "start": {"type": ["string", "null"], "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"},
-            "end": {"type": ["string", "null"], "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"}
+            "start": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+            },
+            "end": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+            }
           }
         },
-        "filter": {"enum": ["in-scope", "all"]},
-        "config_source": {"type": "string", "description": "coffe-mbz: fuente del config de suscripciones/pricing (ruta de config/fpa.json o 'builtin-fallback')"},
+        "filter": {
+          "enum": [
+            "in-scope",
+            "all"
+          ]
+        },
+        "config_source": {
+          "type": "string",
+          "description": "coffe-mbz: fuente del config de suscripciones/pricing (ruta de config/fpa.json o 'builtin-fallback')"
+        },
         "charges_total_real": {
           "description": "coffe-a31.2: suma IA total del ledger data/charges.json (USD, provenance reported)",
           "type": "number"
@@ -30,23 +77,38 @@
         },
         "charges_provenance": {
           "description": "coffe-a31.2: provenance del ledger (reported; unavailable si no se pudo leer — ver charges_reason)",
-          "enum": ["reported", "unavailable"]
+          "enum": [
+            "reported",
+            "unavailable"
+          ]
         },
         "charges_reason": {
           "description": "coffe-a31.2 (FPA-008): razón si el ledger no está disponible; null si reported",
-          "type": ["string", "null"]
+          "type": [
+            "string",
+            "null"
+          ]
         },
         "energy_provenance": {
           "description": "coffe-7mj.1: la energía es SIEMPRE assumed (ningún proveedor reporta kWh); unavailable con energy_reason solo en fallback sin config (FPA-008).",
-          "enum": ["assumed", "unavailable"]
+          "enum": [
+            "assumed",
+            "unavailable"
+          ]
         },
         "energy_config_source": {
           "description": "coffe-7mj.1: config/fpa.json que proveyó los coeficientes (null en fallback).",
-          "type": ["string", "null"]
+          "type": [
+            "string",
+            "null"
+          ]
         },
         "energy_cache_read_factor": {
           "description": "coffe-7mj.1: factor aplicado a cache_read tokens (parámetro dominante del estimado).",
-          "type": ["number", "null"],
+          "type": [
+            "number",
+            "null"
+          ],
           "minimum": 0,
           "maximum": 1
         },
@@ -57,7 +119,9 @@
         "energy_band_cache_factors": {
           "description": "coffe-5ng: factores de cache_read con los que se computan los extremos de energy_kwh_band mensual ([0.0, 1.0]). Ausente en fallback sin config.",
           "type": "array",
-          "items": {"type": "number"},
+          "items": {
+            "type": "number"
+          },
           "minItems": 2,
           "maxItems": 2
         },
@@ -69,113 +133,244 @@
           "description": "coffe-a31.2: parte tracker del cost_total_real (p2p real estimado por el tracker, sin fees implícitos del calendario)",
           "type": "number"
         },
-        "total_interactions": {"type": "integer", "minimum": 0},
-        "total_input_tokens": {"type": "integer", "minimum": 0},
-        "total_output_tokens": {"type": "integer", "minimum": 0},
-        "total_cache_read_tokens": {"type": "integer", "minimum": 0},
-        "total_cache_write_tokens": {"type": "integer", "minimum": 0},
-        "cost_total_effective": {"type": "number"},
-        "cost_total_real": {"type": "number"},
-        "subscription_fees": {"type": "number"},
-        "token_accounting": {"type": "string"},
+        "total_interactions": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "total_input_tokens": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "total_output_tokens": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "total_cache_read_tokens": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "total_cache_write_tokens": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "cost_total_effective": {
+          "type": "number"
+        },
+        "cost_total_real": {
+          "type": "number"
+        },
+        "subscription_fees": {
+          "type": "number"
+        },
+        "token_accounting": {
+          "type": "string"
+        },
         "timezone": {
           "description": "FPA-142: TZ usada para bucketing horario/diario; ausente => vistas hora/día unverified",
-          "type": ["string", "null"]
+          "type": [
+            "string",
+            "null"
+          ]
         },
         "interaction_kinds": {
           "description": "FPA-140: interacciones por kind (user prompts, assistant turns, tool calls)",
           "type": "object",
           "properties": {
-            "user_prompt": {"type": "integer", "minimum": 0},
-            "assistant_turn": {"type": "integer", "minimum": 0},
-            "tool_call": {"type": "integer", "minimum": 0}
+            "user_prompt": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "assistant_turn": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "tool_call": {
+              "type": "integer",
+              "minimum": 0
+            }
           }
         },
         "filtered": {
           "description": "FPA-141: interacciones y coste de los proyectos excluidos por el charly-filter",
           "type": "object",
-          "required": ["interactions", "cost_effective"],
+          "required": [
+            "interactions",
+            "cost_effective"
+          ],
           "properties": {
-            "interactions": {"type": "integer", "minimum": 0},
-            "cost_effective": {"type": "number"}
+            "interactions": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "cost_effective": {
+              "type": "number"
+            }
           }
         },
-        "total_hours": {"type": "integer", "minimum": 0},
-        "total_days": {"type": "integer", "minimum": 0},
-        "total_months": {"type": "integer", "minimum": 0},
-        "total_projects": {"type": "integer", "minimum": 0},
-        "skipped_lines": {"type": "integer", "minimum": 0},
-        "skipped": {"type": "object"}
+        "total_hours": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "total_days": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "total_months": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "total_projects": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "skipped_lines": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "skipped": {
+          "type": "object"
+        }
       }
     },
     "hourly": {
       "type": "object",
       "patternProperties": {
-        "^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:00$": {"$ref": "#/definitions/hourlyBucket"}
+        "^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:00$": {
+          "$ref": "#/definitions/hourlyBucket"
+        }
       }
     },
     "daily": {
       "type": "object",
       "patternProperties": {
-        "^[0-9]{4}-[0-9]{2}-[0-9]{2}$": {"$ref": "#/definitions/simpleBucket"}
+        "^[0-9]{4}-[0-9]{2}-[0-9]{2}$": {
+          "$ref": "#/definitions/simpleBucket"
+        }
       }
     },
     "monthly": {
       "type": "object",
       "patternProperties": {
-        "^[0-9]{4}-[0-9]{2}$": {"$ref": "#/definitions/monthlyBucket"}
+        "^[0-9]{4}-[0-9]{2}$": {
+          "$ref": "#/definitions/monthlyBucket"
+        }
       }
     },
     "projects": {
       "type": "object",
-      "additionalProperties": {"$ref": "#/definitions/projectBucket"}
+      "additionalProperties": {
+        "$ref": "#/definitions/projectBucket"
+      }
     },
-    "skills": {"type": "object"},
-    "commands": {"type": "object"},
+    "skills": {
+      "type": "object"
+    },
+    "commands": {
+      "type": "object"
+    },
     "sessions": {
       "type": "object",
-      "required": ["total_sessions", "length_distribution", "with_agent", "top_longest_by_turns"],
+      "required": [
+        "total_sessions",
+        "length_distribution",
+        "with_agent",
+        "top_longest_by_turns"
+      ],
       "properties": {
-        "total_sessions": {"type": "integer", "minimum": 0},
-        "length_distribution": {"type": "object"},
-        "with_agent": {"type": "integer", "minimum": 0},
+        "total_sessions": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "length_distribution": {
+          "type": "object"
+        },
+        "with_agent": {
+          "type": "integer",
+          "minimum": 0
+        },
         "agent_semantics": {
           "description": "coffe-i31: alcance del flag has_agent por tool — la semántica de subagentes difiere por harness",
-          "type": "string"},
+          "type": "string"
+        },
         "by_tool": {
           "description": "coffe-i31: sesiones con provenance por tool. resets = señal de reset por harness (claude: /clear de history.jsonl; pi: 1 archivo de sesión = 1 /new; amp: 1 tarea = 1 corrida)",
           "type": "object",
-          "patternProperties": {"^[a-z][a-z0-9-]*$": {
-            "type": "object",
-            "required": ["total", "with_agent", "resets"],
-            "properties": {
-              "total": {"type": "integer", "minimum": 0},
-              "with_agent": {"type": "integer", "minimum": 0},
-              "resets": {
-                "type": "object",
-                "required": ["signal", "count"],
-                "properties": {
-                  "signal": {"type": "string"},
-                  "count": {"type": "integer", "minimum": 0}
+          "patternProperties": {
+            "^[a-z][a-z0-9-]*$": {
+              "type": "object",
+              "required": [
+                "total",
+                "with_agent",
+                "resets"
+              ],
+              "properties": {
+                "total": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "with_agent": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "resets": {
+                  "type": "object",
+                  "required": [
+                    "signal",
+                    "count"
+                  ],
+                  "properties": {
+                    "signal": {
+                      "type": "string"
+                    },
+                    "count": {
+                      "type": "integer",
+                      "minimum": 0
+                    }
+                  }
                 }
               }
             }
-          }}},
-        "total_api_errors": {"type": "integer"},
-        "total_compactions": {"type": "integer"},
-        "avg_turns": {"type": "number"},
-        "avg_tools": {"type": "number"},
-        "avg_skills": {"type": "number"},
+          }
+        },
+        "total_api_errors": {
+          "type": "integer"
+        },
+        "total_compactions": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "avg_turns": {
+          "type": "number"
+        },
+        "avg_tools": {
+          "type": "number"
+        },
+        "avg_skills": {
+          "type": "number"
+        },
         "top_longest_by_turns": {
           "type": "array",
           "items": {
             "type": "object",
-            "required": ["turns", "msgs", "date", "project"],
+            "required": [
+              "turns",
+              "msgs",
+              "date",
+              "project"
+            ],
             "properties": {
-              "turns": {"type": "integer"},
-              "msgs": {"type": "integer"},
-              "date": {"type": "string"},
-              "project": {"type": "string"}
+              "turns": {
+                "type": "integer"
+              },
+              "msgs": {
+                "type": "integer"
+              },
+              "date": {
+                "type": "string"
+              },
+              "project": {
+                "type": "string"
+              }
             }
           }
         }
@@ -183,63 +378,153 @@
     },
     "multitasking": {
       "type": "object",
-      "required": ["hourly", "daily", "context_switches"],
+      "required": [
+        "hourly",
+        "daily",
+        "context_switches"
+      ],
       "properties": {
-        "description": {"type": "string"},
+        "description": {
+          "type": "string"
+        },
         "hourly": {
           "type": "object",
-          "required": ["total_active_hours", "hours_with_multiple_projects", "pct_hours_multitasking", "max_projects_in_one_hour", "top_10_hours"],
+          "required": [
+            "total_active_hours",
+            "hours_with_multiple_projects",
+            "pct_hours_multitasking",
+            "max_projects_in_one_hour",
+            "top_10_hours"
+          ],
           "properties": {
-            "total_active_hours": {"type": "integer", "minimum": 0},
-            "hours_with_multiple_projects": {"type": "integer", "minimum": 0},
-            "pct_hours_multitasking": {"type": "number", "minimum": 0, "maximum": 100},
-            "avg_projects_per_active_hour": {"type": "number"},
-            "distribution": {"type": "object"},
+            "total_active_hours": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "hours_with_multiple_projects": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "pct_hours_multitasking": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 100
+            },
+            "avg_projects_per_active_hour": {
+              "type": "number"
+            },
+            "distribution": {
+              "type": "object"
+            },
             "max_projects_in_one_hour": {
               "type": "object",
-              "required": ["count", "hours", "projects"],
+              "required": [
+                "count",
+                "hours",
+                "projects"
+              ],
               "properties": {
-                "count": {"type": "integer"},
-                "hours": {"type": "array", "items": {"type": "string"}},
-                "projects": {"type": "array", "items": {"type": "string"}}
+                "count": {
+                  "type": "integer"
+                },
+                "hours": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "projects": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
               }
             },
-            "top_10_hours": {"type": "array"}
+            "top_10_hours": {
+              "type": "array"
+            }
           }
         },
         "daily": {
           "type": "object",
-          "required": ["total_active_days", "days_with_multiple_projects", "pct_days_multitasking", "top_10_days"],
+          "required": [
+            "total_active_days",
+            "days_with_multiple_projects",
+            "pct_days_multitasking",
+            "top_10_days"
+          ],
           "properties": {
-            "total_active_days": {"type": "integer", "minimum": 0},
-            "days_with_multiple_projects": {"type": "integer", "minimum": 0},
-            "pct_days_multitasking": {"type": "number", "minimum": 0, "maximum": 100},
-            "avg_projects_per_active_day": {"type": "number"},
-            "top_10_days": {"type": "array"}
+            "total_active_days": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "days_with_multiple_projects": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "pct_days_multitasking": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 100
+            },
+            "avg_projects_per_active_day": {
+              "type": "number"
+            },
+            "top_10_days": {
+              "type": "array"
+            }
           }
         },
         "context_switches": {
           "type": "object",
-          "required": ["total", "avg_per_active_day", "max_in_one_day", "top_10_days"],
+          "required": [
+            "total",
+            "avg_per_active_day",
+            "max_in_one_day",
+            "top_10_days"
+          ],
           "properties": {
-            "total": {"type": "integer", "minimum": 0},
-            "avg_per_active_day": {"type": "number"},
-            "max_in_one_day": {"type": "integer", "minimum": 0},
-            "top_10_days": {"type": "object"}
+            "total": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "avg_per_active_day": {
+              "type": "number"
+            },
+            "max_in_one_day": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "top_10_days": {
+              "type": "object"
+            }
           }
         }
       }
     },
     "project_daily": {
       "type": "object",
-      "required": ["days", "matrix"],
+      "required": [
+        "days",
+        "matrix"
+      ],
       "properties": {
-        "days": {"type": "array", "items": {"type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"}},
+        "days": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+          }
+        },
         "matrix": {
           "type": "object",
           "additionalProperties": {
             "type": "array",
-            "items": {"type": "integer", "minimum": 0}
+            "items": {
+              "type": "integer",
+              "minimum": 0
+            }
           }
         }
       }
@@ -251,29 +536,81 @@
         "distinct_projects_per_hour": {
           "type": "object",
           "properties": {
-            "measure": {"enum": ["parallel-agent", "human-context-switching"]},
-            "peak": {"type": "integer", "minimum": 0},
-            "avg": {"type": "number", "minimum": 0}
+            "measure": {
+              "enum": [
+                "parallel-agent",
+                "human-context-switching"
+              ]
+            },
+            "peak": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "avg": {
+              "type": "number",
+              "minimum": 0
+            }
           }
         },
         "peak_simultaneous_sessions": {
           "type": "object",
           "properties": {
-            "measure": {"enum": ["parallel-agent", "human-context-switching"]},
-            "peak": {"type": ["integer", "null"], "minimum": 0},
-            "reason": {"type": ["string", "null"], "description": "coffe-6i8: null cuando el pico SÍ es computable; string con la razón solo cuando es n/a (FPA-008)"}
+            "measure": {
+              "enum": [
+                "parallel-agent",
+                "human-context-switching"
+              ]
+            },
+            "peak": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "minimum": 0
+            },
+            "reason": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "coffe-6i8: null cuando el pico SÍ es computable; string con la razón solo cuando es n/a (FPA-008)"
+            }
           }
         },
         "project_switches_per_active_hour": {
           "type": "object",
           "properties": {
-            "measure": {"enum": ["parallel-agent", "human-context-switching"]},
-            "value": {"type": ["number", "null"], "minimum": 0}
+            "measure": {
+              "enum": [
+                "parallel-agent",
+                "human-context-switching"
+              ]
+            },
+            "value": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "minimum": 0
+            }
           }
         },
-        "peak_simultaneous_sessions_legacy": {"type": ["integer", "null"], "minimum": 0},
-        "switches_per_active_hour": {"type": ["number", "null"]},
-        "description": {"type": "string"}
+        "peak_simultaneous_sessions_legacy": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "switches_per_active_hour": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "description": {
+          "type": "string"
+        }
       }
     },
     "project_monthly": {
@@ -281,25 +618,58 @@
       "type": "object",
       "additionalProperties": {
         "type": "object",
-        "patternProperties": {"^[0-9]{4}-[0-9]{2}$": {
-          "type": "object",
-          "required": ["interactions", "cost_effective", "cost_real", "tokens"],
-          "properties": {
-            "interactions": {"type": "integer", "minimum": 0},
-            "cost_effective": {"type": "number", "minimum": 0},
-            "cost_real": {"type": "number", "minimum": 0},
-            "tokens": {
-              "type": "object",
-              "required": ["in", "out", "cache_read", "cache_write"],
-              "properties": {
-                "in": {"type": "integer", "minimum": 0},
-                "out": {"type": "integer", "minimum": 0},
-                "cache_read": {"type": "integer", "minimum": 0},
-                "cache_write": {"type": "integer", "minimum": 0}
+        "patternProperties": {
+          "^[0-9]{4}-[0-9]{2}$": {
+            "type": "object",
+            "required": [
+              "interactions",
+              "cost_effective",
+              "cost_real",
+              "tokens"
+            ],
+            "properties": {
+              "interactions": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "cost_effective": {
+                "type": "number",
+                "minimum": 0
+              },
+              "cost_real": {
+                "type": "number",
+                "minimum": 0
+              },
+              "tokens": {
+                "type": "object",
+                "required": [
+                  "in",
+                  "out",
+                  "cache_read",
+                  "cache_write"
+                ],
+                "properties": {
+                  "in": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "out": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "cache_read": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "cache_write": {
+                    "type": "integer",
+                    "minimum": 0
+                  }
+                }
               }
             }
           }
-        }}
+        }
       }
     },
     "project_models": {
@@ -309,10 +679,19 @@
         "type": "object",
         "additionalProperties": {
           "type": "object",
-          "required": ["interactions", "cost_effective"],
+          "required": [
+            "interactions",
+            "cost_effective"
+          ],
           "properties": {
-            "interactions": {"type": "integer", "minimum": 0},
-            "cost_effective": {"type": "number", "minimum": 0}
+            "interactions": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "cost_effective": {
+              "type": "number",
+              "minimum": 0
+            }
           }
         }
       }
@@ -320,30 +699,64 @@
     "sessions_monthly": {
       "description": "Sesiones por mes (KPIs: coste por sesión, autonomous share) — coffe-i31: incluye todas las tools (claude + pi + amp)",
       "type": "object",
-      "patternProperties": {"^[0-9]{4}-[0-9]{2}$": {
-        "type": "object",
-        "required": ["total", "with_agent"],
-        "properties": {
-          "total": {"type": "integer", "minimum": 0},
-          "with_agent": {"type": "integer", "minimum": 0}
+      "patternProperties": {
+        "^[0-9]{4}-[0-9]{2}$": {
+          "type": "object",
+          "required": [
+            "total",
+            "with_agent"
+          ],
+          "properties": {
+            "total": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "with_agent": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
         }
-      }}
+      }
     },
     "filtered_out": {
       "description": "FPA-141: interacciones y coste excluidos por el filtro charly",
       "type": "object",
-      "required": ["interactions", "cost_effective", "by_tool", "share"],
+      "required": [
+        "interactions",
+        "cost_effective",
+        "by_tool",
+        "share"
+      ],
       "properties": {
-        "interactions": {"type": "integer", "minimum": 0},
-        "cost_effective": {"type": "number", "minimum": 0},
-        "by_tool": {"type": "object"},
-        "share": {"type": "number", "minimum": 0, "maximum": 1}
+        "interactions": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "cost_effective": {
+          "type": "number",
+          "minimum": 0
+        },
+        "by_tool": {
+          "type": "object"
+        },
+        "share": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
       }
     },
-    "subscription_config": {"type": "object"},
+    "subscription_config": {
+      "type": "object"
+    },
     "subscription_fees_by_month": {
       "type": "object",
-      "patternProperties": {"^[0-9]{4}-[0-9]{2}$": {"type": "number"}}
+      "patternProperties": {
+        "^[0-9]{4}-[0-9]{2}$": {
+          "type": "number"
+        }
+      }
     },
     "charges_real_by_month": {
       "description": "coffe-a31.2 (CRG-F1): cash cost real del ledger data/charges.json por proveedor y mes (YYYY-MM → USD), solo kinds IA (subscription|credits|refund|api_cycle aporta $0), provenance reported (facturas, FPA-003). Medida separada del coste efectivo: jamás sumarlas (FPA-002)",
@@ -351,7 +764,11 @@
       "patternProperties": {
         "^[a-z0-9-]+$": {
           "type": "object",
-          "patternProperties": {"^[0-9]{4}-[0-9]{2}$": {"type": "number"}}
+          "patternProperties": {
+            "^[0-9]{4}-[0-9]{2}$": {
+              "type": "number"
+            }
+          }
         }
       }
     },
@@ -363,14 +780,30 @@
           "type": "object",
           "additionalProperties": {
             "type": "object",
-            "required": ["charges_real", "charges_provenance",
-                         "subscription_fee_implicit", "cost_effective"],
+            "required": [
+              "charges_real",
+              "charges_provenance",
+              "subscription_fee_implicit",
+              "cost_effective"
+            ],
             "properties": {
-              "charges_real": {"type": "number"},
-              "charges_provenance": {"enum": ["reported"]},
-              "subscription_fee_implicit": {"type": "number"},
-              "cost_effective": {"type": "number"},
-              "fee_month_total": {"type": "number"}
+              "charges_real": {
+                "type": "number"
+              },
+              "charges_provenance": {
+                "enum": [
+                  "reported"
+                ]
+              },
+              "subscription_fee_implicit": {
+                "type": "number"
+              },
+              "cost_effective": {
+                "type": "number"
+              },
+              "fee_month_total": {
+                "type": "number"
+              }
             }
           }
         }
@@ -379,50 +812,408 @@
     "model_pricing_config": {
       "type": "object",
       "description": "coffe-mbz: config de pricing cargado (default_rates, cache_write_factor, versions) — lo usado para calcular costes, no constantes hardcodeadas"
+    },
+    "context_metrics": {
+      "description": "ctx-tracker (epic add-context-dashboard, coffe-kup): métricas de contexto por sesión de Pi. reducer puro reduce_context() + aggregate_context(); pico por segmento de compactación (CORR-001), atribución de chars por fuente, models_turns (CORR-002), coste ausente → null con razón (nunca 0 fake), patologías contadas en meta (excluidas de percentiles). Estimación: chars/chars_per_token (assumed, subestima). Pi-only: Claude/Amp/Codex fuera del alcance.",
+      "type": "object",
+      "required": [
+        "available",
+        "sessions",
+        "monthly_model",
+        "meta"
+      ],
+      "properties": {
+        "available": {
+          "type": "boolean"
+        },
+        "reason": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "sessions": {
+          "type": "array",
+          "description": "fila por sesión de Pi in-scope con turns > 0; stubs fuera (meta.stubs); patológicas listadas pero excluidas de percentiles",
+          "items": {
+            "type": "object",
+            "required": [
+              "month",
+              "project",
+              "turns",
+              "peak_ctx_est",
+              "final_ctx_est",
+              "compactions",
+              "chars_by_source",
+              "big_results",
+              "cost_in",
+              "cost_out",
+              "cost_cr",
+              "cost_cw",
+              "context_source",
+              "pathological",
+              "model",
+              "models_turns"
+            ],
+            "properties": {
+              "month": {
+                "type": "string",
+                "pattern": "^[0-9]{4}-[0-9]{2}$",
+                "description": "desde el filename del archivo de sesión (documentado)"
+              },
+              "project": {
+                "type": "string"
+              },
+              "turns": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "turns_no_usage": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "tokens_reported": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "chars_by_source": {
+                "type": "object",
+                "description": "asst_text/asst_thinking/asst_args/tool:<name>/user_text — suma == transcript observado",
+                "additionalProperties": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "big_results": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "big_results_by_tool": {
+                "type": "object"
+              },
+              "compactions": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "segment_count": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "peak_ctx_chars": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "final_ctx_chars": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "peak_ctx_est": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "final_ctx_est": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "max_assistant_block_chars": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "chars_per_token": {
+                "type": "integer"
+              },
+              "model": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "models_turns": {
+                "type": "object",
+                "description": "CORR-002: modelo → turnos (fuente de verdad); model = dominante",
+                "additionalProperties": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              },
+              "provider": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "cost_in": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "cost_out": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "cost_cr": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "cost_cw": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "cost_null_reason": {
+                "type": "string"
+              },
+              "context_source": {
+                "type": "string",
+                "enum": [
+                  "pi",
+                  "claude-cli"
+                ]
+              },
+              "pathological": {
+                "type": "boolean"
+              }
+            }
+          }
+        },
+        "monthly_model": {
+          "type": "array",
+          "description": "agregados por mes × modelo dominante sobre el set limpio (turns>0, sin patológicas)",
+          "items": {
+            "type": "object",
+            "required": [
+              "month",
+              "model",
+              "sessions",
+              "peak_p50",
+              "peak_p90",
+              "pct_big_session",
+              "partial"
+            ],
+            "properties": {
+              "month": {
+                "type": "string",
+                "pattern": "^[0-9]{4}-[0-9]{2}$"
+              },
+              "model": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "sessions": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "peak_p50": {
+                "type": "number"
+              },
+              "peak_p90": {
+                "type": "number"
+              },
+              "pct_big_session": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 100
+              },
+              "tokens_per_turn_by_source": {
+                "type": "object"
+              },
+              "spend_in": {
+                "type": "number"
+              },
+              "spend_out": {
+                "type": "number"
+              },
+              "spend_cr": {
+                "type": "number"
+              },
+              "spend_cw": {
+                "type": "number"
+              },
+              "partial": {
+                "type": "boolean",
+                "description": "mes máximo del dataset = parcial (patrón fpa-dashboard)"
+              }
+            }
+          }
+        },
+        "meta": {
+          "type": "object",
+          "required": [
+            "chars_per_token",
+            "chars_per_token_tag",
+            "chars_per_token_bias",
+            "thresholds",
+            "stubs",
+            "excluded_pathological"
+          ],
+          "properties": {
+            "chars_per_token": {
+              "type": "number"
+            },
+            "chars_per_token_tag": {
+              "type": "string",
+              "enum": [
+                "assumed"
+              ]
+            },
+            "chars_per_token_bias": {
+              "type": "string"
+            },
+            "validation_ratio_median": {
+              "type": [
+                "number",
+                "null"
+              ]
+            },
+            "thresholds": {
+              "type": "object",
+              "description": "umbrales usados (CLAR-002: desde config, no hardcodeados)",
+              "required": [
+                "big_result_chars",
+                "big_session_tokens",
+                "pathological_chars",
+                "chars_per_token"
+              ],
+              "properties": {
+                "big_result_chars": {
+                  "type": "integer"
+                },
+                "big_session_tokens": {
+                  "type": "integer"
+                },
+                "pathological_chars": {
+                  "type": "integer"
+                },
+                "chars_per_token": {
+                  "type": "number"
+                }
+              }
+            },
+            "stubs": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "excluded_pathological": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        }
+      }
     }
   },
   "definitions": {
     "simpleBucket": {
       "type": "object",
-      "required": ["interactions", "input_tokens", "output_tokens", "cost_effective", "cost_real", "tools", "models"],
+      "required": [
+        "interactions",
+        "input_tokens",
+        "output_tokens",
+        "cost_effective",
+        "cost_real",
+        "tools",
+        "models"
+      ],
       "properties": {
-        "interactions": {"type": "integer", "minimum": 0},
-        "input_tokens": {"type": "integer", "minimum": 0},
-        "output_tokens": {"type": "integer", "minimum": 0},
-        "cache_read_tokens": {"type": "integer", "minimum": 0},
-        "cache_write_tokens": {"type": "integer", "minimum": 0},
-        "cost_effective": {"type": "number"},
-        "cost_real": {"type": "number"},
-        "tools": {"type": "object"},
-        "models": {"type": "object"}
+        "interactions": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "input_tokens": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "output_tokens": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "cache_read_tokens": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "cache_write_tokens": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "cost_effective": {
+          "type": "number"
+        },
+        "cost_real": {
+          "type": "number"
+        },
+        "tools": {
+          "type": "object"
+        },
+        "models": {
+          "type": "object"
+        }
       }
     },
     "monthlyBucket": {
-      "allOf": [{"$ref": "#/definitions/simpleBucket"}],
-      "required": ["subscription_fees"],
+      "allOf": [
+        {
+          "$ref": "#/definitions/simpleBucket"
+        }
+      ],
+      "required": [
+        "subscription_fees"
+      ],
       "properties": {
-        "subscription_fees": {"type": "number"},
+        "subscription_fees": {
+          "type": "number"
+        },
         "tokens_by_model": {
           "description": "FPA-019: tokens input/output/cache-read/cache-write por mes y modelo (modelo → tokens; coffe-6i8: el tracker emite 2 niveles, no tool → modelo → tokens)",
           "type": "object",
           "additionalProperties": {
             "type": "object",
-            "required": ["in", "out", "cache_read", "cache_write"],
+            "required": [
+              "in",
+              "out",
+              "cache_read",
+              "cache_write"
+            ],
             "properties": {
-              "in": {"type": "integer", "minimum": 0},
-              "out": {"type": "integer", "minimum": 0},
-              "cache_read": {"type": "integer", "minimum": 0},
-              "cache_write": {"type": "integer", "minimum": 0}
+              "in": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "out": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "cache_read": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "cache_write": {
+                "type": "integer",
+                "minimum": 0
+              }
             }
           }
         },
         "pay_per_token_charges": {
           "description": "FPA-013 (coffe-a31.2): cargas pay-per-token del mes — *reported* cuando el ledger data/charges.json tiene cargas p2p reales (créditos/reembolsos), *assumed* (estimado tokens × pricing) si no",
-          "type": ["number", "null"]
+          "type": [
+            "number",
+            "null"
+          ]
         },
         "pay_per_token_provenance": {
           "description": "coffe-a31.2: provenance del pay_per_token_charges del mes (reported con ledger, assumed si no)",
-          "enum": ["reported", "assumed"]
+          "enum": [
+            "reported",
+            "assumed"
+          ]
         },
         "cost_real_tracker": {
           "description": "coffe-a31.2: parte tracker del cost_real mensual (p2p real estimado por el tracker), sin fees implícitos del calendario",
@@ -440,18 +1231,35 @@
             "oneOf": [
               {
                 "type": "object",
-                "required": ["kwh", "tier"],
+                "required": [
+                  "kwh",
+                  "tier"
+                ],
                 "properties": {
-                  "kwh": {"type": "number", "minimum": 0},
-                  "tier": {"type": "string", "minLength": 1}
+                  "kwh": {
+                    "type": "number",
+                    "minimum": 0
+                  },
+                  "tier": {
+                    "type": "string",
+                    "minLength": 1
+                  }
                 }
               },
               {
                 "type": "object",
-                "required": ["kwh", "reason"],
+                "required": [
+                  "kwh",
+                  "reason"
+                ],
                 "properties": {
-                  "kwh": {"type": "null"},
-                  "reason": {"type": "string", "minLength": 1}
+                  "kwh": {
+                    "type": "null"
+                  },
+                  "reason": {
+                    "type": "string",
+                    "minLength": 1
+                  }
                 }
               }
             ]
@@ -460,10 +1268,19 @@
         "energy_kwh_band": {
           "description": "coffe-5ng: banda de sensibilidad de caché del mes — mismo método 7mj recomputado con cache_read_energy_factor 0.0 (low) y 1.0 (high); el nominal usa el factor del config. Modelos sin telemetría excluidos de ambos extremos (igual que del total nominal).",
           "type": "object",
-          "required": ["low", "high"],
+          "required": [
+            "low",
+            "high"
+          ],
           "properties": {
-            "low": {"type": "number", "minimum": 0},
-            "high": {"type": "number", "minimum": 0}
+            "low": {
+              "type": "number",
+              "minimum": 0
+            },
+            "high": {
+              "type": "number",
+              "minimum": 0
+            }
           },
           "additionalProperties": false
         },
@@ -471,9 +1288,18 @@
           "description": "FPA-140: interacciones por kind en el mes",
           "type": "object",
           "properties": {
-            "user_prompt": {"type": "integer", "minimum": 0},
-            "assistant_turn": {"type": "integer", "minimum": 0},
-            "tool_call": {"type": "integer", "minimum": 0}
+            "user_prompt": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "assistant_turn": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "tool_call": {
+              "type": "integer",
+              "minimum": 0
+            }
           }
         },
         "outcomes_by_project": {
@@ -482,43 +1308,95 @@
           "additionalProperties": {
             "type": "object",
             "properties": {
-              "commits": {"type": "integer", "minimum": 0},
-              "releases": {"type": "integer", "minimum": 0}
+              "commits": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "releases": {
+                "type": "integer",
+                "minimum": 0
+              }
             }
           }
         }
       }
     },
     "hourlyBucket": {
-      "allOf": [{"$ref": "#/definitions/simpleBucket"}],
-      "required": ["projects_active"],
+      "allOf": [
+        {
+          "$ref": "#/definitions/simpleBucket"
+        }
+      ],
+      "required": [
+        "projects_active"
+      ],
       "properties": {
-        "projects_active": {"type": "integer", "minimum": 0},
+        "projects_active": {
+          "type": "integer",
+          "minimum": 0
+        },
         "tools": {
           "type": "object",
           "additionalProperties": {
             "type": "object",
-            "required": ["req", "in", "out", "cache_read", "cache_write", "cost_eff", "cost_real"],
+            "required": [
+              "req",
+              "in",
+              "out",
+              "cache_read",
+              "cache_write",
+              "cost_eff",
+              "cost_real"
+            ],
             "properties": {
-              "req": {"type": "integer"},
-              "in": {"type": "integer"},
-              "out": {"type": "integer"},
-              "cache_read": {"type": "integer"},
-              "cache_write": {"type": "integer"},
-              "cost_eff": {"type": "number"},
-              "cost_real": {"type": "number"}
+              "req": {
+                "type": "integer"
+              },
+              "in": {
+                "type": "integer"
+              },
+              "out": {
+                "type": "integer"
+              },
+              "cache_read": {
+                "type": "integer"
+              },
+              "cache_write": {
+                "type": "integer"
+              },
+              "cost_eff": {
+                "type": "number"
+              },
+              "cost_real": {
+                "type": "number"
+              }
             }
           }
         }
       }
     },
     "projectBucket": {
-      "allOf": [{"$ref": "#/definitions/simpleBucket"}],
-      "required": ["first_seen", "last_seen"],
+      "allOf": [
+        {
+          "$ref": "#/definitions/simpleBucket"
+        }
+      ],
+      "required": [
+        "first_seen",
+        "last_seen"
+      ],
       "properties": {
-        "first_seen": {"type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"},
-        "last_seen": {"type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"},
-        "skills": {"type": "object"}
+        "first_seen": {
+          "type": "string",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+        },
+        "last_seen": {
+          "type": "string",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+        },
+        "skills": {
+          "type": "object"
+        }
       }
     }
   }

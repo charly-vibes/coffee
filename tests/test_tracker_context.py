@@ -21,6 +21,7 @@ compaction con tokensBefore, model_change).
 
 import importlib.util
 import json
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -433,7 +434,8 @@ class TestTokensReported(unittest.TestCase):
 
 def _row(turns_peak_chars, model="m-a", month="2026-10", turns=10,
          pathological=False, context_source="pi", tokens_reported=None,
-         costs=None, chars_by_source=None, project="charly-coffee"):
+         final_turn_tokens=None, costs=None, chars_by_source=None,
+         project="charly-coffee"):
     """Fila de sesión sintética con el shape que emite reduce_context
     (más month y tokens_reported)."""
     r = {
@@ -459,6 +461,8 @@ def _row(turns_peak_chars, model="m-a", month="2026-10", turns=10,
     }
     if tokens_reported is not None:
         r["tokens_reported"] = tokens_reported
+    if final_turn_tokens is not None:
+        r["final_turn_tokens"] = final_turn_tokens
     if costs:
         r.update({"cost_in": costs[0], "cost_out": costs[1],
                   "cost_cr": costs[2], "cost_cw": costs[3]})
@@ -558,14 +562,16 @@ class TestMetaContexto(unittest.TestCase):
         self.assertEqual(100_000, agg["meta"]["thresholds"]["big_session_tokens"])
 
     def test_validation_ratio_median_solo_pi_con_usage(self):
-        """ratio = tokens_reported / est; mediana sobre sesiones pi con
-        usage — claude-cli (usage inválido) fuera, sin usage fuera."""
+        """ratio = tokens del ÚLTIMO turno con usage / final_ctx_est (el
+        último turno ≈ contexto final real, no la suma acumulada de la
+        sesión); mediana sobre sesiones pi con usage — claude-cli (usage
+        inválido) fuera, sin usage fuera."""
         rows = [
-            _row(1_000, tokens_reported=3_000),    # ratio 3.0
-            _row(1_000, tokens_reported=5_000),    # ratio 5.0
-            _row(1_000, tokens_reported=4_000),    # ratio 4.0 → mediana
+            _row(1_000, tokens_reported=3_000, final_turn_tokens=3_000),
+            _row(1_000, tokens_reported=5_000, final_turn_tokens=5_000),
+            _row(1_000, tokens_reported=4_000, final_turn_tokens=4_000),  # mediana
             _row(1_000, context_source="claude-cli",
-                 tokens_reported=99_000),          # excluida
+                 tokens_reported=99_000, final_turn_tokens=99_000),  # excluida
             _row(1_000),                           # sin usage → excluida
         ]
         agg = ut.aggregate_context(rows)
@@ -579,6 +585,93 @@ class TestMetaContexto(unittest.TestCase):
         cfg = dict(DEFAULT_THRESHOLDS, big_session_tokens=250_000)
         agg = ut.aggregate_context([_row(50_000)], config=cfg)
         self.assertEqual(250_000, agg["meta"]["thresholds"]["big_session_tokens"])
+
+
+class TestWiringContext(unittest.TestCase):
+    """coffe-kup (1.8+1.9): wiring — extract_context_metrics camina los JSONL
+    de Pi (1 archivo = 1 sesión, month desde el filename) y aggregate()
+    emite context_metrics en el reporte. Schema lo requiere."""
+
+    def setUp(self):
+        self._tmp = tempfile.TemporaryDirectory()
+        self.tmp = Path(self._tmp.name)
+
+    def tearDown(self):
+        self._tmp.cleanup()
+
+    def _write_session(self, proj, fname, entries):
+        d = self.tmp / proj
+        d.mkdir(parents=True, exist_ok=True)
+        (d / fname).write_text(
+            "\n".join(json.dumps(e) for e in entries) + "\n")
+
+    def test_extract_context_metrics_desde_tmpdir(self):
+        self._write_session("charly-coffee",
+                            "2026-05-10T14-23-00-000Z_a.jsonl", [
+                                e_user("hola" * 1000),
+                                e_assistant(text="mundo" * 1000,
+                                            usage=usage()),
+                            ])
+        cm = ut.extract_context_metrics(sessions_dir=self.tmp)
+        self.assertTrue(cm["available"])
+        self.assertEqual(1, len(cm["sessions"]))
+        row = cm["sessions"][0]
+        self.assertEqual("2026-05", row["month"])   # filename, no contenido
+        self.assertEqual("charly-coffee", row["project"])
+        self.assertEqual(1, row["turns"])
+        self.assertEqual(1, len(cm["monthly_model"]))
+        self.assertIn("chars_per_token", cm["meta"])
+
+    def test_stubs_fuera_del_array_contados(self):
+        self._write_session("charly-coffee",
+                            "2026-05-10T14-23-00-000Z_a.jsonl",
+                            [e_user("solo pregunta")])
+        cm = ut.extract_context_metrics(sessions_dir=self.tmp)
+        self.assertEqual(0, len(cm["sessions"]))
+        self.assertEqual(1, cm["meta"]["stubs"])
+
+    def test_fuera_de_scope_excluida(self):
+        # proyectos no-charly quedan fuera (in_scope), como extract_pi_sessions
+        self._write_session("otro-proyecto",
+                            "2026-05-10T14-23-00-000Z_a.jsonl", [
+                                e_user("hola"),
+                                e_assistant(text="x", usage=usage()),
+                            ])
+        cm = ut.extract_context_metrics(sessions_dir=self.tmp)
+        self.assertEqual(0, len(cm["sessions"]))
+
+    def test_dir_ausente_unavailable_con_razon(self):
+        cm = ut.extract_context_metrics(sessions_dir=self.tmp / "nope")
+        self.assertFalse(cm["available"])
+        self.assertTrue(cm["reason"])
+
+    def test_ventana_since_until_aplicada(self):
+        """coffe-snj: la ventana --since/--until filtra los archivos por la
+        fecha del filename (solape), como el resto del reporte."""
+        self._write_session("charly-coffee",
+                            "2026-03-10T14-23-00-000Z_a.jsonl", [
+                                e_user("hola"),
+                                e_assistant(text="x", usage=usage()),
+                            ])
+        cm = ut.extract_context_metrics(sessions_dir=self.tmp)
+        self.assertEqual(1, len(cm["sessions"]))  # sin ventana → entra
+        ut.SINCE = ut.parse_ts("2026-05-01T00:00:00+00:00").date()
+        try:
+            cm2 = ut.extract_context_metrics(sessions_dir=self.tmp)
+            self.assertEqual(0, len(cm2["sessions"]))
+        finally:
+            ut.SINCE = None
+
+    def test_aggregate_emite_context_metrics(self):
+        cm = {"available": True, "reason": None, "sessions": [],
+              "monthly_model": [], "meta": {"chars_per_token": 4}}
+        report = ut.aggregate([], [], context_metrics=cm)
+        self.assertEqual(cm, report["context_metrics"])
+
+    def test_aggregate_sin_context_emite_unavailable(self):
+        report = ut.aggregate([], [])
+        self.assertFalse(report["context_metrics"]["available"])
+        self.assertTrue(report["context_metrics"]["reason"])
 
 
 class TestPureza(unittest.TestCase):

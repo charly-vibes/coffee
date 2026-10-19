@@ -183,6 +183,12 @@
     "staleness_days": 14,
     "unit_cost_min_base_per_1k": 5.0
   },
+  "context_thresholds": {
+    "big_result_chars": 100000,
+    "big_session_tokens": 100000,
+    "pathological_chars": 500000,
+    "chars_per_token": 4
+  },
   "premium_models": [
     "opus"
   ],
