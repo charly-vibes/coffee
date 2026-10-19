@@ -258,6 +258,30 @@ def git_proxies(commits, releases):
     }
 
 
+def error_rates(interactions, api_errors, terapia):
+    """Tasas de error por 100 interacciones (design D2/spec): errores de API
+    (fuente usage_report) y desglose por clase de terapia. El denominador
+    (`interactions`) va siempre en el row — cualquier tasa es recalculable.
+    Sin interacciones → null con provenance missing (patrón 'missing').
+    """
+    if not interactions:
+        return {
+            "interactions": interactions or 0,
+            "errors_api_per_100": None,
+            "errors_terapia_per_100": None,
+            "provenance": {"errors_api_per_100": "missing",
+                           "errors_terapia_per_100": "missing"},
+        }
+    return {
+        "interactions": interactions,
+        "errors_api_per_100": api_errors * 100.0 / interactions,
+        "errors_terapia_per_100": {k: v * 100.0 / interactions
+                                   for k, v in (terapia or {}).items()},
+        "provenance": {"errors_api_per_100": "reported",
+                       "errors_terapia_per_100": "reported"},
+    }
+
+
 def classify_control(repos_info, outlier=DDL_OUTLIER_REPO):
     """control = ausencia estructural de ddl (sin `.ddl/` y sin topic ddl GitHub).
 

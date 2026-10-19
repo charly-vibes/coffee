@@ -206,6 +206,25 @@ class GitProxiesTest(unittest.TestCase):
         self.assertEqual(out["provenance"]["fix_ratio"], "missing")
 
 
+class ErrorRatesTest(unittest.TestCase):
+    def test_api_por_100_con_denominador(self):
+        out = ddl.error_rates(interactions=1000, api_errors=3, terapia={"bash": 2})
+        self.assertEqual(out["errors_api_per_100"], 0.3)
+        self.assertEqual(out["interactions"], 1000)  # denominador en el row
+        self.assertEqual(out["errors_terapia_per_100"]["bash"], 0.2)
+
+    def test_denominador_cero_todas_null(self):
+        out = ddl.error_rates(interactions=0, api_errors=0, terapia={})
+        self.assertIsNone(out["errors_api_per_100"])
+        self.assertIsNone(out["errors_terapia_per_100"])
+        self.assertEqual(out["provenance"]["errors_api_per_100"], "missing")
+
+    def test_terapia_vacio_con_interacciones_no_es_null(self):
+        out = ddl.error_rates(interactions=500, api_errors=0, terapia={})
+        self.assertEqual(out["errors_api_per_100"], 0.0)
+        self.assertEqual(out["errors_terapia_per_100"], {})
+
+
 class ComputeDoseTest(unittest.TestCase):
     def test_dosis_desde_ddl_status(self):
         status = {
