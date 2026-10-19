@@ -282,6 +282,63 @@ def error_rates(interactions, api_errors, terapia):
     }
 
 
+def gh_runs_incremental(repo, fetch_fn, cache, ttl_days=7, now=None):
+    """Runs de GitHub Actions por repo con cache incremental (design D4/D8).
+
+    fetch_fn(repo, since_iso|None) -> [run] — inyectable: tests no tocan red.
+    cache: {runs, fetched_until} o None. Dentro del TTL no hay red
+    (provenance 'cached'); stale → refetch solo runs posteriores a
+    fetched_until, merge dedupe por id. Red muerta → cache stale conservado
+    con provenance 'missing'+reason; 404 → reason 'repo_gone'.
+    """
+    if cache and now:
+        fetched = _parse_ts(cache.get("fetched_until"))
+        current = _parse_ts(now)
+        if fetched and current and (current - fetched).days < ttl_days:
+            out = dict(cache)
+            out["provenance"] = "cached"
+            return out
+    since = cache.get("fetched_until") if cache else None
+    try:
+        fresh = fetch_fn(repo, since)
+    except Exception as e:  # noqa: BLE001 — red muerta/404/auth: degradar, no romper
+        out = {"runs": (cache or {}).get("runs", []),
+               "fetched_until": (cache or {}).get("fetched_until"),
+               "provenance": "missing"}
+        msg = str(e)
+        out["reason"] = "repo_gone" if "404" in msg else msg[:120]
+        return out
+    by_id = {r["id"]: r for r in (cache or {}).get("runs", [])}
+    for r in fresh:
+        by_id[r["id"]] = r
+    runs = sorted(by_id.values(), key=lambda r: r["created_at"])
+    return {
+        "runs": runs,
+        "fetched_until": runs[-1]["created_at"] if runs else since,
+        "provenance": "reported",
+    }
+
+
+def ci_fail_rate(runs, month):
+    """Runs fallidos / completados del mes, excluyendo dependabot (spec).
+    Sin runs completados en el mes → None con provenance missing.
+    """
+    completed = [r for r in runs
+                 if r.get("status") == "completed"
+                 and not (r.get("head_branch") or "").startswith("dependabot/")
+                 and (r.get("created_at") or "")[:7] == month]
+    failures = sum(1 for r in completed if r.get("conclusion") == "failure")
+    if not completed:
+        return {"ci_fail_rate": None, "runs_total": 0,
+                "runs_failed": 0, "provenance": "missing"}
+    return {
+        "ci_fail_rate": failures / len(completed),
+        "runs_total": len(completed),
+        "runs_failed": failures,
+        "provenance": "reported",
+    }
+
+
 def classify_control(repos_info, outlier=DDL_OUTLIER_REPO):
     """control = ausencia estructural de ddl (sin `.ddl/` y sin topic ddl GitHub).
 

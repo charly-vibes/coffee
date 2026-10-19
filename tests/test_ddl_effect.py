@@ -225,6 +225,111 @@ class ErrorRatesTest(unittest.TestCase):
         self.assertEqual(out["errors_terapia_per_100"], {})
 
 
+class GhCacheTest(unittest.TestCase):
+    def run(self, result=None):
+        return super().run(result)
+
+    RUN_A = {"id": 1, "created_at": "2026-04-01T10:00:00Z",
+             "conclusion": "success", "status": "completed",
+             "head_branch": "main"}
+    RUN_B = {"id": 2, "created_at": "2026-04-05T10:00:00Z",
+             "conclusion": "failure", "status": "completed",
+             "head_branch": "main"}
+
+    def test_cache_frio_descarga_todo(self):
+        seen = []
+        def fetch(repo, since):
+            seen.append(since)
+            return [self.RUN_A, self.RUN_B]
+        out = ddl.gh_runs_incremental("wai", fetch, cache=None,
+                                      now="2026-04-10T00:00:00Z")
+        self.assertIsNone(seen[0])           # sin cache: sin marca since
+        self.assertEqual(len(out["runs"]), 2)
+        self.assertEqual(out["fetched_until"], "2026-04-05T10:00:00Z")
+        self.assertEqual(out["provenance"], "reported")
+
+    def test_cache_tibio_no_llama_red(self):
+        def fetch(repo, since):
+            raise AssertionError("no debió tocar la red dentro del TTL")
+        cache = {"runs": [self.RUN_A], "fetched_until": "2026-04-08T00:00:00Z"}
+        out = ddl.gh_runs_incremental("wai", fetch, cache=cache,
+                                      ttl_days=7, now="2026-04-10T00:00:00Z")
+        self.assertEqual(len(out["runs"]), 1)
+        self.assertEqual(out["provenance"], "cached")
+
+    def test_cache_stale_refetch_incremental(self):
+        seen = []
+        def fetch(repo, since):
+            seen.append(since)
+            return [self.RUN_B]  # solo el run nuevo
+        cache = {"runs": [self.RUN_A], "fetched_until": "2026-04-02T00:00:00Z"}
+        out = ddl.gh_runs_incremental("wai", fetch, cache=cache, ttl_days=0,
+                                      now="2026-04-10T00:00:00Z")
+        self.assertEqual(seen[0], "2026-04-02T00:00:00Z")  # solo lo nuevo
+        self.assertEqual(len(out["runs"]), 2)              # merge sin duplicar
+        self.assertEqual(out["fetched_until"], "2026-04-05T10:00:00Z")
+
+    def test_red_muerta_conserva_cache_stale_con_missing(self):
+        def fetch(repo, since):
+            raise ConnectionError("no network")
+        cache = {"runs": [self.RUN_A], "fetched_until": "2026-04-02T00:00:00Z"}
+        out = ddl.gh_runs_incremental("wai", fetch, cache=cache, ttl_days=0,
+                                      now="2026-04-10T00:00:00Z")
+        self.assertEqual(len(out["runs"]), 1)  # cache conservado
+        self.assertEqual(out["provenance"], "missing")
+        self.assertIn("reason", out)
+
+    def test_repo_gone_404(self):
+        class NotFound(Exception):
+            pass
+        def fetch(repo, since):
+            raise NotFound("404")
+        out = ddl.gh_runs_incremental("ghost", fetch, cache=None,
+                                      now="2026-04-10T00:00:00Z")
+        self.assertEqual(out["provenance"], "missing")
+        self.assertEqual(out["reason"], "repo_gone")
+
+
+class CiFailRateTest(unittest.TestCase):
+    def test_fallidos_sobre_completados(self):
+        runs = [
+            {"conclusion": "success", "status": "completed", "head_branch": "main",
+             "created_at": "2026-04-01T10:00:00Z"},
+            {"conclusion": "failure", "status": "completed", "head_branch": "main",
+             "created_at": "2026-04-02T10:00:00Z"},
+            {"conclusion": None, "status": "in_progress", "head_branch": "main",
+             "created_at": "2026-04-03T10:00:00Z"},
+        ]
+        out = ddl.ci_fail_rate(runs, month="2026-04")
+        self.assertEqual(out["ci_fail_rate"], 0.5)  # 1 failure / 2 completed
+
+    def test_dependabot_excluido(self):
+        runs = [
+            {"conclusion": "failure", "status": "completed",
+             "head_branch": "dependabot/npm/y", "created_at": "2026-04-01T10:00:00Z"},
+            {"conclusion": "success", "status": "completed",
+             "head_branch": "main", "created_at": "2026-04-02T10:00:00Z"},
+        ]
+        out = ddl.ci_fail_rate(runs, month="2026-04")
+        self.assertEqual(out["ci_fail_rate"], 0.0)
+        self.assertEqual(out["runs_total"], 1)
+
+    def test_mes_filtrado(self):
+        runs = [
+            {"conclusion": "failure", "status": "completed", "head_branch": "main",
+             "created_at": "2026-03-01T10:00:00Z"},
+            {"conclusion": "success", "status": "completed", "head_branch": "main",
+             "created_at": "2026-04-01T10:00:00Z"},
+        ]
+        out = ddl.ci_fail_rate(runs, month="2026-04")
+        self.assertEqual(out["runs_total"], 1)
+
+    def test_sin_runs_null_con_missing(self):
+        out = ddl.ci_fail_rate([], month="2026-04")
+        self.assertIsNone(out["ci_fail_rate"])
+        self.assertEqual(out["provenance"], "missing")
+
+
 class ComputeDoseTest(unittest.TestCase):
     def test_dosis_desde_ddl_status(self):
         status = {
