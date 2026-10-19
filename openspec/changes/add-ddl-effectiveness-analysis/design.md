@@ -4,8 +4,21 @@
 
 ### D1. Capability separada, reporte de usage intacto
 
-`ddl-effect-tracker.py` **consume** `data/usage_report_v3.json` (sesiones,
-`n_errors`, project↔cwd) pero emite su propio JSON con su propio schema. Razones:
+`ddl-effect-tracker.py` **consume** tres familias de insumos pero emite su propio
+JSON con su propio schema:
+
+1. `data/usage_report_v3.json` (sesiones agregadas, `n_errors`, project↔cwd);
+2. **walk de `~/.pi/agent/sessions`** para `recovery_p50_interactions` — el
+   reporte de usage solo guarda agregados por sesión (verificado: `sessions` =
+   `total_sessions`, `length_distribution`, `total_api_errors`, … sin filas por
+   evento), y la recuperación necesita la secuencia error→invocaciones por
+   evento. Mismo patrón de walk que el `add-context-dashboard`
+   (grupo `extract_pi_sessions`, coffe-i31); corre tras usage-tracker en el
+   nightly, con duración medida;
+3. fuentes externas: git de la flota, gh api (cache), `ddl status`, cache de
+   terapia (clases de error — no secuencias).
+
+Razones de no-meterlo en el reporte de usage:
 (1) las fuentes son de naturaleza distinta (git, gh api, ddl status, terapia) y
 mezclarlas en el reporte de usage rompería el contrato `usage-report` por datos
 que no son de usage; (2) el golden de `usage_report_v3` es grande y frágil — otro
@@ -47,9 +60,16 @@ y por qué (actividad en sesiones in-scope).
    (fallback cuando no hay `.ddl/`, ej. repos que usan wai sin migrar).
 
 La dosis reportada es la fracción *sana*/13. Dosis 0 ≠ control: un repo puede
-estar en el grupo de tratamiento con dosis 0 (adoptó y мигró a 0 herramientas
+estar en el grupo de tratamiento con dosis 0 (adoptó y migró a 0 herramientas
 sanas). `is_control` se define por **ausencia de `.ddl/` + topic GitHub**, no por
-dosis.
+dosis (offline el test estructural de `.ddl/` es el autoritativo; el topic GitHub
+es informativo y sale del cache de gh).
+
+**D3b — dosis como serie temporal:** `ddl status` solo describe el presente, pero
+el panel es repo × mes: `dose(month)` se deriva hacia atrás desde
+`tools_first_use` + presencia histórica de canarios (git log de `.ddl/`).
+`ddl status` valida la derivación contra el snapshot corriente; si difiere, gana
+`ddl status` y el delta se reporta en metadata (visible, nunca silencioso).
 
 ### D4. Lazo de feedback — definiciones operativas
 
@@ -70,7 +90,9 @@ dosis.
 ### D5. Estimadores — honestos antes que elegantes
 
 - **ITS:** media móvil trimestral pre/post con intervalo bootstrap (10k resamples,
-  seed en `metadata.seed_bootstrap`, fija para reproducibilidad). Sin regresión
+  seed en `metadata.seed_bootstrap`, fija para reproducibilidad). **Ventana pre
+  mínima: 3 meses** — repos cuya adopción precede al tracking salen del ITS con
+  marca explícita, no con delta vacío. Sin regresión
   formal: n de repos es ~decenas, los IC bootstrap son más honestos que p-values.
 - **DiD:** estimador simple de 2 períodos × 2 grupos por métrica, con el delta
   pre→post del grupo control restando tendencia global. Reportado con el n de
@@ -87,6 +109,9 @@ dosis.
 | Fix ratio | commits `fix:` post-release / releases | convención de commits requerida |
 | Test-commit ratio | `test:`+archivos de test / commits | repos sin convención → 0 |
 | `ah check` findings | findings por corrida (serie temporal desde cache local de ah) | solo mide specs contratadas, no todo el repo |
+
+Denominador 0 en un mes (sin commits, sin releases): ratio → `null` con razón
+(patrón "missing", no 0 fake); el dashboard lo distingue de un ratio real 0.
 
 Los 4 van al dashboard lado a lado, nunca agregados en un "score de calidad"
 compuesto (ponderarlos sería inventar pesos sin base).
@@ -113,6 +138,15 @@ intentan controlar eso; el texto sí.
   sesión → el tracker lee `GH_TOKEN` de env o de `gh auth token`, y si no hay,
   emite missing sin romper (CI pasa a provenance *missing*, el dashboard muestra
   el hueco).
+- **Repo renombrado/eliminado en GitHub:** 404 → conservar cache stale y emitir
+  provenance *missing* con razón (`repo_gone`); nunca refetch vacío ni 0.
+- **Sesgo de reloj sesión↔commit:** latencias negativas (commit "antes" de la
+  sesión por skew) se clampean a 0 y se cuentan en
+  `metadata.clamped_negative_latencies` (bias visible).
+- **Dosis con varianza ~0 en corte transversal:** si casi toda la flota viva tiene
+  dosis ~1 (ddl init instala todo), la dosis-respuesta transversal es degenerada →
+  la vista degrada explícitamente a tratamiento-vs-control (variable en el tiempo,
+  no en el corte), declarado en la vista.
 - **cwd de sesiones ≠ nombre de repo GitHub:** mapping explícito en config
   (`config/fpa.json` → `ddl_effect.repo_aliases`) en lugar de fuzzy matching.
 - **Terapia cache frío:** primera corrida del análisis dispara `terapia` sobre

@@ -42,14 +42,29 @@ provenance — nunca fecha estimada.
 - **THEN** `adoption.first_ddl_commit` es `null` con provenance `missing` y el
   repo puede ser elegible como control
 
-### Requirement: dosis de cobertura de herramientas
+### Requirement: dosis de cobertura de herramientas, como serie temporal
 
 El tracker SHALL (debe) calcular la dosis de cada repo como fracción de las 13
-herramientas del registry gestionadas que están presentes y sanas, con jerarquía
-de fuentes explícita: `ddl status` primero; fallback a archivos-canario bajo
-`.ddl/` (git) y a primer uso en sesiones. Cuando la fuente efectiva no es
-`ddl status`, la dosis lleva provenance que lo declare. `dose_detail` lista
-present/sanas/faltantes por nombre.
+herramientas del registry gestionadas que están presentes y sanas. La dosis es
+una serie temporal: `dose(month)` por cada mes del panel, derivada hacia atrás
+desde fechas de adopción (`tools_first_use`, primer commit de `.ddl/`, presencia
+histórica de canarios). `ddl status` es solo el snapshot corriente que valida la
+derivación: si difiere, gana `ddl status` y el delta se reporta en metadata.
+`dose_detail` lista present/sanas/faltantes por nombre; la fuente efectiva de
+cada celda va en provenance.
+
+#### Scenario: dosis desde ddl status
+
+- **WHEN** `ddl status` corre contra un repo y reporta 10 de 13 herramientas sanas
+- **THEN** `dose` del mes corriente es 10/13 con provenance `reported` y
+  `dose_detail.healthy` lista exactamente esas 10
+
+#### Scenario: dosis retroactiva coherente con adopción
+
+- **WHEN** una herramienta se usó por primera vez en un repo en 2026-08 y el
+  panel cubre desde 2026-01
+- **THEN** `dose(month)` para los meses previos a 2026-08 no la cuenta y sube
+  en el mes de primer uso, sin saltos no explicables por las fechas de adopción
 
 #### Scenario: dosis desde ddl status
 
@@ -67,11 +82,28 @@ present/sanas/faltantes por nombre.
 
 El tracker SHALL (debe) emitir por repo × mes: `recovery_p50_interactions`
 (mediana de interacciones entre un error de tool/API y la siguiente invocación
-exitosa del mismo tool dentro de sesiones Pi, con eventos censurados por fin de
-sesión excluidos de la mediana y contados en `recovery_censored_rate`),
+exitosa del mismo tool, calculada sobre el **walk de JSONLs de sesiones Pi** —
+el reporte de usage no tiene filas por evento —, con eventos censurados por fin
+de sesión excluidos de la mediana y contados en `recovery_censored_rate`),
 `session_commit_latency_p50_h` (latencia entre el último timestamp de sesión del
-repo y el primer commit posterior asistido), y `ci_fail_rate` (runs fallidos /
-runs totales del mes vía gh api, excluyendo runs de dependabot).
+repo y el primer commit posterior asistido; latencias negativas por sesgo de
+reloj se clampean a 0 y se cuentan en metadata), y `ci_fail_rate` (runs fallidos /
+runs totales del mes vía gh api, excluyendo runs de dependabot; repo
+renombrado/eliminado → cache stale conservado + provenance `missing` con razón
+`repo_gone`).
+
+#### Scenario: walk de sesiones como fuente de recuperación
+
+- **WHEN** el tracker calcula `recovery_p50_interactions` para un repo × mes
+- **THEN** lo deriva de los eventos de error e invocaciones de los JSONLs de
+  sesiones Pi de ese cwd, no de agregados del reporte de usage
+
+#### Scenario: ITS sin ventana pre suficiente
+
+- **WHEN** la adopción de un repo precede a su primera actividad registrada y la
+  ventana pre queda con menos de 3 meses
+- **THEN** el ITS de ese repo se omite con marca explícita en `analysis.its` y
+  el dashboard lo muestra como no-estimado, no como delta 0
 
 #### Scenario: recuperación con censura visible
 
@@ -107,9 +139,18 @@ con TTL semanal). Toda tasa lleva el denominador (interacciones) en el mismo row
 
 El tracker SHALL (debe) emitir por repo × mes los cuatro proxies: `revert_ratio`,
 `fix_ratio`, `test_commit_ratio` (fuente git, definiciones de design.md) y
-`ah_check_findings` (serie temporal desde cache local de ah). El dashboard SHALL
-(debe) mostrarlos lado a lado y SHALL NOT (no debe) combinarlos en un score
-compuesto ponderado. Cada proxy declara su bias conocido en la guía.
+`ah_check_findings` (serie temporal desde cache local de ah). Meses con
+denominador 0 (sin commits, sin releases) → proxy `null` con razón (nunca 0
+fake). El dashboard SHALL (debe) mostrarlos lado a lado y SHALL NOT (no debe)
+combinarlos en un score compuesto ponderado. Cada proxy declara su bias
+conocido en la guía.
+
+#### Scenario: mes sin commits
+
+- **WHEN** un repo × mes no tiene commits ni releases y `fix_ratio` no puede
+  calcularse
+- **THEN** el proxy es `null` con provenance `missing` y razón — distinto de un
+  ratio real 0 en el dashboard
 
 #### Scenario: sin score inventado
 

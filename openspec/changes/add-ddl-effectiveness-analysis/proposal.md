@@ -6,7 +6,7 @@ La flota charly-vibes corre sobre el toolset gestionado por `dulce-de-leche` (dd
 13 herramientas (wai, testaruda, turu, dont, ah, pretender, vampiro, incitaciones,
 bd, openspec, specodelic, funkalization, wild) con `ddl init/status/migrate/upgrade`.
 Ese toolset tiene una tesis implícita — *instalar y mantener todas las herramientas
-mejora la calidad del código y acorta el lazo de feedback* — que hoy nobody midió:
+mejora la calidad del código y acorta el lazo de feedback* — que hoy nadie midió:
 el reporte de coffee captura uso (interacciones, tokens, errores de API por sesión),
 pero nada cruza adopción de ddl con outcomes de ingeniería.
 
@@ -32,16 +32,21 @@ Datos disponibles que hoy nadie junta:
    repo × mes y tres capas de fuente:
    - **Adopción:** fecha de primer commit de `.ddl/` por repo, primer uso de cada
      herramienta gestionada en las sesiones de ese repo (cwd match), dosis =
-     fracción de las 13 herramientas presentes y sanas (`ddl status`).
+     fracción de las 13 herramientas presentes y sanas — **como serie temporal**:
+     `dose(month)` derivada de fechas de adopción y canarios; `ddl status` es solo
+     el snapshot corriente que valida la derivación.
    - **Lazo de feedback:** (a) tiempo de recuperación mediano — interacciones entre
      un error y la siguiente acción exitosa del mismo tipo dentro de la sesión
-     (fuente: sesiones Pi vía `terapia`/reporte); (b) latencia sesión→commit;
+     (fuente: **walk de JSONLs de sesiones Pi**, mismo patrón que `context_metrics` —
+     el reporte de usage solo tiene agregados por sesión, sin eventos; `terapia`
+     aporta las clases de error, no las secuencias); (b) latencia sesión→commit;
      (c) tasa de fallo de CI por 100 runs (`gh api`, cache en `data/cache/gh_runs/`).
    - **Errores:** `n_errors`/sesión (del reporte), clases de error de `terapia`
      por 100 interacciones, fallos de CI.
    - **Proxies de calidad** (todos los que propuso la revisión, decisión 2026-11-30):
      ratio de commits revert, ratio fix-commit/post-release, ratio commits de test,
-     hallazgos de `ah check` por repo a lo largo del tiempo.
+     hallazgos de `ah check` por repo a lo largo del tiempo. Meses con denominador
+     0 (sin commits, sin releases) → null con razón, nunca 0.
 2. **Metodología en el JSON, no solo en la guía:** el tracker emite, además de los
    agregados, los insumos de (a) serie interrumpida por repo (ventanas pre/post
    adopción), (b) diferencia-en-diferencias contra repos control (charly repos sin
@@ -60,9 +65,11 @@ Datos disponibles que hoy nadie junta:
    diseño es asociativo (no causal): madurez del repo, cambio de mezcla de modelos,
    y el confusor no controlable (adopción de ddl correlaciona con el cuidado del
    mantenedor). Ningún claim causal sin reversión natural documentada.
-5. **Integración:** `nightly-update.sh` regenera tracker + dashboard; README
-   documenta layout y gaps; guía `docs/fpa-analyses-guide.md` suma el análisis #22
-   a 4 niveles con grounding verificado.
+5. **Integración:** `nightly-update.sh` regenera tracker + dashboard (tras el
+   reporte de usage y el walk de sesiones); README documenta layout y gaps;
+   guía `docs/fpa-analyses-guide.md` suma un análisis nuevo a 4 niveles
+   (siguiente sección numerada de la guía: **#21**; el README dice "19 análisis"
+   y ya está stale — bug pre-existente, se filea aparte) con grounding verificado.
 
 ## Scope
 
@@ -83,7 +90,9 @@ Datos disponibles que hoy nadie junta:
 - **Affected specs:** `ddl-effect` (capability nueva, ~10 requirements).
   `usage-report` no cambia: el tracker nuevo **lee** `usage_report_v3.json`,
   no re-emite nada (separación de concerns; evita otro golden gigante).
-- **Affected code:** `scripts/ddl-effect-tracker.py` (nuevo),
+- **Affected code:** `scripts/ddl-effect-tracker.py` (nuevo; insumos:
+  `usage_report_v3.json` + walk de `~/.pi/agent/sessions` + git de la flota +
+  gh api + `ddl status` + cache de terapia),
   `scripts/viz-ddl.py` (nuevo), `scripts/site_theme.py` (solo consumo),
   `scripts/nightly-update.sh` (2 pasos nuevos), `specs/ddl-effect.schema.json`
   (nuevo), `tests/test_ddl_effect.py` (nuevo, reducers puros con fixtures

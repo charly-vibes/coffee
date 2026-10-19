@@ -24,8 +24,10 @@ coffe-nea + coffe-pp0).
 
 ## 2. Métricas de sesión y git
 
-- [ ] 2.1 (coffe-nwn) TDD: `recovery_metrics(sessions)` — p50 de interacciones error→éxito
-  mismo tool, censura por fin de sesión en `recovery_censored_rate`, n visible
+- [ ] 2.1 (coffe-nwn) TDD: `recovery_metrics(sessions)` — p50 de interacciones
+  error→éxito mismo tool sobre el walk de JSONLs de sesiones Pi (el reporte de
+  usage no tiene filas por evento), censura por fin de sesión en
+  `recovery_censored_rate`, n visible
 - [ ] 2.2 (coffe-7rl) TDD: `commit_latency(session_ts, commits)` — latencia sesión→commit
   con heurística documentada (bias declarado)
 - [ ] 2.3 (coffe-md0) TDD: proxies git — `revert_ratio`, `fix_ratio`, `test_commit_ratio`
