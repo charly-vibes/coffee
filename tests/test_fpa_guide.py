@@ -50,13 +50,32 @@ class TestParser(unittest.TestCase):
         self.guide = guide.load_guide(GUIDE_MD)
 
     def test_21_entradas_20_numeros(self):
-        """20 números de análisis (coffe-8kx suma el 20 de energía);
-        el 10 tiene variantes a/b (21 entradas)."""
+        """21 números de análisis (coffe-8kx suma el 20, coffe-6io el 21);
+        el 10 tiene variantes a/b (22 entradas)."""
         flat = [a for s in self.guide["sections"] for a in s["analyses"]]
-        self.assertEqual(21, len(flat))
+        self.assertEqual(22, len(flat))
         nums = {a["num"] for a in flat}
         self.assertEqual({str(i) for i in range(1, 10)} | {"10a", "10b"}
-                         | {str(i) for i in range(11, 21)}, nums)
+                         | {str(i) for i in range(11, 22)}, nums)
+
+    def test_seccion_f_efectividad_existe(self):
+        """coffe-6io: la sección F (efectividad ddl) se parsea como sección
+        propia, no absorbida por D/E (regex de secciones A–F)."""
+        keys = [s["key"] for s in self.guide["sections"]]
+        self.assertIn("E", keys)
+        self.assertIn("F", keys)
+        f = next(s for s in self.guide["sections"] if s["key"] == "F")
+        self.assertEqual(["21"], [a["num"] for a in f["analyses"]])
+
+    def test_analisis_21_declara_disclosure(self):
+        """Spec 'guía a 4 niveles repite el disclaimer': asociativo no causal
+        y confusor de atención del mantenedor en el texto."""
+        flat = [a for s in self.guide["sections"] for a in s["analyses"]]
+        a21 = next(a for a in flat if a["num"] == "21")
+        text = " ".join(a21["levels"].values()).lower()
+        self.assertIn("asociativo", text)
+        self.assertIn("mantenedor", text)
+        self.assertIn("sin score", text)
 
     def test_cuatro_niveles_por_analisis(self):
         for s in self.guide["sections"]:
@@ -90,9 +109,14 @@ class TestMapping(unittest.TestCase):
 
     def test_superficies_validas(self):
         valid = {"summary", "cost", "breakdown", "habits", "outlook",
-                 "energy", "data", "gantt"}
+                 "energy", "data", "gantt", "ddl"}
         for _, surfaces in guide.ANALYSIS_SURFACES:
             self.assertTrue(set(surfaces) <= valid)
+
+    def test_efectividad_en_vista_ddl(self):
+        """coffe-6io: el análisis 21 surfacea al dashboard ddl, no al FPA."""
+        surfaces = dict(guide.ANALYSIS_SURFACES)
+        self.assertEqual(["ddl"], surfaces["21"])
 
     def test_energia_en_su_vista(self):
         """coffe-8kx: la vista Energía tiene su propio análisis (20)."""

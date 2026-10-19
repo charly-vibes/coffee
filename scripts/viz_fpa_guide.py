@@ -3,7 +3,8 @@
 viz_fpa_guide.py — ingesta de la guía de análisis a 4 niveles
 (coffe-gen.3/gen.4, change update-fpa-site-integration).
 
-Purpose: parsear docs/fpa-analyses-guide.md (español, 19 análisis ×
+Purpose: parsear docs/fpa-analyses-guide.md (español, 22 entradas /
+21 análisis numerados ×
 ELI5/Cotidiano/Practicante/Experto) con stdlib y exponerlo al sitio.
 
 Responsibilities:
@@ -77,7 +78,7 @@ def _assign_sections(text):
     """Recorrer el markdown con spans sobre el texto completo y agrupar
     análisis por sección '## X.'."""
     out = []
-    headings = list(re.finditer(r"^## ([A-D])\. (.+)$|^### .+$", text,
+    headings = list(re.finditer(r"^## ([A-F])\. (.+)$|^### .+$", text,
                                 flags=re.M))
     for i, hm in enumerate(headings):
         end = headings[i + 1].start() if i + 1 < len(headings) else len(text)
@@ -97,7 +98,7 @@ def _assign_sections(text):
              "ids": ids, "ids_text": ahm.group("ids").strip(),
              "levels": levels})
     if not out:
-        raise SystemExit(f"ERROR: sin secciones A–D en {GUIDE_MD}")
+        raise SystemExit(f"ERROR: sin secciones A–F en {GUIDE_MD}")
     return {"sections": out}
 
 
@@ -465,6 +466,8 @@ ANALYSIS_SURFACES = [
     ("18", ["data"]),        # calidad de datos
     ("19", ["data"]),        # interfaz y CTAs
     ("20", ["energy"]),      # energía estimada y banda de caché (coffe-8kx)
+    ("21", ["ddl"]),         # efectividad del toolset ddl (coffe-6io;
+                             # surfacea al dashboard ddl, no al FPA)
 ]
 
 # Umbrales citados en la guía ↔ valores reales (config o defaults del

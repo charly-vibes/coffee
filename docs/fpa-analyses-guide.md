@@ -470,3 +470,48 @@ Los IDs de requisito (FPA-xxx) apuntan a la spec.
   per-query que reporta Google) usan límites de sistema distintos y no son
   directamente comparables; el disclosure obligatorio (EU AI Act Art. 53)
   va a mejorar la base de comparación con el tiempo.
+
+---
+
+## F. Efectividad del toolset (ddl)
+
+### 21. Efecto del toolset ddl: lazo de feedback, errores y calidad (ddl-effect)
+
+- **1 · ELI5:** Cuando tu caja de herramientas mejoró, ¿trabajabas mejor?
+  Este panel compara los meses de antes y después en tres cosas que se
+  pueden contar: cuánto tardás en recuperarte de un error, cuántos errores
+  aparecen, y si el trabajo deja rastro limpio (tests, arreglos, menos
+  vueltas atrás).
+- **2 · Cotidiano:** El panel (`data/ddl-dashboard.html`) mira repo por
+  repo y mes a mes. En el **lazo de feedback** mide la mediana de
+  interacciones entre un error y la siguiente invocación exitosa del mismo
+  tool (`recovery_p50_interactions`, con su tasa de censura visible — los
+  eventos que terminan la sesión sin recuperarse no se cuentan en la
+  mediana), la latencia sesión→commit en horas y la tasa de CI fallida
+  (runs de GitHub Actions, excluyendo dependabot). En **errores** trae las
+  tasas por 100 interacciones con el denominador a la vista. En
+  **calidad** muestra cuatro proxies separados: ratio de reverts, ratio de
+  fixes, ratio de commits con test y hallazgos de `ah check` — sin score
+  compuesto, porque combinarlos inventaría una métrica que nadie midió.
+  Los meses sin señal muestran la razón, nunca un cero disfrazado.
+- **3 · Practicante:** Los estimadores del panel: serie interrumpida
+  (ITS) pre/post adopción con media móvil trimestral e intervalo bootstrap
+  de 10,000 resamples (seed fija, reproducible), diferencia-en-diferencias
+  2×2 contra repos control (definidos por ausencia de `.ddl/` + topic,
+  nunca por dosis 0) y dosis-respuesta con correlación de Spearman. Regla
+  dura: celdas con n < 3 no se grafican. La dosis (0–1) viene de la
+  fracción de herramientas del fleet con estado sano según `ddl status` y
+  canarios git.
+- **4 · Experto:** El diseño es **asociativo, no causal**: los ITS/DiD
+  comparan ventanas dentro del mismo repo y contra control, pero la
+  adopción de ddl correlaciona con la atención del mantenedor — confusor
+  no controlable que el disclosure del panel declara en banda fija. Los
+  confusores medidos son madurez del repo y mezcla de modelos. Cada proxy
+  declara su sesgo (el revert ratio subestima — no todo revert usa `git
+  revert`; la latencia sesión→commit hereda el sesgo de reloj entre
+  máquina y servidor, clampeado a 0 y contado en metadata). Toda cifra
+  lleva tag de procedencia: reported/derived (fuentes primarias y
+  derivadas locales), cached (gh/terapia con fecha de fetch) o missing
+  (null con razón). Los IC bootstrap con n ~3 son gruesos por diseño —
+  es honestidad, no bug.
+
