@@ -1368,6 +1368,7 @@ def reduce_context(entries, config=None, month=None):
     cost_sums = {"input": 0.0, "output": 0.0, "cacheRead": 0.0,
                  "cacheWrite": 0.0}
     turns_with_cost = 0
+    tokens_reported = 0  # uso real del usage (ratio de validación, 1.7)
 
     def _add(source, n):
         chars_by_source[source] = chars_by_source.get(source, 0) + n
@@ -1403,7 +1404,14 @@ def reduce_context(entries, config=None, month=None):
                 models_turns[turn_model] = models_turns.get(turn_model, 0) + 1
             if msg.get("provider"):
                 cur_provider = msg["provider"]
-            cost = (msg.get("usage") or {}).get("cost")
+            u = msg.get("usage") or {}
+            if isinstance(u.get("totalTokens"), (int, float)):
+                tokens_reported += int(u["totalTokens"])
+            elif isinstance(u.get("input"), (int, float)):
+                tokens_reported += int(u["input"] + (u.get("output") or 0)
+                                       + (u.get("cacheRead") or 0)
+                                       + (u.get("cacheWrite") or 0))
+            cost = u.get("cost")
             if isinstance(cost, dict):
                 turns_with_cost += 1
                 for k in cost_sums:
@@ -1465,6 +1473,7 @@ def reduce_context(entries, config=None, month=None):
         "model": dominant,
         "models_turns": models_turns,
         "provider": cur_provider,
+        "tokens_reported": tokens_reported,
     }
     # patologías (coffe-gp8): bloque assistant > umbral de config → flag en
     # la fila (el emisor la excluye de percentiles y cuenta en
@@ -1489,6 +1498,102 @@ def reduce_context(entries, config=None, month=None):
     # suscripción — se emite separado, nunca mezclado en percentiles de coste
     out["context_source"] = "claude-cli" if cur_provider == "claude-cli" else "pi"
     return out
+
+def _pctl(sorted_vals, p):
+    """Percentil p (0..1) con interpolación lineal sobre lista YA ordenada
+    (stdlib-only, determinista)."""
+    if not sorted_vals:
+        return None
+    if len(sorted_vals) == 1:
+        return float(sorted_vals[0])
+    idx = (len(sorted_vals) - 1) * p
+    lo = int(idx)
+    hi = min(lo + 1, len(sorted_vals) - 1)
+    frac = idx - lo
+    return sorted_vals[lo] + frac * (sorted_vals[hi] - sorted_vals[lo])
+
+
+def aggregate_context(session_rows, config=None):
+    """Agregados de contexto por mes × modelo dominante + meta (coffe-2xj,
+    tasks 1.6+1.7). Pure: session_rows son las filas que emite
+    reduce_context() (+ month + tokens_reported); nada de disco.
+
+    Set limpio: turns > 0 y no pathological — stubs y patológicas quedan
+    fuera de los agregados pero contadas en meta (loss visible).
+    """
+    th = dict(DEFAULT_CONTEXT_THRESHOLDS)
+    if config:
+        th.update(config)
+    cpt = th["chars_per_token"]
+
+    clean = [r for r in session_rows
+             if r.get("turns", 0) > 0 and not r.get("pathological")]
+    stubs = sum(1 for r in session_rows if r.get("turns", 0) == 0)
+    excluded_pathological = sum(1 for r in session_rows
+                                if r.get("pathological"))
+
+    # agrupar por (mes, modelo dominante)
+    groups = {}
+    for r in clean:
+        groups.setdefault((r.get("month"), r.get("model")), []).append(r)
+
+    monthly_model = []
+    max_month = max((r["month"] for r in clean if r.get("month")),
+                    default=None)
+    for (month, model), rows in sorted(
+            groups.items(), key=lambda kv: (str(kv[0][0]), str(kv[0][1]))):
+        peaks = sorted(r["peak_ctx_est"] for r in rows)
+        total_turns = sum(r["turns"] for r in rows)
+        by_source = {}
+        for r in rows:
+            for src, n in r.get("chars_by_source", {}).items():
+                by_source[src] = by_source.get(src, 0) + n / cpt
+        row = {
+            "month": month,
+            "model": model,
+            "sessions": len(rows),
+            "peak_p50": _pctl(peaks, 0.5),
+            "peak_p90": _pctl(peaks, 0.9),
+            "pct_big_session": round(100.0 * sum(
+                1 for r in rows
+                if r["peak_ctx_est"] > th["big_session_tokens"]) / len(rows), 2),
+            "tokens_per_turn_by_source": {
+                src: round(t / total_turns, 2)
+                for src, t in sorted(by_source.items())},
+            "spend_in": round(sum(r["cost_in"] for r in rows
+                                  if r.get("cost_in") is not None), 2),
+            "spend_out": round(sum(r["cost_out"] for r in rows
+                                   if r.get("cost_out") is not None), 2),
+            "spend_cr": round(sum(r["cost_cr"] for r in rows
+                                  if r.get("cost_cr") is not None), 2),
+            "spend_cw": round(sum(r["cost_cw"] for r in rows
+                                  if r.get("cost_cw") is not None), 2),
+            "partial": month == max_month,
+        }
+        monthly_model.append(row)
+
+    # ratio de validación: tokens reales / est, solo sesiones pi con usage
+    ratios = sorted(
+        r["tokens_reported"] / r["peak_ctx_est"]
+        for r in clean
+        if r.get("context_source") == "pi" and r.get("tokens_reported")
+        and r["peak_ctx_est"] > 0)
+
+    return {
+        "monthly_model": monthly_model,
+        "meta": {
+            "chars_per_token": cpt,
+            "chars_per_token_tag": "assumed",
+            "chars_per_token_bias": (
+                "subestima el contexto real (~40%): español/código ~3 "
+                "chars/token y overhead de serialización; consistente "
+                "entre eras — ver ratio de validación"),
+            "validation_ratio_median": _pctl(ratios, 0.5) if ratios else None,
+            "thresholds": th,
+            "stubs": stubs,
+            "excluded_pathological": excluded_pathological,
+        },
+    }
 
 # --- fin bloque ctx-tracker --------------------------------------------------
 

@@ -413,6 +413,174 @@ class TestPatologias(unittest.TestCase):
         self.assertEqual(1, m["big_results"])
 
 
+class TestTokensReported(unittest.TestCase):
+    """coffe-2xj (1.7): uso real reportado por sesión para el ratio de
+    validación del estimador chars/4 (solo sesiones pi, usage confiable)."""
+
+    def test_tokens_reported_soma_usage(self):
+        entries = [e_user("q"),
+                   e_assistant(text="a", usage=usage(inp=1000, out=500,
+                                                     cr=100, cw=50)),
+                   e_assistant(text="b", usage=usage(inp=200, out=100))]
+        m = ut.reduce_context(entries)
+        self.assertEqual(1000 + 500 + 100 + 50 + 200 + 100,
+                         m["tokens_reported"])
+
+    def test_tokens_reported_sin_usage(self):
+        m = ut.reduce_context([e_user("q"), e_assistant(text="a")])
+        self.assertEqual(0, m["tokens_reported"])
+
+
+def _row(turns_peak_chars, model="m-a", month="2026-10", turns=10,
+         pathological=False, context_source="pi", tokens_reported=None,
+         costs=None, chars_by_source=None, project="charly-coffee"):
+    """Fila de sesión sintética con el shape que emite reduce_context
+    (más month y tokens_reported)."""
+    r = {
+        "turns": turns,
+        "turns_no_usage": 0,
+        "chars_by_source": chars_by_source or {"asst_text": turns_peak_chars},
+        "big_results": 0,
+        "big_results_by_tool": {},
+        "compactions": 0,
+        "segment_count": 1,
+        "peak_ctx_chars": turns_peak_chars * 4,
+        "final_ctx_chars": turns_peak_chars * 4,
+        "peak_ctx_est": turns_peak_chars,
+        "final_ctx_est": turns_peak_chars,
+        "max_assistant_block_chars": 1000,
+        "chars_per_token": 4,
+        "model": model,
+        "models_turns": {model: turns},
+        "provider": "anthropic",
+        "cost_in": None, "cost_out": None, "cost_cr": None, "cost_cw": None,
+        "context_source": context_source,
+        "pathological": pathological,
+    }
+    if tokens_reported is not None:
+        r["tokens_reported"] = tokens_reported
+    if costs:
+        r.update({"cost_in": costs[0], "cost_out": costs[1],
+                  "cost_cr": costs[2], "cost_cw": costs[3]})
+    r["month"] = month
+    r["project"] = project
+    return r
+
+
+class TestMonthlyModel(unittest.TestCase):
+    """coffe-2xj (1.6): agregados monthly_model[] por mes × modelo dominante,
+    sobre el set limpio (turns>0, sin patológicas) + meta completo (1.7)."""
+
+    def test_dos_modelos_un_mes_dos_filas(self):
+        rows = [_row(50_000, model="m-a"), _row(60_000, model="m-a"),
+                _row(80_000, model="m-b")]
+        agg = ut.aggregate_context(rows)
+        filas = [f for f in agg["monthly_model"] if f["month"] == "2026-10"]
+        self.assertEqual(2, len(filas))
+        modelos = {f["model"] for f in filas}
+        self.assertEqual({"m-a", "m-b"}, modelos)
+
+    def test_p50_p90_del_pico(self):
+        picos = [10_000, 20_000, 30_000, 40_000, 50_000]
+        rows = [_row(p, model="m-a") for p in picos]
+        agg = ut.aggregate_context(rows)
+        f = agg["monthly_model"][0]
+        self.assertAlmostEqual(30_000, f["peak_p50"])
+        self.assertAlmostEqual(46_000, f["peak_p90"])  # interpolación lineal
+
+    def test_pct_big_session(self):
+        """% de sesiones > context_thresholds.big_session_tokens (config)."""
+        rows = [_row(50_000), _row(150_000), _row(200_000)]  # 2/3 > 100k
+        agg = ut.aggregate_context(rows)
+        f = agg["monthly_model"][0]
+        self.assertAlmostEqual(66.67, f["pct_big_session"], places=1)
+
+    def test_tok_por_turno_por_fuente(self):
+        """tok/turno por fuente: est tokens de la fuente / turns del grupo."""
+        rows = [
+            _row(0, turns=2,
+                 chars_by_source={"asst_text": 8_000, "asst_thinking": 4_000,
+                                  "tool:bash": 8_000}),
+            _row(0, turns=2,
+                 chars_by_source={"asst_text": 16_000,
+                                  "asst_thinking": 4_000}),
+        ]
+        agg = ut.aggregate_context(rows)
+        f = agg["monthly_model"][0]
+        # est tokens por fuente / total turns del grupo (4 turnos):
+        # asst_text (8000+16000)/4 = 6000 tok → 1500/turno
+        self.assertAlmostEqual(1_500, f["tokens_per_turn_by_source"]["asst_text"])
+        self.assertAlmostEqual(500, f["tokens_per_turn_by_source"]["asst_thinking"])
+        self.assertAlmostEqual(500, f["tokens_per_turn_by_source"]["tool:bash"])
+
+    def test_spend_por_componente(self):
+        rows = [_row(10_000, costs=(1.0, 2.0, 0.1, 0.2)),
+                _row(20_000, costs=(3.0, 4.0, 0.3, 0.4)),
+                _row(30_000)]  # coste null: no suma, no ensucia
+        agg = ut.aggregate_context(rows)
+        f = agg["monthly_model"][0]
+        self.assertAlmostEqual(4.0, f["spend_in"])
+        self.assertAlmostEqual(6.0, f["spend_out"])
+        self.assertAlmostEqual(0.4, f["spend_cr"])
+        self.assertAlmostEqual(0.6, f["spend_cw"])
+
+    def test_set_limpio_excluye_stubs_y_patologicas(self):
+        rows = [_row(50_000), _row(0, turns=0),  # stub
+                _row(16_000_000, pathological=True)]
+        agg = ut.aggregate_context(rows)
+        self.assertEqual(1, agg["meta"]["stubs"])
+        self.assertEqual(1, agg["meta"]["excluded_pathological"])
+        self.assertEqual(1, len(agg["monthly_model"]))
+        self.assertEqual(50_000, agg["monthly_model"][0]["peak_p50"])
+
+    def test_mes_vacio_sin_fila(self):
+        rows = [_row(50_000, month="2026-10")]
+        agg = ut.aggregate_context(rows)
+        self.assertFalse(any(f["month"] == "2026-09"
+                             for f in agg["monthly_model"]))
+
+    def test_mes_parcial_marcado(self):
+        """El mes máximo del dataset es parcial (patrón fpa-dashboard)."""
+        rows = [_row(50_000, month="2026-09"),
+                _row(60_000, month="2026-10")]
+        agg = ut.aggregate_context(rows)
+        por_mes = {f["month"]: f["partial"] for f in agg["monthly_model"]}
+        self.assertFalse(por_mes["2026-09"])
+        self.assertTrue(por_mes["2026-10"])
+
+
+class TestMetaContexto(unittest.TestCase):
+    def test_meta_chars_per_token_y_umbrales(self):
+        agg = ut.aggregate_context([_row(50_000)])
+        self.assertEqual(4, agg["meta"]["chars_per_token"])
+        self.assertEqual("assumed", agg["meta"]["chars_per_token_tag"])
+        self.assertIn("subestima", agg["meta"]["chars_per_token_bias"])
+        self.assertEqual(100_000, agg["meta"]["thresholds"]["big_session_tokens"])
+
+    def test_validation_ratio_median_solo_pi_con_usage(self):
+        """ratio = tokens_reported / est; mediana sobre sesiones pi con
+        usage — claude-cli (usage inválido) fuera, sin usage fuera."""
+        rows = [
+            _row(1_000, tokens_reported=3_000),    # ratio 3.0
+            _row(1_000, tokens_reported=5_000),    # ratio 5.0
+            _row(1_000, tokens_reported=4_000),    # ratio 4.0 → mediana
+            _row(1_000, context_source="claude-cli",
+                 tokens_reported=99_000),          # excluida
+            _row(1_000),                           # sin usage → excluida
+        ]
+        agg = ut.aggregate_context(rows)
+        self.assertAlmostEqual(4.0, agg["meta"]["validation_ratio_median"])
+
+    def test_validation_ratio_sin_datos_null(self):
+        agg = ut.aggregate_context([_row(1_000)])
+        self.assertIsNone(agg["meta"]["validation_ratio_median"])
+
+    def test_meta_umbrales_desde_config(self):
+        cfg = dict(DEFAULT_THRESHOLDS, big_session_tokens=250_000)
+        agg = ut.aggregate_context([_row(50_000)], config=cfg)
+        self.assertEqual(250_000, agg["meta"]["thresholds"]["big_session_tokens"])
+
+
 class TestPureza(unittest.TestCase):
     def test_puro_no_escribe_ni_leo_disco(self):
         """El reducer no toca disco: dos pasadas sobre los mismos entries
