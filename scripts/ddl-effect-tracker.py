@@ -16,6 +16,9 @@ import json
 import sys
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import schema_validate  # noqa: E402
+
 # 13 herramientas del registry gestionado (MANAGED-TOOLS en dulce-de-leche/README.md;
 # drift-tested allá por tests/tool_registry_drift.rs — no duplicamos el check aquí).
 MANAGED_TOOLS = (
@@ -33,6 +36,9 @@ FLEET_REPOS = (
     "dulce-de-leche", "coffee",
 )
 DDL_OUTLIER_REPO = "charly-dulce-de-leche"
+
+DDL_SCHEMA = (Path(__file__).resolve().parent.parent / "specs"
+              / "ddl-effect.schema.json")
 
 
 # ---------------------------------------------------------------------------
@@ -628,6 +634,18 @@ def dose_response(points, metric, min_n=3):
     return {"spearman_rho": cov / (var_x * var_y) ** 0.5, "n": n}
 
 
+def validate_report(report):
+    """Valida contra specs/ddl-effect.schema.json (coffe-nea); lista de
+    errores ('$ruta: mensaje') — vacía = válido. Stdlib-only vía
+    scripts/schema_validate.py (el nightly no garantiza jsonschema).
+    """
+    schema = json.loads(DDL_SCHEMA.read_text())
+    return schema_validate.validate_against_schema(report, schema)
+
+
+validate_against_schema = schema_validate.validate_against_schema
+
+
 # ---------------------------------------------------------------------------
 # main
 # ---------------------------------------------------------------------------
@@ -636,7 +654,21 @@ def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--output", default="data/ddl_effect.json")
     ap.add_argument("--usage-report", default="data/usage_report_v3.json")
+    ap.add_argument("--validate", metavar="ARCHIVO", default=None,
+                    help="valida el JSON dado contra specs/ddl-effect.schema.json "
+                         "y sale (0 válido / 1 inválido) sin regenerar")
     args = ap.parse_args(argv)
+
+    if args.validate:
+        errors = validate_report(json.loads(Path(args.validate).read_text()))
+        if errors:
+            print("ddl-effect: schema inválido:", file=sys.stderr)
+            for e in errors:
+                print(f"  {e}", file=sys.stderr)
+            return 1
+        print(f"ddl-effect: {args.validate} válido contra {DDL_SCHEMA.name}")
+        return 0
+
     out_path = Path(args.output)
 
     # Guard (patrón usage-tracker): sin insumos locales no hay datos reales.
@@ -658,6 +690,11 @@ def main(argv=None):
         "monthly": [],
         "analysis": {"its": [], "did": [], "dose_response": []},
     }
+    errors = validate_report(report)
+    if errors:  # fail loud: el tracker no escribe un reporte inválido
+        ap.error("reporte inválido contra " + DDL_SCHEMA.name + ": "
+                 + "; ".join(errors))
+
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text(json.dumps(report, indent=2, sort_keys=False) + "\n")
     print(f"ddl-effect: esqueleto escrito en {out_path} "

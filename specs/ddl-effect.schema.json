@@ -1,0 +1,77 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ddl-effect v1",
+  "description": "Salida de scripts/ddl-effect-tracker.py (change add-ddl-effectiveness-analysis): panel repo × mes del efecto del toolset dulce-de-leche. Provenance en toda cifra (design D7): reported/derived/cached/missing.",
+  "type": "object",
+  "required": ["metadata", "repos", "monthly", "analysis"],
+  "additionalProperties": false,
+  "properties": {
+    "metadata": {
+      "type": "object",
+      "required": ["managed_tools", "fleet_definition", "seed_bootstrap"],
+      "additionalProperties": true,
+      "properties": {
+        "managed_tools": {
+          "type": "array",
+          "minItems": 13,
+          "items": {"type": "string"}
+        },
+        "fleet_definition": {"type": "string"},
+        "seed_bootstrap": {"type": "integer"},
+        "generated_at": {"type": ["string", "null"]}
+      }
+    },
+    "repos": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["repo", "is_control", "is_outlier", "adoption"],
+        "additionalProperties": true,
+        "properties": {
+          "repo": {"type": "string"},
+          "is_control": {"type": "boolean"},
+          "is_outlier": {"type": "boolean"},
+          "adoption": {
+            "type": "object",
+            "additionalProperties": true,
+            "properties": {
+              "first_ddl_commit": {"type": ["string", "null"]},
+              "dose": {"type": ["number", "null"],
+                       "minimum": 0.0, "maximum": 1.0},
+              "dose_detail": {"type": "object"}
+            }
+          }
+        }
+      }
+    },
+    "monthly": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["repo", "month", "src"],
+        "additionalProperties": true,
+        "properties": {
+          "repo": {"type": "string"},
+          "month": {"type": "string", "pattern": "^\\d{4}-\\d{2}$"},
+          "src": {
+            "type": "object",
+            "patternProperties": {
+              ".+": {"enum": ["reported", "derived", "cached", "missing"]}
+            }
+          },
+          "reasons": {"type": "object"}
+        }
+      }
+    },
+    "analysis": {
+      "type": "object",
+      "required": ["its", "did", "dose_response"],
+      "additionalProperties": true,
+      "properties": {
+        "its": {"type": "array"},
+        "did": {"type": "array"},
+        "dose_response": {"type": "array"}
+      }
+    }
+  }
+}

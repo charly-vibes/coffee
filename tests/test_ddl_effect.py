@@ -5,6 +5,7 @@ Solo stdlib. Sin disk I/O: los reducers reciben estructuras, no paths
 (mismo estilo que test_tracker.py con aggregate()).
 """
 import importlib.util
+import json
 import sys
 import unittest
 from pathlib import Path
@@ -764,6 +765,66 @@ class DoseResponseTest(unittest.TestCase):
         self.assertIsNone(out["spearman_rho"])
         self.assertEqual(out["reason"], "sin_varianza")
         self.assertEqual(out["n"], 4)
+
+
+class SchemaValidateTest(unittest.TestCase):
+    """4.5 (coffe-nea): specs/ddl-effect.schema.json + --validate."""
+
+    @classmethod
+    def setUpClass(cls):
+        import tempfile
+        cls.tmp = tempfile.TemporaryDirectory()
+        cls.out = Path(cls.tmp.name) / "ddl_effect.json"
+        rc = ddl.main(["--output", str(cls.out)])
+        assert rc == 0
+        cls.report = json.loads(cls.out.read_text())
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.tmp.cleanup()
+
+    def test_schema_existe_y_es_draft07(self):
+        schema = json.loads(ddl.DDL_SCHEMA.read_text())
+        self.assertEqual(schema["$schema"],
+                         "http://json-schema.org/draft-07/schema#")
+
+    def test_esqueleto_valida(self):
+        self.assertEqual(ddl.validate_report(self.report), [])
+
+    def test_fila_monthly_sin_src_falla(self):
+        bad = json.loads(json.dumps(self.report))
+        bad["monthly"] = [{"repo": "wai", "month": "2026-08",
+                           "dose": 0.5}]
+        errors = ddl.validate_report(bad)
+        self.assertTrue(any("src" in e for e in errors))
+
+    def test_src_tag_invalido_falla(self):
+        bad = json.loads(json.dumps(self.report))
+        bad["monthly"] = [{"repo": "wai", "month": "2026-08",
+                           "dose": 0.5,
+                           "src": {"dose": "guessed"}}]
+        errors = ddl.validate_report(bad)
+        self.assertTrue(any("guessed" in e for e in errors))
+
+    def test_month_patro(self):
+        bad = json.loads(json.dumps(self.report))
+        bad["monthly"] = [{"repo": "wai", "month": "agosto",
+                           "dose": 0.5, "src": {"dose": "reported"}}]
+        errors = ddl.validate_report(bad)
+        self.assertTrue(any("month" in e for e in errors))
+
+    def test_validate_cli_salida_corrupta_exit_1(self):
+        corrupt = Path(self.tmp.name) / "corrupt.json"
+        corrupt.write_text(json.dumps({"metadata": {}}))
+        self.assertEqual(ddl.main(["--validate", str(corrupt)]), 1)
+
+    def test_validate_cli_salida_valida_exit_0(self):
+        self.assertEqual(ddl.main(["--validate", str(self.out)]), 0)
+
+    def test_validador_reutilizado_no_copiado(self):
+        import schema_validate
+        self.assertIs(ddl.validate_against_schema,
+                      schema_validate.validate_against_schema)
 
 
 if __name__ == "__main__":
