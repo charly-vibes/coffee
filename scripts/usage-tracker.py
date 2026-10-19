@@ -1460,6 +1460,10 @@ def reduce_context(entries, config=None, month=None):
         "models_turns": models_turns,
         "provider": cur_provider,
     }
+    # patologías (coffe-gp8): bloque assistant > umbral de config → flag en
+    # la fila (el emisor la excluye de percentiles y cuenta en
+    # meta.excluded_pathological); toolResults grandes son big_results, no glitch
+    out["pathological"] = max_assistant_block > th["pathological_chars"]
     if month is not None:
         out["month"] = month
     # coste por sesión (coffe-5uu): ausente → null con razón (patrón

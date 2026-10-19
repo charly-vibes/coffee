@@ -376,6 +376,43 @@ class TestCostePorSesion(unittest.TestCase):
         self.assertEqual("pi", m["context_source"])
 
 
+class TestPatologias(unittest.TestCase):
+    """coffe-gp8 (1.4): sesión con bloque assistant >
+    context_thresholds.pathological_chars (config, default 500k) → flag
+    pathological en la fila; el emisor la excluye de percentiles y la
+    cuenta en meta.excluded_pathological. Umbrales desde config (CLAR-002)."""
+
+    def test_sesion_glitch_flag(self):
+        """Bloque assistant de 16M chars > 500k default → pathological True
+        con el tamaño del bloque."""
+        entries = [e_user("q"),
+                   e_assistant(text="g" * 16_000_000, usage=usage())]
+        m = ut.reduce_context(entries)
+        self.assertTrue(m["pathological"])
+        self.assertEqual(16_000_000, m["max_assistant_block_chars"])
+
+    def test_sesion_normal_bajo_umbral(self):
+        entries = [e_user("q"), e_assistant(text="ok " * 1000, usage=usage()),
+                   e_tool_result("bash", "r" * 200_000)]  # toolResult no cuenta
+        m = ut.reduce_context(entries)
+        self.assertFalse(m["pathological"])
+
+    def test_umbral_desde_config(self):
+        """Umbral 10 chars de config → bloque de 11 chars ya es patológico."""
+        cfg = dict(DEFAULT_THRESHOLDS, pathological_chars=10)
+        m = ut.reduce_context([e_user("q"), e_assistant(text="abcdefghijk")],
+                              config=cfg)
+        self.assertTrue(m["pathological"])
+
+    def test_toolresult_grande_no_es_patologico(self):
+        """Solo bloques ASSISTANT disparan la patología (un toolResult grande
+        es big_result, no glitch)."""
+        entries = [e_user("q"), e_tool_result("read", "r" * 600_000)]
+        m = ut.reduce_context(entries)
+        self.assertFalse(m["pathological"])
+        self.assertEqual(1, m["big_results"])
+
+
 class TestPureza(unittest.TestCase):
     def test_puro_no_escribe_ni_leo_disco(self):
         """El reducer no toca disco: dos pasadas sobre los mismos entries
