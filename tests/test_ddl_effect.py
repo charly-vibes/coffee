@@ -330,6 +330,31 @@ class CiFailRateTest(unittest.TestCase):
         self.assertEqual(out["provenance"], "missing")
 
 
+class GhAuthTest(unittest.TestCase):
+    def test_env_token_gana(self):
+        token, src = ddl.gh_token(env={"GH_TOKEN": "tok-env"},
+                                  gh_auth=lambda: "tok-cli")
+        self.assertEqual(token, "tok-env")
+        self.assertEqual(src, "GH_TOKEN")
+
+    def test_fallback_gh_auth_token(self):
+        token, src = ddl.gh_token(env={}, gh_auth=lambda: "tok-cli")
+        self.assertEqual(token, "tok-cli")
+        self.assertEqual(src, "gh auth token")
+
+    def test_sin_credencial_es_none_con_razon(self):
+        token, src = ddl.gh_token(env={}, gh_auth=lambda: None)
+        self.assertIsNone(token)
+        self.assertIsNone(src)
+
+    def test_gh_auth_fallando_no_explota(self):
+        def boom():
+            raise FileNotFoundError("gh no instalado")
+        token, src = ddl.gh_token(env={}, gh_auth=boom)
+        self.assertIsNone(token)
+        self.assertIsNone(src)
+
+
 class ComputeDoseTest(unittest.TestCase):
     def test_dosis_desde_ddl_status(self):
         status = {

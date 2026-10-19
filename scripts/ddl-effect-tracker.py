@@ -282,6 +282,29 @@ def error_rates(interactions, api_errors, terapia):
     }
 
 
+def gh_token(env=None, gh_auth=None):
+    """Credencial gh: GH_TOKEN de env primero, `gh auth token` como fallback.
+    Los user-timers del nightly no cargan la auth de la sesión interactiva
+    (design Riesgos). Sin credencial → (None, None): el llamador emite
+    provenance missing con razón explícita en metadata, nunca 0.
+    """
+    import os
+    env = os.environ if env is None else env
+    tok_env = env.get("GH_TOKEN") or env.get("GITHUB_TOKEN")
+    if tok_env:
+        return tok_env, "GH_TOKEN"
+    if gh_auth is None:
+        import subprocess
+        def gh_auth():
+            return subprocess.run(["gh", "auth", "token"], capture_output=True,
+                                  text=True, timeout=10).stdout.strip() or None
+    try:
+        tok_cli = gh_auth()
+    except Exception:  # noqa: BLE001 — gh ausente/fallando: (None, None)
+        return None, None
+    return (tok_cli, "gh auth token") if tok_cli else (None, None)
+
+
 def gh_runs_incremental(repo, fetch_fn, cache, ttl_days=7, now=None):
     """Runs de GitHub Actions por repo con cache incremental (design D4/D8).
 
