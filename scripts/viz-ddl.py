@@ -178,6 +178,9 @@ def _scatter_svg(points):
     dosis 0–1, outcome auto-escala al rango de los puntos."""
     W, H, PAD = 320, 180, 24
     outcomes = [p["outcome"] for p in points]
+    if not outcomes:  # rho sin puntos: placeholder, nunca crash (regen real)
+        return ('<p class="placeholder">Scatter sin puntos graficables'
+                "(outcome/dose null)</p>")
     lo, hi = min(outcomes), max(outcomes)
     span = (hi - lo) or 1.0
     circles = []

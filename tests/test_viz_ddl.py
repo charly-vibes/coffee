@@ -83,8 +83,12 @@ class VizDdlTest(unittest.TestCase):
         self.assertIn('class="dl-svg"', svg)
 
     def test_provenance_tags_en_html(self):
-        self.assertIn('class="prov-tag"', self.html)  # helper presente
-        self.assertIn('title="procedencia: missing"', self.html)
+        # coffe-q9z: con datos reales la provenance vive en cada cifra
+        # (fig → data-provenance); el placeholder del esqueleto ya no es
+        # la única fuente del tag missing.
+        self.assertIn('data-provenance="reported"', self.html)
+        self.assertIn('data-provenance="missing"', self.html)
+        self.assertIn('data-provenance="derived"', self.html)
 
     def test_vistas_placeholder_sin_datos(self):
         # esqueleto: vistas vacías muestran placeholder visible, no tabs muertos
@@ -352,6 +356,25 @@ class VistaAdopcionDosisTest(unittest.TestCase):
 
     def test_dosis_reported_en_puntos(self):
         self.assertIn('data-provenance="reported"', self.html)
+
+
+class VistaDosisScatterVacioTest(unittest.TestCase):
+    """coffe-q9z: regen real — rho presente pero points vacío (outcome null)
+    debe degradar a placeholder, no crash en min() del scatter."""
+
+    def test_rho_sin_puntos_placeholder_sin_crash(self):
+        report = {"metadata": {"managed_tools": ["x"] * 13,
+                               "fleet_definition": "f", "seed_bootstrap": 42},
+                  "repos": [], "monthly": [],
+                  "analysis": {"its": [], "did": [],
+                               "dose_response": [
+                                   {"metric": "m", "spearman_rho": 0.4,
+                                    "n": 13, "points": []}]}}
+        html = viz_ddl.build_html(report)
+        self.assertIn("sin puntos graficables", html)
+
+    def test_scatter_vacio_directo(self):
+        self.assertIn("sin puntos graficables", viz_ddl._scatter_svg([]))
 
 
 class DisclosureBandTest(unittest.TestCase):

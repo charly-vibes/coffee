@@ -329,5 +329,47 @@
       "mid": 0.1,
       "frontier": 0.2
     }
+  },
+  "ddl_effect": {
+    "repo_aliases": {
+      "wai": [
+        "charly/wai-git-epic"
+      ],
+      "dont": [
+        "charly/dont-git-epic"
+      ],
+      "turu": [
+        "charly/whisper",
+        "charly/whisper-git-epic"
+      ],
+      "ah": [
+        "charly/espectacular",
+        "charly/espectacular-git-epic"
+      ],
+      "pretender": [
+        "charly/pretender-git-epic"
+      ],
+      "testaruda": [
+        "charly/testaruda-git-epic"
+      ],
+      "specodelic": [
+        "charly/specodelic-gre-wt"
+      ],
+      "dulce-de-leche": [
+        "charly/dulce-git-epic"
+      ],
+      "coffee": [
+        "charly/coffe"
+      ]
+    },
+    "repo_paths": {
+      "turu": "whisper",
+      "ah": "espectacular"
+    },
+    "repo_owners": {
+      "*": "charly-vibes",
+      "turu": "charly-vibes/whisper",
+      "ah": "charly-vibes/espectacular"
+    }
   }
 }

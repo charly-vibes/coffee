@@ -772,16 +772,26 @@ class SchemaValidateTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        import tempfile
-        cls.tmp = tempfile.TemporaryDirectory()
-        cls.out = Path(cls.tmp.name) / "ddl_effect.json"
-        rc = ddl.main(["--output", str(cls.out)])
-        assert rc == 0
-        cls.report = json.loads(cls.out.read_text())
+        # coffe-q9z: main() regenera con insumos reales (walk/git/gh) — el
+        # fixture de schema ahora es assemble_report con sintéticos, hermético
+        cls.report = ddl.assemble_report({
+            "usage_report": {"project_monthly": {
+                "charly-wai": {"2026-08": {"interactions": 10}}}},
+            "sessions": [{"repo": "wai", "uses": {}, "events": []}],
+            "git": {"wai": {"commits": [{"repo": "wai",
+                                          "date": "2026-06-01T00:00:00Z",
+                                          "message": "ddl init",
+                                          "files": [".ddl/config.json"]}],
+                            "releases": [], "has_ddl_now": True}},
+            "topics": {"wai": {"topic_ddl": True}},
+            "ddl_status": {"present": list(ddl.MANAGED_TOOLS),
+                           "healthy": list(ddl.MANAGED_TOOLS)},
+            "now": "2026-08-10T00:00:00Z",
+        })
 
     @classmethod
     def tearDownClass(cls):
-        cls.tmp.cleanup()
+        pass
 
     def test_schema_existe_y_es_draft07(self):
         schema = json.loads(ddl.DDL_SCHEMA.read_text())
@@ -814,12 +824,18 @@ class SchemaValidateTest(unittest.TestCase):
         self.assertTrue(any("month" in e for e in errors))
 
     def test_validate_cli_salida_corrupta_exit_1(self):
-        corrupt = Path(self.tmp.name) / "corrupt.json"
-        corrupt.write_text(json.dumps({"metadata": {}}))
-        self.assertEqual(ddl.main(["--validate", str(corrupt)]), 1)
+        import tempfile
+        with tempfile.TemporaryDirectory() as d:
+            corrupt = Path(d) / "corrupt.json"
+            corrupt.write_text(json.dumps({"metadata": {}}))
+            self.assertEqual(ddl.main(["--validate", str(corrupt)]), 1)
 
     def test_validate_cli_salida_valida_exit_0(self):
-        self.assertEqual(ddl.main(["--validate", str(self.out)]), 0)
+        import tempfile
+        with tempfile.TemporaryDirectory() as d:
+            out = Path(d) / "ok.json"
+            out.write_text(json.dumps(self.report))
+            self.assertEqual(ddl.main(["--validate", str(out)]), 0)
 
     def test_validador_reutilizado_no_copiado(self):
         import schema_validate

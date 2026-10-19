@@ -684,13 +684,710 @@ es la honestidad del diseño (D5), no un bug. Regla dura n < min_n → None con
 
 
 # ---------------------------------------------------------------------------
+# Extracción (capa de I/O con dependencias inyectables; coffe-q9z)
+# ---------------------------------------------------------------------------
+
+# Dir local → repo canónico (cuando el nombre del dir no es el repo):
+# ah vive en espectacular/, turu en whisper/ (workspace con 3 bins),
+# coffee se llamaba coffe antes del rename.
+DEFAULT_REPO_DIRS = {"espectacular": "ah", "whisper": "turu",
+                     "coffe": "coffee"}
+FLEET_GH_ROOT = Path.home() / "para" / "areas" / "dev" / "gh"
+PATH_MARKER = "/para/areas/dev/gh/"
+
+
+def build_alias_map(repo_aliases):
+    """config ddl_effect.repo_aliases: {repo: [alias]} → {alias: repo}.
+    Los alias son explícitos (design Riesgos): sin fuzzy matching. Forma de
+    alias: 'org/dir' (la convención de path de la flota) o dir suelto."""
+    out = {}
+    for repo, aliases in (repo_aliases or {}).items():
+        for a in aliases or []:
+            out[a] = repo
+    return out
+
+
+def cwd_to_repo(cwd, alias_map=None):
+    """cwd de sesión → repo canónico de la flota, o None.
+
+    1) alias explícito exacto ('org/dir' derivado de la convención de path,
+    o dir suelto); 2) convención /para/areas/dev/gh/<org>/<dir> con mapping
+    DEFAULT_REPO_DIRS; fuera de la flota → None (nunca fuzzy).
+    """
+    if not cwd:
+        return None
+    am = dict(DEFAULT_REPO_DIRS)
+    am.update(alias_map or {})
+    key = None
+    if PATH_MARKER in cwd:
+        rest = cwd.split(PATH_MARKER, 1)[1].strip("/").split("/")
+        if len(rest) >= 2 and rest[1]:
+            key = f"{rest[0]}/{rest[1]}"
+        elif rest and rest[0]:
+            key = rest[0]
+    if key is None:
+        return None
+    if key in am:
+        return am[key]
+    dir_name = key.split("/", 1)[1] if "/" in key else key
+    if dir_name in am:
+        return am[dir_name]
+    return dir_name if dir_name in FLEET_REPOS else None
+
+
+def _bash_tokens(command):
+    """Primer token de cada segmento del comando (cd /x && bd list →
+    ['cd', 'bd']) — suficiente para detectar binarios gestionados."""
+    tokens = []
+    for seg in str(command or "").replace("&&", "\n").replace(";", "\n").split("\n"):
+        parts = seg.strip().split()
+        if parts:
+            tokens.append(parts[0])
+    return tokens
+
+
+def parse_pi_session(path, registry=MANAGED_TOOLS):
+    """1 archivo JSONL de pi → {cwd, events, uses} o None sin señal.
+
+    events: [(kind, tool, ok, ts)] con kind 'assistant' (marcador para
+    recovery) o 'result' (toolResult con isError → ok). uses: {tool: ts}
+    del PRIMER uso de cada binario gestionado (via bash, token inicial del
+    comando; design D3 fuente 3).
+    """
+    cwd, events, uses = None, [], {}
+    try:
+        with open(path, encoding="utf-8", errors="replace") as fh:
+            for line in fh:
+                try:
+                    entry = json.loads(line)
+                except json.JSONDecodeError:
+                    continue
+                ts = entry.get("timestamp")
+                if entry.get("type") == "session":
+                    cwd = (entry.get("cwd") or None) if cwd is None else cwd
+                    continue
+                if entry.get("type") != "message":
+                    continue
+                msg = entry.get("message", {}) or {}
+                role = msg.get("role")
+                if role == "assistant":
+                    events.append(("assistant", None, None, ts))
+                    for part in (msg.get("content") or msg.get("parts") or []):
+                        if not (isinstance(part, dict)
+                                and str(part.get("type")) == "toolCall"):
+                            continue
+                        name = part.get("name") or part.get("toolName")
+                        if name in registry and name not in uses:
+                            uses[name] = ts
+                        if name == "bash":
+                            for tok in _bash_tokens(
+                                    (part.get("arguments") or {}).get("command")):
+                                if tok in registry and tok not in uses:
+                                    uses[tok] = ts
+                elif role == "toolResult":
+                    tool = str(msg.get("toolName") or "tool")
+                    ok = not bool(msg.get("isError"))
+                    events.append(("result", tool, ok, ts))
+    except OSError:
+        return None
+    if not events and not uses:
+        return None
+    return {"cwd": cwd, "events": events, "uses": uses}
+
+
+def walk_pi_sessions(sessions_dir=None, alias_map=None, fleet=FLEET_REPOS):
+    """Walk de ~/.pi/agent/sessions (design D1, patrón coffe-i31): sólo
+    sesiones con cwd mapeable a la flota. Sessions sin eventos ni usos se
+    descartan (parse_pi_session ya devuelve None para ellas)."""
+    out = []
+    sessions_dir = Path(sessions_dir or Path.home() / ".pi" / "agent"
+                        / "sessions")
+    if not sessions_dir.exists():
+        return out
+    for sd in sorted(p for p in sessions_dir.iterdir() if p.is_dir()):
+        for f in sorted(sd.glob("*.jsonl")):
+            parsed = parse_pi_session(f)
+            if parsed is None:
+                continue
+            repo = cwd_to_repo(parsed["cwd"], alias_map)
+            if repo not in fleet:
+                continue
+            parsed["repo"] = repo
+            out.append(parsed)
+    return out
+
+
+def uses_rows(sessions):
+    """{tool: ts} por sesión → [{repo, tool, date}] del primer uso por
+    (repo, tool) — insumo de extract_adoption (fuente 3 de dosis, D3)."""
+    first = {}
+    for s in sessions:
+        for tool, ts in (s.get("uses") or {}).items():
+            if ts is None:
+                continue
+            key = (s["repo"], tool)
+            cur = first.get(key)
+            if cur is None or _parse_ts(ts) < _parse_ts(cur):
+                first[key] = ts
+    return [{"repo": r, "tool": t, "date": ts}
+            for (r, t), ts in sorted(first.items())]
+
+
+def events_by_repo_month(sessions):
+    """Slice del stream de eventos por (repo, mes) para recovery_metrics:
+    cada (sesión, mes) mantiene el orden de eventos; grupos vacíos no
+    existen (sin eventos en el mes → sin bucket)."""
+    buckets = {}
+    for s in sessions:
+        by_month = {}
+        for ev in s.get("events") or []:
+            ts = ev[3]
+            if not ts:
+                continue
+            by_month.setdefault(str(ts)[:7], []).append(ev)
+        for month, evs in by_month.items():
+            buckets.setdefault((s["repo"], month), []).extend(
+                [(e[0], e[1], e[2]) for e in evs])
+    return buckets
+
+
+def monthly_dose(repo, month, first_use, registry=MANAGED_TOOLS):
+    """Dosis como serie temporal (D3b): fracción de herramientas gestionadas
+    con primer uso ≤ mes, derivada hacia atrás desde tools_first_use. El
+    snapshot corriente lo valida compute_dose con ddl status (reported)."""
+    fu = (first_use or {}).get(repo) or {}
+    n = sum(1 for d in fu.values()
+            if d and str(d)[:7] <= month)
+    return {"dose": n / len(registry), "provenance": "derived"}
+
+
+def git_commits(repo_path, run=None):
+    """git log de un repo de la flota → [{date, message, files}] o None si
+    el repo no es local (sin git). run(cmd, cwd) inyectable para tests."""
+    if run is None:
+        import subprocess
+        def run(cmd, cwd):
+            r = subprocess.run(cmd, cwd=cwd, capture_output=True, text=True,
+                               timeout=120)
+            if r.returncode != 0:
+                raise RuntimeError(r.stderr.strip() or "git falló")
+            return r.stdout
+    try:
+        out = run(["git", "log", "--all", "--name-only",
+                   "--pretty=format:%x1e%H|%cI|%s"], str(repo_path))
+    except Exception:  # noqa: BLE001 — repo ausente/dañado → missing
+        return None
+    commits = []
+    for block in out.split("\x1e"):
+        lines = [l for l in block.strip("\n").split("\n") if l.strip()]
+        if not lines or "|" not in lines[0]:
+            continue
+        _h, date, message = lines[0].split("|", 2)
+        commits.append({"date": date, "message": message, "files": lines[1:]})
+    return commits
+
+
+def git_releases(repo_path, run=None):
+    """Fechas de tags = releases (insumo de fix_ratio, D6)."""
+    if run is None:
+        import subprocess
+        def run(cmd, cwd):
+            r = subprocess.run(cmd, cwd=cwd, capture_output=True, text=True,
+                               timeout=30)
+            return r.stdout
+    try:
+        out = run(["git", "for-each-ref", "refs/tags",
+                   "--format=%(creatordate:iso-strict)"], str(repo_path))
+    except Exception:  # noqa: BLE001
+        return None
+    return [l.strip() for l in out.splitlines() if l.strip()]
+
+
+def repo_local_path(repo, repo_paths=None, root=None):
+    """Repo canónico → path local (~/para/areas/dev/gh/charly/<dir> con
+    DEFAULT_REPO_DIRS); config ddl_effect.repo_paths sobreescribe. None si
+    el repo no es local (bd vive upstream, sin checkout)."""
+    paths = dict(DEFAULT_REPO_DIRS)
+    for repo_key, p in (repo_paths or {}).items():
+        paths[repo_key] = p
+    if repo in paths:
+        cand = Path(paths[repo])
+        if not cand.is_absolute():
+            cand = (root or FLEET_GH_ROOT) / "charly" / cand
+        return cand
+    cand = (root or FLEET_GH_ROOT) / "charly" / repo
+    return cand
+
+
+def ddl_status_global(run=None):
+    """`ddl status --json` → {present, healthy} por herramienta (D3 fuente 1).
+    'not installed' (level error) no es presente. Binario ausente → None."""
+    if run is None:
+        import subprocess
+        def run(cmd):
+            r = subprocess.run(cmd, capture_output=True, text=True, timeout=60)
+            if r.returncode != 0:
+                raise RuntimeError(r.stderr.strip() or "ddl status falló")
+            return r.stdout
+    try:
+        envelope = json.loads(run(["ddl", "status", "--json"]))
+    except Exception:  # noqa: BLE001
+        return None
+    present, healthy = [], []
+    for section in (envelope.get("data") or {}).get("sections") or []:
+        for item in section.get("items") or []:
+            label = item.get("label")
+            level = item.get("level")
+            if not label:
+                continue
+            if level != "error":
+                present.append(label)
+            if level == "healthy":
+                healthy.append(label)
+    return {"present": present, "healthy": healthy}
+
+
+def gh_runs_fetch(owner_repo, run=None):
+    """Runs de GitHub Actions paginados (D4). run(cmd) inyectable. Red
+    muerta / repo 404 → None (gh_runs_incremental conserva cache stale)."""
+    if run is None:
+        import subprocess
+        def run(cmd):
+            r = subprocess.run(cmd, capture_output=True, text=True, timeout=60)
+            if r.returncode != 0:
+                raise RuntimeError(r.stderr.strip() or "gh api falló")
+            return r.stdout
+    runs = []
+    page = 1
+    while True:
+        try:
+            out = run(["gh", "api",
+                       f"repos/{owner_repo}/actions/runs?per_page=100&page={page}"])
+            data = json.loads(out)
+        except Exception:  # noqa: BLE001 — sin red/token/repo_gone
+            return None
+        batch = data.get("workflow_runs") or []
+        runs.extend(batch)
+        if len(batch) < 100:
+            return runs
+        page += 1
+
+
+def gh_topics(owner_repo, run=None):
+    """Topics del repo (insumo de classify_control: topic ddl). None sin red."""
+    if run is None:
+        import subprocess
+        def run(cmd):
+            r = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
+            if r.returncode != 0:
+                raise RuntimeError(r.stderr.strip() or "gh api falló")
+            return r.stdout
+    try:
+        data = json.loads(run(["gh", "api", f"repos/{owner_repo}"]))
+    except Exception:  # noqa: BLE001
+        return None
+    return {"topics": data.get("topics") or [],
+            "created_at": data.get("created_at")}
+
+
+def _cache_fresh(cache, now, ttl_days):
+    fetched = _parse_ts((cache or {}).get("fetched_until"))
+    cur = _parse_ts(now)
+    return bool(cache and fetched and cur
+                and (cur - fetched).days < ttl_days)
+
+
+def terapia_errors_global(cache_path, ttl_days=7, now=None, run=None):
+    """Errores por clase de terapia (cache data/cache/terapia_errors.json,
+    TTL semanal — mismo patrón que gh, design D1). Terapia es una query
+    GLOBAL (el CLI no filtra por proyecto): su desglose queda en metadata
+    como contexto, no en filas por repo-mes (atribución imposible sin
+    inventar). Sin binario → missing con razón, cache stale conservado."""
+    cache_path = Path(cache_path)
+    cache = None
+    if cache_path.exists():
+        try:
+            cache = json.loads(cache_path.read_text())
+        except (json.JSONDecodeError, OSError):
+            cache = None
+    if _cache_fresh(cache, now, ttl_days):
+        return {"data": cache["data"], "provenance": "cached",
+                "fetched_until": cache["fetched_until"]}
+    if run is None:
+        import subprocess
+        def run(cmd):
+            r = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
+            if r.returncode != 0:
+                raise RuntimeError(r.stderr.strip() or "terapia falló")
+            return r.stdout
+    try:
+        data = json.loads(run(["terapia", "errors", "--all",
+                               "--group-by", "class"]))
+    except Exception as e:  # noqa: BLE001
+        return {"data": None, "provenance": "missing", "reason": str(e)}
+    fetched = now or datetime_now_iso()
+    try:
+        cache_path.parent.mkdir(parents=True, exist_ok=True)
+        cache_path.write_text(json.dumps({"data": data,
+                                          "fetched_until": fetched},
+                                         indent=2) + "\n")
+    except OSError:
+        pass
+    return {"data": data, "provenance": "reported", "fetched_until": fetched}
+
+
+def ah_findings_cached(repos, cache_path, ttl_days=7, now=None, runner=None):
+    """findings de `ah check` por repo (D6: findings por corrida, serie desde
+    cache data/cache/ah_findings.json). Repos sin setup espectacular →
+    missing con razón. runner(repo) → (exit, stdout) inyectable."""
+    cache_path = Path(cache_path)
+    cache = {}
+    if cache_path.exists():
+        try:
+            cache = json.loads(cache_path.read_text())
+        except (json.JSONDecodeError, OSError):
+            cache = {}
+    if runner is None:
+        import subprocess
+        def runner(repo):
+            r = subprocess.run(["ah", "check"], cwd=repo, capture_output=True,
+                               text=True, timeout=120)
+            return r.returncode, r.stdout
+    out = {}
+    for repo in repos:
+        entry = cache.get(repo)
+        if _cache_fresh({"fetched_until": (entry or {}).get("fetched_until")},
+                        now, ttl_days):
+            out[repo] = dict(entry)
+            out[repo]["provenance"] = "cached"
+            continue
+        try:
+            _exit, stdout = runner(repo)
+            env = json.loads(stdout)
+            findings = (env.get("data") or {}).get("findings")
+        except Exception:  # noqa: BLE001 — sin setup / stdout no-JSON
+            findings = None
+        entry = {"fetched_until": now or datetime_now_iso()}
+        if findings is not None:
+            entry.update({"findings": len(findings), "provenance": "reported"})
+        else:
+            entry.update({"findings": None, "provenance": "missing",
+                          "reason": "sin setup espectacular o salida no-JSON"})
+        out[repo] = entry
+        cache[repo] = entry
+    try:
+        cache_path.parent.mkdir(parents=True, exist_ok=True)
+        cache_path.write_text(json.dumps(cache, indent=2) + "\n")
+    except OSError:
+        pass
+    return out
+
+
+def datetime_now_iso():
+    from datetime import datetime, timezone
+    return datetime.now(timezone.utc).isoformat(timespec="seconds")
+
+
+# ---------------------------------------------------------------------------
+# Ensamblado (puro: consume insumos ya extraídos)
+# ---------------------------------------------------------------------------
+
+# Métricas del panel que alimentan ITS/DiD/dosis-respuesta (D5)
+ANALYSIS_METRICS = (
+    "errors_api_per_100", "recovery_p50_interactions",
+    "session_commit_latency_p50_h", "ci_fail_rate",
+    "revert_ratio", "fix_ratio", "test_commit_ratio",
+)
+
+
+def _usage_emitter(usage_report, repo, month, n_sessions):
+    """Emisor usage (D1 fuente 1): interactions de project_monthly
+    (reported), sessions del walk pi (reported, bias pi-only documentado en
+    metadata). API errors por repo-mes y terapia por repo-mes no existen:
+    missing con razón, nunca 0 fake."""
+    proj_rows = (usage_report.get("project_monthly") or {})
+    project = next((p for p in proj_rows
+                    if p.split("-", 1)[-1] == repo), None)
+    interactions = None
+    if project and month in proj_rows[project]:
+        interactions = proj_rows[project][month].get("interactions")
+    return {
+        "sessions": n_sessions,
+        "interactions": interactions,
+        "errors_api_per_100": None,
+        "errors_terapia_per_100": None,
+        "provenance": {
+            "sessions": "reported" if n_sessions else "missing",
+            "interactions": "reported" if interactions is not None
+                            else "missing",
+            "errors_api_per_100": "missing",
+            "errors_terapia_per_100": "missing",
+        },
+        "reason": {
+            "errors_api_per_100": "el reporte de usage no desglosa errores "
+                                  "API por repo-mes",
+            "errors_terapia_per_100": "terapia es una query global (sin "
+                                      "filtro por proyecto); desglose en "
+                                      "metadata",
+            "interactions": None if interactions is not None
+                            else "sin interacciones in-scope del proyecto",
+        },
+    }
+
+
+def _recovery_emitter(events):
+    """recovery_metrics con provenance honesto: p50 None (sin errores) es
+    missing, no derived — None ⇔ missing en build_panel."""
+    m = recovery_metrics([events])
+    return {
+        "recovery_p50_interactions": m["recovery_p50_interactions"],
+        "recovery_censored_rate": m["recovery_censored_rate"],
+        "recovery_n": m["recovery_n"],
+        "provenance": {
+            "recovery_p50_interactions": ("derived"
+                                          if m["recovery_p50_interactions"]
+                                          is not None else "missing"),
+            "recovery_censored_rate": "derived",
+            "recovery_n": "derived",
+        },
+    }
+
+
+def _latency_emitter(anchor_ts, commits):
+    m = commit_latency(anchor_ts, commits)
+    return {
+        "session_commit_latency_p50_h": m["session_commit_latency_p50_h"],
+        "latency_n": m["latency_n"],
+        "clamped_negative": m["clamped_negative"],
+        "provenance": {
+            "session_commit_latency_p50_h":
+                ("derived" if m["session_commit_latency_p50_h"] is not None
+                 else "missing"),
+        },
+        "reason": {
+            "session_commit_latency_p50_h": None
+            if m["session_commit_latency_p50_h"] is not None
+            else "sin commit posterior al ancla de sesión del mes",
+        },
+    }
+
+
+def assemble_report(insumos):
+    """Ensambla el reporte completo (D2) desde insumos extraídos — puro,
+    testeable con sintéticos. Insumos: usage_report, sessions (walk), git
+    {repo: {commits, releases, has_ddl_now}}, gh {repo: {runs, provenance}},
+    topics {repo: {topic_ddl}}, ddl_status, terapia, ah {repo: entry}, now."""
+    fleet = FLEET_REPOS
+    sessions = insumos.get("sessions") or []
+    git = insumos.get("git") or {}
+    gh = insumos.get("gh") or {}
+    topics = insumos.get("topics") or {}
+    now = insumos.get("now")
+
+    # --- repos[]: adopción + dosis corriente + control (D3, D6) ---
+    commit_rows = [dict(c, repo=repo)
+                   for repo, g in git.items()
+                   for c in (g.get("commits") or [])]
+    use_rows = uses_rows(sessions)
+    adoption = extract_adoption(commit_rows, use_rows, repos=fleet)
+    canaries = {repo: sorted({f for c in (git.get(repo) or {}).get("commits") or []
+                              for f in c.get("files") or []
+                              if f.startswith(".ddl/")})
+                for repo in fleet}
+    session_uses = {}
+    for row in use_rows:
+        session_uses.setdefault(row["repo"], set()).add(row["tool"])
+    status = insumos.get("ddl_status")
+    ddl_status_per_repo = {}
+    if status:
+        ddl_status_per_repo = {repo: status for repo in fleet
+                               if (git.get(repo) or {}).get("has_ddl_now")}
+    dose_current = compute_dose(ddl_status_per_repo, canaries, session_uses,
+                                repos=fleet)
+    repos_info = {repo: {"has_ddl": bool((git.get(repo) or {}).get("has_ddl_now")),
+                         "topic_ddl": bool((topics.get(repo) or {}).get("topic_ddl"))}
+                  for repo in fleet}
+    control = classify_control(repos_info)
+
+    repos_out = []
+    for repo in fleet:
+        adv = adoption[repo]
+        repos_out.append({
+            "repo": repo,
+            "is_control": control[repo]["is_control"],
+            "is_outlier": control[repo]["is_outlier"],
+            "adoption": {
+                "first_ddl_commit": adv["first_ddl_commit"],
+                "tools_first_use": adv["tools_first_use"],
+                "provenance": adv["provenance"],
+            },
+            "dose": dose_current[repo]["dose"],
+            "dose_detail": dose_current[repo]["dose_detail"],
+            "dose_provenance": dose_current[repo]["provenance"]["dose"],
+        })
+
+    # --- monthly[]: panel repo × mes (D2) ---
+    buckets = events_by_repo_month(sessions)
+    sessions_per_month = {}
+    for s in sessions:
+        months = {str(ev[3])[:7] for ev in (s.get("events") or []) if ev[3]}
+        for m in months:
+            sessions_per_month[(s["repo"], m)] = \
+                sessions_per_month.get((s["repo"], m), 0) + 1
+    first_use = {r["repo"]: {} for r in repos_out}
+    for row in use_rows:
+        first_use[row["repo"]][row["tool"]] = row["date"]
+    # extract_adoption también aporta first_use (fuente git-irrelevante acá:
+    # sólo sesiones)
+    for r in repos_out:
+        for t, d in (r["adoption"]["tools_first_use"] or {}).items():
+            if d:
+                first_use.setdefault(r["repo"], {}).setdefault(t, d)
+
+    activity_months = set(buckets) | set(sessions_per_month)
+    usage = insumos.get("usage_report") or {}
+    proj_rows = usage.get("project_monthly") or {}
+    for project, months in proj_rows.items():
+        repo = project.split("-", 1)[-1]
+        if repo in fleet:
+            for m in months:
+                activity_months.add((repo, m))
+
+    cells, clamped_total = [], 0
+    ah = insumos.get("ah") or {}
+    for repo, month in sorted(activity_months):
+        emitters = {"usage": _usage_emitter(
+            usage, repo, month, sessions_per_month.get((repo, month), 0))}
+        if (repo, month) in buckets and buckets[(repo, month)]:
+            emitters["recovery"] = _recovery_emitter(buckets[(repo, month)])
+        anchor = max((ev[3] for s in sessions if s["repo"] == repo
+                      for ev in (s.get("events") or [])
+                      if ev[3] and str(ev[3])[:7] == month), default=None)
+        if anchor and git.get(repo):
+            emitters["latency"] = _latency_emitter(
+                anchor, git[repo].get("commits") or [])
+            clamped_total += emitters["latency"]["clamped_negative"]
+        if git.get(repo):
+            month_commits = [c for c in git[repo].get("commits") or []
+                             if str(c["date"])[:7] == month]
+            month_releases = [d for d in git[repo].get("releases") or []
+                              if str(d)[:7] == month]
+            emitters["git"] = git_proxies(month_commits, month_releases)
+        if repo in gh and gh[repo].get("runs") is not None:
+            emitters["ci"] = ci_fail_rate(gh[repo]["runs"], month)
+            # D7: los runs vienen del cache gh → tag cached, no reported
+            # (el reducer no sabe de dónde salieron los runs).
+            if gh[repo].get("provenance") == "cached" \
+                    and emitters["ci"]["provenance"] == "reported":
+                emitters["ci"]["provenance"] = "cached"
+        entry = ah.get(repo) or {}
+        if entry.get("findings") is not None \
+                and str(entry.get("fetched_until") or "")[:7] == month:
+            emitters["ah"] = {"ah_check_findings": entry["findings"],
+                              "provenance": {"ah_check_findings":
+                                             entry["provenance"]}}
+        emitters["dose"] = monthly_dose(repo, month, first_use)
+        cells.append(cell_from_emitters(repo, month, emitters))
+    panel = build_panel(cells)
+
+    # --- analysis: ITS / DiD / dosis-respuesta (D5) ---
+    rows_by_repo = {}
+    for r in panel:
+        rows_by_repo.setdefault(r["repo"], []).append(r)
+    its = []
+    for entry in repos_out:
+        adm = entry["adoption"]["first_ddl_commit"]
+        if not adm:
+            continue
+        for metric in ANALYSIS_METRICS:
+            res = its_pre_post(rows_by_repo.get(entry["repo"], []), metric,
+                               str(adm)[:7])
+            its.append({"repo": entry["repo"], "metric": metric,
+                        "adoption_month": str(adm)[:7], **res})
+    frontiers = sorted(str(e["adoption"]["first_ddl_commit"])[:7]
+                       for e in repos_out
+                       if e["adoption"]["first_ddl_commit"])
+    did = []
+    if frontiers:
+        frontier = frontiers[0]
+        control_repos = {e["repo"] for e in repos_out if e["is_control"]}
+        for metric in ANALYSIS_METRICS:
+            deltas = repo_deltas(rows_by_repo, metric, frontier)
+            res = did_2x2(deltas, control_repos)
+            did.append({"metric": metric, "adoption_frontier": frontier,
+                        **res})
+    dose_response_out = []
+    for metric in ANALYSIS_METRICS:
+        points = []
+        scatter = []
+        for entry in repos_out:
+            vals = [r[metric] for r in rows_by_repo.get(entry["repo"], [])
+                    if r.get(metric) is not None]
+            if vals:
+                import statistics
+                mean = statistics.fmean(vals)
+                points.append({"repo": entry["repo"],
+                               "dose": entry["dose"],
+                               metric: mean})
+                scatter.append({"repo": entry["repo"],
+                                "dose": entry["dose"], "outcome": mean})
+        dose_response_out.append({"metric": metric,
+                                  **dose_response(points, metric),
+                                  "points": scatter})
+
+    fleet_prov = {}
+    for repo in fleet:
+        fleet_prov[repo] = {
+            "git": repo in git,
+            "gh": repo in gh,
+            "sessions": sessions_per_month.get((repo, ""), 0)
+            or sum(n for (r, _m), n in sessions_per_month.items()
+                   if r == repo),
+        }
+    report = {
+        "metadata": {
+            "generated_at": now,
+            "seed_bootstrap": 42,
+            "managed_tools": list(MANAGED_TOOLS),
+            "fleet_definition": "repos charly-vibes con actividad en "
+                                "sesiones in-scope (walk pi) o interacciones "
+                                "en project_monthly",
+            "provenance": {
+                "fleet": fleet_prov,
+                "gh": {repo: (gh.get(repo) or {}).get("provenance", "missing")
+                       for repo in fleet},
+                "terapia": insumos.get("terapia") or {
+                    "data": None, "provenance": "missing",
+                    "reason": "sin insumo terapia"},
+                "ah": {repo: (ah.get(repo) or {}).get("provenance", "missing")
+                       for repo in fleet},
+                "sessions_bias": "sessions cuenta sólo sesiones pi (las "
+                                 "otras fuentes no exponen cwd por sesión; "
+                                 "coffe-i31)",
+            },
+            "clamped_negative_latencies": clamped_total,
+        },
+        "repos": repos_out,
+        "monthly": panel,
+        "analysis": {"its": its, "did": did,
+                     "dose_response": dose_response_out},
+    }
+    return report
+
+
+# ---------------------------------------------------------------------------
 # main
 # ---------------------------------------------------------------------------
+
 
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--output", default="data/ddl_effect.json")
     ap.add_argument("--usage-report", default="data/usage_report_v3.json")
+    ap.add_argument("--config", default="config/fpa.json")
+    ap.add_argument("--cache-dir", default="data/cache")
+    ap.add_argument("--sessions-dir", default=None,
+                    help="walk de sesiones pi (default ~/.pi/agent/sessions)")
     ap.add_argument("--validate", metavar="ARCHIVO", default=None,
                     help="valida el JSON dado contra specs/ddl-effect.schema.json "
                          "y sale (0 válido / 1 inválido) sin regenerar")
@@ -715,18 +1412,136 @@ def main(argv=None):
             "usage; los logs fuente (~/.pi/agent/sessions, git, gh api) no están "
             "versionados (ver README 'Los JSON en data/ son derivados')"
         )
+    report_path = Path(args.usage_report)
+    usage_report = json.loads(report_path.read_text())
+    config = {}
+    if Path(args.config).exists():
+        config = json.loads(Path(args.config).read_text())
+    ddl_cfg = config.get("ddl_effect") or {}
+    alias_map = build_alias_map(ddl_cfg.get("repo_aliases"))
+    repo_paths = ddl_cfg.get("repo_paths") or {}
+    owners = ddl_cfg.get("repo_owners") or {"*": "charly-vibes"}
+    cache_dir = Path(args.cache_dir)
 
-    report = {
-        "metadata": {
-            "generated_at": None,  # se completa cuando aterrice la capa de extracción
-            "seed_bootstrap": 42,
-            "managed_tools": list(MANAGED_TOOLS),
-            "fleet_definition": "repos charly-vibes con actividad en sesiones in-scope",
-        },
-        "repos": [],
-        "monthly": [],
-        "analysis": {"its": [], "did": [], "dose_response": []},
+    sessions = walk_pi_sessions(args.sessions_dir, alias_map)
+    print(f"ddl-effect: {len(sessions)} sesiones pi de la flota")
+
+    git_insumos = {}
+    for repo in FLEET_REPOS:
+        path = repo_local_path(repo, repo_paths)
+        if path is None or not path.exists():
+            continue
+        commits = git_commits(path)
+        if commits is None:
+            continue
+        git_insumos[repo] = {
+            "commits": commits,
+            "releases": git_releases(path) or [],
+            "has_ddl_now": (path / ".ddl").is_dir(),
+        }
+
+    def _owner(repo):
+        """Slug de GitHub del repo: repo_owners puede traer owner suelto
+        ('charly-vibes') o slug completo ('charly-vibes/whisper' cuando el
+        repo canónico y el de GitHub no comparten nombre)."""
+        val = owners.get(repo) or owners.get("*")
+        return val if "/" in val else f"{val}/{repo}"
+
+    token, token_src = gh_token()
+    gh_insumos = {}
+    for repo in FLEET_REPOS:
+        if repo not in git_insumos:  # gh sólo para repos locales (charly-vibes)
+            continue
+        cache = None
+        cache_file = cache_dir / "gh_runs" / f"{repo}.json"
+        if cache_file.exists():
+            try:
+                cache = json.loads(cache_file.read_text())
+            except (json.JSONDecodeError, OSError):
+                cache = None
+        owner_repo = _owner(repo)
+
+        def _fetch(_repo, _since, owner_repo=owner_repo):
+            runs = gh_runs_fetch(owner_repo)
+            if runs is None:  # red muerta/404: degradar, no romper
+                raise RuntimeError("gh api sin red o repo_gone")
+            return runs
+
+        merged = gh_runs_incremental(repo, _fetch, cache,
+                                     now=datetime_now_iso())
+        if merged is None:
+            continue
+        prov = merged.get("provenance", "reported")
+        gh_insumos[repo] = {"runs": merged.get("runs") or [],
+                            "provenance": prov}
+        try:
+            cache_file.parent.mkdir(parents=True, exist_ok=True)
+            cache_file.write_text(json.dumps(
+                {"runs": merged.get("runs") or [],
+                 "fetched_until": merged.get("fetched_until")}, indent=2) + "\n")
+        except OSError:
+            pass
+
+    topics = {}
+    topics_cache = cache_dir / "gh_topics.json"
+    topics_cache_data = {}
+    if topics_cache.exists():
+        try:
+            topics_cache_data = json.loads(topics_cache.read_text())
+        except (json.JSONDecodeError, OSError):
+            topics_cache_data = {}
+    for repo in FLEET_REPOS:
+        if repo not in git_insumos:
+            continue
+        entry = topics_cache_data.get(repo)
+        if _cache_fresh({"fetched_until": (entry or {}).get("fetched_until")},
+                        datetime_now_iso(), 7):
+            topics[repo] = entry
+            continue
+        res = gh_topics(_owner(repo))
+        if res is None:
+            if entry:
+                topics[repo] = {**entry, "provenance": "cached"}
+            continue
+        entry = {"topic_ddl": "ddl" in (res.get("topics") or []),
+                 "provenance": "reported",
+                 "created_at": res.get("created_at"),
+                 "fetched_until": datetime_now_iso()}
+        topics[repo] = entry
+        topics_cache_data[repo] = entry
+    try:
+        topics_cache.parent.mkdir(parents=True, exist_ok=True)
+        topics_cache.write_text(json.dumps(topics_cache_data, indent=2) + "\n")
+    except OSError:
+        pass
+
+    terapia = terapia_errors_global(cache_dir / "terapia_errors.json",
+                                    ttl_days=7, now=datetime_now_iso())
+
+    import subprocess
+
+    def _ah_runner(repo):
+        cwd = repo_local_path(repo, repo_paths)
+        r = subprocess.run(["ah", "check"], cwd=str(cwd),
+                           capture_output=True, text=True, timeout=120)
+        return r.returncode, r.stdout
+
+    ah = ah_findings_cached([r for r in FLEET_REPOS if r in git_insumos],
+                            cache_dir / "ah_findings.json", ttl_days=7,
+                            now=datetime_now_iso(), runner=_ah_runner)
+
+    insumos = {
+        "usage_report": usage_report,
+        "sessions": sessions,
+        "git": git_insumos,
+        "gh": gh_insumos,
+        "topics": topics,
+        "ddl_status": ddl_status_global(),
+        "terapia": terapia,
+        "ah": ah,
+        "now": datetime_now_iso(),
     }
+    report = assemble_report(insumos)
     errors = validate_report(report)
     if errors:  # fail loud: el tracker no escribe un reporte inválido
         ap.error("reporte inválido contra " + DDL_SCHEMA.name + ": "
@@ -734,10 +1549,14 @@ def main(argv=None):
 
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text(json.dumps(report, indent=2, sort_keys=False) + "\n")
-    print(f"ddl-effect: esqueleto escrito en {out_path} "
-          "(reducers en tickets coffe-51p..; extracción gh/git/walk pendiente)")
+    repos_n = len(report["repos"])
+    rows_n = len(report["monthly"])
+    print(f"ddl-effect: {out_path} — {repos_n} repos, {rows_n} filas de "
+          "panel, "
+          f"{len(report['analysis']['its'])} ITS, "
+          f"{len(report['analysis']['did'])} DiD")
     return 0
 
-
+    sys.exit(main())
 if __name__ == "__main__":
     sys.exit(main())

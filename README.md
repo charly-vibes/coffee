@@ -49,6 +49,8 @@ El Gantt se conserva como visualización única de su tipo.
 | `data/usage_hourly.json` | 399K | Datos hora a hora de v2 (sin filtrar). |
 | `data/daily_summary.json` | 33K | Resumen diario v2. |
 | `data/tool_timeline.json` | 1.6K | Timeline de herramientas (primera/última vez). |
+| `data/ddl_effect.json` | 92K | **Efecto del toolset ddl.** Panel repo × mes (adopción, dosis, recovery, latencia, CI, proxies git, ah findings) + ITS/DiD/dosis-respuesta con provenance por cifra (coffe-q9z). |
+| `data/ddl-dashboard.html` | 73K | **Dashboard ddl.** 6 vistas (adopción, dosis-respuesta, pre/post+DiD, lazo de feedback, errores, calidad) + disclosure de confusores (coffe-31l..46h). |
 
 ### Documentos
 
@@ -178,10 +180,13 @@ errores por clase de terapia, mismo patrón incremental que gh.
 varianza (toda la flota ~1) → `sin_varianza` declarada; bootstrap con
 `seed_bootstrap: 42` fija (IC 95%, 10k resamples).
 
-Nota (coffe-q9z): `data/ddl_effect.json` todavía no está regenerado con
-datos reales — `main()` escribe el esqueleto validado; la capa de
-extracción (walk de sesiones, git, gh cache, terapia) se wirear antes de
-la primera regeneración.
+Primera regeneración con datos reales (coffe-q9z, 2026-10-19): 15 repos,
+54 filas de panel, 42 ITS, 7 DiD. Gaps honestos visibles: `errors_api` y
+`terapia` no se desglosan por repo-mes (missing con razón — terapia es
+query global); `sessions` cuenta sólo sesiones pi (las demás fuentes no
+exponen cwd por sesión); `openspec` sin CI upstream (mirror local sin
+remote, 404 → missing). Cache en `data/cache/` (gh_runs, gh_topics,
+terapia_errors, ah_findings) — TTL 7 días.
 
 ### ✅ Extraído y documentado
 
