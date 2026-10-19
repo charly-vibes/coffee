@@ -1,0 +1,4053 @@
+{
+  "metadata": {
+    "generated_at": "2026-10-19T22:01:34+00:00",
+    "seed_bootstrap": 42,
+    "managed_tools": [
+      "wai",
+      "testaruda",
+      "turu",
+      "dont",
+      "ah",
+      "pretender",
+      "vampiro",
+      "incitaciones",
+      "bd",
+      "openspec",
+      "specodelic",
+      "funkalization",
+      "wild"
+    ],
+    "fleet_definition": "repos charly-vibes con actividad en sesiones in-scope (walk pi) o interacciones en project_monthly",
+    "provenance": {
+      "fleet": {
+        "wai": {
+          "git": true,
+          "gh": true,
+          "sessions": 76
+        },
+        "testaruda": {
+          "git": true,
+          "gh": true,
+          "sessions": 79
+        },
+        "turu": {
+          "git": true,
+          "gh": true,
+          "sessions": 17
+        },
+        "dont": {
+          "git": true,
+          "gh": true,
+          "sessions": 99
+        },
+        "ah": {
+          "git": true,
+          "gh": true,
+          "sessions": 67
+        },
+        "pretender": {
+          "git": true,
+          "gh": true,
+          "sessions": 37
+        },
+        "vampiro": {
+          "git": true,
+          "gh": true,
+          "sessions": 40
+        },
+        "incitaciones": {
+          "git": true,
+          "gh": true,
+          "sessions": 43
+        },
+        "bd": {
+          "git": false,
+          "gh": false,
+          "sessions": 0
+        },
+        "openspec": {
+          "git": true,
+          "gh": true,
+          "sessions": 0
+        },
+        "specodelic": {
+          "git": true,
+          "gh": true,
+          "sessions": 250
+        },
+        "funkalization": {
+          "git": true,
+          "gh": true,
+          "sessions": 6
+        },
+        "wild": {
+          "git": true,
+          "gh": true,
+          "sessions": 62
+        },
+        "dulce-de-leche": {
+          "git": true,
+          "gh": true,
+          "sessions": 32
+        },
+        "coffee": {
+          "git": true,
+          "gh": true,
+          "sessions": 66
+        }
+      },
+      "gh": {
+        "wai": "cached",
+        "testaruda": "cached",
+        "turu": "cached",
+        "dont": "cached",
+        "ah": "cached",
+        "pretender": "cached",
+        "vampiro": "cached",
+        "incitaciones": "cached",
+        "bd": "missing",
+        "openspec": "missing",
+        "specodelic": "cached",
+        "funkalization": "cached",
+        "wild": "cached",
+        "dulce-de-leche": "cached",
+        "coffee": "cached"
+      },
+      "terapia": {
+        "data": {
+          "exit_nonzero": 7064,
+          "edit_mismatch": 1566,
+          "file_not_found": 1212,
+          "network": 135,
+          "other": 1881,
+          "lang_runtime": 1339,
+          "cli_flag_drift": 203
+        },
+        "provenance": "cached",
+        "fetched_until": "2026-10-19T21:35:18+00:00"
+      },
+      "ah": {
+        "wai": "cached",
+        "testaruda": "cached",
+        "turu": "cached",
+        "dont": "cached",
+        "ah": "cached",
+        "pretender": "cached",
+        "vampiro": "cached",
+        "incitaciones": "cached",
+        "bd": "missing",
+        "openspec": "cached",
+        "specodelic": "cached",
+        "funkalization": "cached",
+        "wild": "cached",
+        "dulce-de-leche": "cached",
+        "coffee": "cached"
+      },
+      "sessions_bias": "sessions cuenta s\u00f3lo sesiones pi (las otras fuentes no exponen cwd por sesi\u00f3n; coffe-i31)"
+    },
+    "clamped_negative_latencies": 200
+  },
+  "repos": [
+    {
+      "repo": "wai",
+      "is_control": true,
+      "is_outlier": false,
+      "adoption": {
+        "first_ddl_commit": null,
+        "tools_first_use": {
+          "wai": "2026-04-18T19:46:58.812Z",
+          "testaruda": "2026-07-28T14:24:30.024Z",
+          "turu": "2026-09-17T14:49:36.522Z",
+          "dont": "2026-07-28T14:37:02.736Z",
+          "ah": "2026-07-28T01:42:23.108Z",
+          "pretender": "2026-07-28T14:39:58.044Z",
+          "vampiro": null,
+          "incitaciones": null,
+          "bd": "2026-04-18T19:46:58.812Z",
+          "openspec": "2026-04-18T20:14:31.531Z",
+          "specodelic": null,
+          "funkalization": null,
+          "wild": null
+        },
+        "provenance": {
+          "first_ddl_commit": "missing",
+          "tools_first_use": "reported"
+        }
+      },
+      "dose": 0.6153846153846154,
+      "dose_detail": {
+        "present": [
+          "ah",
+          "bd",
+          "dont",
+          "openspec",
+          "pretender",
+          "testaruda",
+          "turu",
+          "wai"
+        ],
+        "healthy": [],
+        "missing": [
+          "vampiro",
+          "incitaciones",
+          "specodelic",
+          "funkalization",
+          "wild"
+        ]
+      },
+      "dose_provenance": "derived"
+    },
+    {
+      "repo": "testaruda",
+      "is_control": true,
+      "is_outlier": false,
+      "adoption": {
+        "first_ddl_commit": null,
+        "tools_first_use": {
+          "wai": "2026-07-08T22:31:09.556Z",
+          "testaruda": "2026-07-14T20:41:14.635Z",
+          "turu": "2026-09-29T16:20:46.693Z",
+          "dont": "2026-07-21T18:58:42.877Z",
+          "ah": "2026-07-07T17:52:32.143Z",
+          "pretender": "2026-07-07T17:52:38.628Z",
+          "vampiro": null,
+          "incitaciones": null,
+          "bd": "2026-07-08T22:30:15.958Z",
+          "openspec": "2026-07-08T22:32:44.077Z",
+          "specodelic": null,
+          "funkalization": null,
+          "wild": null
+        },
+        "provenance": {
+          "first_ddl_commit": "missing",
+          "tools_first_use": "reported"
+        }
+      },
+      "dose": 0.6153846153846154,
+      "dose_detail": {
+        "present": [
+          "ah",
+          "bd",
+          "dont",
+          "openspec",
+          "pretender",
+          "testaruda",
+          "turu",
+          "wai"
+        ],
+        "healthy": [],
+        "missing": [
+          "vampiro",
+          "incitaciones",
+          "specodelic",
+          "funkalization",
+          "wild"
+        ]
+      },
+      "dose_provenance": "derived"
+    },
+    {
+      "repo": "turu",
+      "is_control": false,
+      "is_outlier": false,
+      "adoption": {
+        "first_ddl_commit": "2026-10-14T09:30:30-03:00",
+        "tools_first_use": {
+          "wai": "2026-10-04T14:41:55.164Z",
+          "testaruda": null,
+          "turu": "2026-09-17T15:37:11.839Z",
+          "dont": null,
+          "ah": "2026-10-15T13:41:29.114Z",
+          "pretender": "2026-10-04T17:39:19.603Z",
+          "vampiro": null,
+          "incitaciones": "2026-09-05T19:09:26.629Z",
+          "bd": "2026-09-05T18:40:58.045Z",
+          "openspec": "2026-09-15T19:27:39.576Z",
+          "specodelic": null,
+          "funkalization": null,
+          "wild": null
+        },
+        "provenance": {
+          "first_ddl_commit": "reported",
+          "tools_first_use": "reported"
+        }
+      },
+      "dose": 0.9230769230769231,
+      "dose_detail": {
+        "present": [
+          "wai",
+          "testaruda",
+          "turu",
+          "dont",
+          "ah",
+          "pretender",
+          "vampiro",
+          "incitaciones",
+          "bd",
+          "openspec",
+          "specodelic",
+          "wild"
+        ],
+        "healthy": [
+          "wai",
+          "testaruda",
+          "turu",
+          "dont",
+          "ah",
+          "pretender",
+          "vampiro",
+          "incitaciones",
+          "bd",
+          "openspec",
+          "specodelic",
+          "wild"
+        ],
+        "missing": [
+          "funkalization"
+        ]
+      },
+      "dose_provenance": "reported"
+    },
+    {
+      "repo": "dont",
+      "is_control": false,
+      "is_outlier": false,
+      "adoption": {
+        "first_ddl_commit": "2026-10-14T09:24:01-03:00",
+        "tools_first_use": {
+          "wai": "2026-04-20T21:30:05.813Z",
+          "testaruda": "2026-09-15T23:43:42.245Z",
+          "turu": "2026-10-14T17:32:28.550Z",
+          "dont": "2026-04-20T21:30:05.813Z",
+          "ah": "2026-07-28T01:58:44.005Z",
+          "pretender": "2026-07-18T01:43:14.700Z",
+          "vampiro": "2026-09-15T23:43:42.245Z",
+          "incitaciones": null,
+          "bd": "2026-04-20T21:37:21.123Z",
+          "openspec": "2026-04-20T21:33:50.404Z",
+          "specodelic": null,
+          "funkalization": null,
+          "wild": null
+        },
+        "provenance": {
+          "first_ddl_commit": "reported",
+          "tools_first_use": "reported"
+        }
+      },
+      "dose": 0.9230769230769231,
+      "dose_detail": {
+        "present": [
+          "wai",
+          "testaruda",
+          "turu",
+          "dont",
+          "ah",
+          "pretender",
+          "vampiro",
+          "incitaciones",
+          "bd",
+          "openspec",
+          "specodelic",
+          "wild"
+        ],
+        "healthy": [
+          "wai",
+          "testaruda",
+          "turu",
+          "dont",
+          "ah",
+          "pretender",
+          "vampiro",
+          "incitaciones",
+          "bd",
+          "openspec",
+          "specodelic",
+          "wild"
+        ],
+        "missing": [
+          "funkalization"
+        ]
+      },
+      "dose_provenance": "reported"
+    },
+    {
+      "repo": "ah",
+      "is_control": true,
+      "is_outlier": false,
+      "adoption": {
+        "first_ddl_commit": null,
+        "tools_first_use": {
+          "wai": "2026-05-12T21:56:06.061Z",
+          "testaruda": "2026-10-09T15:23:25.993Z",
+          "turu": "2026-09-29T18:20:29.305Z",
+          "dont": "2026-05-12T21:56:06.061Z",
+          "ah": "2026-05-21T16:58:59.520Z",
+          "pretender": "2026-09-30T18:20:14.148Z",
+          "vampiro": null,
+          "incitaciones": null,
+          "bd": "2026-05-12T21:55:36.613Z",
+          "openspec": "2026-05-12T21:56:06.061Z",
+          "specodelic": "2026-09-29T19:23:04.615Z",
+          "funkalization": null,
+          "wild": null
+        },
+        "provenance": {
+          "first_ddl_commit": "missing",
+          "tools_first_use": "reported"
+        }
+      },
+      "dose": 0.6923076923076923,
+      "dose_detail": {
+        "present": [
+          "ah",
+          "bd",
+          "dont",
+          "openspec",
+          "pretender",
+          "specodelic",
+          "testaruda",
+          "turu",
+          "wai"
+        ],
+        "healthy": [],
+        "missing": [
+          "vampiro",
+          "incitaciones",
+          "funkalization",
+          "wild"
+        ]
+      },
+      "dose_provenance": "derived"
+    },
+    {
+      "repo": "pretender",
+      "is_control": false,
+      "is_outlier": false,
+      "adoption": {
+        "first_ddl_commit": "2026-10-14T09:29:37-03:00",
+        "tools_first_use": {
+          "wai": "2026-05-12T15:55:55.398Z",
+          "testaruda": null,
+          "turu": "2026-09-29T18:20:07.235Z",
+          "dont": "2026-05-13T20:45:01.719Z",
+          "ah": "2026-07-28T01:48:32.866Z",
+          "pretender": "2026-07-18T01:25:33.183Z",
+          "vampiro": null,
+          "incitaciones": null,
+          "bd": "2026-05-12T15:55:55.398Z",
+          "openspec": "2026-05-12T15:57:25.077Z",
+          "specodelic": "2026-10-09T20:27:13.042Z",
+          "funkalization": null,
+          "wild": null
+        },
+        "provenance": {
+          "first_ddl_commit": "reported",
+          "tools_first_use": "reported"
+        }
+      },
+      "dose": 0.9230769230769231,
+      "dose_detail": {
+        "present": [
+          "wai",
+          "testaruda",
+          "turu",
+          "dont",
+          "ah",
+          "pretender",
+          "vampiro",
+          "incitaciones",
+          "bd",
+          "openspec",
+          "specodelic",
+          "wild"
+        ],
+        "healthy": [
+          "wai",
+          "testaruda",
+          "turu",
+          "dont",
+          "ah",
+          "pretender",
+          "vampiro",
+          "incitaciones",
+          "bd",
+          "openspec",
+          "specodelic",
+          "wild"
+        ],
+        "missing": [
+          "funkalization"
+        ]
+      },
+      "dose_provenance": "reported"
+    },
+    {
+      "repo": "vampiro",
+      "is_control": false,
+      "is_outlier": false,
+      "adoption": {
+        "first_ddl_commit": "2026-10-14T09:29:51-03:00",
+        "tools_first_use": {
+          "wai": "2026-07-28T01:30:05.712Z",
+          "testaruda": "2026-09-30T17:09:31.502Z",
+          "turu": "2026-09-30T15:09:51.528Z",
+          "dont": "2026-07-31T17:32:50.197Z",
+          "ah": null,
+          "pretender": "2026-10-14T15:57:13.633Z",
+          "vampiro": "2026-07-28T14:05:01.985Z",
+          "incitaciones": null,
+          "bd": "2026-07-28T01:30:05.712Z",
+          "openspec": "2026-07-28T02:25:33.479Z",
+          "specodelic": null,
+          "funkalization": null,
+          "wild": null
+        },
+        "provenance": {
+          "first_ddl_commit": "reported",
+          "tools_first_use": "reported"
+        }
+      },
+      "dose": 0.9230769230769231,
+      "dose_detail": {
+        "present": [
+          "wai",
+          "testaruda",
+          "turu",
+          "dont",
+          "ah",
+          "pretender",
+          "vampiro",
+          "incitaciones",
+          "bd",
+          "openspec",
+          "specodelic",
+          "wild"
+        ],
+        "healthy": [
+          "wai",
+          "testaruda",
+          "turu",
+          "dont",
+          "ah",
+          "pretender",
+          "vampiro",
+          "incitaciones",
+          "bd",
+          "openspec",
+          "specodelic",
+          "wild"
+        ],
+        "missing": [
+          "funkalization"
+        ]
+      },
+      "dose_provenance": "reported"
+    },
+    {
+      "repo": "incitaciones",
+      "is_control": false,
+      "is_outlier": false,
+      "adoption": {
+        "first_ddl_commit": "2026-10-14T09:30:11-03:00",
+        "tools_first_use": {
+          "wai": "2026-09-30T14:55:21.828Z",
+          "testaruda": null,
+          "turu": "2026-09-15T20:14:10.296Z",
+          "dont": null,
+          "ah": "2026-10-14T17:54:32.259Z",
+          "pretender": "2026-10-14T17:56:37.236Z",
+          "vampiro": null,
+          "incitaciones": null,
+          "bd": "2026-07-29T18:50:53.486Z",
+          "openspec": null,
+          "specodelic": "2026-10-14T18:23:41.190Z",
+          "funkalization": null,
+          "wild": null
+        },
+        "provenance": {
+          "first_ddl_commit": "reported",
+          "tools_first_use": "reported"
+        }
+      },
+      "dose": 0.9230769230769231,
+      "dose_detail": {
+        "present": [
+          "wai",
+          "testaruda",
+          "turu",
+          "dont",
+          "ah",
+          "pretender",
+          "vampiro",
+          "incitaciones",
+          "bd",
+          "openspec",
+          "specodelic",
+          "wild"
+        ],
+        "healthy": [
+          "wai",
+          "testaruda",
+          "turu",
+          "dont",
+          "ah",
+          "pretender",
+          "vampiro",
+          "incitaciones",
+          "bd",
+          "openspec",
+          "specodelic",
+          "wild"
+        ],
+        "missing": [
+          "funkalization"
+        ]
+      },
+      "dose_provenance": "reported"
+    },
+    {
+      "repo": "bd",
+      "is_control": true,
+      "is_outlier": false,
+      "adoption": {
+        "first_ddl_commit": null,
+        "tools_first_use": {
+          "wai": null,
+          "testaruda": null,
+          "turu": null,
+          "dont": null,
+          "ah": null,
+          "pretender": null,
+          "vampiro": null,
+          "incitaciones": null,
+          "bd": null,
+          "openspec": null,
+          "specodelic": null,
+          "funkalization": null,
+          "wild": null
+        },
+        "provenance": {
+          "first_ddl_commit": "missing",
+          "tools_first_use": "missing"
+        }
+      },
+      "dose": 0.0,
+      "dose_detail": {
+        "present": [],
+        "healthy": [],
+        "missing": [
+          "wai",
+          "testaruda",
+          "turu",
+          "dont",
+          "ah",
+          "pretender",
+          "vampiro",
+          "incitaciones",
+          "bd",
+          "openspec",
+          "specodelic",
+          "funkalization",
+          "wild"
+        ]
+      },
+      "dose_provenance": "missing"
+    },
+    {
+      "repo": "openspec",
+      "is_control": true,
+      "is_outlier": false,
+      "adoption": {
+        "first_ddl_commit": null,
+        "tools_first_use": {
+          "wai": null,
+          "testaruda": null,
+          "turu": null,
+          "dont": null,
+          "ah": null,
+          "pretender": null,
+          "vampiro": null,
+          "incitaciones": null,
+          "bd": null,
+          "openspec": null,
+          "specodelic": null,
+          "funkalization": null,
+          "wild": null
+        },
+        "provenance": {
+          "first_ddl_commit": "missing",
+          "tools_first_use": "missing"
+        }
+      },
+      "dose": 0.0,
+      "dose_detail": {
+        "present": [],
+        "healthy": [],
+        "missing": [
+          "wai",
+          "testaruda",
+          "turu",
+          "dont",
+          "ah",
+          "pretender",
+          "vampiro",
+          "incitaciones",
+          "bd",
+          "openspec",
+          "specodelic",
+          "funkalization",
+          "wild"
+        ]
+      },
+      "dose_provenance": "missing"
+    },
+    {
+      "repo": "specodelic",
+      "is_control": true,
+      "is_outlier": false,
+      "adoption": {
+        "first_ddl_commit": null,
+        "tools_first_use": {
+          "wai": "2026-09-28T20:18:57.585Z",
+          "testaruda": "2026-09-29T12:31:54.978Z",
+          "turu": "2026-09-28T17:01:14.073Z",
+          "dont": null,
+          "ah": "2026-10-03T19:27:31.203Z",
+          "pretender": "2026-10-03T19:27:31.203Z",
+          "vampiro": "2026-10-03T19:32:11.846Z",
+          "incitaciones": null,
+          "bd": "2026-09-28T16:03:49.722Z",
+          "openspec": "2026-09-28T16:29:23.196Z",
+          "specodelic": "2026-09-28T16:45:55.896Z",
+          "funkalization": null,
+          "wild": null
+        },
+        "provenance": {
+          "first_ddl_commit": "missing",
+          "tools_first_use": "reported"
+        }
+      },
+      "dose": 0.6923076923076923,
+      "dose_detail": {
+        "present": [
+          "ah",
+          "bd",
+          "openspec",
+          "pretender",
+          "specodelic",
+          "testaruda",
+          "turu",
+          "vampiro",
+          "wai"
+        ],
+        "healthy": [],
+        "missing": [
+          "dont",
+          "incitaciones",
+          "funkalization",
+          "wild"
+        ]
+      },
+      "dose_provenance": "derived"
+    },
+    {
+      "repo": "funkalization",
+      "is_control": true,
+      "is_outlier": false,
+      "adoption": {
+        "first_ddl_commit": null,
+        "tools_first_use": {
+          "wai": "2026-10-13T18:54:19.608Z",
+          "testaruda": null,
+          "turu": "2026-10-13T19:11:20.131Z",
+          "dont": null,
+          "ah": "2026-10-14T15:55:31.125Z",
+          "pretender": "2026-10-19T20:48:22.954Z",
+          "vampiro": null,
+          "incitaciones": null,
+          "bd": "2026-10-13T18:56:11.289Z",
+          "openspec": "2026-10-13T18:56:11.289Z",
+          "specodelic": "2026-10-19T20:22:28.932Z",
+          "funkalization": "2026-10-13T19:11:32.994Z",
+          "wild": null
+        },
+        "provenance": {
+          "first_ddl_commit": "missing",
+          "tools_first_use": "reported"
+        }
+      },
+      "dose": 0.6153846153846154,
+      "dose_detail": {
+        "present": [
+          "ah",
+          "bd",
+          "funkalization",
+          "openspec",
+          "pretender",
+          "specodelic",
+          "turu",
+          "wai"
+        ],
+        "healthy": [],
+        "missing": [
+          "testaruda",
+          "dont",
+          "vampiro",
+          "incitaciones",
+          "wild"
+        ]
+      },
+      "dose_provenance": "derived"
+    },
+    {
+      "repo": "wild",
+      "is_control": true,
+      "is_outlier": false,
+      "adoption": {
+        "first_ddl_commit": null,
+        "tools_first_use": {
+          "wai": "2026-10-05T15:31:44.019Z",
+          "testaruda": "2026-10-05T15:32:04.610Z",
+          "turu": "2026-10-08T21:07:00.898Z",
+          "dont": null,
+          "ah": "2026-10-05T15:32:04.610Z",
+          "pretender": "2026-10-05T15:32:04.610Z",
+          "vampiro": "2026-10-09T14:48:50.548Z",
+          "incitaciones": null,
+          "bd": "2026-10-08T18:56:52.894Z",
+          "openspec": "2026-10-05T15:32:52.802Z",
+          "specodelic": "2026-10-05T15:30:58.272Z",
+          "funkalization": null,
+          "wild": "2026-10-09T15:13:22.789Z"
+        },
+        "provenance": {
+          "first_ddl_commit": "missing",
+          "tools_first_use": "reported"
+        }
+      },
+      "dose": 0.7692307692307693,
+      "dose_detail": {
+        "present": [
+          "ah",
+          "bd",
+          "openspec",
+          "pretender",
+          "specodelic",
+          "testaruda",
+          "turu",
+          "vampiro",
+          "wai",
+          "wild"
+        ],
+        "healthy": [],
+        "missing": [
+          "dont",
+          "incitaciones",
+          "funkalization"
+        ]
+      },
+      "dose_provenance": "derived"
+    },
+    {
+      "repo": "dulce-de-leche",
+      "is_control": false,
+      "is_outlier": false,
+      "adoption": {
+        "first_ddl_commit": "2026-09-01T16:20:51-03:00",
+        "tools_first_use": {
+          "wai": "2026-07-30T19:37:51.108Z",
+          "testaruda": "2026-09-01T19:42:36.080Z",
+          "turu": "2026-09-15T19:31:52.042Z",
+          "dont": "2026-10-08T15:05:06.490Z",
+          "ah": "2026-10-05T13:36:21.976Z",
+          "pretender": "2026-10-05T15:24:29.012Z",
+          "vampiro": "2026-09-01T19:29:56.400Z",
+          "incitaciones": "2026-09-15T18:50:37.834Z",
+          "bd": "2026-07-30T19:37:46.128Z",
+          "openspec": "2026-07-30T19:52:58.770Z",
+          "specodelic": "2026-10-05T13:02:13.587Z",
+          "funkalization": null,
+          "wild": null
+        },
+        "provenance": {
+          "first_ddl_commit": "reported",
+          "tools_first_use": "reported"
+        }
+      },
+      "dose": 0.9230769230769231,
+      "dose_detail": {
+        "present": [
+          "wai",
+          "testaruda",
+          "turu",
+          "dont",
+          "ah",
+          "pretender",
+          "vampiro",
+          "incitaciones",
+          "bd",
+          "openspec",
+          "specodelic",
+          "wild"
+        ],
+        "healthy": [
+          "wai",
+          "testaruda",
+          "turu",
+          "dont",
+          "ah",
+          "pretender",
+          "vampiro",
+          "incitaciones",
+          "bd",
+          "openspec",
+          "specodelic",
+          "wild"
+        ],
+        "missing": [
+          "funkalization"
+        ]
+      },
+      "dose_provenance": "reported"
+    },
+    {
+      "repo": "coffee",
+      "is_control": true,
+      "is_outlier": false,
+      "adoption": {
+        "first_ddl_commit": null,
+        "tools_first_use": {
+          "wai": "2026-10-05T15:07:13.723Z",
+          "testaruda": null,
+          "turu": "2026-09-19T13:08:04.228Z",
+          "dont": null,
+          "ah": "2026-10-19T21:21:05.237Z",
+          "pretender": null,
+          "vampiro": null,
+          "incitaciones": null,
+          "bd": "2026-09-19T13:12:30.993Z",
+          "openspec": "2026-09-19T14:05:03.596Z",
+          "specodelic": null,
+          "funkalization": null,
+          "wild": null
+        },
+        "provenance": {
+          "first_ddl_commit": "missing",
+          "tools_first_use": "reported"
+        }
+      },
+      "dose": 0.38461538461538464,
+      "dose_detail": {
+        "present": [
+          "ah",
+          "bd",
+          "openspec",
+          "turu",
+          "wai"
+        ],
+        "healthy": [],
+        "missing": [
+          "testaruda",
+          "dont",
+          "pretender",
+          "vampiro",
+          "incitaciones",
+          "specodelic",
+          "funkalization",
+          "wild"
+        ]
+      },
+      "dose_provenance": "derived"
+    }
+  ],
+  "monthly": [
+    {
+      "repo": "ah",
+      "month": "2026-05",
+      "sessions": 14,
+      "interactions": null,
+      "errors_api_per_100": null,
+      "errors_terapia_per_100": null,
+      "recovery_p50_interactions": 1.0,
+      "recovery_censored_rate": 0.0,
+      "recovery_n": 46,
+      "session_commit_latency_p50_h": 3167.4959219444445,
+      "ci_fail_rate": null,
+      "runs_total": null,
+      "runs_failed": null,
+      "revert_ratio": 0.0,
+      "fix_ratio": null,
+      "test_commit_ratio": 0.4074074074074074,
+      "dose": 0.38461538461538464,
+      "src": {
+        "sessions": "reported",
+        "interactions": "missing",
+        "errors_api_per_100": "missing",
+        "errors_terapia_per_100": "missing",
+        "recovery_p50_interactions": "derived",
+        "recovery_censored_rate": "derived",
+        "recovery_n": "derived",
+        "session_commit_latency_p50_h": "derived",
+        "revert_ratio": "reported",
+        "fix_ratio": "missing",
+        "test_commit_ratio": "reported",
+        "ci_fail_rate": "missing",
+        "runs_total": "missing",
+        "runs_failed": "missing",
+        "dose": "derived"
+      },
+      "reasons": {
+        "interactions": "sin interacciones in-scope del proyecto",
+        "errors_api_per_100": "el reporte de usage no desglosa errores API por repo-mes",
+        "errors_terapia_per_100": "terapia es una query global (sin filtro por proyecto); desglose en metadata",
+        "session_commit_latency_p50_h": null
+      }
+    },
+    {
+      "repo": "ah",
+      "month": "2026-07",
+      "sessions": 11,
+      "interactions": null,
+      "errors_api_per_100": null,
+      "errors_terapia_per_100": null,
+      "recovery_p50_interactions": 1,
+      "recovery_censored_rate": 0.007042253521126761,
+      "recovery_n": 142,
+      "session_commit_latency_p50_h": 1486.6787594444445,
+      "ci_fail_rate": 0.08247422680412371,
+      "runs_total": 97,
+      "runs_failed": 8,
+      "revert_ratio": 0.0,
+      "fix_ratio": 4.75,
+      "test_commit_ratio": 0.3333333333333333,
+      "dose": 0.38461538461538464,
+      "src": {
+        "sessions": "reported",
+        "interactions": "missing",
+        "errors_api_per_100": "missing",
+        "errors_terapia_per_100": "missing",
+        "recovery_p50_interactions": "derived",
+        "recovery_censored_rate": "derived",
+        "recovery_n": "derived",
+        "session_commit_latency_p50_h": "derived",
+        "revert_ratio": "reported",
+        "fix_ratio": "reported",
+        "test_commit_ratio": "reported",
+        "ci_fail_rate": "cached",
+        "runs_total": "cached",
+        "runs_failed": "cached",
+        "dose": "derived"
+      },
+      "reasons": {
+        "interactions": "sin interacciones in-scope del proyecto",
+        "errors_api_per_100": "el reporte de usage no desglosa errores API por repo-mes",
+        "errors_terapia_per_100": "terapia es una query global (sin filtro por proyecto); desglose en metadata",
+        "session_commit_latency_p50_h": null
+      }
+    },
+    {
+      "repo": "ah",
+      "month": "2026-08",
+      "sessions": 2,
+      "interactions": null,
+      "errors_api_per_100": null,
+      "errors_terapia_per_100": null,
+      "recovery_p50_interactions": 1.0,
+      "recovery_censored_rate": 0.0,
+      "recovery_n": 38,
+      "session_commit_latency_p50_h": 1369.0567722222222,
+      "ci_fail_rate": 0.041666666666666664,
+      "runs_total": 48,
+      "runs_failed": 2,
+      "revert_ratio": 0.0,
+      "fix_ratio": 13.0,
+      "test_commit_ratio": 0.18181818181818182,
+      "dose": 0.38461538461538464,
+      "src": {
+        "sessions": "reported",
+        "interactions": "missing",
+        "errors_api_per_100": "missing",
+        "errors_terapia_per_100": "missing",
+        "recovery_p50_interactions": "derived",
+        "recovery_censored_rate": "derived",
+        "recovery_n": "derived",
+        "session_commit_latency_p50_h": "derived",
+        "revert_ratio": "reported",
+        "fix_ratio": "reported",
+        "test_commit_ratio": "reported",
+        "ci_fail_rate": "cached",
+        "runs_total": "cached",
+        "runs_failed": "cached",
+        "dose": "derived"
+      },
+      "reasons": {
+        "interactions": "sin interacciones in-scope del proyecto",
+        "errors_api_per_100": "el reporte de usage no desglosa errores API por repo-mes",
+        "errors_terapia_per_100": "terapia es una query global (sin filtro por proyecto); desglose en metadata",
+        "session_commit_latency_p50_h": null
+      }
+    },
+    {
+      "repo": "ah",
+      "month": "2026-09",
+      "sessions": 12,
+      "interactions": null,
+      "errors_api_per_100": null,
+      "errors_terapia_per_100": null,
+      "recovery_p50_interactions": 1.0,
+      "recovery_censored_rate": 0.0,
+      "recovery_n": 96,
+      "session_commit_latency_p50_h": 67.72471333333333,
+      "ci_fail_rate": 0.09482758620689655,
+      "runs_total": 116,
+      "runs_failed": 11,
+      "revert_ratio": 0.0,
+      "fix_ratio": 2.0,
+      "test_commit_ratio": 0.1346153846153846,
+      "dose": 0.6153846153846154,
+      "src": {
+        "sessions": "reported",
+        "interactions": "missing",
+        "errors_api_per_100": "missing",
+        "errors_terapia_per_100": "missing",
+        "recovery_p50_interactions": "derived",
+        "recovery_censored_rate": "derived",
+        "recovery_n": "derived",
+        "session_commit_latency_p50_h": "derived",
+        "revert_ratio": "reported",
+        "fix_ratio": "reported",
+        "test_commit_ratio": "reported",
+        "ci_fail_rate": "cached",
+        "runs_total": "cached",
+        "runs_failed": "cached",
+        "dose": "derived"
+      },
+      "reasons": {
+        "interactions": "sin interacciones in-scope del proyecto",
+        "errors_api_per_100": "el reporte de usage no desglosa errores API por repo-mes",
+        "errors_terapia_per_100": "terapia es una query global (sin filtro por proyecto); desglose en metadata",
+        "session_commit_latency_p50_h": null
+      }
+    },
+    {
+      "repo": "ah",
+      "month": "2026-10",
+      "sessions": 28,
+      "interactions": null,
+      "errors_api_per_100": null,
+      "errors_terapia_per_100": null,
+      "recovery_p50_interactions": 1,
+      "recovery_censored_rate": 0.0,
+      "recovery_n": 155,
+      "session_commit_latency_p50_h": 11.622069999999999,
+      "ci_fail_rate": 0.35714285714285715,
+      "runs_total": 168,
+      "runs_failed": 60,
+      "revert_ratio": 0.0,
+      "fix_ratio": 4.142857142857143,
+      "test_commit_ratio": 0.19047619047619047,
+      "dose": 0.6923076923076923,
+      "src": {
+        "sessions": "reported",
+        "interactions": "missing",
+        "errors_api_per_100": "missing",
+        "errors_terapia_per_100": "missing",
+        "recovery_p50_interactions": "derived",
+        "recovery_censored_rate": "derived",
+        "recovery_n": "derived",
+        "session_commit_latency_p50_h": "derived",
+        "revert_ratio": "reported",
+        "fix_ratio": "reported",
+        "test_commit_ratio": "reported",
+        "ci_fail_rate": "cached",
+        "runs_total": "cached",
+        "runs_failed": "cached",
+        "dose": "derived"
+      },
+      "reasons": {
+        "interactions": "sin interacciones in-scope del proyecto",
+        "errors_api_per_100": "el reporte de usage no desglosa errores API por repo-mes",
+        "errors_terapia_per_100": "terapia es una query global (sin filtro por proyecto); desglose en metadata",
+        "session_commit_latency_p50_h": null
+      }
+    },
+    {
+      "repo": "coffee",
+      "month": "2026-09",
+      "sessions": 56,
+      "interactions": 4920,
+      "errors_api_per_100": null,
+      "errors_terapia_per_100": null,
+      "recovery_p50_interactions": 1,
+      "recovery_censored_rate": 0.0034482758620689655,
+      "recovery_n": 290,
+      "session_commit_latency_p50_h": 575.1704294444445,
+      "ci_fail_rate": 0.050505050505050504,
+      "runs_total": 99,
+      "runs_failed": 5,
+      "revert_ratio": 0.0,
+      "fix_ratio": null,
+      "test_commit_ratio": 0.3698630136986301,
+      "dose": 0.23076923076923078,
+      "src": {
+        "sessions": "reported",
+        "interactions": "reported",
+        "errors_api_per_100": "missing",
+        "errors_terapia_per_100": "missing",
+        "recovery_p50_interactions": "derived",
+        "recovery_censored_rate": "derived",
+        "recovery_n": "derived",
+        "session_commit_latency_p50_h": "derived",
+        "revert_ratio": "reported",
+        "fix_ratio": "missing",
+        "test_commit_ratio": "reported",
+        "ci_fail_rate": "cached",
+        "runs_total": "cached",
+        "runs_failed": "cached",
+        "dose": "derived"
+      },
+      "reasons": {
+        "interactions": null,
+        "errors_api_per_100": "el reporte de usage no desglosa errores API por repo-mes",
+        "errors_terapia_per_100": "terapia es una query global (sin filtro por proyecto); desglose en metadata",
+        "session_commit_latency_p50_h": null
+      }
+    },
+    {
+      "repo": "coffee",
+      "month": "2026-10",
+      "sessions": 10,
+      "interactions": 712,
+      "errors_api_per_100": null,
+      "errors_terapia_per_100": null,
+      "recovery_p50_interactions": 1,
+      "recovery_censored_rate": 0.017857142857142856,
+      "recovery_n": 56,
+      "session_commit_latency_p50_h": 0.0,
+      "ci_fail_rate": 0.041666666666666664,
+      "runs_total": 24,
+      "runs_failed": 1,
+      "revert_ratio": 0.0,
+      "fix_ratio": null,
+      "test_commit_ratio": 0.35294117647058826,
+      "dose": 0.38461538461538464,
+      "src": {
+        "sessions": "reported",
+        "interactions": "reported",
+        "errors_api_per_100": "missing",
+        "errors_terapia_per_100": "missing",
+        "recovery_p50_interactions": "derived",
+        "recovery_censored_rate": "derived",
+        "recovery_n": "derived",
+        "session_commit_latency_p50_h": "derived",
+        "revert_ratio": "reported",
+        "fix_ratio": "missing",
+        "test_commit_ratio": "reported",
+        "ci_fail_rate": "cached",
+        "runs_total": "cached",
+        "runs_failed": "cached",
+        "dose": "derived"
+      },
+      "reasons": {
+        "interactions": null,
+        "errors_api_per_100": "el reporte de usage no desglosa errores API por repo-mes",
+        "errors_terapia_per_100": "terapia es una query global (sin filtro por proyecto); desglose en metadata",
+        "session_commit_latency_p50_h": null
+      }
+    },
+    {
+      "repo": "dont",
+      "month": "2026-04",
+      "sessions": 13,
+      "interactions": 1469,
+      "errors_api_per_100": null,
+      "errors_terapia_per_100": null,
+      "recovery_p50_interactions": 1.0,
+      "recovery_censored_rate": 0.0,
+      "recovery_n": 32,
+      "session_commit_latency_p50_h": 448.4834075,
+      "ci_fail_rate": 0.5294117647058824,
+      "runs_total": 34,
+      "runs_failed": 18,
+      "revert_ratio": 0.0,
+      "fix_ratio": null,
+      "test_commit_ratio": 0.02702702702702703,
+      "dose": 0.3076923076923077,
+      "src": {
+        "sessions": "reported",
+        "interactions": "reported",
+        "errors_api_per_100": "missing",
+        "errors_terapia_per_100": "missing",
+        "recovery_p50_interactions": "derived",
+        "recovery_censored_rate": "derived",
+        "recovery_n": "derived",
+        "session_commit_latency_p50_h": "derived",
+        "revert_ratio": "reported",
+        "fix_ratio": "missing",
+        "test_commit_ratio": "reported",
+        "ci_fail_rate": "cached",
+        "runs_total": "cached",
+        "runs_failed": "cached",
+        "dose": "derived"
+      },
+      "reasons": {
+        "interactions": null,
+        "errors_api_per_100": "el reporte de usage no desglosa errores API por repo-mes",
+        "errors_terapia_per_100": "terapia es una query global (sin filtro por proyecto); desglose en metadata",
+        "session_commit_latency_p50_h": null
+      }
+    },
+    {
+      "repo": "dont",
+      "month": "2026-05",
+      "sessions": 61,
+      "interactions": 10367,
+      "errors_api_per_100": null,
+      "errors_terapia_per_100": null,
+      "recovery_p50_interactions": 2,
+      "recovery_censored_rate": 0.0,
+      "recovery_n": 163,
+      "session_commit_latency_p50_h": 1436.9889819444445,
+      "ci_fail_rate": 0.46564885496183206,
+      "runs_total": 262,
+      "runs_failed": 122,
+      "revert_ratio": 0.0,
+      "fix_ratio": null,
+      "test_commit_ratio": 0.6569037656903766,
+      "dose": 0.3076923076923077,
+      "src": {
+        "sessions": "reported",
+        "interactions": "reported",
+        "errors_api_per_100": "missing",
+        "errors_terapia_per_100": "missing",
+        "recovery_p50_interactions": "derived",
+        "recovery_censored_rate": "derived",
+        "recovery_n": "derived",
+        "session_commit_latency_p50_h": "derived",
+        "revert_ratio": "reported",
+        "fix_ratio": "missing",
+        "test_commit_ratio": "reported",
+        "ci_fail_rate": "cached",
+        "runs_total": "cached",
+        "runs_failed": "cached",
+        "dose": "derived"
+      },
+      "reasons": {
+        "interactions": null,
+        "errors_api_per_100": "el reporte de usage no desglosa errores API por repo-mes",
+        "errors_terapia_per_100": "terapia es una query global (sin filtro por proyecto); desglose en metadata",
+        "session_commit_latency_p50_h": null
+      }
+    },
+    {
+      "repo": "dont",
+      "month": "2026-06",
+      "sessions": 2,
+      "interactions": 2596,
+      "errors_api_per_100": null,
+      "errors_terapia_per_100": null,
+      "recovery_p50_interactions": 2.0,
+      "recovery_censored_rate": 0.0,
+      "recovery_n": 20,
+      "session_commit_latency_p50_h": 1271.914971111111,
+      "ci_fail_rate": 0.3333333333333333,
+      "runs_total": 42,
+      "runs_failed": 14,
+      "revert_ratio": 0.0,
+      "fix_ratio": null,
+      "test_commit_ratio": 0.6,
+      "dose": 0.3076923076923077,
+      "src": {
+        "sessions": "reported",
+        "interactions": "reported",
+        "errors_api_per_100": "missing",
+        "errors_terapia_per_100": "missing",
+        "recovery_p50_interactions": "derived",
+        "recovery_censored_rate": "derived",
+        "recovery_n": "derived",
+        "session_commit_latency_p50_h": "derived",
+        "revert_ratio": "reported",
+        "fix_ratio": "missing",
+        "test_commit_ratio": "reported",
+        "ci_fail_rate": "cached",
+        "runs_total": "cached",
+        "runs_failed": "cached",
+        "dose": "derived"
+      },
+      "reasons": {
+        "interactions": null,
+        "errors_api_per_100": "el reporte de usage no desglosa errores API por repo-mes",
+        "errors_terapia_per_100": "terapia es una query global (sin filtro por proyecto); desglose en metadata",
+        "session_commit_latency_p50_h": null
+      }
+    },
+    {
+      "repo": "dont",
+      "month": "2026-07",
+      "sessions": 14,
+      "interactions": 2587,
+      "errors_api_per_100": null,
+      "errors_terapia_per_100": null,
+      "recovery_p50_interactions": 1,
+      "recovery_censored_rate": 0.003472222222222222,
+      "recovery_n": 288,
+      "session_commit_latency_p50_h": 1467.775571388889,
+      "ci_fail_rate": 0.25,
+      "runs_total": 76,
+      "runs_failed": 19,
+      "revert_ratio": 0.0,
+      "fix_ratio": 3.5,
+      "test_commit_ratio": 0.3275862068965517,
+      "dose": 0.46153846153846156,
+      "src": {
+        "sessions": "reported",
+        "interactions": "reported",
+        "errors_api_per_100": "missing",
+        "errors_terapia_per_100": "missing",
+        "recovery_p50_interactions": "derived",
+        "recovery_censored_rate": "derived",
+        "recovery_n": "derived",
+        "session_commit_latency_p50_h": "derived",
+        "revert_ratio": "reported",
+        "fix_ratio": "reported",
+        "test_commit_ratio": "reported",
+        "ci_fail_rate": "cached",
+        "runs_total": "cached",
+        "runs_failed": "cached",
+        "dose": "derived"
+      },
+      "reasons": {
+        "interactions": null,
+        "errors_api_per_100": "el reporte de usage no desglosa errores API por repo-mes",
+        "errors_terapia_per_100": "terapia es una query global (sin filtro por proyecto); desglose en metadata",
+        "session_commit_latency_p50_h": null
+      }
+    },
+    {
+      "repo": "dont",
+      "month": "2026-09",
+      "sessions": 2,
+      "interactions": 336,
+      "errors_api_per_100": null,
+      "errors_terapia_per_100": null,
+      "recovery_p50_interactions": 1.0,
+      "recovery_censored_rate": 0.0,
+      "recovery_n": 16,
+      "session_commit_latency_p50_h": 575.9109930555555,
+      "ci_fail_rate": 0.16279069767441862,
+      "runs_total": 43,
+      "runs_failed": 7,
+      "revert_ratio": 0.0,
+      "fix_ratio": 8.0,
+      "test_commit_ratio": 0.2777777777777778,
+      "dose": 0.6153846153846154,
+      "src": {
+        "sessions": "reported",
+        "interactions": "reported",
+        "errors_api_per_100": "missing",
+        "errors_terapia_per_100": "missing",
+        "recovery_p50_interactions": "derived",
+        "recovery_censored_rate": "derived",
+        "recovery_n": "derived",
+        "session_commit_latency_p50_h": "derived",
+        "revert_ratio": "reported",
+        "fix_ratio": "reported",
+        "test_commit_ratio": "reported",
+        "ci_fail_rate": "cached",
+        "runs_total": "cached",
+        "runs_failed": "cached",
+        "dose": "derived"
+      },
+      "reasons": {
+        "interactions": null,
+        "errors_api_per_100": "el reporte de usage no desglosa errores API por repo-mes",
+        "errors_terapia_per_100": "terapia es una query global (sin filtro por proyecto); desglose en metadata",
+        "session_commit_latency_p50_h": null
+      }
+    },
+    {
+      "repo": "dont",
+      "month": "2026-10",
+      "sessions": 7,
+      "interactions": 581,
+      "errors_api_per_100": null,
+      "errors_terapia_per_100": null,
+      "recovery_p50_interactions": 1.0,
+      "recovery_censored_rate": 0.0,
+      "recovery_n": 30,
+      "session_commit_latency_p50_h": 0.0,
+      "ci_fail_rate": 0.22727272727272727,
+      "runs_total": 66,
+      "runs_failed": 15,
+      "revert_ratio": 0.0,
+      "fix_ratio": null,
+      "test_commit_ratio": 0.14705882352941177,
+      "dose": 0.6923076923076923,
+      "src": {
+        "sessions": "reported",
+        "interactions": "reported",
+        "errors_api_per_100": "missing",
+        "errors_terapia_per_100": "missing",
+        "recovery_p50_interactions": "derived",
+        "recovery_censored_rate": "derived",
+        "recovery_n": "derived",
+        "session_commit_latency_p50_h": "derived",
+        "revert_ratio": "reported",
+        "fix_ratio": "missing",
+        "test_commit_ratio": "reported",
+        "ci_fail_rate": "cached",
+        "runs_total": "cached",
+        "runs_failed": "cached",
+        "dose": "derived"
+      },
+      "reasons": {
+        "interactions": null,
+        "errors_api_per_100": "el reporte de usage no desglosa errores API por repo-mes",
+        "errors_terapia_per_100": "terapia es una query global (sin filtro por proyecto); desglose en metadata",
+        "session_commit_latency_p50_h": null
+      }
+    },
+    {
+      "repo": "dulce-de-leche",
+      "month": "2026-07",
+      "sessions": 2,
+      "interactions": 365,
+      "errors_api_per_100": null,
+      "errors_terapia_per_100": null,
+      "recovery_p50_interactions": 2,
+      "recovery_censored_rate": 0.0,
+      "recovery_n": 31,
+      "session_commit_latency_p50_h": 1651.89041,
+      "ci_fail_rate": 0.9411764705882353,
+      "runs_total": 17,
+      "runs_failed": 16,
+      "revert_ratio": 0.0,
+      "fix_ratio": 0.0,
+      "test_commit_ratio": 0.17647058823529413,
+      "dose": 0.23076923076923078,
+      "src": {
+        "sessions": "reported",
+        "interactions": "reported",
+        "errors_api_per_100": "missing",
+        "errors_terapia_per_100": "missing",
+        "recovery_p50_interactions": "derived",
+        "recovery_censored_rate": "derived",
+        "recovery_n": "derived",
+        "session_commit_latency_p50_h": "derived",
+        "revert_ratio": "reported",
+        "fix_ratio": "reported",
+        "test_commit_ratio": "reported",
+        "ci_fail_rate": "cached",
+        "runs_total": "cached",
+        "runs_failed": "cached",
+        "dose": "derived"
+      },
+      "reasons": {
+        "interactions": null,
+        "errors_api_per_100": "el reporte de usage no desglosa errores API por repo-mes",
+        "errors_terapia_per_100": "terapia es una query global (sin filtro por proyecto); desglose en metadata",
+        "session_commit_latency_p50_h": null
+      }
+    },
+    {
+      "repo": "dulce-de-leche",
+      "month": "2026-08",
+      "sessions": 2,
+      "interactions": 470,
+      "errors_api_per_100": null,
+      "errors_terapia_per_100": null,
+      "recovery_p50_interactions": 2,
+      "recovery_censored_rate": 0.0,
+      "recovery_n": 47,
+      "session_commit_latency_p50_h": 1534.7630291666667,
+      "ci_fail_rate": 0.9333333333333333,
+      "runs_total": 15,
+      "runs_failed": 14,
+      "revert_ratio": 0.0,
+      "fix_ratio": 9.0,
+      "test_commit_ratio": 0.55,
+      "dose": 0.23076923076923078,
+      "src": {
+        "sessions": "reported",
+        "interactions": "reported",
+        "errors_api_per_100": "missing",
+        "errors_terapia_per_100": "missing",
+        "recovery_p50_interactions": "derived",
+        "recovery_censored_rate": "derived",
+        "recovery_n": "derived",
+        "session_commit_latency_p50_h": "derived",
+        "revert_ratio": "reported",
+        "fix_ratio": "reported",
+        "test_commit_ratio": "reported",
+        "ci_fail_rate": "cached",
+        "runs_total": "cached",
+        "runs_failed": "cached",
+        "dose": "derived"
+      },
+      "reasons": {
+        "interactions": null,
+        "errors_api_per_100": "el reporte de usage no desglosa errores API por repo-mes",
+        "errors_terapia_per_100": "terapia es una query global (sin filtro por proyecto); desglose en metadata",
+        "session_commit_latency_p50_h": null
+      }
+    },
+    {
+      "repo": "dulce-de-leche",
+      "month": "2026-09",
+      "sessions": 9,
+      "interactions": 1342,
+      "errors_api_per_100": null,
+      "errors_terapia_per_100": null,
+      "recovery_p50_interactions": 1.0,
+      "recovery_censored_rate": 0.0,
+      "recovery_n": 70,
+      "session_commit_latency_p50_h": 340.9144833333333,
+      "ci_fail_rate": 0.31386861313868614,
+      "runs_total": 137,
+      "runs_failed": 43,
+      "revert_ratio": 0.0,
+      "fix_ratio": 4.75,
+      "test_commit_ratio": 0.22727272727272727,
+      "dose": 0.5384615384615384,
+      "src": {
+        "sessions": "reported",
+        "interactions": "reported",
+        "errors_api_per_100": "missing",
+        "errors_terapia_per_100": "missing",
+        "recovery_p50_interactions": "derived",
+        "recovery_censored_rate": "derived",
+        "recovery_n": "derived",
+        "session_commit_latency_p50_h": "derived",
+        "revert_ratio": "reported",
+        "fix_ratio": "reported",
+        "test_commit_ratio": "reported",
+        "ci_fail_rate": "cached",
+        "runs_total": "cached",
+        "runs_failed": "cached",
+        "dose": "derived"
+      },
+      "reasons": {
+        "interactions": null,
+        "errors_api_per_100": "el reporte de usage no desglosa errores API por repo-mes",
+        "errors_terapia_per_100": "terapia es una query global (sin filtro por proyecto); desglose en metadata",
+        "session_commit_latency_p50_h": null
+      }
+    },
+    {
+      "repo": "dulce-de-leche",
+      "month": "2026-10",
+      "sessions": 19,
+      "interactions": 2389,
+      "errors_api_per_100": null,
+      "errors_terapia_per_100": null,
+      "recovery_p50_interactions": 1.0,
+      "recovery_censored_rate": 0.011235955056179775,
+      "recovery_n": 89,
+      "session_commit_latency_p50_h": 0.0,
+      "ci_fail_rate": 0.2032520325203252,
+      "runs_total": 246,
+      "runs_failed": 50,
+      "revert_ratio": 0.0,
+      "fix_ratio": 8.0,
+      "test_commit_ratio": 0.23008849557522124,
+      "dose": 0.8461538461538461,
+      "src": {
+        "sessions": "reported",
+        "interactions": "reported",
+        "errors_api_per_100": "missing",
+        "errors_terapia_per_100": "missing",
+        "recovery_p50_interactions": "derived",
+        "recovery_censored_rate": "derived",
+        "recovery_n": "derived",
+        "session_commit_latency_p50_h": "derived",
+        "revert_ratio": "reported",
+        "fix_ratio": "reported",
+        "test_commit_ratio": "reported",
+        "ci_fail_rate": "cached",
+        "runs_total": "cached",
+        "runs_failed": "cached",
+        "dose": "derived"
+      },
+      "reasons": {
+        "interactions": null,
+        "errors_api_per_100": "el reporte de usage no desglosa errores API por repo-mes",
+        "errors_terapia_per_100": "terapia es una query global (sin filtro por proyecto); desglose en metadata",
+        "session_commit_latency_p50_h": null
+      }
+    },
+    {
+      "repo": "funkalization",
+      "month": "2026-10",
+      "sessions": 6,
+      "interactions": 338,
+      "errors_api_per_100": null,
+      "errors_terapia_per_100": null,
+      "recovery_p50_interactions": 1,
+      "recovery_censored_rate": 0.0,
+      "recovery_n": 11,
+      "session_commit_latency_p50_h": null,
+      "ci_fail_rate": 0.09090909090909091,
+      "runs_total": 11,
+      "runs_failed": 1,
+      "revert_ratio": 0.0,
+      "fix_ratio": null,
+      "test_commit_ratio": 0.22727272727272727,
+      "dose": 0.6153846153846154,
+      "src": {
+        "sessions": "reported",
+        "interactions": "reported",
+        "errors_api_per_100": "missing",
+        "errors_terapia_per_100": "missing",
+        "recovery_p50_interactions": "derived",
+        "recovery_censored_rate": "derived",
+        "recovery_n": "derived",
+        "session_commit_latency_p50_h": "missing",
+        "revert_ratio": "reported",
+        "fix_ratio": "missing",
+        "test_commit_ratio": "reported",
+        "ci_fail_rate": "cached",
+        "runs_total": "cached",
+        "runs_failed": "cached",
+        "dose": "derived"
+      },
+      "reasons": {
+        "interactions": null,
+        "errors_api_per_100": "el reporte de usage no desglosa errores API por repo-mes",
+        "errors_terapia_per_100": "terapia es una query global (sin filtro por proyecto); desglose en metadata",
+        "session_commit_latency_p50_h": "sin commit posterior al ancla de sesi\u00f3n del mes"
+      }
+    },
+    {
+      "repo": "incitaciones",
+      "month": "2026-01",
+      "sessions": null,
+      "interactions": 5,
+      "errors_api_per_100": null,
+      "errors_terapia_per_100": null,
+      "ci_fail_rate": null,
+      "runs_total": null,
+      "runs_failed": null,
+      "revert_ratio": 0.0,
+      "fix_ratio": null,
+      "test_commit_ratio": 0.0,
+      "dose": 0.0,
+      "src": {
+        "sessions": "missing",
+        "interactions": "reported",
+        "errors_api_per_100": "missing",
+        "errors_terapia_per_100": "missing",
+        "revert_ratio": "reported",
+        "fix_ratio": "missing",
+        "test_commit_ratio": "reported",
+        "ci_fail_rate": "missing",
+        "runs_total": "missing",
+        "runs_failed": "missing",
+        "dose": "derived"
+      },
+      "reasons": {
+        "interactions": null,
+        "errors_api_per_100": "el reporte de usage no desglosa errores API por repo-mes",
+        "errors_terapia_per_100": "terapia es una query global (sin filtro por proyecto); desglose en metadata"
+      }
+    },
+    {
+      "repo": "incitaciones",
+      "month": "2026-02",
+      "sessions": null,
+      "interactions": 2,
+      "errors_api_per_100": null,
+      "errors_terapia_per_100": null,
+      "ci_fail_rate": 0.0,
+      "runs_total": 2,
+      "runs_failed": 0,
+      "revert_ratio": 0.0,
+      "fix_ratio": null,
+      "test_commit_ratio": 0.0,
+      "dose": 0.0,
+      "src": {
+        "sessions": "missing",
+        "interactions": "reported",
+        "errors_api_per_100": "missing",
+        "errors_terapia_per_100": "missing",
+        "revert_ratio": "reported",
+        "fix_ratio": "missing",
+        "test_commit_ratio": "reported",
+        "ci_fail_rate": "cached",
+        "runs_total": "cached",
+        "runs_failed": "cached",
+        "dose": "derived"
+      },
+      "reasons": {
+        "interactions": null,
+        "errors_api_per_100": "el reporte de usage no desglosa errores API por repo-mes",
+        "errors_terapia_per_100": "terapia es una query global (sin filtro por proyecto); desglose en metadata"
+      }
+    },
+    {
+      "repo": "incitaciones",
+      "month": "2026-04",
+      "sessions": 7,
+      "interactions": 708,
+      "errors_api_per_100": null,
+      "errors_terapia_per_100": null,
+      "recovery_p50_interactions": 1,
+      "recovery_censored_rate": 0.0,
+      "recovery_n": 33,
+      "session_commit_latency_p50_h": 3430.5678269444443,
+      "ci_fail_rate": 0.0,
+      "runs_total": 18,
+      "runs_failed": 0,
+      "revert_ratio": 0.0,
+      "fix_ratio": null,
+      "test_commit_ratio": 0.13793103448275862,
+      "dose": 0.0,
+      "src": {
+        "sessions": "reported",
+        "interactions": "reported",
+        "errors_api_per_100": "missing",
+        "errors_terapia_per_100": "missing",
+        "recovery_p50_interactions": "derived",
+        "recovery_censored_rate": "derived",
+        "recovery_n": "derived",
+        "session_commit_latency_p50_h": "derived",
+        "revert_ratio": "reported",
+        "fix_ratio": "missing",
+        "test_commit_ratio": "reported",
+        "ci_fail_rate": "cached",
+        "runs_total": "cached",
+        "runs_failed": "cached",
+        "dose": "derived"
+      },
+      "reasons": {
+        "interactions": null,
+        "errors_api_per_100": "el reporte de usage no desglosa errores API por repo-mes",
+        "errors_terapia_per_100": "terapia es una query global (sin filtro por proyecto); desglose en metadata",
+        "session_commit_latency_p50_h": null
+      }
+    },
+    {
+      "repo": "incitaciones",
+      "month": "2026-05",
+      "sessions": 5,
+      "interactions": 226,
+      "errors_api_per_100": null,
+      "errors_terapia_per_100": null,
+      "recovery_p50_interactions": 3,
+      "recovery_censored_rate": 0.0,
+      "recovery_n": 3,
+      "session_commit_latency_p50_h": 2859.1400383333335,
+      "ci_fail_rate": 0.0,
+      "runs_total": 4,
+      "runs_failed": 0,
+      "revert_ratio": 0.0,
+      "fix_ratio": null,
+      "test_commit_ratio": 0.2,
+      "dose": 0.0,
+      "src": {
+        "sessions": "reported",
+        "interactions": "reported",
+        "errors_api_per_100": "missing",
+        "errors_terapia_per_100": "missing",
+        "recovery_p50_interactions": "derived",
+        "recovery_censored_rate": "derived",
+        "recovery_n": "derived",
+        "session_commit_latency_p50_h": "derived",
+        "revert_ratio": "reported",
+        "fix_ratio": "missing",
+        "test_commit_ratio": "reported",
+        "ci_fail_rate": "cached",
+        "runs_total": "cached",
+        "runs_failed": "cached",
+        "dose": "derived"
+      },
+      "reasons": {
+        "interactions": null,
+        "errors_api_per_100": "el reporte de usage no desglosa errores API por repo-mes",
+        "errors_terapia_per_100": "terapia es una query global (sin filtro por proyecto); desglose en metadata",
+        "session_commit_latency_p50_h": null
+      }
+    },
+    {
+      "repo": "incitaciones",
+      "month": "2026-07",
+      "sessions": 8,
+      "interactions": 645,
+      "errors_api_per_100": null,
+      "errors_terapia_per_100": null,
+      "recovery_p50_interactions": 1.0,
+      "recovery_censored_rate": 0.0,
+      "recovery_n": 44,
+      "session_commit_latency_p50_h": 1337.8602880555554,
+      "ci_fail_rate": 0.0,
+      "runs_total": 18,
+      "runs_failed": 0,
+      "revert_ratio": 0.0,
+      "fix_ratio": 1.0,
+      "test_commit_ratio": 0.0,
+      "dose": 0.07692307692307693,
+      "src": {
+        "sessions": "reported",
+        "interactions": "reported",
+        "errors_api_per_100": "missing",
+        "errors_terapia_per_100": "missing",
+        "recovery_p50_interactions": "derived",
+        "recovery_censored_rate": "derived",
+        "recovery_n": "derived",
+        "session_commit_latency_p50_h": "derived",
+        "revert_ratio": "reported",
+        "fix_ratio": "reported",
+        "test_commit_ratio": "reported",
+        "ci_fail_rate": "cached",
+        "runs_total": "cached",
+        "runs_failed": "cached",
+        "dose": "derived"
+      },
+      "reasons": {
+        "interactions": null,
+        "errors_api_per_100": "el reporte de usage no desglosa errores API por repo-mes",
+        "errors_terapia_per_100": "terapia es una query global (sin filtro por proyecto); desglose en metadata",
+        "session_commit_latency_p50_h": null
+      }
+    },
+    {
+      "repo": "incitaciones",
+      "month": "2026-08",
+      "sessions": 1,
+      "interactions": 56,
+      "errors_api_per_100": null,
+      "errors_terapia_per_100": null,
+      "recovery_p50_interactions": 1.5,
+      "recovery_censored_rate": 0.0,
+      "recovery_n": 2,
+      "session_commit_latency_p50_h": 594.1698869444444,
+      "ci_fail_rate": 0.0,
+      "runs_total": 1,
+      "runs_failed": 0,
+      "revert_ratio": 0.0,
+      "fix_ratio": null,
+      "test_commit_ratio": 0.0,
+      "dose": 0.07692307692307693,
+      "src": {
+        "sessions": "reported",
+        "interactions": "reported",
+        "errors_api_per_100": "missing",
+        "errors_terapia_per_100": "missing",
+        "recovery_p50_interactions": "derived",
+        "recovery_censored_rate": "derived",
+        "recovery_n": "derived",
+        "session_commit_latency_p50_h": "derived",
+        "revert_ratio": "reported",
+        "fix_ratio": "missing",
+        "test_commit_ratio": "reported",
+        "ci_fail_rate": "cached",
+        "runs_total": "cached",
+        "runs_failed": "cached",
+        "dose": "derived"
+      },
+      "reasons": {
+        "interactions": null,
+        "errors_api_per_100": "el reporte de usage no desglosa errores API por repo-mes",
+        "errors_terapia_per_100": "terapia es una query global (sin filtro por proyecto); desglose en metadata",
+        "session_commit_latency_p50_h": null
+      }
+    },
+    {
+      "repo": "incitaciones",
+      "month": "2026-09",
+      "sessions": 13,
+      "interactions": 1333,
+      "errors_api_per_100": null,
+      "errors_terapia_per_100": null,
+      "recovery_p50_interactions": 1,
+      "recovery_censored_rate": 0.0,
+      "recovery_n": 69,
+      "session_commit_latency_p50_h": 338.8889977777778,
+      "ci_fail_rate": 0.021052631578947368,
+      "runs_total": 95,
+      "runs_failed": 2,
+      "revert_ratio": 0.0,
+      "fix_ratio": 1.8333333333333333,
+      "test_commit_ratio": 0.07462686567164178,
+      "dose": 0.23076923076923078,
+      "src": {
+        "sessions": "reported",
+        "interactions": "reported",
+        "errors_api_per_100": "missing",
+        "errors_terapia_per_100": "missing",
+        "recovery_p50_interactions": "derived",
+        "recovery_censored_rate": "derived",
+        "recovery_n": "derived",
+        "session_commit_latency_p50_h": "derived",
+        "revert_ratio": "reported",
+        "fix_ratio": "reported",
+        "test_commit_ratio": "reported",
+        "ci_fail_rate": "cached",
+        "runs_total": "cached",
+        "runs_failed": "cached",
+        "dose": "derived"
+      },
+      "reasons": {
+        "interactions": null,
+        "errors_api_per_100": "el reporte de usage no desglosa errores API por repo-mes",
+        "errors_terapia_per_100": "terapia es una query global (sin filtro por proyecto); desglose en metadata",
+        "session_commit_latency_p50_h": null
+      }
+    },
+    {
+      "repo": "incitaciones",
+      "month": "2026-10",
+      "sessions": 9,
+      "interactions": 696,
+      "errors_api_per_100": null,
+      "errors_terapia_per_100": null,
+      "recovery_p50_interactions": 1,
+      "recovery_censored_rate": 0.0,
+      "recovery_n": 25,
+      "session_commit_latency_p50_h": 0.0,
+      "ci_fail_rate": 0.0,
+      "runs_total": 36,
+      "runs_failed": 0,
+      "revert_ratio": 0.0,
+      "fix_ratio": 1.6666666666666667,
+      "test_commit_ratio": 0.10526315789473684,
+      "dose": 0.46153846153846156,
+      "src": {
+        "sessions": "reported",
+        "interactions": "reported",
+        "errors_api_per_100": "missing",
+        "errors_terapia_per_100": "missing",
+        "recovery_p50_interactions": "derived",
+        "recovery_censored_rate": "derived",
+        "recovery_n": "derived",
+        "session_commit_latency_p50_h": "derived",
+        "revert_ratio": "reported",
+        "fix_ratio": "reported",
+        "test_commit_ratio": "reported",
+        "ci_fail_rate": "cached",
+        "runs_total": "cached",
+        "runs_failed": "cached",
+        "dose": "derived"
+      },
+      "reasons": {
+        "interactions": null,
+        "errors_api_per_100": "el reporte de usage no desglosa errores API por repo-mes",
+        "errors_terapia_per_100": "terapia es una query global (sin filtro por proyecto); desglose en metadata",
+        "session_commit_latency_p50_h": null
+      }
+    },
+    {
+      "repo": "pretender",
+      "month": "2026-05",
+      "sessions": 13,
+      "interactions": 2615,
+      "errors_api_per_100": null,
+      "errors_terapia_per_100": null,
+      "recovery_p50_interactions": 1,
+      "recovery_censored_rate": 0.0,
+      "recovery_n": 57,
+      "session_commit_latency_p50_h": 1799.6318452777778,
+      "ci_fail_rate": null,
+      "runs_total": null,
+      "runs_failed": null,
+      "revert_ratio": 0.0,
+      "fix_ratio": null,
+      "test_commit_ratio": 0.4067796610169492,
+      "dose": 0.3076923076923077,
+      "src": {
+        "sessions": "reported",
+        "interactions": "reported",
+        "errors_api_per_100": "missing",
+        "errors_terapia_per_100": "missing",
+        "recovery_p50_interactions": "derived",
+        "recovery_censored_rate": "derived",
+        "recovery_n": "derived",
+        "session_commit_latency_p50_h": "derived",
+        "revert_ratio": "reported",
+        "fix_ratio": "missing",
+        "test_commit_ratio": "reported",
+        "ci_fail_rate": "missing",
+        "runs_total": "missing",
+        "runs_failed": "missing",
+        "dose": "derived"
+      },
+      "reasons": {
+        "interactions": null,
+        "errors_api_per_100": "el reporte de usage no desglosa errores API por repo-mes",
+        "errors_terapia_per_100": "terapia es una query global (sin filtro por proyecto); desglose en metadata",
+        "session_commit_latency_p50_h": null
+      }
+    },
+    {
+      "repo": "pretender",
+      "month": "2026-06",
+      "sessions": null,
+      "interactions": 1765,
+      "errors_api_per_100": null,
+      "errors_terapia_per_100": null,
+      "ci_fail_rate": 0.2916666666666667,
+      "runs_total": 24,
+      "runs_failed": 7,
+      "revert_ratio": 0.0,
+      "fix_ratio": null,
+      "test_commit_ratio": 0.4473684210526316,
+      "dose": 0.3076923076923077,
+      "src": {
+        "sessions": "missing",
+        "interactions": "reported",
+        "errors_api_per_100": "missing",
+        "errors_terapia_per_100": "missing",
+        "revert_ratio": "reported",
+        "fix_ratio": "missing",
+        "test_commit_ratio": "reported",
+        "ci_fail_rate": "cached",
+        "runs_total": "cached",
+        "runs_failed": "cached",
+        "dose": "derived"
+      },
+      "reasons": {
+        "interactions": null,
+        "errors_api_per_100": "el reporte de usage no desglosa errores API por repo-mes",
+        "errors_terapia_per_100": "terapia es una query global (sin filtro por proyecto); desglose en metadata"
+      }
+    },
+    {
+      "repo": "pretender",
+      "month": "2026-07",
+      "sessions": 13,
+      "interactions": 2472,
+      "errors_api_per_100": null,
+      "errors_terapia_per_100": null,
+      "recovery_p50_interactions": 1,
+      "recovery_censored_rate": 0.0,
+      "recovery_n": 205,
+      "session_commit_latency_p50_h": 1440.9768158333331,
+      "ci_fail_rate": 0.2540983606557377,
+      "runs_total": 122,
+      "runs_failed": 31,
+      "revert_ratio": 0.0,
+      "fix_ratio": 3.2,
+      "test_commit_ratio": 0.4375,
+      "dose": 0.46153846153846156,
+      "src": {
+        "sessions": "reported",
+        "interactions": "reported",
+        "errors_api_per_100": "missing",
+        "errors_terapia_per_100": "missing",
+        "recovery_p50_interactions": "derived",
+        "recovery_censored_rate": "derived",
+        "recovery_n": "derived",
+        "session_commit_latency_p50_h": "derived",
+        "revert_ratio": "reported",
+        "fix_ratio": "reported",
+        "test_commit_ratio": "reported",
+        "ci_fail_rate": "cached",
+        "runs_total": "cached",
+        "runs_failed": "cached",
+        "dose": "derived"
+      },
+      "reasons": {
+        "interactions": null,
+        "errors_api_per_100": "el reporte de usage no desglosa errores API por repo-mes",
+        "errors_terapia_per_100": "terapia es una query global (sin filtro por proyecto); desglose en metadata",
+        "session_commit_latency_p50_h": null
+      }
+    },
+    {
+      "repo": "pretender",
+      "month": "2026-08",
+      "sessions": 1,
+      "interactions": 393,
+      "errors_api_per_100": null,
+      "errors_terapia_per_100": null,
+      "recovery_p50_interactions": 2,
+      "recovery_censored_rate": 0.0,
+      "recovery_n": 15,
+      "session_commit_latency_p50_h": 1347.8061225000001,
+      "ci_fail_rate": 0.5555555555555556,
+      "runs_total": 9,
+      "runs_failed": 5,
+      "revert_ratio": 0.0,
+      "fix_ratio": 9.0,
+      "test_commit_ratio": 0.5333333333333333,
+      "dose": 0.46153846153846156,
+      "src": {
+        "sessions": "reported",
+        "interactions": "reported",
+        "errors_api_per_100": "missing",
+        "errors_terapia_per_100": "missing",
+        "recovery_p50_interactions": "derived",
+        "recovery_censored_rate": "derived",
+        "recovery_n": "derived",
+        "session_commit_latency_p50_h": "derived",
+        "revert_ratio": "reported",
+        "fix_ratio": "reported",
+        "test_commit_ratio": "reported",
+        "ci_fail_rate": "cached",
+        "runs_total": "cached",
+        "runs_failed": "cached",
+        "dose": "derived"
+      },
+      "reasons": {
+        "interactions": null,
+        "errors_api_per_100": "el reporte de usage no desglosa errores API por repo-mes",
+        "errors_terapia_per_100": "terapia es una query global (sin filtro por proyecto); desglose en metadata",
+        "session_commit_latency_p50_h": null
+      }
+    },
+    {
+      "repo": "pretender",
+      "month": "2026-09",
+      "sessions": 5,
+      "interactions": 908,
+      "errors_api_per_100": null,
+      "errors_terapia_per_100": null,
+      "recovery_p50_interactions": 1,
+      "recovery_censored_rate": 0.0,
+      "recovery_n": 41,
+      "session_commit_latency_p50_h": 48.03980138888889,
+      "ci_fail_rate": 0.045871559633027525,
+      "runs_total": 109,
+      "runs_failed": 5,
+      "revert_ratio": 0.0,
+      "fix_ratio": 8.0,
+      "test_commit_ratio": 0.16666666666666666,
+      "dose": 0.5384615384615384,
+      "src": {
+        "sessions": "reported",
+        "interactions": "reported",
+        "errors_api_per_100": "missing",
+        "errors_terapia_per_100": "missing",
+        "recovery_p50_interactions": "derived",
+        "recovery_censored_rate": "derived",
+        "recovery_n": "derived",
+        "session_commit_latency_p50_h": "derived",
+        "revert_ratio": "reported",
+        "fix_ratio": "reported",
+        "test_commit_ratio": "reported",
+        "ci_fail_rate": "cached",
+        "runs_total": "cached",
+        "runs_failed": "cached",
+        "dose": "derived"
+      },
+      "reasons": {
+        "interactions": null,
+        "errors_api_per_100": "el reporte de usage no desglosa errores API por repo-mes",
+        "errors_terapia_per_100": "terapia es una query global (sin filtro por proyecto); desglose en metadata",
+        "session_commit_latency_p50_h": null
+      }
+    },
+    {
+      "repo": "pretender",
+      "month": "2026-10",
+      "sessions": 5,
+      "interactions": 485,
+      "errors_api_per_100": null,
+      "errors_terapia_per_100": null,
+      "recovery_p50_interactions": 1,
+      "recovery_censored_rate": 0.0,
+      "recovery_n": 27,
+      "session_commit_latency_p50_h": 117.29169805555557,
+      "ci_fail_rate": 0.16,
+      "runs_total": 75,
+      "runs_failed": 12,
+      "revert_ratio": 0.0,
+      "fix_ratio": 1.4,
+      "test_commit_ratio": 0.15384615384615385,
+      "dose": 0.6153846153846154,
+      "src": {
+        "sessions": "reported",
+        "interactions": "reported",
+        "errors_api_per_100": "missing",
+        "errors_terapia_per_100": "missing",
+        "recovery_p50_interactions": "derived",
+        "recovery_censored_rate": "derived",
+        "recovery_n": "derived",
+        "session_commit_latency_p50_h": "derived",
+        "revert_ratio": "reported",
+        "fix_ratio": "reported",
+        "test_commit_ratio": "reported",
+        "ci_fail_rate": "cached",
+        "runs_total": "cached",
+        "runs_failed": "cached",
+        "dose": "derived"
+      },
+      "reasons": {
+        "interactions": null,
+        "errors_api_per_100": "el reporte de usage no desglosa errores API por repo-mes",
+        "errors_terapia_per_100": "terapia es una query global (sin filtro por proyecto); desglose en metadata",
+        "session_commit_latency_p50_h": null
+      }
+    },
+    {
+      "repo": "specodelic",
+      "month": "2026-09",
+      "sessions": 56,
+      "interactions": 6125,
+      "errors_api_per_100": null,
+      "errors_terapia_per_100": null,
+      "recovery_p50_interactions": 1,
+      "recovery_censored_rate": 0.0,
+      "recovery_n": 281,
+      "session_commit_latency_p50_h": 171.59828222222222,
+      "ci_fail_rate": 0.43414634146341463,
+      "runs_total": 205,
+      "runs_failed": 89,
+      "revert_ratio": 0.0,
+      "fix_ratio": 3.0,
+      "test_commit_ratio": 0.3930635838150289,
+      "dose": 0.46153846153846156,
+      "src": {
+        "sessions": "reported",
+        "interactions": "reported",
+        "errors_api_per_100": "missing",
+        "errors_terapia_per_100": "missing",
+        "recovery_p50_interactions": "derived",
+        "recovery_censored_rate": "derived",
+        "recovery_n": "derived",
+        "session_commit_latency_p50_h": "derived",
+        "revert_ratio": "reported",
+        "fix_ratio": "reported",
+        "test_commit_ratio": "reported",
+        "ci_fail_rate": "cached",
+        "runs_total": "cached",
+        "runs_failed": "cached",
+        "dose": "derived"
+      },
+      "reasons": {
+        "interactions": null,
+        "errors_api_per_100": "el reporte de usage no desglosa errores API por repo-mes",
+        "errors_terapia_per_100": "terapia es una query global (sin filtro por proyecto); desglose en metadata",
+        "session_commit_latency_p50_h": null
+      }
+    },
+    {
+      "repo": "specodelic",
+      "month": "2026-10",
+      "sessions": 194,
+      "interactions": 19965,
+      "errors_api_per_100": null,
+      "errors_terapia_per_100": null,
+      "recovery_p50_interactions": 1,
+      "recovery_censored_rate": 0.0,
+      "recovery_n": 721,
+      "session_commit_latency_p50_h": 0.0,
+      "ci_fail_rate": 0.2608695652173913,
+      "runs_total": 552,
+      "runs_failed": 144,
+      "revert_ratio": 0.0,
+      "fix_ratio": 3.5833333333333335,
+      "test_commit_ratio": 0.23903818953323905,
+      "dose": 0.6923076923076923,
+      "src": {
+        "sessions": "reported",
+        "interactions": "reported",
+        "errors_api_per_100": "missing",
+        "errors_terapia_per_100": "missing",
+        "recovery_p50_interactions": "derived",
+        "recovery_censored_rate": "derived",
+        "recovery_n": "derived",
+        "session_commit_latency_p50_h": "derived",
+        "revert_ratio": "reported",
+        "fix_ratio": "reported",
+        "test_commit_ratio": "reported",
+        "ci_fail_rate": "cached",
+        "runs_total": "cached",
+        "runs_failed": "cached",
+        "dose": "derived"
+      },
+      "reasons": {
+        "interactions": null,
+        "errors_api_per_100": "el reporte de usage no desglosa errores API por repo-mes",
+        "errors_terapia_per_100": "terapia es una query global (sin filtro por proyecto); desglose en metadata",
+        "session_commit_latency_p50_h": null
+      }
+    },
+    {
+      "repo": "testaruda",
+      "month": "2026-07",
+      "sessions": 52,
+      "interactions": 10046,
+      "errors_api_per_100": null,
+      "errors_terapia_per_100": null,
+      "recovery_p50_interactions": 1,
+      "recovery_censored_rate": 0.005994005994005994,
+      "recovery_n": 1001,
+      "session_commit_latency_p50_h": 1467.6555363888888,
+      "ci_fail_rate": 0.2947103274559194,
+      "runs_total": 397,
+      "runs_failed": 117,
+      "revert_ratio": 0.0,
+      "fix_ratio": 4.909090909090909,
+      "test_commit_ratio": 0.3090909090909091,
+      "dose": 0.5384615384615384,
+      "src": {
+        "sessions": "reported",
+        "interactions": "reported",
+        "errors_api_per_100": "missing",
+        "errors_terapia_per_100": "missing",
+        "recovery_p50_interactions": "derived",
+        "recovery_censored_rate": "derived",
+        "recovery_n": "derived",
+        "session_commit_latency_p50_h": "derived",
+        "revert_ratio": "reported",
+        "fix_ratio": "reported",
+        "test_commit_ratio": "reported",
+        "ci_fail_rate": "cached",
+        "runs_total": "cached",
+        "runs_failed": "cached",
+        "dose": "derived"
+      },
+      "reasons": {
+        "interactions": null,
+        "errors_api_per_100": "el reporte de usage no desglosa errores API por repo-mes",
+        "errors_terapia_per_100": "terapia es una query global (sin filtro por proyecto); desglose en metadata",
+        "session_commit_latency_p50_h": null
+      }
+    },
+    {
+      "repo": "testaruda",
+      "month": "2026-08",
+      "sessions": 3,
+      "interactions": 690,
+      "errors_api_per_100": null,
+      "errors_terapia_per_100": null,
+      "recovery_p50_interactions": 1,
+      "recovery_censored_rate": 0.0,
+      "recovery_n": 37,
+      "session_commit_latency_p50_h": 930.725113611111,
+      "ci_fail_rate": 0.3333333333333333,
+      "runs_total": 21,
+      "runs_failed": 7,
+      "revert_ratio": 0.0,
+      "fix_ratio": 17.0,
+      "test_commit_ratio": 0.2692307692307692,
+      "dose": 0.5384615384615384,
+      "src": {
+        "sessions": "reported",
+        "interactions": "reported",
+        "errors_api_per_100": "missing",
+        "errors_terapia_per_100": "missing",
+        "recovery_p50_interactions": "derived",
+        "recovery_censored_rate": "derived",
+        "recovery_n": "derived",
+        "session_commit_latency_p50_h": "derived",
+        "revert_ratio": "reported",
+        "fix_ratio": "reported",
+        "test_commit_ratio": "reported",
+        "ci_fail_rate": "cached",
+        "runs_total": "cached",
+        "runs_failed": "cached",
+        "dose": "derived"
+      },
+      "reasons": {
+        "interactions": null,
+        "errors_api_per_100": "el reporte de usage no desglosa errores API por repo-mes",
+        "errors_terapia_per_100": "terapia es una query global (sin filtro por proyecto); desglose en metadata",
+        "session_commit_latency_p50_h": null
+      }
+    },
+    {
+      "repo": "testaruda",
+      "month": "2026-09",
+      "sessions": 11,
+      "interactions": 1965,
+      "errors_api_per_100": null,
+      "errors_terapia_per_100": null,
+      "recovery_p50_interactions": 1.0,
+      "recovery_censored_rate": 0.0,
+      "recovery_n": 88,
+      "session_commit_latency_p50_h": 329.3300211111111,
+      "ci_fail_rate": 0.037037037037037035,
+      "runs_total": 189,
+      "runs_failed": 7,
+      "revert_ratio": 0.0,
+      "fix_ratio": 12.5,
+      "test_commit_ratio": 0.3333333333333333,
+      "dose": 0.6153846153846154,
+      "src": {
+        "sessions": "reported",
+        "interactions": "reported",
+        "errors_api_per_100": "missing",
+        "errors_terapia_per_100": "missing",
+        "recovery_p50_interactions": "derived",
+        "recovery_censored_rate": "derived",
+        "recovery_n": "derived",
+        "session_commit_latency_p50_h": "derived",
+        "revert_ratio": "reported",
+        "fix_ratio": "reported",
+        "test_commit_ratio": "reported",
+        "ci_fail_rate": "cached",
+        "runs_total": "cached",
+        "runs_failed": "cached",
+        "dose": "derived"
+      },
+      "reasons": {
+        "interactions": null,
+        "errors_api_per_100": "el reporte de usage no desglosa errores API por repo-mes",
+        "errors_terapia_per_100": "terapia es una query global (sin filtro por proyecto); desglose en metadata",
+        "session_commit_latency_p50_h": null
+      }
+    },
+    {
+      "repo": "testaruda",
+      "month": "2026-10",
+      "sessions": 13,
+      "interactions": 1698,
+      "errors_api_per_100": null,
+      "errors_terapia_per_100": null,
+      "recovery_p50_interactions": 1.0,
+      "recovery_censored_rate": 0.0,
+      "recovery_n": 84,
+      "session_commit_latency_p50_h": 3.663022916666667,
+      "ci_fail_rate": 0.16428571428571428,
+      "runs_total": 140,
+      "runs_failed": 23,
+      "revert_ratio": 0.0,
+      "fix_ratio": 3.8333333333333335,
+      "test_commit_ratio": 0.18478260869565216,
+      "dose": 0.6153846153846154,
+      "src": {
+        "sessions": "reported",
+        "interactions": "reported",
+        "errors_api_per_100": "missing",
+        "errors_terapia_per_100": "missing",
+        "recovery_p50_interactions": "derived",
+        "recovery_censored_rate": "derived",
+        "recovery_n": "derived",
+        "session_commit_latency_p50_h": "derived",
+        "revert_ratio": "reported",
+        "fix_ratio": "reported",
+        "test_commit_ratio": "reported",
+        "ci_fail_rate": "cached",
+        "runs_total": "cached",
+        "runs_failed": "cached",
+        "dose": "derived"
+      },
+      "reasons": {
+        "interactions": null,
+        "errors_api_per_100": "el reporte de usage no desglosa errores API por repo-mes",
+        "errors_terapia_per_100": "terapia es una query global (sin filtro por proyecto); desglose en metadata",
+        "session_commit_latency_p50_h": null
+      }
+    },
+    {
+      "repo": "turu",
+      "month": "2026-09",
+      "sessions": 12,
+      "interactions": null,
+      "errors_api_per_100": null,
+      "errors_terapia_per_100": null,
+      "recovery_p50_interactions": 1,
+      "recovery_censored_rate": 0.0,
+      "recovery_n": 93,
+      "session_commit_latency_p50_h": 128.47008805555555,
+      "ci_fail_rate": 0.07142857142857142,
+      "runs_total": 56,
+      "runs_failed": 4,
+      "revert_ratio": 0.0,
+      "fix_ratio": 1.8,
+      "test_commit_ratio": 0.31343283582089554,
+      "dose": 0.3076923076923077,
+      "src": {
+        "sessions": "reported",
+        "interactions": "missing",
+        "errors_api_per_100": "missing",
+        "errors_terapia_per_100": "missing",
+        "recovery_p50_interactions": "derived",
+        "recovery_censored_rate": "derived",
+        "recovery_n": "derived",
+        "session_commit_latency_p50_h": "derived",
+        "revert_ratio": "reported",
+        "fix_ratio": "reported",
+        "test_commit_ratio": "reported",
+        "ci_fail_rate": "cached",
+        "runs_total": "cached",
+        "runs_failed": "cached",
+        "dose": "derived"
+      },
+      "reasons": {
+        "interactions": "sin interacciones in-scope del proyecto",
+        "errors_api_per_100": "el reporte de usage no desglosa errores API por repo-mes",
+        "errors_terapia_per_100": "terapia es una query global (sin filtro por proyecto); desglose en metadata",
+        "session_commit_latency_p50_h": null
+      }
+    },
+    {
+      "repo": "turu",
+      "month": "2026-10",
+      "sessions": 5,
+      "interactions": null,
+      "errors_api_per_100": null,
+      "errors_terapia_per_100": null,
+      "recovery_p50_interactions": 1.0,
+      "recovery_censored_rate": 0.0,
+      "recovery_n": 24,
+      "session_commit_latency_p50_h": 0.0,
+      "ci_fail_rate": 0.2391304347826087,
+      "runs_total": 46,
+      "runs_failed": 11,
+      "revert_ratio": 0.0,
+      "fix_ratio": 1.3333333333333333,
+      "test_commit_ratio": 0.21621621621621623,
+      "dose": 0.5384615384615384,
+      "src": {
+        "sessions": "reported",
+        "interactions": "missing",
+        "errors_api_per_100": "missing",
+        "errors_terapia_per_100": "missing",
+        "recovery_p50_interactions": "derived",
+        "recovery_censored_rate": "derived",
+        "recovery_n": "derived",
+        "session_commit_latency_p50_h": "derived",
+        "revert_ratio": "reported",
+        "fix_ratio": "reported",
+        "test_commit_ratio": "reported",
+        "ci_fail_rate": "cached",
+        "runs_total": "cached",
+        "runs_failed": "cached",
+        "dose": "derived"
+      },
+      "reasons": {
+        "interactions": "sin interacciones in-scope del proyecto",
+        "errors_api_per_100": "el reporte de usage no desglosa errores API por repo-mes",
+        "errors_terapia_per_100": "terapia es una query global (sin filtro por proyecto); desglose en metadata",
+        "session_commit_latency_p50_h": null
+      }
+    },
+    {
+      "repo": "vampiro",
+      "month": "2026-07",
+      "sessions": 26,
+      "interactions": 6393,
+      "errors_api_per_100": null,
+      "errors_terapia_per_100": null,
+      "recovery_p50_interactions": 1.0,
+      "recovery_censored_rate": 0.00851063829787234,
+      "recovery_n": 470,
+      "session_commit_latency_p50_h": 1458.4196705555555,
+      "ci_fail_rate": 0.8789808917197452,
+      "runs_total": 157,
+      "runs_failed": 138,
+      "revert_ratio": 0.0,
+      "fix_ratio": 9.333333333333334,
+      "test_commit_ratio": 0.4161073825503356,
+      "dose": 0.38461538461538464,
+      "src": {
+        "sessions": "reported",
+        "interactions": "reported",
+        "errors_api_per_100": "missing",
+        "errors_terapia_per_100": "missing",
+        "recovery_p50_interactions": "derived",
+        "recovery_censored_rate": "derived",
+        "recovery_n": "derived",
+        "session_commit_latency_p50_h": "derived",
+        "revert_ratio": "reported",
+        "fix_ratio": "reported",
+        "test_commit_ratio": "reported",
+        "ci_fail_rate": "cached",
+        "runs_total": "cached",
+        "runs_failed": "cached",
+        "dose": "derived"
+      },
+      "reasons": {
+        "interactions": null,
+        "errors_api_per_100": "el reporte de usage no desglosa errores API por repo-mes",
+        "errors_terapia_per_100": "terapia es una query global (sin filtro por proyecto); desglose en metadata",
+        "session_commit_latency_p50_h": null
+      }
+    },
+    {
+      "repo": "vampiro",
+      "month": "2026-08",
+      "sessions": 2,
+      "interactions": 336,
+      "errors_api_per_100": null,
+      "errors_terapia_per_100": null,
+      "recovery_p50_interactions": 1,
+      "recovery_censored_rate": 0.0,
+      "recovery_n": 17,
+      "session_commit_latency_p50_h": 1344.7924530555556,
+      "ci_fail_rate": 0.9629629629629629,
+      "runs_total": 27,
+      "runs_failed": 26,
+      "revert_ratio": 0.0,
+      "fix_ratio": 9.0,
+      "test_commit_ratio": 0.32,
+      "dose": 0.38461538461538464,
+      "src": {
+        "sessions": "reported",
+        "interactions": "reported",
+        "errors_api_per_100": "missing",
+        "errors_terapia_per_100": "missing",
+        "recovery_p50_interactions": "derived",
+        "recovery_censored_rate": "derived",
+        "recovery_n": "derived",
+        "session_commit_latency_p50_h": "derived",
+        "revert_ratio": "reported",
+        "fix_ratio": "reported",
+        "test_commit_ratio": "reported",
+        "ci_fail_rate": "cached",
+        "runs_total": "cached",
+        "runs_failed": "cached",
+        "dose": "derived"
+      },
+      "reasons": {
+        "interactions": null,
+        "errors_api_per_100": "el reporte de usage no desglosa errores API por repo-mes",
+        "errors_terapia_per_100": "terapia es una query global (sin filtro por proyecto); desglose en metadata",
+        "session_commit_latency_p50_h": null
+      }
+    },
+    {
+      "repo": "vampiro",
+      "month": "2026-09",
+      "sessions": 11,
+      "interactions": 1298,
+      "errors_api_per_100": null,
+      "errors_terapia_per_100": null,
+      "recovery_p50_interactions": 1,
+      "recovery_censored_rate": 0.0,
+      "recovery_n": 51,
+      "session_commit_latency_p50_h": 20.048729166666668,
+      "ci_fail_rate": 0.07079646017699115,
+      "runs_total": 113,
+      "runs_failed": 8,
+      "revert_ratio": 0.0,
+      "fix_ratio": 22.0,
+      "test_commit_ratio": 0.1,
+      "dose": 0.5384615384615384,
+      "src": {
+        "sessions": "reported",
+        "interactions": "reported",
+        "errors_api_per_100": "missing",
+        "errors_terapia_per_100": "missing",
+        "recovery_p50_interactions": "derived",
+        "recovery_censored_rate": "derived",
+        "recovery_n": "derived",
+        "session_commit_latency_p50_h": "derived",
+        "revert_ratio": "reported",
+        "fix_ratio": "reported",
+        "test_commit_ratio": "reported",
+        "ci_fail_rate": "cached",
+        "runs_total": "cached",
+        "runs_failed": "cached",
+        "dose": "derived"
+      },
+      "reasons": {
+        "interactions": null,
+        "errors_api_per_100": "el reporte de usage no desglosa errores API por repo-mes",
+        "errors_terapia_per_100": "terapia es una query global (sin filtro por proyecto); desglose en metadata",
+        "session_commit_latency_p50_h": null
+      }
+    },
+    {
+      "repo": "vampiro",
+      "month": "2026-10",
+      "sessions": 1,
+      "interactions": 20,
+      "errors_api_per_100": null,
+      "errors_terapia_per_100": null,
+      "recovery_p50_interactions": 0,
+      "recovery_censored_rate": 0.0,
+      "recovery_n": 1,
+      "session_commit_latency_p50_h": 0.0,
+      "ci_fail_rate": 0.25,
+      "runs_total": 40,
+      "runs_failed": 10,
+      "revert_ratio": 0.0,
+      "fix_ratio": 3.0,
+      "test_commit_ratio": 0.1111111111111111,
+      "dose": 0.6153846153846154,
+      "src": {
+        "sessions": "reported",
+        "interactions": "reported",
+        "errors_api_per_100": "missing",
+        "errors_terapia_per_100": "missing",
+        "recovery_p50_interactions": "derived",
+        "recovery_censored_rate": "derived",
+        "recovery_n": "derived",
+        "session_commit_latency_p50_h": "derived",
+        "revert_ratio": "reported",
+        "fix_ratio": "reported",
+        "test_commit_ratio": "reported",
+        "ci_fail_rate": "cached",
+        "runs_total": "cached",
+        "runs_failed": "cached",
+        "dose": "derived"
+      },
+      "reasons": {
+        "interactions": null,
+        "errors_api_per_100": "el reporte de usage no desglosa errores API por repo-mes",
+        "errors_terapia_per_100": "terapia es una query global (sin filtro por proyecto); desglose en metadata",
+        "session_commit_latency_p50_h": null
+      }
+    },
+    {
+      "repo": "wai",
+      "month": "2026-01",
+      "sessions": null,
+      "interactions": 25,
+      "errors_api_per_100": null,
+      "errors_terapia_per_100": null,
+      "ci_fail_rate": null,
+      "runs_total": null,
+      "runs_failed": null,
+      "revert_ratio": 0.0,
+      "fix_ratio": null,
+      "test_commit_ratio": 0.0,
+      "dose": 0.0,
+      "src": {
+        "sessions": "missing",
+        "interactions": "reported",
+        "errors_api_per_100": "missing",
+        "errors_terapia_per_100": "missing",
+        "revert_ratio": "reported",
+        "fix_ratio": "missing",
+        "test_commit_ratio": "reported",
+        "ci_fail_rate": "missing",
+        "runs_total": "missing",
+        "runs_failed": "missing",
+        "dose": "derived"
+      },
+      "reasons": {
+        "interactions": null,
+        "errors_api_per_100": "el reporte de usage no desglosa errores API por repo-mes",
+        "errors_terapia_per_100": "terapia es una query global (sin filtro por proyecto); desglose en metadata"
+      }
+    },
+    {
+      "repo": "wai",
+      "month": "2026-02",
+      "sessions": null,
+      "interactions": 173,
+      "errors_api_per_100": null,
+      "errors_terapia_per_100": null,
+      "ci_fail_rate": 0.76,
+      "runs_total": 100,
+      "runs_failed": 76,
+      "revert_ratio": 0.0,
+      "fix_ratio": 27.0,
+      "test_commit_ratio": 0.2350597609561753,
+      "dose": 0.0,
+      "src": {
+        "sessions": "missing",
+        "interactions": "reported",
+        "errors_api_per_100": "missing",
+        "errors_terapia_per_100": "missing",
+        "revert_ratio": "reported",
+        "fix_ratio": "reported",
+        "test_commit_ratio": "reported",
+        "ci_fail_rate": "cached",
+        "runs_total": "cached",
+        "runs_failed": "cached",
+        "dose": "derived"
+      },
+      "reasons": {
+        "interactions": null,
+        "errors_api_per_100": "el reporte de usage no desglosa errores API por repo-mes",
+        "errors_terapia_per_100": "terapia es una query global (sin filtro por proyecto); desglose en metadata"
+      }
+    },
+    {
+      "repo": "wai",
+      "month": "2026-04",
+      "sessions": 7,
+      "interactions": 975,
+      "errors_api_per_100": null,
+      "errors_terapia_per_100": null,
+      "recovery_p50_interactions": 2,
+      "recovery_censored_rate": 0.0,
+      "recovery_n": 39,
+      "session_commit_latency_p50_h": 3671.9925208333334,
+      "ci_fail_rate": 0.3728813559322034,
+      "runs_total": 59,
+      "runs_failed": 22,
+      "revert_ratio": 0.0,
+      "fix_ratio": 2.5,
+      "test_commit_ratio": 0.16666666666666666,
+      "dose": 0.23076923076923078,
+      "src": {
+        "sessions": "reported",
+        "interactions": "reported",
+        "errors_api_per_100": "missing",
+        "errors_terapia_per_100": "missing",
+        "recovery_p50_interactions": "derived",
+        "recovery_censored_rate": "derived",
+        "recovery_n": "derived",
+        "session_commit_latency_p50_h": "derived",
+        "revert_ratio": "reported",
+        "fix_ratio": "reported",
+        "test_commit_ratio": "reported",
+        "ci_fail_rate": "cached",
+        "runs_total": "cached",
+        "runs_failed": "cached",
+        "dose": "derived"
+      },
+      "reasons": {
+        "interactions": null,
+        "errors_api_per_100": "el reporte de usage no desglosa errores API por repo-mes",
+        "errors_terapia_per_100": "terapia es una query global (sin filtro por proyecto); desglose en metadata",
+        "session_commit_latency_p50_h": null
+      }
+    },
+    {
+      "repo": "wai",
+      "month": "2026-05",
+      "sessions": 6,
+      "interactions": 1865,
+      "errors_api_per_100": null,
+      "errors_terapia_per_100": null,
+      "recovery_p50_interactions": 1,
+      "recovery_censored_rate": 0.0,
+      "recovery_n": 39,
+      "session_commit_latency_p50_h": 3364.1481255555555,
+      "ci_fail_rate": 0.0,
+      "runs_total": 27,
+      "runs_failed": 0,
+      "revert_ratio": 0.0,
+      "fix_ratio": 1.0,
+      "test_commit_ratio": 0.6037735849056604,
+      "dose": 0.23076923076923078,
+      "src": {
+        "sessions": "reported",
+        "interactions": "reported",
+        "errors_api_per_100": "missing",
+        "errors_terapia_per_100": "missing",
+        "recovery_p50_interactions": "derived",
+        "recovery_censored_rate": "derived",
+        "recovery_n": "derived",
+        "session_commit_latency_p50_h": "derived",
+        "revert_ratio": "reported",
+        "fix_ratio": "reported",
+        "test_commit_ratio": "reported",
+        "ci_fail_rate": "cached",
+        "runs_total": "cached",
+        "runs_failed": "cached",
+        "dose": "derived"
+      },
+      "reasons": {
+        "interactions": null,
+        "errors_api_per_100": "el reporte de usage no desglosa errores API por repo-mes",
+        "errors_terapia_per_100": "terapia es una query global (sin filtro por proyecto); desglose en metadata",
+        "session_commit_latency_p50_h": null
+      }
+    },
+    {
+      "repo": "wai",
+      "month": "2026-06",
+      "sessions": null,
+      "interactions": 91,
+      "errors_api_per_100": null,
+      "errors_terapia_per_100": null,
+      "ci_fail_rate": 0.0,
+      "runs_total": 5,
+      "runs_failed": 0,
+      "revert_ratio": 0.0,
+      "fix_ratio": null,
+      "test_commit_ratio": 0.0,
+      "dose": 0.23076923076923078,
+      "src": {
+        "sessions": "missing",
+        "interactions": "reported",
+        "errors_api_per_100": "missing",
+        "errors_terapia_per_100": "missing",
+        "revert_ratio": "reported",
+        "fix_ratio": "missing",
+        "test_commit_ratio": "reported",
+        "ci_fail_rate": "cached",
+        "runs_total": "cached",
+        "runs_failed": "cached",
+        "dose": "derived"
+      },
+      "reasons": {
+        "interactions": null,
+        "errors_api_per_100": "el reporte de usage no desglosa errores API por repo-mes",
+        "errors_terapia_per_100": "terapia es una query global (sin filtro por proyecto); desglose en metadata"
+      }
+    },
+    {
+      "repo": "wai",
+      "month": "2026-07",
+      "sessions": 11,
+      "interactions": 1875,
+      "errors_api_per_100": null,
+      "errors_terapia_per_100": null,
+      "recovery_p50_interactions": 1.0,
+      "recovery_censored_rate": 0.0072992700729927005,
+      "recovery_n": 137,
+      "session_commit_latency_p50_h": 1588.7809580555556,
+      "ci_fail_rate": 0.3548387096774194,
+      "runs_total": 62,
+      "runs_failed": 22,
+      "revert_ratio": 0.0,
+      "fix_ratio": 2.0,
+      "test_commit_ratio": 0.2345679012345679,
+      "dose": 0.5384615384615384,
+      "src": {
+        "sessions": "reported",
+        "interactions": "reported",
+        "errors_api_per_100": "missing",
+        "errors_terapia_per_100": "missing",
+        "recovery_p50_interactions": "derived",
+        "recovery_censored_rate": "derived",
+        "recovery_n": "derived",
+        "session_commit_latency_p50_h": "derived",
+        "revert_ratio": "reported",
+        "fix_ratio": "reported",
+        "test_commit_ratio": "reported",
+        "ci_fail_rate": "cached",
+        "runs_total": "cached",
+        "runs_failed": "cached",
+        "dose": "derived"
+      },
+      "reasons": {
+        "interactions": null,
+        "errors_api_per_100": "el reporte de usage no desglosa errores API por repo-mes",
+        "errors_terapia_per_100": "terapia es una query global (sin filtro por proyecto); desglose en metadata",
+        "session_commit_latency_p50_h": null
+      }
+    },
+    {
+      "repo": "wai",
+      "month": "2026-08",
+      "sessions": 4,
+      "interactions": 864,
+      "errors_api_per_100": null,
+      "errors_terapia_per_100": null,
+      "recovery_p50_interactions": 1.0,
+      "recovery_censored_rate": 0.0,
+      "recovery_n": 76,
+      "session_commit_latency_p50_h": 1530.6046472222224,
+      "ci_fail_rate": 0.46153846153846156,
+      "runs_total": 13,
+      "runs_failed": 6,
+      "revert_ratio": 0.0,
+      "fix_ratio": 15.0,
+      "test_commit_ratio": 0.3,
+      "dose": 0.5384615384615384,
+      "src": {
+        "sessions": "reported",
+        "interactions": "reported",
+        "errors_api_per_100": "missing",
+        "errors_terapia_per_100": "missing",
+        "recovery_p50_interactions": "derived",
+        "recovery_censored_rate": "derived",
+        "recovery_n": "derived",
+        "session_commit_latency_p50_h": "derived",
+        "revert_ratio": "reported",
+        "fix_ratio": "reported",
+        "test_commit_ratio": "reported",
+        "ci_fail_rate": "cached",
+        "runs_total": "cached",
+        "runs_failed": "cached",
+        "dose": "derived"
+      },
+      "reasons": {
+        "interactions": null,
+        "errors_api_per_100": "el reporte de usage no desglosa errores API por repo-mes",
+        "errors_terapia_per_100": "terapia es una query global (sin filtro por proyecto); desglose en metadata",
+        "session_commit_latency_p50_h": null
+      }
+    },
+    {
+      "repo": "wai",
+      "month": "2026-09",
+      "sessions": 7,
+      "interactions": 916,
+      "errors_api_per_100": null,
+      "errors_terapia_per_100": null,
+      "recovery_p50_interactions": 1,
+      "recovery_censored_rate": 0.0,
+      "recovery_n": 53,
+      "session_commit_latency_p50_h": 237.69939611111113,
+      "ci_fail_rate": 0.24390243902439024,
+      "runs_total": 41,
+      "runs_failed": 10,
+      "revert_ratio": 0.0,
+      "fix_ratio": 5.0,
+      "test_commit_ratio": 0.1836734693877551,
+      "dose": 0.6153846153846154,
+      "src": {
+        "sessions": "reported",
+        "interactions": "reported",
+        "errors_api_per_100": "missing",
+        "errors_terapia_per_100": "missing",
+        "recovery_p50_interactions": "derived",
+        "recovery_censored_rate": "derived",
+        "recovery_n": "derived",
+        "session_commit_latency_p50_h": "derived",
+        "revert_ratio": "reported",
+        "fix_ratio": "reported",
+        "test_commit_ratio": "reported",
+        "ci_fail_rate": "cached",
+        "runs_total": "cached",
+        "runs_failed": "cached",
+        "dose": "derived"
+      },
+      "reasons": {
+        "interactions": null,
+        "errors_api_per_100": "el reporte de usage no desglosa errores API por repo-mes",
+        "errors_terapia_per_100": "terapia es una query global (sin filtro por proyecto); desglose en metadata",
+        "session_commit_latency_p50_h": null
+      }
+    },
+    {
+      "repo": "wai",
+      "month": "2026-10",
+      "sessions": 41,
+      "interactions": 5075,
+      "errors_api_per_100": null,
+      "errors_terapia_per_100": null,
+      "recovery_p50_interactions": 1.0,
+      "recovery_censored_rate": 0.0,
+      "recovery_n": 270,
+      "session_commit_latency_p50_h": 0.0,
+      "ci_fail_rate": 0.29411764705882354,
+      "runs_total": 153,
+      "runs_failed": 45,
+      "revert_ratio": 0.005076142131979695,
+      "fix_ratio": 2.857142857142857,
+      "test_commit_ratio": 0.23857868020304568,
+      "dose": 0.6153846153846154,
+      "src": {
+        "sessions": "reported",
+        "interactions": "reported",
+        "errors_api_per_100": "missing",
+        "errors_terapia_per_100": "missing",
+        "recovery_p50_interactions": "derived",
+        "recovery_censored_rate": "derived",
+        "recovery_n": "derived",
+        "session_commit_latency_p50_h": "derived",
+        "revert_ratio": "reported",
+        "fix_ratio": "reported",
+        "test_commit_ratio": "reported",
+        "ci_fail_rate": "cached",
+        "runs_total": "cached",
+        "runs_failed": "cached",
+        "dose": "derived"
+      },
+      "reasons": {
+        "interactions": null,
+        "errors_api_per_100": "el reporte de usage no desglosa errores API por repo-mes",
+        "errors_terapia_per_100": "terapia es una query global (sin filtro por proyecto); desglose en metadata",
+        "session_commit_latency_p50_h": null
+      }
+    },
+    {
+      "repo": "wild",
+      "month": "2026-10",
+      "sessions": 62,
+      "interactions": 6327,
+      "errors_api_per_100": null,
+      "errors_terapia_per_100": null,
+      "recovery_p50_interactions": 1.0,
+      "recovery_censored_rate": 0.003278688524590164,
+      "recovery_n": 305,
+      "session_commit_latency_p50_h": 0.0,
+      "ci_fail_rate": 0.8987341772151899,
+      "runs_total": 79,
+      "runs_failed": 71,
+      "revert_ratio": 0.0,
+      "fix_ratio": 5.0,
+      "test_commit_ratio": 0.35714285714285715,
+      "dose": 0.7692307692307693,
+      "src": {
+        "sessions": "reported",
+        "interactions": "reported",
+        "errors_api_per_100": "missing",
+        "errors_terapia_per_100": "missing",
+        "recovery_p50_interactions": "derived",
+        "recovery_censored_rate": "derived",
+        "recovery_n": "derived",
+        "session_commit_latency_p50_h": "derived",
+        "revert_ratio": "reported",
+        "fix_ratio": "reported",
+        "test_commit_ratio": "reported",
+        "ci_fail_rate": "cached",
+        "runs_total": "cached",
+        "runs_failed": "cached",
+        "dose": "derived"
+      },
+      "reasons": {
+        "interactions": null,
+        "errors_api_per_100": "el reporte de usage no desglosa errores API por repo-mes",
+        "errors_terapia_per_100": "terapia es una query global (sin filtro por proyecto); desglose en metadata",
+        "session_commit_latency_p50_h": null
+      }
+    }
+  ],
+  "analysis": {
+    "its": [
+      {
+        "repo": "turu",
+        "metric": "errors_api_per_100",
+        "adoption_month": "2026-10",
+        "delta": null,
+        "n_pre": 0,
+        "n_post": 0,
+        "reason": "ventana_pre_insuficiente"
+      },
+      {
+        "repo": "turu",
+        "metric": "recovery_p50_interactions",
+        "adoption_month": "2026-10",
+        "delta": null,
+        "n_pre": 1,
+        "n_post": 1,
+        "reason": "ventana_pre_insuficiente"
+      },
+      {
+        "repo": "turu",
+        "metric": "session_commit_latency_p50_h",
+        "adoption_month": "2026-10",
+        "delta": null,
+        "n_pre": 1,
+        "n_post": 1,
+        "reason": "ventana_pre_insuficiente"
+      },
+      {
+        "repo": "turu",
+        "metric": "ci_fail_rate",
+        "adoption_month": "2026-10",
+        "delta": null,
+        "n_pre": 1,
+        "n_post": 1,
+        "reason": "ventana_pre_insuficiente"
+      },
+      {
+        "repo": "turu",
+        "metric": "revert_ratio",
+        "adoption_month": "2026-10",
+        "delta": null,
+        "n_pre": 1,
+        "n_post": 1,
+        "reason": "ventana_pre_insuficiente"
+      },
+      {
+        "repo": "turu",
+        "metric": "fix_ratio",
+        "adoption_month": "2026-10",
+        "delta": null,
+        "n_pre": 1,
+        "n_post": 1,
+        "reason": "ventana_pre_insuficiente"
+      },
+      {
+        "repo": "turu",
+        "metric": "test_commit_ratio",
+        "adoption_month": "2026-10",
+        "delta": null,
+        "n_pre": 1,
+        "n_post": 1,
+        "reason": "ventana_pre_insuficiente"
+      },
+      {
+        "repo": "dont",
+        "metric": "errors_api_per_100",
+        "adoption_month": "2026-10",
+        "delta": null,
+        "n_pre": 0,
+        "n_post": 0,
+        "reason": "ventana_pre_insuficiente"
+      },
+      {
+        "repo": "dont",
+        "metric": "recovery_p50_interactions",
+        "adoption_month": "2026-10",
+        "delta": null,
+        "n_pre": 5,
+        "n_post": 1,
+        "reason": "ventana_ma_trimestral_insuficiente"
+      },
+      {
+        "repo": "dont",
+        "metric": "session_commit_latency_p50_h",
+        "adoption_month": "2026-10",
+        "delta": null,
+        "n_pre": 5,
+        "n_post": 1,
+        "reason": "ventana_ma_trimestral_insuficiente"
+      },
+      {
+        "repo": "dont",
+        "metric": "ci_fail_rate",
+        "adoption_month": "2026-10",
+        "delta": null,
+        "n_pre": 5,
+        "n_post": 1,
+        "reason": "ventana_ma_trimestral_insuficiente"
+      },
+      {
+        "repo": "dont",
+        "metric": "revert_ratio",
+        "adoption_month": "2026-10",
+        "delta": null,
+        "n_pre": 5,
+        "n_post": 1,
+        "reason": "ventana_ma_trimestral_insuficiente"
+      },
+      {
+        "repo": "dont",
+        "metric": "fix_ratio",
+        "adoption_month": "2026-10",
+        "delta": null,
+        "n_pre": 2,
+        "n_post": 0,
+        "reason": "ventana_pre_insuficiente"
+      },
+      {
+        "repo": "dont",
+        "metric": "test_commit_ratio",
+        "adoption_month": "2026-10",
+        "delta": null,
+        "n_pre": 5,
+        "n_post": 1,
+        "reason": "ventana_ma_trimestral_insuficiente"
+      },
+      {
+        "repo": "pretender",
+        "metric": "errors_api_per_100",
+        "adoption_month": "2026-10",
+        "delta": null,
+        "n_pre": 0,
+        "n_post": 0,
+        "reason": "ventana_pre_insuficiente"
+      },
+      {
+        "repo": "pretender",
+        "metric": "recovery_p50_interactions",
+        "adoption_month": "2026-10",
+        "delta": null,
+        "n_pre": 4,
+        "n_post": 1,
+        "reason": "ventana_ma_trimestral_insuficiente"
+      },
+      {
+        "repo": "pretender",
+        "metric": "session_commit_latency_p50_h",
+        "adoption_month": "2026-10",
+        "delta": null,
+        "n_pre": 4,
+        "n_post": 1,
+        "reason": "ventana_ma_trimestral_insuficiente"
+      },
+      {
+        "repo": "pretender",
+        "metric": "ci_fail_rate",
+        "adoption_month": "2026-10",
+        "delta": null,
+        "n_pre": 4,
+        "n_post": 1,
+        "reason": "ventana_ma_trimestral_insuficiente"
+      },
+      {
+        "repo": "pretender",
+        "metric": "revert_ratio",
+        "adoption_month": "2026-10",
+        "delta": null,
+        "n_pre": 5,
+        "n_post": 1,
+        "reason": "ventana_ma_trimestral_insuficiente"
+      },
+      {
+        "repo": "pretender",
+        "metric": "fix_ratio",
+        "adoption_month": "2026-10",
+        "delta": null,
+        "n_pre": 3,
+        "n_post": 1,
+        "reason": "ventana_ma_trimestral_insuficiente"
+      },
+      {
+        "repo": "pretender",
+        "metric": "test_commit_ratio",
+        "adoption_month": "2026-10",
+        "delta": null,
+        "n_pre": 5,
+        "n_post": 1,
+        "reason": "ventana_ma_trimestral_insuficiente"
+      },
+      {
+        "repo": "vampiro",
+        "metric": "errors_api_per_100",
+        "adoption_month": "2026-10",
+        "delta": null,
+        "n_pre": 0,
+        "n_post": 0,
+        "reason": "ventana_pre_insuficiente"
+      },
+      {
+        "repo": "vampiro",
+        "metric": "recovery_p50_interactions",
+        "adoption_month": "2026-10",
+        "delta": null,
+        "n_pre": 3,
+        "n_post": 1,
+        "reason": "ventana_ma_trimestral_insuficiente"
+      },
+      {
+        "repo": "vampiro",
+        "metric": "session_commit_latency_p50_h",
+        "adoption_month": "2026-10",
+        "delta": null,
+        "n_pre": 3,
+        "n_post": 1,
+        "reason": "ventana_ma_trimestral_insuficiente"
+      },
+      {
+        "repo": "vampiro",
+        "metric": "ci_fail_rate",
+        "adoption_month": "2026-10",
+        "delta": null,
+        "n_pre": 3,
+        "n_post": 1,
+        "reason": "ventana_ma_trimestral_insuficiente"
+      },
+      {
+        "repo": "vampiro",
+        "metric": "revert_ratio",
+        "adoption_month": "2026-10",
+        "delta": null,
+        "n_pre": 3,
+        "n_post": 1,
+        "reason": "ventana_ma_trimestral_insuficiente"
+      },
+      {
+        "repo": "vampiro",
+        "metric": "fix_ratio",
+        "adoption_month": "2026-10",
+        "delta": null,
+        "n_pre": 3,
+        "n_post": 1,
+        "reason": "ventana_ma_trimestral_insuficiente"
+      },
+      {
+        "repo": "vampiro",
+        "metric": "test_commit_ratio",
+        "adoption_month": "2026-10",
+        "delta": null,
+        "n_pre": 3,
+        "n_post": 1,
+        "reason": "ventana_ma_trimestral_insuficiente"
+      },
+      {
+        "repo": "incitaciones",
+        "metric": "errors_api_per_100",
+        "adoption_month": "2026-10",
+        "delta": null,
+        "n_pre": 0,
+        "n_post": 0,
+        "reason": "ventana_pre_insuficiente"
+      },
+      {
+        "repo": "incitaciones",
+        "metric": "recovery_p50_interactions",
+        "adoption_month": "2026-10",
+        "delta": null,
+        "n_pre": 5,
+        "n_post": 1,
+        "reason": "ventana_ma_trimestral_insuficiente"
+      },
+      {
+        "repo": "incitaciones",
+        "metric": "session_commit_latency_p50_h",
+        "adoption_month": "2026-10",
+        "delta": null,
+        "n_pre": 5,
+        "n_post": 1,
+        "reason": "ventana_ma_trimestral_insuficiente"
+      },
+      {
+        "repo": "incitaciones",
+        "metric": "ci_fail_rate",
+        "adoption_month": "2026-10",
+        "delta": null,
+        "n_pre": 6,
+        "n_post": 1,
+        "reason": "ventana_ma_trimestral_insuficiente"
+      },
+      {
+        "repo": "incitaciones",
+        "metric": "revert_ratio",
+        "adoption_month": "2026-10",
+        "delta": null,
+        "n_pre": 7,
+        "n_post": 1,
+        "reason": "ventana_ma_trimestral_insuficiente"
+      },
+      {
+        "repo": "incitaciones",
+        "metric": "fix_ratio",
+        "adoption_month": "2026-10",
+        "delta": null,
+        "n_pre": 2,
+        "n_post": 1,
+        "reason": "ventana_pre_insuficiente"
+      },
+      {
+        "repo": "incitaciones",
+        "metric": "test_commit_ratio",
+        "adoption_month": "2026-10",
+        "delta": null,
+        "n_pre": 7,
+        "n_post": 1,
+        "reason": "ventana_ma_trimestral_insuficiente"
+      },
+      {
+        "repo": "dulce-de-leche",
+        "metric": "errors_api_per_100",
+        "adoption_month": "2026-09",
+        "delta": null,
+        "n_pre": 0,
+        "n_post": 0,
+        "reason": "ventana_pre_insuficiente"
+      },
+      {
+        "repo": "dulce-de-leche",
+        "metric": "recovery_p50_interactions",
+        "adoption_month": "2026-09",
+        "delta": null,
+        "n_pre": 2,
+        "n_post": 2,
+        "reason": "ventana_pre_insuficiente"
+      },
+      {
+        "repo": "dulce-de-leche",
+        "metric": "session_commit_latency_p50_h",
+        "adoption_month": "2026-09",
+        "delta": null,
+        "n_pre": 2,
+        "n_post": 2,
+        "reason": "ventana_pre_insuficiente"
+      },
+      {
+        "repo": "dulce-de-leche",
+        "metric": "ci_fail_rate",
+        "adoption_month": "2026-09",
+        "delta": null,
+        "n_pre": 2,
+        "n_post": 2,
+        "reason": "ventana_pre_insuficiente"
+      },
+      {
+        "repo": "dulce-de-leche",
+        "metric": "revert_ratio",
+        "adoption_month": "2026-09",
+        "delta": null,
+        "n_pre": 2,
+        "n_post": 2,
+        "reason": "ventana_pre_insuficiente"
+      },
+      {
+        "repo": "dulce-de-leche",
+        "metric": "fix_ratio",
+        "adoption_month": "2026-09",
+        "delta": null,
+        "n_pre": 2,
+        "n_post": 2,
+        "reason": "ventana_pre_insuficiente"
+      },
+      {
+        "repo": "dulce-de-leche",
+        "metric": "test_commit_ratio",
+        "adoption_month": "2026-09",
+        "delta": null,
+        "n_pre": 2,
+        "n_post": 2,
+        "reason": "ventana_pre_insuficiente"
+      }
+    ],
+    "did": [
+      {
+        "metric": "errors_api_per_100",
+        "adoption_frontier": "2026-09",
+        "n_treatment": 0,
+        "n_control": 0,
+        "delta_treatment": null,
+        "delta_control": null,
+        "did": null,
+        "reason": "n_insuficiente"
+      },
+      {
+        "metric": "recovery_p50_interactions",
+        "adoption_frontier": "2026-09",
+        "n_treatment": 5,
+        "n_control": 3,
+        "delta_treatment": -0.5916666666666666,
+        "delta_control": -0.08333333333333333,
+        "did": -0.5083333333333332
+      },
+      {
+        "metric": "session_commit_latency_p50_h",
+        "adoption_frontier": "2026-09",
+        "n_treatment": 5,
+        "n_control": 3,
+        "delta_treatment": -1403.1164535185185,
+        "delta_control": -1806.9320313503085,
+        "did": 403.81557783179005
+      },
+      {
+        "metric": "ci_fail_rate",
+        "adoption_frontier": "2026-09",
+        "n_treatment": 5,
+        "n_control": 3,
+        "delta_treatment": -0.3784959635028317,
+        "delta_control": -0.03510401931450317,
+        "did": -0.3433919441883285
+      },
+      {
+        "metric": "revert_ratio",
+        "adoption_frontier": "2026-09",
+        "n_treatment": 5,
+        "n_control": 3,
+        "delta_treatment": 0.0,
+        "delta_control": 0.0008460236886632825,
+        "did": -0.0008460236886632825
+      },
+      {
+        "metric": "fix_ratio",
+        "adoption_frontier": "2026-09",
+        "n_treatment": 5,
+        "n_control": 3,
+        "delta_treatment": 1.8116666666666668,
+        "delta_control": -4.720959595959596,
+        "did": 6.532626262626263
+      },
+      {
+        "metric": "test_commit_ratio",
+        "adoption_frontier": "2026-09",
+        "n_treatment": 5,
+        "n_control": 3,
+        "delta_treatment": -0.16997590771095356,
+        "delta_control": -0.06132011620809517,
+        "did": -0.1086557915028584
+      }
+    ],
+    "dose_response": [
+      {
+        "metric": "errors_api_per_100",
+        "spearman_rho": null,
+        "n": 0,
+        "reason": "n_insuficiente",
+        "points": []
+      },
+      {
+        "metric": "recovery_p50_interactions",
+        "spearman_rho": 0.3861997313354397,
+        "n": 13,
+        "points": [
+          {
+            "repo": "wai",
+            "dose": 0.6153846153846154,
+            "outcome": 1.1666666666666667
+          },
+          {
+            "repo": "testaruda",
+            "dose": 0.6153846153846154,
+            "outcome": 1.0
+          },
+          {
+            "repo": "turu",
+            "dose": 0.9230769230769231,
+            "outcome": 1.0
+          },
+          {
+            "repo": "dont",
+            "dose": 0.9230769230769231,
+            "outcome": 1.3333333333333333
+          },
+          {
+            "repo": "ah",
+            "dose": 0.6923076923076923,
+            "outcome": 1.0
+          },
+          {
+            "repo": "pretender",
+            "dose": 0.9230769230769231,
+            "outcome": 1.2
+          },
+          {
+            "repo": "vampiro",
+            "dose": 0.9230769230769231,
+            "outcome": 0.75
+          },
+          {
+            "repo": "incitaciones",
+            "dose": 0.9230769230769231,
+            "outcome": 1.4166666666666667
+          },
+          {
+            "repo": "specodelic",
+            "dose": 0.6923076923076923,
+            "outcome": 1.0
+          },
+          {
+            "repo": "funkalization",
+            "dose": 0.6153846153846154,
+            "outcome": 1.0
+          },
+          {
+            "repo": "wild",
+            "dose": 0.7692307692307693,
+            "outcome": 1.0
+          },
+          {
+            "repo": "dulce-de-leche",
+            "dose": 0.9230769230769231,
+            "outcome": 1.5
+          },
+          {
+            "repo": "coffee",
+            "dose": 0.38461538461538464,
+            "outcome": 1.0
+          }
+        ]
+      },
+      {
+        "metric": "session_commit_latency_p50_h",
+        "spearman_rho": 0.09368225124350368,
+        "n": 12,
+        "points": [
+          {
+            "repo": "wai",
+            "dose": 0.6153846153846154,
+            "outcome": 1732.2042746296295
+          },
+          {
+            "repo": "testaruda",
+            "dose": 0.6153846153846154,
+            "outcome": 682.8434235069444
+          },
+          {
+            "repo": "turu",
+            "dose": 0.9230769230769231,
+            "outcome": 64.23504402777777
+          },
+          {
+            "repo": "dont",
+            "dose": 0.9230769230769231,
+            "outcome": 866.8456541666666
+          },
+          {
+            "repo": "ah",
+            "dose": 0.6923076923076923,
+            "outcome": 1220.5156473888887
+          },
+          {
+            "repo": "pretender",
+            "dose": 0.9230769230769231,
+            "outcome": 950.749256611111
+          },
+          {
+            "repo": "vampiro",
+            "dose": 0.9230769230769231,
+            "outcome": 705.8152131944445
+          },
+          {
+            "repo": "incitaciones",
+            "dose": 0.9230769230769231,
+            "outcome": 1426.7711730092594
+          },
+          {
+            "repo": "specodelic",
+            "dose": 0.6923076923076923,
+            "outcome": 85.79914111111111
+          },
+          {
+            "repo": "wild",
+            "dose": 0.7692307692307693,
+            "outcome": 0.0
+          },
+          {
+            "repo": "dulce-de-leche",
+            "dose": 0.9230769230769231,
+            "outcome": 881.891980625
+          },
+          {
+            "repo": "coffee",
+            "dose": 0.38461538461538464,
+            "outcome": 287.58521472222225
+          }
+        ]
+      },
+      {
+        "metric": "ci_fail_rate",
+        "spearman_rho": 0.3290449626377132,
+        "n": 13,
+        "points": [
+          {
+            "repo": "wai",
+            "dose": 0.6153846153846154,
+            "outcome": 0.31090982665391226
+          },
+          {
+            "repo": "testaruda",
+            "dose": 0.6153846153846154,
+            "outcome": 0.207341603028001
+          },
+          {
+            "repo": "turu",
+            "dose": 0.9230769230769231,
+            "outcome": 0.15527950310559008
+          },
+          {
+            "repo": "dont",
+            "dose": 0.9230769230769231,
+            "outcome": 0.32807622965803224
+          },
+          {
+            "repo": "ah",
+            "dose": 0.6923076923076923,
+            "outcome": 0.144027834205136
+          },
+          {
+            "repo": "pretender",
+            "dose": 0.9230769230769231,
+            "outcome": 0.2614384285021975
+          },
+          {
+            "repo": "vampiro",
+            "dose": 0.9230769230769231,
+            "outcome": 0.5406850787149249
+          },
+          {
+            "repo": "incitaciones",
+            "dose": 0.9230769230769231,
+            "outcome": 0.003007518796992481
+          },
+          {
+            "repo": "specodelic",
+            "dose": 0.6923076923076923,
+            "outcome": 0.34750795334040296
+          },
+          {
+            "repo": "funkalization",
+            "dose": 0.6153846153846154,
+            "outcome": 0.09090909090909091
+          },
+          {
+            "repo": "wild",
+            "dose": 0.7692307692307693,
+            "outcome": 0.8987341772151899
+          },
+          {
+            "repo": "dulce-de-leche",
+            "dose": 0.9230769230769231,
+            "outcome": 0.597907612395145
+          },
+          {
+            "repo": "coffee",
+            "dose": 0.38461538461538464,
+            "outcome": 0.046085858585858584
+          }
+        ]
+      },
+      {
+        "metric": "revert_ratio",
+        "spearman_rho": -0.32710225430843876,
+        "n": 13,
+        "points": [
+          {
+            "repo": "wai",
+            "dose": 0.6153846153846154,
+            "outcome": 0.0005640157924421883
+          },
+          {
+            "repo": "testaruda",
+            "dose": 0.6153846153846154,
+            "outcome": 0.0
+          },
+          {
+            "repo": "turu",
+            "dose": 0.9230769230769231,
+            "outcome": 0.0
+          },
+          {
+            "repo": "dont",
+            "dose": 0.9230769230769231,
+            "outcome": 0.0
+          },
+          {
+            "repo": "ah",
+            "dose": 0.6923076923076923,
+            "outcome": 0.0
+          },
+          {
+            "repo": "pretender",
+            "dose": 0.9230769230769231,
+            "outcome": 0.0
+          },
+          {
+            "repo": "vampiro",
+            "dose": 0.9230769230769231,
+            "outcome": 0.0
+          },
+          {
+            "repo": "incitaciones",
+            "dose": 0.9230769230769231,
+            "outcome": 0.0
+          },
+          {
+            "repo": "specodelic",
+            "dose": 0.6923076923076923,
+            "outcome": 0.0
+          },
+          {
+            "repo": "funkalization",
+            "dose": 0.6153846153846154,
+            "outcome": 0.0
+          },
+          {
+            "repo": "wild",
+            "dose": 0.7692307692307693,
+            "outcome": 0.0
+          },
+          {
+            "repo": "dulce-de-leche",
+            "dose": 0.9230769230769231,
+            "outcome": 0.0
+          },
+          {
+            "repo": "coffee",
+            "dose": 0.38461538461538464,
+            "outcome": 0.0
+          }
+        ]
+      },
+      {
+        "metric": "fix_ratio",
+        "spearman_rho": -0.36880333061353227,
+        "n": 11,
+        "points": [
+          {
+            "repo": "wai",
+            "dose": 0.6153846153846154,
+            "outcome": 7.908163265306122
+          },
+          {
+            "repo": "testaruda",
+            "dose": 0.6153846153846154,
+            "outcome": 9.56060606060606
+          },
+          {
+            "repo": "turu",
+            "dose": 0.9230769230769231,
+            "outcome": 1.5666666666666667
+          },
+          {
+            "repo": "dont",
+            "dose": 0.9230769230769231,
+            "outcome": 5.75
+          },
+          {
+            "repo": "ah",
+            "dose": 0.6923076923076923,
+            "outcome": 5.973214285714286
+          },
+          {
+            "repo": "pretender",
+            "dose": 0.9230769230769231,
+            "outcome": 5.4
+          },
+          {
+            "repo": "vampiro",
+            "dose": 0.9230769230769231,
+            "outcome": 10.833333333333334
+          },
+          {
+            "repo": "incitaciones",
+            "dose": 0.9230769230769231,
+            "outcome": 1.5
+          },
+          {
+            "repo": "specodelic",
+            "dose": 0.6923076923076923,
+            "outcome": 3.291666666666667
+          },
+          {
+            "repo": "wild",
+            "dose": 0.7692307692307693,
+            "outcome": 5.0
+          },
+          {
+            "repo": "dulce-de-leche",
+            "dose": 0.9230769230769231,
+            "outcome": 5.4375
+          }
+        ]
+      },
+      {
+        "metric": "test_commit_ratio",
+        "spearman_rho": -0.020383316269592854,
+        "n": 13,
+        "points": [
+          {
+            "repo": "wai",
+            "dose": 0.6153846153846154,
+            "outcome": 0.21803556259487455
+          },
+          {
+            "repo": "testaruda",
+            "dose": 0.6153846153846154,
+            "outcome": 0.27410940508766596
+          },
+          {
+            "repo": "turu",
+            "dose": 0.9230769230769231,
+            "outcome": 0.2648245260185559
+          },
+          {
+            "repo": "dont",
+            "dose": 0.9230769230769231,
+            "outcome": 0.3393922668201908
+          },
+          {
+            "repo": "ah",
+            "dose": 0.6923076923076923,
+            "outcome": 0.24953009953009953
+          },
+          {
+            "repo": "pretender",
+            "dose": 0.9230769230769231,
+            "outcome": 0.35758237265262244
+          },
+          {
+            "repo": "vampiro",
+            "dose": 0.9230769230769231,
+            "outcome": 0.23680462341536168
+          },
+          {
+            "repo": "incitaciones",
+            "dose": 0.9230769230769231,
+            "outcome": 0.06472763225614216
+          },
+          {
+            "repo": "specodelic",
+            "dose": 0.6923076923076923,
+            "outcome": 0.316050886674134
+          },
+          {
+            "repo": "funkalization",
+            "dose": 0.6153846153846154,
+            "outcome": 0.22727272727272727
+          },
+          {
+            "repo": "wild",
+            "dose": 0.7692307692307693,
+            "outcome": 0.35714285714285715
+          },
+          {
+            "repo": "dulce-de-leche",
+            "dose": 0.9230769230769231,
+            "outcome": 0.29595795277081066
+          },
+          {
+            "repo": "coffee",
+            "dose": 0.38461538461538464,
+            "outcome": 0.3614020950846092
+          }
+        ]
+      }
+    ]
+  }
+}

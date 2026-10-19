@@ -73,5 +73,5 @@ coffe-nea + coffe-pp0).
   bug pre-existente, coffe-4j9) (4 niveles, español) + grounding en
   `viz_fpa_guide.py` (`--check`)
 - [x] 6.3+6.4 (coffe-zx5) README: layout de `data/ddl_effect.json`, cache gh/terapia, gaps
-- [ ] 6.5 (coffe-q9z) Regenerar `data/ddl_effect.json` + `data/ddl-dashboard.html` con datos
+- [x] 6.5 (coffe-q9z) Regenerar `data/ddl_effect.json` + `data/ddl-dashboard.html` con datos
   reales, revisar cifras contra insumos antes de commitear
