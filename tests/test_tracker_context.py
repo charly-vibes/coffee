@@ -65,8 +65,9 @@ def e_assistant(text="", thinking="", tool_calls=None, usage=None,
     for tc in (tool_calls or []):
         content.append({"type": "toolCall", "id": tc.get("id", "c1"),
                         "name": tc["name"], "arguments": tc["arguments"]})
-    msg = {"role": "assistant", "content": content,
-           "provider": provider, "model": model}
+    msg = {"role": "assistant", "content": content, "model": model}
+    if provider is not None:
+        msg["provider"] = provider
     if usage is not None:
         msg["usage"] = usage
     return {"type": "message", "timestamp": ts, "message": msg}
@@ -248,6 +249,63 @@ class TestBigResults(unittest.TestCase):
         self.assertEqual({"bash": 1}, m["big_results_by_tool"])
         m2 = ut.reduce_context(entries)  # default 100k → no
         self.assertEqual(0, m2["big_results"])
+
+
+class TestModelosTurnos(unittest.TestCase):
+    """coffe-sht (1.2): atribución por modelo — CORR-002 del review R5:
+    66 model_change en 40 archivos muestreados; un solo modelo por fila
+    no alcanza. models_turns es fuente de verdad, model es el dominante."""
+
+    def _turnos(self, modelo, n, model_change=True):
+        out = []
+        if model_change:
+            out.append({"type": "model_change", "provider": "anthropic",
+                        "modelId": modelo})
+        for i in range(n):
+            out.append(e_assistant(text="r", usage=usage(), model=modelo))
+        return out
+
+    def test_model_change_mid_sesion(self):
+        """20 turnos A + 10 turnos B → models_turns {A:20,B:10}, model A."""
+        entries = (self._turnos("modelo-a", 20)
+                   + self._turnos("modelo-b", 10))
+        m = ut.reduce_context(entries)
+        self.assertEqual({"modelo-a": 20, "modelo-b": 10}, m["models_turns"])
+        self.assertEqual("modelo-a", m["model"])
+        self.assertEqual(30, m["turns"])
+
+    def test_modelo_desde_mensaje_sin_model_change(self):
+        """Sin entradas model_change: el modelo viene del campo message.model
+        de cada assistant (presente en los archivos reales verificados)."""
+        entries = self._turnos("solo-b", 3, model_change=False)
+        m = ut.reduce_context(entries)
+        self.assertEqual({"solo-b": 3}, m["models_turns"])
+        self.assertEqual("solo-b", m["model"])
+
+    def test_provider_ultima_model_change(self):
+        """provider se lleva en paralelo al modelo (context_source en 5uu):
+        mensajes sin provider propio caen al último model_change."""
+        entries = [{"type": "model_change", "provider": "openrouter",
+                    "modelId": "m-x"}]
+        for i in range(2):
+            entries.append(e_assistant(text="r", usage=usage(), model="m-x",
+                                       provider=None))
+        m = ut.reduce_context(entries)
+        self.assertEqual("openrouter", m["provider"])
+        self.assertEqual({"m-x": 2}, m["models_turns"])
+
+    def test_sin_turnos_model_none(self):
+        m = ut.reduce_context([e_user("p")])
+        self.assertIsNone(m["model"])
+        self.assertEqual({}, m["models_turns"])
+
+    def test_month_desde_filename(self):
+        """month viene del filename del archivo de sesión (documentado):
+        el reducer lo recibe, no lo deriva."""
+        m = ut.reduce_context([e_user("p")], month="2026-10")
+        self.assertEqual("2026-10", m["month"])
+        m2 = ut.reduce_context([e_user("p")])
+        self.assertNotIn("month", m2)
 
 
 class TestPureza(unittest.TestCase):

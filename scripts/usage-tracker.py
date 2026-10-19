@@ -1320,7 +1320,7 @@ DEFAULT_CONTEXT_THRESHOLDS = {
 }
 
 
-def reduce_context(entries, config=None):
+def reduce_context(entries, config=None, month=None):
     """Reducer puro de contexto por sesión de Pi (ctx-tracker, coffe-7gg).
 
     entries: iterable de dicts ya parseados de un JSONL de Pi (1 archivo =
@@ -1338,6 +1338,11 @@ def reduce_context(entries, config=None):
 
     Loss visible: turnos assistant sin usage (abortados) cuentan en
     turns_no_usage — nunca se silencian como 0 fake.
+
+    Atribución por modelo (CORR-002, coffe-sht): models_turns es fuente de
+    verdad (turno a turno, desde message.model o el último model_change);
+    model = dominante por conteo. month viene del filename del archivo de
+    sesión (el reducer no lo deriva): solo se emite si se pasa.
     """
     th = dict(DEFAULT_CONTEXT_THRESHOLDS)
     if config:
@@ -1352,6 +1357,8 @@ def reduce_context(entries, config=None):
     seg_chars = 0          # acumulador del segmento actual
     peak_chars = 0         # máximo del acumulador dentro del segmento mayor
     max_assistant_block = 0  # chars del mayor bloque assistant individual (gp8)
+    models_turns = {}
+    cur_model = cur_provider = None
 
     def _add(source, n):
         chars_by_source[source] = chars_by_source.get(source, 0) + n
@@ -1362,6 +1369,11 @@ def reduce_context(entries, config=None):
             compactions += 1
             segment_count += 1
             seg_chars = 0  # reset del acumulador: segmento nuevo
+            continue
+        if etype == "model_change":
+            cur_provider = entry.get("provider")
+            if entry.get("modelId"):
+                cur_model = entry["modelId"]
             continue
         if etype != "message":
             continue
@@ -1375,6 +1387,13 @@ def reduce_context(entries, config=None):
                     seg_chars += n
         elif role == "assistant":
             turns += 1
+            # modelo del turno: el campo propio del mensaje manda (los
+            # archivos reales lo traen); fallback al último model_change
+            turn_model = msg.get("model") or cur_model
+            if turn_model:
+                models_turns[turn_model] = models_turns.get(turn_model, 0) + 1
+            if msg.get("provider"):
+                cur_provider = msg["provider"]
             block_chars = 0
             for part in (msg.get("content") or []):
                 if not isinstance(part, dict):
@@ -1410,7 +1429,10 @@ def reduce_context(entries, config=None):
         if seg_chars > peak_chars:
             peak_chars = seg_chars  # máximo dentro del segmento actual
     cpt = th["chars_per_token"]
-    return {
+    dominant = None
+    if models_turns:
+        dominant = max(sorted(models_turns), key=lambda k: models_turns[k])
+    out = {
         "turns": turns,
         "turns_no_usage": turns_no_usage,
         "chars_by_source": chars_by_source,
@@ -1424,7 +1446,13 @@ def reduce_context(entries, config=None):
         "final_ctx_est": seg_chars // cpt,
         "max_assistant_block_chars": max_assistant_block,
         "chars_per_token": cpt,
+        "model": dominant,
+        "models_turns": models_turns,
+        "provider": cur_provider,
     }
+    if month is not None:
+        out["month"] = month
+    return out
 
 # --- fin bloque ctx-tracker --------------------------------------------------
 
