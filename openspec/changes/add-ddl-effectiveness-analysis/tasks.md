@@ -60,7 +60,7 @@ coffe-nea + coffe-pp0).
 - [ ] 5.2+5.3 (coffe-het) Vista línea de adopción (timeline por repo, fechas null visibles)
 - [ ] 5.3 Vista dosis-respuesta (scatter con n por punto, celdas n<3 ocultas)
 - [ ] 5.4 (coffe-470) Vista pre/post + DiD con IC bootstrap
-- [ ] 5.5 (coffe-46h) Vistas lazo de feedback, errores y calidad (4 proxies, sin score)
+- [x] 5.5 (coffe-46h) Vistas lazo de feedback, errores y calidad (4 proxies, sin score)
 - [ ] 5.6 (coffe-8yf) Banda fija de disclosure de confusores (no-colapsable)
 - [ ] 5.7 (coffe-x1s) Smoke Chromium en `tests/test_viz.py` (0 pageerrors, charts render)
 

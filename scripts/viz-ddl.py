@@ -239,6 +239,124 @@ def view_pre_post(report):
             f"(IC bootstrap sobre deltas por repo):</p>{did}")
 
 
+def _monthly_rows(report):
+    """Filas de monthly[] ordenadas por (repo, mes) — reproducible."""
+    return sorted(report.get("monthly") or [],
+                  key=lambda r: (r.get("repo", ""), r.get("month", "")))
+
+
+def _cell(row, field, nd=2, suffix=""):
+    """Celda de panel con provenance (patrón FPA-003): valor con tag de src,
+    None con su razón visible — distinto de un 0 real (spec). Dicts (clases
+    de error de terapia) se desglosan clave a clave."""
+    val = row.get(field)
+    tag = (row.get("src") or {}).get(field) or "missing"
+    if val is None:
+        reason = (row.get("reasons") or {}).get(field)
+        return fig("n/a" + (f" ({esc(reason)})" if reason else ""), "missing")
+    if isinstance(val, dict):
+        if not val:
+            return fig("—", tag)  # {} = sin clases, distinto de missing
+        inner = ", ".join(f"{esc(k)} {v:.{nd}f}"
+                          for k, v in sorted(val.items()))
+        return fig(inner, tag)
+    return fig(f"{val:.{nd}f}{suffix}", tag)
+
+
+def view_lazo_feedback(report):
+    """Vista lazo de feedback (coffe-46h 5.5): recovery (p50 con n y tasa de
+    censura visibles — spec 'recuperación con censura visible'), latencia
+    sesión→commit y CI fallida con runs; null con razón, nunca 0 fake."""
+    rows = _monthly_rows(report)
+    if not rows:
+        return (f'<h2>{esc(VIEW_TITLES["lazo-feedback"])}</h2>'
+                '<p class="placeholder">Lazo de feedback: sin datos'
+                f'{prov_tag("missing")}</p>')
+    trs = []
+    for r in rows:
+        p50 = r.get("recovery_p50_interactions")
+        if p50 is None:
+            recovery = _cell(r, "recovery_p50_interactions")
+        else:
+            tag = (r.get("src") or {}).get("recovery_p50_interactions",
+                                           "missing")
+            n = r.get("recovery_n")
+            cens = r.get("recovery_censored_rate")
+            det = (" (n: " + (str(n) if n is not None else "?")
+                   + ", censura "
+                   + (f"{cens:.0%}" if cens is not None else "n/a") + ")")
+            recovery = fig(f"{p50:.2f} inter{esc(det)}", tag)
+        runs_t, runs_f = r.get("runs_total"), r.get("runs_failed")
+        if r.get("ci_fail_rate") is not None:
+            runs = (f" ({int(runs_f)}/{int(runs_t)})"
+                    if runs_t is not None and runs_f is not None else "")
+            ci = fig(f"{r['ci_fail_rate']:.2f}{esc(runs)}",
+                     (r.get("src") or {}).get("ci_fail_rate", "missing"))
+        else:
+            ci = _cell(r, "ci_fail_rate")
+        trs.append(
+            f'<tr data-repo="{esc(r.get("repo", "?"))}">'
+            f'<td>{esc(r.get("repo", "?"))}</td><td>{esc(r.get("month", ""))}</td>'
+            f"<td>{recovery}</td><td>{_cell(r, 'session_commit_latency_p50_h', suffix=' h')}</td>"
+            f"<td>{ci}</td></tr>")
+    return (f'<h2>{esc(VIEW_TITLES["lazo-feedback"])}</h2>'
+            "<p>Ciclo error→recuperación, sesión→commit y CI por repo × mes "
+            "(null con razón — nunca 0 fake):</p>"
+            + _estimator_table(["repo", "mes", "recuperación (p50 inter)",
+                            "sesión→commit", "CI fallida"],
+                           trs, "Lazo de feedback: sin datos"))
+
+
+def view_errores(report):
+    """Vista errores (coffe-46h 5.5): tasas por 100 interacciones con el
+    denominador en el mismo row (spec 'denominador siempre presente') y
+    clases de terapia desglosadas."""
+    rows = _monthly_rows(report)
+    if not rows:
+        return (f'<h2>{esc(VIEW_TITLES["errores"])}</h2>'
+                '<p class="placeholder">Errores: sin datos'
+                f'{prov_tag("missing")}</p>')
+    trs = []
+    for r in rows:
+        trs.append(
+            f'<tr data-repo="{esc(r.get("repo", "?"))}">'
+            f'<td>{esc(r.get("repo", "?"))}</td><td>{esc(r.get("month", ""))}</td>'
+            f'<td>{esc(str(r.get("interactions")))}</td>'
+            f"<td>{_cell(r, 'errors_api_per_100')}</td>"
+            f"<td>{_cell(r, 'errors_terapia_per_100')}</td></tr>")
+    return (f'<h2>{esc(VIEW_TITLES["errores"])}</h2>'
+            "<p>Errores por 100 interacciones (el denominador va en el row):</p>"
+            + _estimator_table(["repo", "mes", "interacciones", "errores API/100",
+                            "clases terapia/100"],
+                           trs, "Errores: sin datos"))
+
+
+def view_calidad(report):
+    """Vista calidad (coffe-46h 5.5): los 4 proxies lado a lado — revert,
+    fix, test/commit y ah_check — sin score compuesto ponderado (spec
+    'sin score inventado'). Cada bias está declarado en la guía."""
+    rows = _monthly_rows(report)
+    if not rows:
+        return (f'<h2>{esc(VIEW_TITLES["calidad"])}</h2>'
+                '<p class="placeholder">Calidad: sin datos'
+                f'{prov_tag("missing")}</p>')
+    trs = []
+    for r in rows:
+        trs.append(
+            f'<tr data-repo="{esc(r.get("repo", "?"))}">'
+            f'<td>{esc(r.get("repo", "?"))}</td><td>{esc(r.get("month", ""))}</td>'
+            f"<td>{_cell(r, 'revert_ratio')}</td>"
+            f"<td>{_cell(r, 'fix_ratio')}</td>"
+            f"<td>{_cell(r, 'test_commit_ratio')}</td>"
+            f"<td>{_cell(r, 'ah_check_findings', nd=0)}</td></tr>")
+    return (f'<h2>{esc(VIEW_TITLES["calidad"])}</h2>'
+            "<p>Cuatro proxies separados — <strong>sin score compuesto</strong> "
+            "(combinarlos inventaría una métrica que no medimos):</p>"
+            + _estimator_table(["repo", "mes", "revert_ratio", "fix_ratio",
+                            "test_commit_ratio", "ah_check_findings"],
+                           trs, "Calidad: sin datos"))
+
+
 def add_export_buttons(html_doc):
     """Inserta botón 'Exportar CSV' delante de cada tabla y 'Descargar SVG'
     delante de cada chart (clase chart). El click lo maneja el JS por
@@ -297,6 +415,12 @@ def view_html(view, report):
         return view_adopcion(report)
     if view == "dosis-respuesta":
         return view_dosis_respuesta(report)
+    if view == "lazo-feedback":
+        return view_lazo_feedback(report)
+    if view == "errores":
+        return view_errores(report)
+    if view == "calidad":
+        return view_calidad(report)
     return placeholder(view, report)
 
 
