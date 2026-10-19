@@ -107,13 +107,13 @@ El deploy es vía **GitHub Actions** (no hay branch `gh-pages`): `.github/workfl
 ## Estado de los datos
 
 <!-- CHECK-DOCS:BEGIN -->
-- Interacciones: 272,300
-- Proyectos: 106
-- Costo efectivo: $5,878.53
-- Costo real: $1,188.09
+- Interacciones: 273,843
+- Proyectos: 107
+- Costo efectivo: $5,883.32
+- Costo real: $1,192.88
 - Cash real (ledger): $1,516.72
-- Sesiones: 4,198
-- Periodo: 2025-12-23 → 2026-10-18
+- Sesiones: 4,216
+- Periodo: 2025-12-23 → 2026-10-19
 <!-- CHECK-DOCS:END -->
 
 Nota: `Costo real` es la suma mensual del tracker (fees implícitos del
