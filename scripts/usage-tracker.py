@@ -1098,8 +1098,11 @@ def extract_pi_sessions(sessions_dir=None):
     0 /new en 981 archivos). La señal correcta de sesión/reset es el
     archivo mismo: cada /new abre JSONL nuevo.
 
-    Métricas sin señal en pi (skills/errores/compactions) van en None —
-    _session_stats las excluye de los totales en vez de contarlas como 0.
+    Métricas sin señal en pi (skills/errores) van en None — _session_stats
+    las excluye de los totales en vez de contarlas como 0. n_compactions es
+    real desde coffe-64z (CORR-003): las entradas type=="compaction"
+    existen en los JSONL de Pi desde ~may-2026 (12 en miblioteca, review
+    R5); sin entradas == 0, no None.
     has_agent=False: la semántica Agent (subagentes) es de Claude; el
     alcance se declara en sessions.agent_semantics.
 
@@ -1116,13 +1119,16 @@ def extract_pi_sessions(sessions_dir=None):
         if not is_charly(proj): continue  # coffe-i31: scope consistente
         for f in sorted(sd.glob("*.jsonl")):
             try:
-                msgs = user_prompts = 0
+                msgs = user_prompts = n_compactions = 0
                 first_ts = last_ts = None
                 first_raw = last_raw = None
                 tools = set()
                 with open(f) as fh:
                     for line in fh:
                         entry = json.loads(line)
+                        if entry.get("type") == "compaction":
+                            n_compactions += 1
+                            continue
                         if entry.get("type") != "message": continue
                         ts = parse_ts(entry.get("timestamp"))
                         if ts is not None:
@@ -1156,7 +1162,7 @@ def extract_pi_sessions(sessions_dir=None):
                     "has_agent": False,
                     "n_skills": None,
                     "n_errors": None,
-                    "n_compactions": None,
+                    "n_compactions": n_compactions,
                 })
             except (json.JSONDecodeError, OSError, ValueError, TypeError, KeyError) as e:
                 if os.environ.get("TRACKER_DEBUG"):

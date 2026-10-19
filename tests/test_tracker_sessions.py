@@ -66,6 +66,11 @@ def _write_jsonl(path, entries):
     path.write_text("\n".join(json.dumps(e) for e in entries) + "\n")
 
 
+def _pi_compaction(ts):
+    return {"type": "compaction", "timestamp": ts, "tokensBefore": 100000,
+            "fromHook": False}
+
+
 def _pi_project(tmp, name):
     """Escribe una sesión pi de 5 mensajes (2 user, 3 assistant, 1 tool)."""
     d = Path(tmp) / name
@@ -122,15 +127,38 @@ class TestExtractPiSessions(unittest.TestCase):
         self.assertEqual(s["last_ts_full"], "2026-05-10T14:26:00.000Z")
 
     def test_metricas_claude_only_son_none(self):
-        # pi no tiene señal de skills/errores/compactions: None (no 0, no
-        # inventado) — _session_stats los excluye de los totales.
+        # pi no tiene señal de skills/errores: None (no 0, no inventado) —
+        # _session_stats los excluye de los totales. n_compactions ya no es
+        # None: CORR-003 (coffe-64z) — la señal existe en los JSONL desde
+        # ~may-2026, sin entradas compaction == 0 real.
         _pi_project(self.tmp, "charly-coffee")
         s = ut.extract_pi_sessions(sessions_dir=self.tmp)[0]
         self.assertIsNone(s["n_skills"])
         self.assertIsNone(s["n_errors"])
-        self.assertIsNone(s["n_compactions"])
+        self.assertEqual(0, s["n_compactions"])
         # sin señal de subagentes (semántica Agent es de Claude)
         self.assertFalse(s["has_agent"])
+
+    def test_n_compactions_real_desde_jsonl(self):
+        """CORR-003: entradas type==compaction del JSONL se cuentan
+        (12 en el archivo miblioteca, verificado en el review R5)."""
+        _pi_project(self.tmp, "charly-coffee")
+        _write_jsonl(self.tmp / "charly-coffee" / "s2.jsonl", [
+            _pi_msg("2026-05-11T09:00:00.000Z", "user"),
+            {"type": "compaction", "timestamp": "2026-05-11T09:05:00.000Z",
+             "tokensBefore": 90000, "fromHook": False},
+            _pi_msg("2026-05-11T09:06:00.000Z", "assistant"),
+            {"type": "compaction", "timestamp": "2026-05-11T09:10:00.000Z",
+             "tokensBefore": 120000, "fromHook": False},
+            _pi_msg("2026-05-11T09:11:00.000Z", "assistant"),
+        ])
+        sessions = ut.extract_pi_sessions(sessions_dir=self.tmp)
+        s2 = [s for s in sessions
+              if s["first_ts"] == "2026-05-11"][0]
+        self.assertEqual(2, s2["n_compactions"])
+        # la sesión sin compactions queda en 0 real (no None)
+        s1 = [s for s in sessions if s["first_ts"] == "2026-05-10"][0]
+        self.assertEqual(0, s1["n_compactions"])
 
     def test_fuera_de_scope_excluida(self):
         _pi_project(self.tmp, "charly-coffee")
