@@ -487,6 +487,57 @@ def build_panel(cells):
     return rows
 
 
+def its_pre_post(rows, metric, adoption_month, seed=42, min_pre=3,
+                 n_boot=10_000):
+    """ITS simple (design D5, 'honestos antes que elegantes'): media móvil
+    trimestral pre/post del corte de adopción, delta post−pre e IC 95% por
+    bootstrap (10k resamples, seed fija para reproducibilidad).
+
+    rows: filas del panel de UN repo, orden libre (se ordenan por month).
+    Ventana pre mínima: min_pre meses — menos que eso omite el ITS con
+    'reason' explícita y delta None, nunca delta 0 disfrazado (spec). Meses
+    con la métrica None (missing) no cuentan en ninguna ventana.
+    """
+    import random
+    import statistics
+    series = sorted((r for r in rows if r.get(metric) is not None),
+                    key=lambda r: r["month"])
+    pre = [r[metric] for r in series if r["month"] < adoption_month]
+    post = [r[metric] for r in series if r["month"] >= adoption_month]
+    if len(pre) < min_pre:
+        return {"delta": None, "n_pre": len(pre), "n_post": len(post),
+                "reason": "ventana_pre_insuficiente"}
+    if not post:
+        return {"delta": None, "n_pre": len(pre), "n_post": 0,
+                "reason": "sin_meses_post"}
+
+    def _ma3(values):
+        return [statistics.fmean(values[i:i + 3])
+                for i in range(len(values) - 2)]
+
+    pre_ma, post_ma = _ma3(pre), _ma3(post)
+    if not pre_ma or not post_ma:
+        return {"delta": None, "n_pre": len(pre), "n_post": len(post),
+                "reason": "ventana_ma_trimestral_insuficiente"}
+    delta = statistics.fmean(post_ma) - statistics.fmean(pre_ma)
+    rng = random.Random(seed)
+    deltas = []
+    for _ in range(n_boot):
+        bp = [pre_ma[rng.randrange(len(pre_ma))] for _ in pre_ma]
+        bq = [post_ma[rng.randrange(len(post_ma))] for _ in post_ma]
+        deltas.append(statistics.fmean(bq) - statistics.fmean(bp))
+    deltas.sort()
+    lo = deltas[int(0.025 * (n_boot - 1))]
+    hi = deltas[int(0.975 * (n_boot - 1))]
+    return {
+        "delta": delta,
+        "pre_mean": statistics.fmean(pre_ma),
+        "post_mean": statistics.fmean(post_ma),
+        "ci_low": lo, "ci_high": hi,
+        "n_pre": len(pre), "n_post": len(post),
+    }
+
+
 # ---------------------------------------------------------------------------
 # main
 # ---------------------------------------------------------------------------

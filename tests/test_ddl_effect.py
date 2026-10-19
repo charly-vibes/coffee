@@ -544,5 +544,76 @@ class PanelTest(unittest.TestCase):
         self.assertNotIn("dose_detail", panel[0])
 
 
+class ItsTest(unittest.TestCase):
+    """4.2 (coffe-ktu): ITS pre/post, media móvil trimestral + IC bootstrap."""
+
+    MONTHS = [f"2026-{m:02d}" for m in range(1, 9)]  # 2026-01..2026-08
+
+    def _rows(self, values):
+        return [{"month": m, "ah_check_findings": v}
+                for m, v in zip(self.MONTHS, values)]
+
+    def test_delta_pre_post_paso_escalon(self):
+        out = ddl.its_pre_post(self._rows([1, 1, 1, 1, 3, 3, 3, 3]),
+                               "ah_check_findings", "2026-05")
+        self.assertEqual(out["pre_mean"], 1.0)
+        self.assertEqual(out["post_mean"], 3.0)
+        self.assertEqual(out["delta"], 2.0)
+        self.assertEqual(out["n_pre"], 4)
+        self.assertEqual(out["n_post"], 4)
+
+    def test_ci_bracketea_delta(self):
+        out = ddl.its_pre_post(self._rows([1, 2, 1, 3, 5, 4, 6, 5]),
+                               "ah_check_findings", "2026-05", n_boot=1000)
+        self.assertLess(out["ci_low"], out["delta"])
+        self.assertGreater(out["ci_high"], out["delta"])
+
+    def test_reproducible_con_seed_fija(self):
+        rows = self._rows([1, 2, 1, 3, 5, 4, 6, 5])
+        a = ddl.its_pre_post(rows, "ah_check_findings", "2026-05")
+        b = ddl.its_pre_post(rows, "ah_check_findings", "2026-05")
+        self.assertEqual(a, b)
+
+    def test_ventana_pre_insuficiente_omitido_con_marca(self):
+        # adopción precede al tracking: 2 meses pre < mínimo 3 → delta None,
+        # nunca 0 disfrazado
+        out = ddl.its_pre_post(self._rows([1, 1, 3, 3, 3, 3, 3, 3]),
+                               "ah_check_findings", "2026-03")
+        self.assertIsNone(out["delta"])
+        self.assertEqual(out["reason"], "ventana_pre_insuficiente")
+        self.assertEqual(out["n_pre"], 2)
+
+    def test_ventana_pre_de_3_meses_si_estima(self):
+        # borde: exactamente 3 meses pre es suficiente (D5)
+        out = ddl.its_pre_post(self._rows([1, 1, 1, 3, 3, 3, 3, 3]),
+                               "ah_check_findings", "2026-04")
+        self.assertEqual(out["n_pre"], 3)
+        self.assertIsNone(out.get("reason"))
+        self.assertEqual(out["delta"], 2.0)
+
+    def test_sin_meses_post_omitido(self):
+        # adopción después del último mes de la serie: post vacío
+        out = ddl.its_pre_post(self._rows([1, 1, 1, 1, 1, 1, 1, 1]),
+                               "ah_check_findings", "2026-09")
+        self.assertIsNone(out["delta"])
+        self.assertEqual(out["reason"], "sin_meses_post")
+        self.assertEqual(out["n_post"], 0)
+
+    def test_post_de_1_mes_sin_ma_omitido(self):
+        # adopción en el último mes: hay 1 mes post pero no alcanza para la
+        # media móvil trimestral → omitido con razón, no delta crudo disfrazado
+        out = ddl.its_pre_post(self._rows([1, 1, 1, 1, 1, 1, 1, 1]),
+                               "ah_check_findings", "2026-08")
+        self.assertIsNone(out["delta"])
+        self.assertEqual(out["reason"], "ventana_ma_trimestral_insuficiente")
+        self.assertEqual(out["n_post"], 1)
+
+    def test_meses_con_metrica_none_excluidos(self):
+        rows = self._rows([1, None, 1, 1, 3, 3, 3, 3])
+        out = ddl.its_pre_post(rows, "ah_check_findings", "2026-05")
+        self.assertEqual(out["n_pre"], 3)  # el None de feb no cuenta
+        self.assertEqual(out["delta"], 2.0)
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=1)
