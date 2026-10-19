@@ -89,10 +89,6 @@ class VizDdlTest(unittest.TestCase):
         # esqueleto: vistas vacías muestran placeholder visible, no tabs muertos
         self.assertIn("placeholder", self.html)
 
-    def test_disclosure_count_not_required_yet(self):
-        # 5.6 (coffe-8yf) agrega la banda fija; el esqueleto no la lleva
-        self.assertNotIn("confusor", self.html.lower())
-
 
 class VistaPrePostTest(unittest.TestCase):
     """5.4 (coffe-470): vista pre/post + DiD con IC bootstrap."""
