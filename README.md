@@ -144,6 +144,45 @@ mismo método recomputado con cache factor 0.0 y 1.0 — y el total del
 periodo con banda (33.5 kWh nominal, 17.7–175.2 en el dataset
 congelado).
 
+### Efecto del toolset ddl (add-ddl-effectiveness-analysis, coffe-zx5)
+
+`scripts/ddl-effect-tracker.py` produce `data/ddl_effect.json` (schema:
+`specs/ddl-effect.schema.json`, validado con `--validate`; sin
+`jsonschema` en el runtime — stdlib-only vía `scripts/schema_validate.py`).
+Evalúa si el toolset de dulce-de-leche mejora outcomes: panel repo × mes
+(`monthly[]`, repos sin señal afuera del array, nunca celdas imputadas),
+con `analysis.its` (pre/post con IC bootstrap), `analysis.did` (DiD 2×2
+contra control) y `analysis.dose_response` (Spearman). **Toda cifra lleva
+tag de provenance** (`reported` / `derived` / `cached` / `missing`, mismo
+estándar que fpa-dashboard) y los gaps son explícitos: `null` con razón,
+nunca `0` fake; celdas con `n < 3` no se grafican ni correlacionan;
+fechas de adopción faltantes se muestran vacías, sin imputar. En esta
+familia **no hay score compuesto**: los 4 proxies de calidad van lado a
+lado, cada uno con su bias declarado (D8).
+
+Parámetros y caches (se leen de `config/fpa.json` → `ddl_effect.*`; el
+wiring de lectura aterriza con coffe-q9z):
+
+- **`ddl_effect.repo_aliases`:** mapeo explícito de cwd crudo de sesiones a repo
+canónico — match exacto, sin fuzzy (el cwd de pi es un path mungeado,
+no un nombre de repo GitHub).
+- **Cache gh (`gh_runs_incremental`, TTL 7 días):** runs de GitHub
+Actions por repo, incremental — dentro del TTL no hay red
+(provenance `cached`); stale → refetch de runs posteriores a
+`fetched_until` con merge dedupe por `id`; red muerta conserva el cache
+stale con `provenance: missing`. Dependabot excluido del fail-rate.
+- **Cache terapia (`data/cache/terapia_errors.json`, TTL semanal):**
+errores por clase de terapia, mismo patrón incremental que gh.
+- **Umbrales y determinismo:** `min_n = 3` en Spearman y DiD
+(`n_insuficiente` → `null` con razón, nunca correlación fake); dosis sin
+varianza (toda la flota ~1) → `sin_varianza` declarada; bootstrap con
+`seed_bootstrap: 42` fija (IC 95%, 10k resamples).
+
+Nota (coffe-q9z): `data/ddl_effect.json` todavía no está regenerado con
+datos reales — `main()` escribe el esqueleto validado; la capa de
+extracción (walk de sesiones, git, gh cache, terapia) se wirear antes de
+la primera regeneración.
+
 ### ✅ Extraído y documentado
 
 - **81,887 interacciones** de enero 11 a junio 10 (solo charly)
