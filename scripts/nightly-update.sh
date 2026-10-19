@@ -17,8 +17,13 @@ NO_PUSH=0
 
 log "regenerando reporte + dashboards"
 python3 scripts/usage-tracker.py
+# ddl-effect: tracker tras usage-tracker (consume usage_report_v3.json),
+# viz tras tracker (el dashboard es derivado, nunca fuente). Sin gh/terapia
+# cache degrada a provenance missing — el nightly no requiere red.
+python3 scripts/ddl-effect-tracker.py
 python3 scripts/viz-gantt.py
 python3 scripts/viz-fpa.py
+python3 scripts/viz-ddl.py
 python3 scripts/viz_fpa_guide.py
 python3 scripts/viz-index.py
 
