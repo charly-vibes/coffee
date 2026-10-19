@@ -37,8 +37,9 @@ REPO = Path(__file__).resolve().parent.parent
 TRACKER_PATH = REPO / "scripts" / "usage-tracker.py"
 LEDGER_PATH = REPO / "data" / "charges.json"
 
-# Totales IA transcriptos (tests/test_charges.py — fuente de verdad)
-TOTAL_IA = 1356.72
+# Totales IA transcriptos (tests/test_charges.py — fuente de verdad;
+# recargas openrouter oct 2026 elevan el total de 1356.72 a 1716.72)
+TOTAL_IA = 1716.72
 
 
 def load_tracker():
@@ -94,7 +95,7 @@ class TestCargarLedger(unittest.TestCase):
         self.assertAlmostEqual(40.0, por_prov["codex"])
         self.assertAlmostEqual(275.0, por_prov["amp"])
         self.assertAlmostEqual(119.94, por_prov["gemini-cli"])
-        self.assertAlmostEqual(470.0, por_prov["openrouter"])
+        self.assertAlmostEqual(830.0, por_prov["openrouter"])
 
     def test_cargar_charges_meses_clave_yyyy_mm(self):
         """Las claves de mes salen de la fecha del cargo (YYYY-MM)."""
@@ -212,8 +213,8 @@ class TestPayPerTokenReported(unittest.TestCase):
         (assumed), null no: la cifra existe (FPA-008)."""
         rep = ut.aggregate([row(ts="2026-09-10T10:00:00+00:00")], [])
         sep = rep["monthly"]["2026-09"]
-        # sep tiene recargas openrouter reales ($20 + $30) → reported
-        self.assertAlmostEqual(50.0, sep["pay_per_token_charges"])
+        # sep tiene recargas openrouter reales ($20 + $30 + $60) → reported
+        self.assertAlmostEqual(110.0, sep["pay_per_token_charges"])
         self.assertEqual("reported", sep["pay_per_token_provenance"])
         # mes sin cargas p2p en el ledger → estimado del tracker (assumed),
         # null no: la cifra existe (FPA-008)

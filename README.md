@@ -80,6 +80,12 @@ REGEN_GOLDEN=1 python3 tests/test_tracker.py  # regenerar golden (revisar diff a
 El contrato del reporte está spec'd en `specs/usage-report-v3.schema.json`;
 los viz scripts lo validan con `--validate` (requiere `jsonschema`, opcional).
 
+**Fuente de verdad:** `data/charges.json` (ledger) y `data/usage_report_v3.json`
+(dataset, regenerado por `scripts/nightly-update.sh`). Los goldens de tests
+(`tests/golden/`) son snapshots de regresión derivados: cuando el ledger o el
+dataset cambian de forma intencional, regenerarlos con `REGEN_GOLDEN=1` y
+revisar el diff antes de aceptar (coffe-9w0).
+
 ```bash
 python3 scripts/usage-tracker.py   # regenera data/usage_report_v3.json (requiere los logs locales)
 python3 scripts/usage-tracker.py --since 2026-01-01 --until 2026-06-30 --output data/usage_report_v2.json

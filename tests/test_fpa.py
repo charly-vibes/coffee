@@ -93,21 +93,25 @@ class TestPureFuncs(unittest.TestCase):
 class TestMonthsMeta(unittest.TestCase):
     """FPA-004: mes parcial con días transcurridos/total."""
 
-    def test_septiembre_parcial_coherente(self):
-        """FPA-004: mes parcial → elapsed = último día del rango (coffe-6i8:
-        antes clavado a 19; ahora derivado del reporte para sobrevivir
-        regeneraciones del dataset)."""
+    def test_mes_final_parcial_coherente(self):
+        """FPA-004: mes parcial (el último del rango) → elapsed = último día
+        del rango y total_days = días del mes (coffe-6i8: antes clavado a
+        19; coffe-9w0: derivado del reporte para sobrevivir regeneraciones
+        nocturnas del dataset — antes asumía septiembre fijo)."""
+        import calendar
         end = REPORT["metadata"]["date_range"]["end"]
         meta = viz.build_months(REPORT)
-        sep = [m for m in meta if m["ym"] == end[:7]][0]
-        self.assertTrue(sep["partial"])
-        self.assertEqual(int(end[8:10]), sep["elapsed"])
-        self.assertEqual(30, sep["total_days"])
+        ultimo = [m for m in meta if m["ym"] == end[:7]][0]
+        self.assertTrue(ultimo["partial"])
+        self.assertEqual(int(end[8:10]), ultimo["elapsed"])
+        y, mo = map(int, ultimo["ym"].split("-"))
+        self.assertEqual(calendar.monthrange(y, mo)[1], ultimo["total_days"])
 
     def test_meses_completos_no_parciales(self):
+        end = REPORT["metadata"]["date_range"]["end"]
         meta = viz.build_months(REPORT)
         for m in meta:
-            if m["ym"] != "2026-09":
+            if m["ym"] != end[:7]:
                 self.assertFalse(m["partial"], m["ym"])
 
     def test_dias_en_cada_mes(self):

@@ -23,13 +23,14 @@ KINDS_IA = {"subscription", "credits", "refund", "api_cycle"}
 PROVEEDORES = {"claude-cli", "codex", "amp", "gemini-cli", "openrouter"}
 
 # Totales IA por proveedor (suma de amounts; api_cycle aporta $0).
-# Verificados contra las facturas transcriptas 2026-09-20.
+# Facturas transcriptas 2026-09-20 + recargas openrouter 2026-10 (ledger
+# data/charges.json es fuente de verdad; commit c74b914 añadió $360).
 TOTALES_IA = {
     "claude-cli": 451.78,
     "codex": 40.0,
     "amp": 275.0,
     "gemini-cli": 119.94,
-    "openrouter": 470.0,
+    "openrouter": 830.0,
 }
 
 
@@ -110,7 +111,7 @@ class TestLedgerTotales(unittest.TestCase):
         total = round(sum(
             self._ia_total(p) for p in self.ledger["providers"]
         ), 2)
-        self.assertEqual(1356.72, total)
+        self.assertEqual(1716.72, total)
 
     def test_claude_api_cycle_aporta_cero(self):
         """Las facturas de ciclo API $0 no cambian el cash."""

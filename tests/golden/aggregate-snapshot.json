@@ -32,7 +32,7 @@
       "2026-06": 20.0,
       "2026-07": 380.0,
       "2026-09": 110.0,
-      "2026-10": 80.0
+      "2026-10": 300.0
     }
   },
   "charges_reconciliation_by_month": {
@@ -437,7 +437,7 @@
       },
       "openrouter": {
         "charges_provenance": "reported",
-        "charges_real": 80.0,
+        "charges_real": 300.0,
         "cost_effective": 0.0,
         "fee_month_total": 0.0,
         "subscription_fee_implicit": 0.0
@@ -596,7 +596,7 @@
     "charges_provenance": "reported",
     "charges_reason": null,
     "charges_source": "data/charges.json",
-    "charges_total_real": 1496.72,
+    "charges_total_real": 1716.72,
     "config_source": "config/fpa.json",
     "cost_real_total_tracker": 0.0,
     "cost_total_effective": 0.03,
