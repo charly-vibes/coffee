@@ -142,6 +142,75 @@ class VistaPrePostTest(unittest.TestCase):
         self.assertIn("sin datos", html)
 
 
+class VistaAdopcionDosisTest(unittest.TestCase):
+    """5.2+5.3 (coffe-het): línea de adopción + scatter dosis-respuesta."""
+
+    REPORT = {
+        "metadata": {"managed_tools": ["x"] * 13, "fleet_definition": "f",
+                     "seed_bootstrap": 42},
+        "repos": [
+            {"repo": "turu", "is_control": False, "is_outlier": False,
+             "adoption": {"first_ddl_commit": "2026-02-01", "dose": 0.6,
+                          "dose_detail": {"present": ["wai", "turu"],
+                                          "healthy": ["wai"],
+                                          "missing": ["dont"]},
+                          "provenance": {"first_ddl_commit": "reported",
+                                         "tools_first_use": "reported",
+                                         "dose": "reported"}}},
+            {"repo": "ghost", "is_control": True, "is_outlier": True,
+             "adoption": {"first_ddl_commit": None, "dose": None,
+                          "provenance": {"first_ddl_commit": "missing",
+                                         "dose": "missing"}}},
+        ],
+        "monthly": [],
+        "analysis": {
+            "its": [], "did": [],
+            "dose_response": [
+                {"metric": "ah_check_findings", "spearman_rho": 0.7, "n": 4,
+                 "points": [{"repo": "wai", "dose": 1.0, "outcome": 3.0},
+                            {"repo": "turu", "dose": 0.6, "outcome": 2.0},
+                            {"repo": "ah", "dose": 0.3, "outcome": 2.5},
+                            {"repo": "bd", "dose": 0.0, "outcome": 1.0}]},
+                {"metric": "ci_fail_rate", "spearman_rho": None, "n": 2,
+                 "reason": "n_insuficiente", "points": []},
+            ],
+        },
+    }
+
+    @classmethod
+    def setUpClass(cls):
+        cls.html = viz_ddl.build_html(cls.REPORT)
+
+    def test_adopcion_fecha_visible(self):
+        self.assertIn("2026-02-01", self.html)
+
+    def test_adopcion_sin_senal_visible(self):
+        self.assertIn("sin señal", self.html)
+
+    def test_adopcion_ordenada_por_fecha_nulls_last(self):
+        pos = [self.html.index(f'data-repo="{r}"') for r in ("turu", "ghost")]
+        self.assertLess(pos[0], pos[1])
+
+    def test_outlier_marcado(self):
+        self.assertIn("outlier", self.html)
+
+    def test_dosis_scatter_con_puntos(self):
+        self.assertIn("<svg", self.html)
+        self.assertEqual(self.html.count('class="scatter-pt"'), 4)
+
+    def test_dosis_rho_y_n_visibles(self):
+        self.assertIn("ρ = 0.70", self.html)
+        self.assertIn("n = 4", self.html)
+
+    def test_dosis_celda_n3_no_graficada(self):
+        self.assertIn("n_insuficiente", self.html)
+        # la celda chica no aporta círculos
+        self.assertEqual(self.html.count('class="scatter-pt"'), 4)
+
+    def test_dosis_reported_en_puntos(self):
+        self.assertIn('data-provenance="reported"', self.html)
+
+
 class VizDdlCliTest(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()

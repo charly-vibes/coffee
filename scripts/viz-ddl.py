@@ -136,6 +136,90 @@ def did_rows_html(did_rows):
     return rows
 
 
+def view_adopcion(report):
+    """Vista línea de adopción (coffe-het 5.2): timeline por repo, fechas
+    null visibles como 'sin señal' (patrón FPA-008) — nunca fecha imputada."""
+    repos = report.get("repos") or []
+    if not repos:
+        return (f'<h2>{esc(VIEW_TITLES["adopcion"])}</h2>'
+                f'<p class="placeholder">Adopción: sin datos</p>')
+    ordenados = sorted(
+        repos,
+        key=lambda r: (r.get("adoption", {}).get("first_ddl_commit") is None,
+                       r.get("adoption", {}).get("first_ddl_commit") or ""))
+    rows = []
+    for r in ordenados:
+        a = r.get("adoption", {})
+        fecha = a.get("first_ddl_commit")
+        badge = "" 
+        if r.get("is_outlier"):
+            badge = ' <span class="badge">outlier</span>'
+        elif r.get("is_control"):
+            badge = ' <span class="badge">control</span>'
+        dose = a.get("dose")
+        dose_cell = (fig(_fmt(dose), "reported") if dose is not None
+                     else fig("sin señal", "missing"))
+        first = (esc(fecha) if fecha
+                 else fig("sin señal", "missing"))
+        rows.append(
+            f'<tr data-repo="{esc(r.get("repo", "?"))}">'
+            f'<td>{esc(r.get("repo", "?"))}{badge}</td>'
+            f"<td>{first}</td>"
+            f"<td>{dose_cell}</td></tr>")
+    return (f'<h2>{esc(VIEW_TITLES["adopcion"])}</h2>'
+            "<p>Primer commit de <code>.ddl/</code> por repo (fechas null "
+            "visibles — sin imputación):</p>"
+            f'<table><thead><tr><th>repo</th><th>primer commit .ddl/</th>'
+            f'<th>dosis</th></tr></thead><tbody>{"".join(rows)}</tbody></table>')
+
+
+def _scatter_svg(points):
+    """Scatter dosis × outcome en SVG inline, sin librerías. Ejes fijos:
+    dosis 0–1, outcome auto-escala al rango de los puntos."""
+    W, H, PAD = 320, 180, 24
+    outcomes = [p["outcome"] for p in points]
+    lo, hi = min(outcomes), max(outcomes)
+    span = (hi - lo) or 1.0
+    circles = []
+    for p in points:
+        x = PAD + p["dose"] * (W - 2 * PAD)
+        y = H - PAD - (p["outcome"] - lo) / span * (H - 2 * PAD)
+        circles.append(f'<circle class="scatter-pt" cx="{x:.1f}" '
+                       f'cy="{y:.1f}" r="4" '
+                       f'title="{esc(p["repo"])}"/>')
+    return (f'<svg class="ddl-chart" width="{W}" height="{H}" '
+            f'role="img" aria-label="scatter dosis-respuesta">'
+            f'{"".join(circles)}</svg>')
+
+
+def view_dosis_respuesta(report):
+    """Vista dosis-respuesta (coffe-het 5.3): scatter con n por punto;
+    regla dura — celdas con n < 3 o sin rho no se grafican, quedan marcadas
+    (anti-anécdota, spec)."""
+    entries = (report.get("analysis") or {}).get("dose_response") or []
+    blocks = []
+    for e in entries:
+        label = esc(e.get("metric", "?"))
+        rho = e.get("spearman_rho")
+        if rho is None or (e.get("n") or 0) < 3:
+            reason = esc(e.get("reason", "n_insuficiente"))
+            blocks.append(
+                f'<p class="placeholder">{label}: no graficada ({reason}), '
+                f'n = {e.get("n", "?")}</p>')
+            continue
+        points = [p for p in (e.get("points") or [])
+                  if p.get("dose") is not None
+                  and p.get("outcome") is not None]
+        blocks.append(
+            f'<div class="scatter-block"><h3>{label}</h3>'
+            f"{fig(f'ρ = {rho:.2f} · n = {e["n"]}', 'reported')}"
+            f"{_scatter_svg(points)}</div>")
+    if not blocks:
+        blocks = ['<p class="placeholder">Dosis-respuesta: sin datos</p>']
+    return (f'<h2>{esc(VIEW_TITLES["dosis-respuesta"])}</h2>'
+            + "\n".join(blocks))
+
+
 def view_pre_post(report):
     """Vista pre/post + DiD (coffe-470): ITS por repo (coffe-ktu) arriba,
     DiD por métrica con IC bootstrap abajo. Provenance derived en toda cifra."""
@@ -209,6 +293,10 @@ def view_html(view, report):
     enchufando las suyas acá)."""
     if view == "pre-post":
         return view_pre_post(report)
+    if view == "adopcion":
+        return view_adopcion(report)
+    if view == "dosis-respuesta":
+        return view_dosis_respuesta(report)
     return placeholder(view, report)
 
 
