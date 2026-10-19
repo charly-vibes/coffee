@@ -827,5 +827,39 @@ class SchemaValidateTest(unittest.TestCase):
                       schema_validate.validate_against_schema)
 
 
+class DidBootstrapTest(unittest.TestCase):
+    """5.4 (coffe-470): DiD con IC bootstrap (re-muestreo de deltas por grupo)."""
+
+    def _deltas(self):
+        return {"wai": {"pre_mean": 1.0, "post_mean": 3.0, "delta": 2.0},
+                "turu": {"pre_mean": 2.0, "post_mean": 4.0, "delta": 2.5},
+                "ah": {"pre_mean": 0.0, "post_mean": 1.0, "delta": 1.0},
+                "dont": {"pre_mean": 5.0, "post_mean": 5.0, "delta": 0.0},
+                "bd": {"pre_mean": 7.0, "post_mean": 7.5, "delta": 0.5},
+                "wild": {"pre_mean": 9.0, "post_mean": 8.5, "delta": -0.5}}
+
+    def test_punto_igual_que_did_2x2(self):
+        out = ddl.did_bootstrap(self._deltas(), {"dont", "bd", "wild"})
+        self.assertEqual(out["did"], ddl.did_2x2(
+            self._deltas(), {"dont", "bd", "wild"})["did"])
+
+    def test_ci_bracketea_el_punto(self):
+        out = ddl.did_bootstrap(self._deltas(), {"dont", "bd", "wild"})
+        self.assertLess(out["ci_low"], out["did"])
+        self.assertGreater(out["ci_high"], out["did"])
+
+    def test_reproducible_con_seed_fija(self):
+        a = ddl.did_bootstrap(self._deltas(), {"dont", "bd", "wild"})
+        b = ddl.did_bootstrap(self._deltas(), {"dont", "bd", "wild"})
+        self.assertEqual(a, b)
+
+    def test_n_insuficiente_regla_dura(self):
+        deltas = {k: v for k, v in self._deltas().items() if k != "ah"}
+        out = ddl.did_bootstrap(deltas, {"dont", "bd", "wild"})
+        self.assertIsNone(out["did"])
+        self.assertEqual(out["reason"], "n_insuficiente")
+        self.assertEqual(out["n_treatment"], 2)
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=1)

@@ -41,6 +41,18 @@ VIEW_TITLES = {
     "calidad": "Calidad",
 }
 
+# Reporte vacío (forma del schema v1): lo usa build_html cuando el análisis
+# aún no tiene datos y es la base del esqueleto del tracker.
+SKELETON_REPORT = {
+    "metadata": {"generated_at": None, "seed_bootstrap": 42,
+                 "managed_tools": [],
+                 "fleet_definition": "repos charly-vibes con actividad en "
+                                     "sesiones in-scope"},
+    "repos": [],
+    "monthly": [],
+    "analysis": {"its": [], "did": [], "dose_response": []},
+}
+
 
 def esc(s):
     return html.escape(str(s), quote=True)
@@ -62,8 +74,85 @@ def placeholder(view, report):
     tiene_datos = bool(report.get("monthly") or report.get("repos"))
     msg = ("datos cargados — la vista llega en un ticket posterior"
            if tiene_datos else "sin datos")
-    return (f'<p class="placeholder">Vista “{VIEW_TITLES[view]}”: {msg}.'
+    return (f'<p class="placeholder">Vista “{VIEW_TITLES[view]}": {msg}.'
             f'{prov_tag("missing")}</p>')
+
+
+def _fmt(x, nd=2):
+    return "n/a" if x is None else f"{x:.{nd}f}"
+
+
+def _estimator_table(headers, rows_html, empty_msg):
+    if not rows_html:
+        return f'<p class="placeholder">{esc(empty_msg)}</p>'
+    head = "".join(f"<th>{esc(h)}</th>" for h in headers)
+    body = "".join(rows_html)
+    return (f'<table><thead><tr>{head}</tr></thead><tbody>{body}</tbody>'
+            f'</table>')
+
+
+def its_rows_html(its):
+    """Filas ITS (coffe-ktu): delta con IC bootstrap y n visibles; omitidos
+    con reason explícito — nunca delta 0 disfrazado (spec)."""
+    rows = []
+    for e in its:
+        label = f"{esc(e.get('repo', '?'))} · {esc(e.get('metric', '?'))}"
+        if e.get("delta") is None:
+            rows.append(
+                f"<tr><td>{label}</td>"
+                f"<td colspan='3'>omitido: {esc(e.get('reason', 'sin razón'))}</td>"
+                f"</tr>")
+            continue
+        rows.append(
+            f"<tr><td>{label}</td>"
+            f"<td>{fig(_fmt(e['delta']), 'derived')}</td>"
+            f"<td>IC 95%: {_fmt(e.get('ci_low'))} … {_fmt(e.get('ci_high'))}</td>"
+            f"<td>n_pre {e.get('n_pre', '?')} · n_post {e.get('n_post', '?')}</td>"
+            f"</tr>")
+    return rows
+
+
+def did_rows_html(did_rows):
+    """Filas DiD (coffe-470): punto + IC bootstrap, n de cada celda visible;
+    regla dura n<3 → omitido con reason, el punto no se grafica (anti-anécdota)."""
+    rows = []
+    for e in did_rows:
+        label = esc(e.get("metric", "?"))
+        if e.get("did") is None:
+            rows.append(
+                f"<tr><td>{label}</td>"
+                f"<td colspan='3'>omitido: {esc(e.get('reason', 'sin razón'))}</td>"
+                f"</tr>")
+            continue
+        rows.append(
+            f"<tr><td>{label}</td>"
+            f"<td>{fig(_fmt(e['did']), 'derived')}</td>"
+            f"<td>IC 95%: {_fmt(e.get('ci_low'))} … {_fmt(e.get('ci_high'))}</td>"
+            f"<td>Δ trat {_fmt(e.get('delta_treatment'))} · "
+            f"Δ ctrl {_fmt(e.get('delta_control'))}</td>"
+            f"<td>n_treatment: {e.get('n_treatment', '?')} · "
+            f"n_control: {e.get('n_control', '?')}</td>"
+            f"</tr>")
+    return rows
+
+
+def view_pre_post(report):
+    """Vista pre/post + DiD (coffe-470): ITS por repo (coffe-ktu) arriba,
+    DiD por métrica con IC bootstrap abajo. Provenance derived en toda cifra."""
+    analysis = report.get("analysis") or {}
+    its = _estimator_table(
+        ["repo · métrica", "delta", "IC bootstrap", "n"],
+        its_rows_html(analysis.get("its") or []),
+        "ITS: sin datos")
+    did = _estimator_table(
+        ["métrica", "DiD", "IC bootstrap", "deltas", "n"],
+        did_rows_html(analysis.get("did") or []),
+        "DiD: sin datos")
+    return (f'<h2>{esc(VIEW_TITLES["pre-post"])}</h2>'
+            f"<p>Serie interrumpida por repo (media móvil trimestral, "
+            f"IC bootstrap seed fija):</p>{its}"
+            f"<p>Diferencia-en-diferencias 2×2 contra control "
+            f"(IC bootstrap sobre deltas por repo):</p>{did}")
 
 
 def add_export_buttons(html_doc):
@@ -114,12 +203,21 @@ def _tab_html(v):
             f'{selected}>{esc(VIEW_TITLES[v])}</a>')
 
 
+def view_html(view, report):
+    """Dispatcher de vistas: las implementadas renderizan su contenido, el
+    resto cae al placeholder del esqueleto (los tickets het/46h/8yf van
+    enchufando las suyas acá)."""
+    if view == "pre-post":
+        return view_pre_post(report)
+    return placeholder(view, report)
+
+
 def sections_html(report):
     out = []
     for i, v in enumerate(VIEWS):
         hidden = "" if i == 0 else " hidden"
         out.append(f'<section class="view" id="{v}" data-view="{v}"'
-                   f'{hidden}>{placeholder(v, report)}</section>')
+                   f'{hidden}>{view_html(v, report)}</section>')
     return "\n".join(out)
 
 

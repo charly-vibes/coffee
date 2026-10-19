@@ -646,6 +646,43 @@ def validate_report(report):
 validate_against_schema = schema_validate.validate_against_schema
 
 
+def did_bootstrap(deltas, control_repos, seed=42, min_n=3, n_boot=10_000):
+    """DiD 2×2 con IC 95% bootstrap (ticket coffe-470): punto idéntico a
+    did_2x2; el IC re-muestrea los deltas por repo con reemplazo dentro de
+cada grupo (10k resamples, seed fija). Con n ~3 por grupo el IC es grueso —
+es la honestidad del diseño (D5), no un bug. Regla dura n < min_n → None con
+    reason 'n_insuficiente', nunca IC inventado.
+    """
+    import random
+    import statistics
+    ctrl = set(control_repos)
+    dt = [d["delta"] for r, d in deltas.items()
+          if r not in ctrl and d["delta"] is not None]
+    dc = [d["delta"] for r, d in deltas.items()
+          if r in ctrl and d["delta"] is not None]
+    if len(dt) < min_n or len(dc) < min_n:
+        return {"did": None, "ci_low": None, "ci_high": None,
+                "delta_treatment": (statistics.fmean(dt) if dt else None),
+                "delta_control": (statistics.fmean(dc) if dc else None),
+                "n_treatment": len(dt), "n_control": len(dc),
+                "reason": "n_insuficiente"}
+    rng = random.Random(seed)
+    boots = []
+    for _ in range(n_boot):
+        bt = [dt[rng.randrange(len(dt))] for _ in dt]
+        bc = [dc[rng.randrange(len(dc))] for _ in dc]
+        boots.append(statistics.fmean(bt) - statistics.fmean(bc))
+    boots.sort()
+    return {
+        "did": statistics.fmean(dt) - statistics.fmean(dc),
+        "ci_low": boots[int(0.025 * (n_boot - 1))],
+        "ci_high": boots[int(0.975 * (n_boot - 1))],
+        "delta_treatment": statistics.fmean(dt),
+        "delta_control": statistics.fmean(dc),
+        "n_treatment": len(dt), "n_control": len(dc),
+    }
+
+
 # ---------------------------------------------------------------------------
 # main
 # ---------------------------------------------------------------------------
