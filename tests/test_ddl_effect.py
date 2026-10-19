@@ -80,6 +80,132 @@ class ExtractAdoptionTest(unittest.TestCase):
         self.assertIsNone(out["wai"]["tools_first_use"]["wai"])
 
 
+class RecoveryMetricsTest(unittest.TestCase):
+    # convención de eventos: ("assistant",) | ("result", tool, ok)
+
+    def test_recuperacion_cuenta_asistentes_hasta_exito(self):
+        sessions = [[
+            ("result", "bash", False),   # error
+            ("assistant",),
+            ("assistant",),
+            ("result", "bash", True),    # éxito del mismo tool
+        ]]
+        out = ddl.recovery_metrics(sessions)
+        self.assertEqual(out["recovery_p50_interactions"], 2)
+        self.assertEqual(out["recovery_censored_rate"], 0.0)
+        self.assertEqual(out["recovery_n"], 1)
+
+    def test_error_censurado_por_fin_de_sesion(self):
+        sessions = [[("result", "bash", False), ("assistant",)]]
+        out = ddl.recovery_metrics(sessions)
+        self.assertIsNone(out["recovery_p50_interactions"])
+        self.assertEqual(out["recovery_censored_rate"], 1.0)
+
+    def test_exito_de_otro_tool_no_resuelve(self):
+        sessions = [[
+            ("result", "bash", False),
+            ("result", "read", True),
+            ("result", "bash", True),
+        ]]
+        out = ddl.recovery_metrics(sessions)
+        self.assertEqual(out["recovery_p50_interactions"], 0)  # 0 asistentes entre medio
+        self.assertEqual(out["recovery_n"], 1)
+
+    def test_dos_errores_resueltos_por_un_exito(self):
+        sessions = [[
+            ("result", "edit", False),
+            ("assistant",),
+            ("result", "edit", False),
+            ("result", "edit", True),
+        ]]
+        out = ddl.recovery_metrics(sessions)
+        self.assertEqual(out["recovery_p50_interactions"], 0.5)  # mediana de [1, 0]
+        self.assertEqual(out["recovery_n"], 2)
+
+    def test_sesion_vacia(self):
+        out = ddl.recovery_metrics([[]])
+        self.assertIsNone(out["recovery_p50_interactions"])
+        self.assertEqual(out["recovery_censored_rate"], 0.0)
+        self.assertEqual(out["recovery_n"], 0)
+
+    def test_mediana_sobre_multiples_sesiones(self):
+        sessions = [
+            [("result", "bash", False), ("result", "bash", True)],   # 0
+            [("result", "bash", False), ("assistant",), ("result", "bash", True)],  # 1
+            [("result", "bash", False), ("assistant",), ("assistant",),
+             ("assistant",), ("result", "bash", True)],             # 3
+        ]
+        out = ddl.recovery_metrics(sessions)
+        self.assertEqual(out["recovery_p50_interactions"], 1)
+
+
+class CommitLatencyTest(unittest.TestCase):
+    def test_primer_commit_posterior_a_sesion(self):
+        commits = [
+            {"date": "2026-04-01T09:00:00Z", "message": "w: previo"},
+            {"date": "2026-04-01T14:30:00Z", "message": "feat: trabajo asistido"},
+        ]
+        out = ddl.commit_latency("2026-04-01T13:00:00Z", commits)
+        self.assertEqual(out["session_commit_latency_p50_h"], 1.5)
+        self.assertEqual(out["latency_n"], 1)
+
+    def test_sin_commit_posterior_es_none(self):
+        out = ddl.commit_latency("2026-04-01T13:00:00Z",
+                                 [{"date": "2026-04-01T09:00:00Z", "message": "x"}])
+        self.assertIsNone(out["session_commit_latency_p50_h"])
+
+    def test_sesgo_de_reloj_se_clampea(self):
+        # commit "antes" de la sesión por skew → latencia 0, contada
+        commits = [{"date": "2026-04-01T12:00:00Z", "message": "fix: a"}]
+        out = ddl.commit_latency("2026-04-01T13:00:00Z", commits)
+        self.assertEqual(out["session_commit_latency_p50_h"], 0.0)
+        self.assertEqual(out["clamped_negative"], 1)
+
+    def test_mediana_sobre_varios_pares(self):
+        commits = [
+            {"date": "2026-04-01T14:00:00Z", "message": "a"},  # 1h
+            {"date": "2026-04-01T16:00:00Z", "message": "b"},  # 3h
+        ]
+        out = ddl.commit_latency("2026-04-01T13:00:00Z", commits)
+        self.assertEqual(out["session_commit_latency_p50_h"], 2.0)
+
+
+class GitProxiesTest(unittest.TestCase):
+    COMMITS = [
+        {"date": "2026-04-01T10:00:00Z", "message": "feat: a", "files": ["src/x.py"]},
+        {"date": "2026-04-02T10:00:00Z", "message": "fix: b", "files": ["src/y.py"]},
+        {"date": "2026-04-03T10:00:00Z", "message": "Revert \"feat: a\"", "files": ["src/x.py"]},
+        {"date": "2026-04-04T10:00:00Z", "message": "test: c", "files": ["tests/test_x.py"]},
+        {"date": "2026-04-05T10:00:00Z", "message": "docs: d", "files": ["docs/x.md"]},
+    ]
+
+    def test_tres_proxies_sobre_mes_con_datos(self):
+        out = ddl.git_proxies(self.COMMITS, releases=["2026-04-06T00:00:00Z"])
+        self.assertEqual(out["revert_ratio"], 1 / 5)
+        self.assertEqual(out["fix_ratio"], 1 / 1)      # 1 fix / 1 release
+        self.assertEqual(out["test_commit_ratio"], 1 / 5)  # test: explicito
+        self.assertEqual(out["provenance"]["revert_ratio"], "reported")
+
+    def test_archivos_de_test_cuentan_sin_prefijo(self):
+        commits = self.COMMITS + [
+            {"date": "2026-04-07T10:00:00Z", "message": "wip",
+             "files": ["tests/test_y.py"]},
+        ]
+        out = ddl.git_proxies(commits, releases=[])
+        self.assertEqual(out["test_commit_ratio"], 2 / 6)
+
+    def test_denominador_cero_es_null_con_missing(self):
+        out = ddl.git_proxies([], releases=[])
+        self.assertIsNone(out["revert_ratio"])
+        self.assertIsNone(out["fix_ratio"])
+        self.assertEqual(out["provenance"]["fix_ratio"], "missing")
+
+    def test_release_cero_con_fixes_presentes(self):
+        out = ddl.git_proxies(self.COMMITS, releases=[])
+        self.assertIsNone(out["fix_ratio"])
+        self.assertEqual(out["provenance"]["fix_ratio"], "missing")
+
+
 class ComputeDoseTest(unittest.TestCase):
     def test_dosis_desde_ddl_status(self):
         status = {

@@ -136,6 +136,128 @@ def compute_dose(ddl_status, canaries, session_uses, registry=MANAGED_TOOLS,
     return out
 
 
+def recovery_metrics(sessions):
+    """Recuperación: interacciones (mensajes de assistant) entre un error de tool
+    (toolResult isError) y la siguiente invocación exitosa del MISMO tool.
+
+    sessions: [[event, ...]] con event = ("assistant",) | ("result", tool, ok).
+    Errores sin éxito posterior del mismo tool quedan censurados por fin de
+    sesión: fuera de la mediana, contados en recovery_censored_rate. Cero
+    asistentes entre error y éxito cuenta como recuperación 0 (retry inmediato).
+    """
+    import statistics
+    values = []
+    n_errors = censored = 0
+    for events in sessions:
+        pending = {}  # tool -> [assistants_since_error, ...]
+        for ev in events:
+            if ev[0] == "assistant":
+              for tool in pending:
+                pending[tool] = [c + 1 for c in pending[tool]]
+            elif ev[0] == "result":
+              _, tool, ok = ev
+              if ok:
+                values.extend(pending.pop(tool, []))
+              else:
+                pending.setdefault(tool, []).append(0)
+        for counts in pending.values():
+            censored += len(counts)
+    n_errors = len(values) + censored
+    return {
+        "recovery_p50_interactions": (statistics.median(values)
+                                       if values else None),
+        "recovery_censored_rate": (censored / n_errors if n_errors else 0.0),
+        "recovery_n": n_errors,
+    }
+
+
+def _parse_ts(ts):
+    """ISO-8601 (incl. 'Z') → datetime UTC-aware; None si no parsea."""
+    from datetime import datetime
+    if not ts:
+        return None
+    try:
+        return datetime.fromisoformat(ts.replace("Z", "+00:00"))
+    except ValueError:
+        return None
+
+
+def commit_latency(session_ts, commits):
+    """Latencia sesión→commit: para cada commit posterior al timestamp de
+    sesión, horas transcurridas; p50 sobre esos pares (un commit ancla 1 par).
+
+    Bias declarado (design D4): sobrestima cuando hay trabajo manual entre la
+    sesión y el commit. Latencias negativas (skew de reloj) se clampean a 0 y
+    se cuentan en `clamped_negative` — visibles, nunca descartadas.
+    """
+    import statistics
+    t0 = _parse_ts(session_ts)
+    if t0 is None:
+        return {"session_commit_latency_p50_h": None, "latency_n": 0,
+                "clamped_negative": 0}
+    SKEW_WINDOW_H = 1.0  # commit hasta 1h "antes" de la sesión = skew de reloj
+    hours, clamped = [], 0
+    for c in commits:
+        ts = _parse_ts(c["date"])
+        if ts is None:
+            continue
+        if ts < t0:
+            neg_h = (ts - t0).total_seconds() / 3600.0
+            if neg_h >= -SKEW_WINDOW_H:  # skew: se clampea, no se descarta
+                clamped += 1
+                hours.append(0.0)
+            continue  # commit previo genuino: no es par
+        hours.append((ts - t0).total_seconds() / 3600.0)
+    return {
+        "session_commit_latency_p50_h": (statistics.median(hours)
+                                         if hours else None),
+        "latency_n": len(hours),
+        "clamped_negative": clamped,
+    }
+
+
+def _is_revert(message):
+    m = message.strip().lower()
+    return m.startswith("revert") or "revert \"" in m
+
+
+def _is_fix(message):
+    return message.strip().lower().startswith("fix")
+
+
+def _is_test(message, files):
+    if message.strip().lower().startswith("test"):
+        return True
+    return any("test" in f.lower() for f in (files or []))
+
+
+def git_proxies(commits, releases):
+    """Proxies de calidad desde git (design D6): revert_ratio, fix_ratio,
+    test_commit_ratio. Denominador 0 → None con provenance "missing"
+    (nunca 0 fake). releases: lista de timestamps de release en el período.
+    """
+    total = len(commits)
+    reverts = sum(1 for c in commits if _is_revert(c["message"]))
+    fixes = sum(1 for c in commits if _is_fix(c["message"]))
+    tests = sum(1 for c in commits if _is_test(c["message"], c.get("files")))
+    n_releases = len(releases)
+
+    def _ratio(num, den, key):
+        prov = "reported" if den else "missing"
+        return (num / den if den else None), prov
+
+    rev_r, rev_p = _ratio(reverts, total, "revert_ratio")
+    fix_r, fix_p = _ratio(fixes, n_releases, "fix_ratio")
+    tst_r, tst_p = _ratio(tests, total, "test_commit_ratio")
+    return {
+        "revert_ratio": rev_r,
+        "fix_ratio": fix_r,
+        "test_commit_ratio": tst_r,
+        "provenance": {"revert_ratio": rev_p, "fix_ratio": fix_p,
+                       "test_commit_ratio": tst_p},
+    }
+
+
 def classify_control(repos_info, outlier=DDL_OUTLIER_REPO):
     """control = ausencia estructural de ddl (sin `.ddl/` y sin topic ddl GitHub).
 
