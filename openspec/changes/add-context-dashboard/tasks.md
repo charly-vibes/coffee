@@ -11,30 +11,30 @@ los anteriores + coffe-9w0 — suite pre-existente en rojo).
       `asst_thinking`, `asst_args`, tool results por `toolName`), `big_results`
       (> `context_thresholds.big_result_chars` de config) — tolera mensajes
       assistant sin `usage` (turnos abortados) contándolos en loss visible
-- [ ] 1.2 Atribución por modelo: `models_turns` (turnos por modelo, incluye
+- [x] 1.2 Atribución por modelo: `models_turns` (turnos por modelo, incluye
       `model_change` mid-sesión) + `model` dominante; `month` desde el filename
       del archivo de sesión (documentado)
-- [ ] 1.3 Coste por sesión: sumar `cost.in/out/cacheRead/cacheWrite` por sesión;
+- [x] 1.3 Coste por sesión: sumar `cost.in/out/cacheRead/cacheWrite` por sesión;
       `context_source` (pi vs claude-cli); coste ausente → `null` con razón
       (patrón "sin telemetría", no 0 fake)
-- [ ] 1.4 Detección de patologías: sesión con bloque assistant >
+- [x] 1.4 Detección de patologías: sesión con bloque assistant >
       `context_thresholds.pathological_chars` (config) → excluida de percentiles,
       contada en `meta.excluded_pathological` y listable
-- [ ] 1.5 Corrección de semántica: docstring de `extract_pi_sessions` ("sin señal
+- [x] 1.5 Corrección de semántica: docstring de `extract_pi_sessions` ("sin señal
       en pi (compactions)" está desactualizado — las entradas existen desde
       ~may-2026), `n_compactions` real para Pi y `sessions.total_compactions`
       coherente
-- [ ] 1.6 Agregados `monthly_model[]` por mes × modelo dominante: p50/p90 del pico,
+- [x] 1.6 Agregados `monthly_model[]` por mes × modelo dominante: p50/p90 del pico,
       % > `context_thresholds.big_session_tokens` (config), tok/turno por fuente,
       spend por componente — sobre el set limpio (`turns > 0`, sin patológicas),
       stubs en `meta.stubs`
-- [ ] 1.7 `meta`: `chars_per_token` (assumed, dirección de bias), `validation_ratio_median`,
+- [x] 1.7 `meta`: `chars_per_token` (assumed, dirección de bias), `validation_ratio_median`,
       umbrales usados
-- [ ] 1.8 Tests: `tests/test_tracker_context.py` con líneas JSONL sintéticas
+- [x] 1.8 Tests: `tests/test_tracker_context.py` con líneas JSONL sintéticas
       (sesión normal, con compaction multi-segmento, con `model_change`,
       patológica, claude-cli, sin usage en turnos, multi-mes, stub) + regenerar
       golden (`REGEN_GOLDEN=1`, revisar diff)
-- [ ] 1.9 `specs/usage-report-v3.schema.json`: requerir la sección nueva
+- [x] 1.9 `specs/usage-report-v3.schema.json`: requerir la sección nueva
       (incluyendo nullability del coste) y regenerar/validar
 
 ## 2. Dashboard
