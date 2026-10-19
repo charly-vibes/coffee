@@ -615,5 +615,101 @@ class ItsTest(unittest.TestCase):
         self.assertEqual(out["delta"], 2.0)
 
 
+class DidTest(unittest.TestCase):
+    """4.3 (coffe-dek): DiD 2×2 contra control + regla dura n<3."""
+
+    MONTHS = [f"2026-{m:02d}" for m in range(1, 9)]
+
+    def _rows(self, pre, post):
+        vals = list(pre) + list(post)
+        return [{"month": m, "ah_check_findings": v}
+                for m, v in zip(self.MONTHS, vals)]
+
+    def _repo_deltas(self):
+        return ddl.repo_deltas(
+            {"wai": self._rows([1, 1, 1, 1], [3, 3, 3, 3]),
+             "turu": self._rows([2, 2, 2, 2], [4, 4, 4, 4]),
+             "ah": self._rows([0, 0, 0, 0], [2, 2, 2, 2]),
+             "dont": self._rows([5, 5, 5, 5], [5, 5, 5, 5]),
+             "bd": self._rows([7, 7, 7, 7], [7, 7, 7, 7]),
+             "wild": self._rows([9, 9, 9, 9], [9, 9, 9, 9])},
+            "ah_check_findings", "2026-05")
+
+    def test_repo_deltas_por_repo(self):
+        out = ddl.repo_deltas(
+            {"wai": self._rows([1, 1, 1, 1], [3, 3, 3, 3])},
+            "ah_check_findings", "2026-05")
+        self.assertEqual(out["wai"]["delta"], 2.0)
+        self.assertEqual(out["wai"]["pre_mean"], 1.0)
+        self.assertEqual(out["wai"]["post_mean"], 3.0)
+
+    def test_repo_sin_post_delta_none(self):
+        rows = [{"month": m, "ah_check_findings": 1}
+                for m in self.MONTHS[:4]]
+        out = ddl.repo_deltas({"ghost": rows}, "ah_check_findings",
+                              "2026-05")
+        self.assertIsNone(out["ghost"]["delta"])
+
+    def test_did_basico_control_plano(self):
+        deltas = self._repo_deltas()
+        out = ddl.did_2x2(deltas, control_repos={"dont", "bd", "wild"})
+        self.assertEqual(out["did"], 2.0)  # tratamiento +2, control +0
+        self.assertEqual(out["n_treatment"], 3)
+        self.assertEqual(out["n_control"], 3)
+
+    def test_did_resta_tendencia_global(self):
+        # control sube igual que el tratamiento: el efecto se cancela
+        deltas = ddl.repo_deltas(
+            {"wai": self._rows([1, 1, 1, 1], [3, 3, 3, 3]),
+             "turu": self._rows([2, 2, 2, 2], [4, 4, 4, 4]),
+             "ah": self._rows([0, 0, 0, 0], [2, 2, 2, 2]),
+             "dont": self._rows([1, 1, 1, 1], [3, 3, 3, 3]),
+             "bd": self._rows([2, 2, 2, 2], [4, 4, 4, 4]),
+             "wild": self._rows([0, 0, 0, 0], [2, 2, 2, 2])},
+            "ah_check_findings", "2026-05")
+        out = ddl.did_2x2(deltas, control_repos={"dont", "bd", "wild"})
+        self.assertEqual(out["did"], 0.0)
+
+    def test_n_insuficiente_tratamiento_marca_el_json(self):
+        deltas = ddl.repo_deltas(
+            {"wai": self._rows([1, 1, 1, 1], [3, 3, 3, 3]),
+             "turu": self._rows([2, 2, 2, 2], [4, 4, 4, 4]),
+             "dont": self._rows([5, 5, 5, 5], [5, 5, 5, 5]),
+             "bd": self._rows([7, 7, 7, 7], [7, 7, 7, 7]),
+             "wild": self._rows([9, 9, 9, 9], [9, 9, 9, 9])},
+            "ah_check_findings", "2026-05")
+        out = ddl.did_2x2(deltas, control_repos={"dont", "bd", "wild"})
+        self.assertIsNone(out["did"])
+        self.assertEqual(out["reason"], "n_insuficiente")
+        self.assertEqual(out["n_treatment"], 2)  # visible, no oculto
+        self.assertEqual(out["n_control"], 3)
+
+    def test_n_insuficiente_control(self):
+        deltas = ddl.repo_deltas(
+            {"wai": self._rows([1, 1, 1, 1], [3, 3, 3, 3]),
+             "turu": self._rows([2, 2, 2, 2], [4, 4, 4, 4]),
+             "ah": self._rows([0, 0, 0, 0], [2, 2, 2, 2]),
+             "dont": self._rows([5, 5, 5, 5], [5, 5, 5, 5])},
+            "ah_check_findings", "2026-05")
+        out = ddl.did_2x2(deltas, control_repos={"dont"})
+        self.assertIsNone(out["did"])
+        self.assertEqual(out["reason"], "n_insuficiente")
+        self.assertEqual(out["n_control"], 1)
+
+    def test_repo_sin_delta_no_cuenta_en_n(self):
+        deltas = self._repo_deltas()
+        deltas["ghost"] = {"pre_mean": 1.0, "post_mean": None, "delta": None}
+        out = ddl.did_2x2(deltas, control_repos={"dont", "bd", "wild"})
+        self.assertEqual(out["did"], 2.0)
+        self.assertEqual(out["n_treatment"], 3)
+
+    def test_borde_n_3_si_estima(self):
+        deltas = self._repo_deltas()
+        out = ddl.did_2x2(deltas, control_repos={"dont", "bd", "wild"},
+                          min_n=3)
+        self.assertIsNone(out.get("reason"))
+        self.assertEqual(out["did"], 2.0)
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=1)

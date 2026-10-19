@@ -538,6 +538,56 @@ def its_pre_post(rows, metric, adoption_month, seed=42, min_pre=3,
     }
 
 
+def repo_deltas(rows_by_repo, metric, adoption_month):
+    """Delta pre→post por repo (insumo de DiD y de la vista pre/post).
+
+    rows_by_repo: {repo: filas del panel}; la métrica None (missing) no
+    cuenta en ninguna ventana. Repo sin pre o sin post → delta None (con
+    pre/post mean None), nunca 0 disfrazado.
+    """
+    import statistics
+    out = {}
+    for repo, rows in rows_by_repo.items():
+        series = sorted((r for r in rows if r.get(metric) is not None),
+                        key=lambda r: r["month"])
+        pre = [r[metric] for r in series if r["month"] < adoption_month]
+        post = [r[metric] for r in series if r["month"] >= adoption_month]
+        out[repo] = {
+            "pre_mean": statistics.fmean(pre) if pre else None,
+            "post_mean": statistics.fmean(post) if post else None,
+            "delta": (statistics.fmean(post) - statistics.fmean(pre)
+                      if pre and post else None),
+        }
+    return out
+
+
+def did_2x2(deltas, control_repos, min_n=3):
+    """DiD simple 2 períodos × 2 grupos (design D5): delta pre→post del grupo
+    tratamiento menos el delta del control (resta tendencia global). N de cada
+    celda visible; regla dura: n < min_n en cualquiera de los dos grupos →
+    did None con reason 'n_insuficiente' — el punto no se grafica y el JSON
+    lo marca (anti-anécdota).
+    """
+    import statistics
+    ctrl = set(control_repos)
+    dt = [d["delta"] for r, d in deltas.items()
+          if r not in ctrl and d["delta"] is not None]
+    dc = [d["delta"] for r, d in deltas.items()
+          if r in ctrl and d["delta"] is not None]
+    out = {
+        "n_treatment": len(dt),
+        "n_control": len(dc),
+        "delta_treatment": statistics.fmean(dt) if dt else None,
+        "delta_control": statistics.fmean(dc) if dc else None,
+    }
+    if len(dt) < min_n or len(dc) < min_n:
+        out["did"] = None
+        out["reason"] = "n_insuficiente"
+        return out
+    out["did"] = statistics.fmean(dt) - statistics.fmean(dc)
+    return out
+
+
 # ---------------------------------------------------------------------------
 # main
 # ---------------------------------------------------------------------------
