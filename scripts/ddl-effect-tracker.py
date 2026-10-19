@@ -269,7 +269,8 @@ def error_rates(interactions, api_errors, terapia):
             "interactions": interactions or 0,
             "errors_api_per_100": None,
             "errors_terapia_per_100": None,
-            "provenance": {"errors_api_per_100": "missing",
+            "provenance": {"interactions": "missing",
+                           "errors_api_per_100": "missing",
                            "errors_terapia_per_100": "missing"},
         }
     return {
@@ -277,7 +278,8 @@ def error_rates(interactions, api_errors, terapia):
         "errors_api_per_100": api_errors * 100.0 / interactions,
         "errors_terapia_per_100": {k: v * 100.0 / interactions
                                    for k, v in (terapia or {}).items()},
-        "provenance": {"errors_api_per_100": "reported",
+        "provenance": {"interactions": "reported",
+                       "errors_api_per_100": "reported",
                        "errors_terapia_per_100": "reported"},
     }
 
@@ -376,6 +378,113 @@ def classify_control(repos_info, outlier=DDL_OUTLIER_REPO):
             "is_outlier": repo == outlier,
         }
     return out
+
+
+# ---------------------------------------------------------------------------
+# Panel repo × mes (design D2)
+# ---------------------------------------------------------------------------
+
+# Campos de métrica admitidos en una fila de monthly[] (D2 + n visibles de
+# recovery y CI — spec 'recuperación con censura visible' y denominadores).
+PANEL_METRICS = (
+    "sessions", "interactions",
+    "errors_api_per_100", "errors_terapia_per_100",
+    "recovery_p50_interactions", "recovery_censored_rate", "recovery_n",
+    "session_commit_latency_p50_h",
+    "ci_fail_rate", "runs_total", "runs_failed",
+    "revert_ratio", "fix_ratio", "test_commit_ratio",
+    "ah_check_findings", "dose",
+)
+
+# Claves de emisor que no son métricas del panel: provenance y audit metadata
+# (latency_n/clamped_negative de commit_latency, dose_detail es per-repo,
+# no per-mes).
+_PANEL_META_KEYS = frozenset(
+    {"provenance", "reason", "dose_detail", "latency_n", "clamped_negative"})
+
+_PANEL_TAGS = frozenset({"reported", "derived", "cached", "missing"})
+
+
+def cell_from_emitters(repo, month, emitters):
+    """Normaliza los emisores de un (repo, mes) a una celda del panel.
+
+    emitters: {nombre: dict de reducer} — cada dict tiene métricas planas +
+    'provenance' ({campo: tag} o tag escalar que aplica a todas las métricas
+    del emisor) y opcionalmente 'reason' ({campo: texto} o texto). El tag
+    'missing' normaliza el valor a None (nunca 0 fake, p.ej. dose 0.0 sin
+    señal). Campos fuera de PANEL_METRICS o duplicados entre emisores fallan
+    loud: el schema (coffe-nea) no puede derivar de un panel que mintió.
+    """
+    metrics, src, reasons = {}, {}, {}
+    for name, em in (emitters or {}).items():
+        prov = em.get("provenance")
+        reason = em.get("reason")
+        for field in (k for k in em if k not in _PANEL_META_KEYS):
+            if field not in PANEL_METRICS:
+                raise ValueError(
+                    f"{repo} {month}: campo '{field}' del emisor '{name}' no "
+                    "está en PANEL_METRICS")
+            if field in metrics:
+                raise ValueError(
+                    f"{repo} {month}: campo '{field}' emitido por más de un "
+                    "emisor")
+            tag = prov.get(field) if isinstance(prov, dict) else prov
+            if tag == "missing":
+                metrics[field] = None
+            else:
+                metrics[field] = em[field]
+            src[field] = tag
+            if reason is not None:
+                if isinstance(reason, dict):
+                    if field in reason:
+                        reasons[field] = reason[field]
+                else:
+                    reasons[field] = reason
+    out = {"repo": repo, "month": month}
+    out.update(metrics)
+    out["src"] = src
+    if reasons:
+        out["reasons"] = reasons
+    return out
+
+
+def build_panel(cells):
+    """Ensambla monthly[] (design D2): filas repo × mes con provenance en toda
+    cifra. Invariantes loud: toda métrica lleva tag de _PANEL_TAGS; None ⇔ tag
+    'missing' (null con tag real o valor con tag missing mintirían el origen).
+    Meses sin señal (todas las métricas None) quedan afuera del array — no
+    nulls-fantasma. Salida ordenada por (repo, month), reproducible.
+    """
+    rows, seen = [], set()
+    for cell in cells:
+        metrics = {k: cell[k] for k in PANEL_METRICS if k in cell}
+        src = cell.get("src", {})
+        for field, value in metrics.items():
+            tag = src.get(field)
+            if tag not in _PANEL_TAGS:
+                raise ValueError(
+                    f"{cell['repo']} {cell['month']}: '{field}' sin tag de "
+                    f"provenance válido (tiene {tag!r})")
+            if (value is None) != (tag == "missing"):
+                raise ValueError(
+                    f"{cell['repo']} {cell['month']}: '{field}' valor {value!r} "
+                    f"inconsistente con tag {tag!r} (None ⇔ missing)")
+        if all(v is None for v in metrics.values()):
+            continue  # mes sin señal: afuera del array
+        key = (cell["repo"], cell["month"])
+        if key in seen:
+            raise ValueError(
+                f"{cell['repo']} {cell['month']}: celda duplicada — el panel "
+                "es repo × mes")
+        seen.add(key)
+        row = {"repo": cell["repo"], "month": cell["month"]}
+        row.update(metrics)
+        row["src"] = dict(src)
+        if cell.get("reasons"):
+            row["reasons"] = dict(cell["reasons"])
+        rows.append(row)
+    rows.sort(key=lambda r: (r["repo"], r["month"]))
+    return rows
 
 
 # ---------------------------------------------------------------------------
