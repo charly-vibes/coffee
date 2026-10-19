@@ -1359,6 +1359,9 @@ def reduce_context(entries, config=None, month=None):
     max_assistant_block = 0  # chars del mayor bloque assistant individual (gp8)
     models_turns = {}
     cur_model = cur_provider = None
+    cost_sums = {"input": 0.0, "output": 0.0, "cacheRead": 0.0,
+                 "cacheWrite": 0.0}
+    turns_with_cost = 0
 
     def _add(source, n):
         chars_by_source[source] = chars_by_source.get(source, 0) + n
@@ -1394,6 +1397,13 @@ def reduce_context(entries, config=None, month=None):
                 models_turns[turn_model] = models_turns.get(turn_model, 0) + 1
             if msg.get("provider"):
                 cur_provider = msg["provider"]
+            cost = (msg.get("usage") or {}).get("cost")
+            if isinstance(cost, dict):
+                turns_with_cost += 1
+                for k in cost_sums:
+                    v = cost.get(k)
+                    if isinstance(v, (int, float)):
+                        cost_sums[k] += v
             block_chars = 0
             for part in (msg.get("content") or []):
                 if not isinstance(part, dict):
@@ -1452,6 +1462,22 @@ def reduce_context(entries, config=None, month=None):
     }
     if month is not None:
         out["month"] = month
+    # coste por sesión (coffe-5uu): ausente → null con razón (patrón
+    # "sin telemetría", no 0 fake); parcial → suma de los turnos con coste
+    if turns_with_cost:
+        out["cost_in"] = round(cost_sums["input"], 6)
+        out["cost_out"] = round(cost_sums["output"], 6)
+        out["cost_cr"] = round(cost_sums["cacheRead"], 6)
+        out["cost_cw"] = round(cost_sums["cacheWrite"], 6)
+    else:
+        out["cost_in"] = out["cost_out"] = None
+        out["cost_cr"] = out["cost_cw"] = None
+        out["cost_null_reason"] = (
+            "sin usage.cost en ningún turno (turnos abortados o proveedor "
+            "sin billing por token)")
+    # context_source (coffe-5uu): claude-cli tiene usage inválido y coste de
+    # suscripción — se emite separado, nunca mezclado en percentiles de coste
+    out["context_source"] = "claude-cli" if cur_provider == "claude-cli" else "pi"
     return out
 
 # --- fin bloque ctx-tracker --------------------------------------------------

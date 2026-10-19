@@ -308,6 +308,74 @@ class TestModelosTurnos(unittest.TestCase):
         self.assertNotIn("month", m2)
 
 
+class TestCostePorSesion(unittest.TestCase):
+    """coffe-5uu (1.3): cost.in/out/cacheRead/cacheWrite por sesión;
+    coste ausente → null con razón (patrón 'sin telemetría', no 0 fake);
+    context_source: pi vs claude-cli (usage inválido, coste de suscripción)."""
+
+    def test_coste_completo_soma_componentes(self):
+        entries = [
+            e_user("q"),
+            e_assistant(text="a", usage=usage(cost={"input": 0.01,
+                                                    "output": 0.02,
+                                                    "cacheRead": 0.001,
+                                                    "cacheWrite": 0.002})),
+            e_assistant(text="b", usage=usage(cost={"input": 0.03,
+                                                    "output": 0.04,
+                                                    "cacheRead": 0.003,
+                                                    "cacheWrite": 0.004})),
+        ]
+        m = ut.reduce_context(entries)
+        self.assertAlmostEqual(0.04, m["cost_in"])
+        self.assertAlmostEqual(0.06, m["cost_out"])
+        self.assertAlmostEqual(0.004, m["cost_cr"])
+        self.assertAlmostEqual(0.006, m["cost_cw"])
+        self.assertNotIn("cost_null_reason", m)
+
+    def test_coste_ausente_null_con_razon(self):
+        """Ningún turno trae usage.cost → los 4 campos null + razón."""
+        entries = [e_user("q"), e_assistant(text="a", usage=usage()),
+                   e_assistant(text="b")]  # abortado: ni usage
+        m = ut.reduce_context(entries)
+        self.assertIsNone(m["cost_in"])
+        self.assertIsNone(m["cost_out"])
+        self.assertIsNone(m["cost_cr"])
+        self.assertIsNone(m["cost_cw"])
+        self.assertIn("cost_null_reason", m)
+        self.assertTrue(m["cost_null_reason"])
+
+    def test_coste_parcial_solo_turnos_con_coste(self):
+        """Turno abortado (sin coste) + turno con coste → suma del disponible;
+        el resto visible vía turns_no_usage (loss visible, no 0 fake)."""
+        entries = [
+            e_user("q"),
+            e_assistant(text="abortado"),
+            e_assistant(text="ok", usage=usage(cost={"input": 0.05,
+                                                     "output": 0.01,
+                                                     "cacheRead": 0.0,
+                                                     "cacheWrite": 0.0})),
+        ]
+        m = ut.reduce_context(entries)
+        self.assertAlmostEqual(0.05, m["cost_in"])
+        self.assertAlmostEqual(0.01, m["cost_out"])
+        self.assertEqual(1, m["turns_no_usage"])
+
+    def test_context_source_claude_cli(self):
+        entries = [{"type": "model_change", "provider": "claude-cli",
+                    "modelId": "claude-sonnet-4-6"}]
+        entries += [e_user("q"),
+                    e_assistant(text="a", provider="claude-cli",
+                                usage=usage())]
+        m = ut.reduce_context(entries)
+        self.assertEqual("claude-cli", m["context_source"])
+
+    def test_context_source_pi_default(self):
+        m = ut.reduce_context([e_user("q"),
+                               e_assistant(text="a", provider="anthropic",
+                                           usage=usage())])
+        self.assertEqual("pi", m["context_source"])
+
+
 class TestPureza(unittest.TestCase):
     def test_puro_no_escribe_ni_leo_disco(self):
         """El reducer no toca disco: dos pasadas sobre los mismos entries
