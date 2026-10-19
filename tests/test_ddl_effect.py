@@ -711,5 +711,60 @@ class DidTest(unittest.TestCase):
         self.assertEqual(out["did"], 2.0)
 
 
+class DoseResponseTest(unittest.TestCase):
+    """4.4 (coffe-s8j): Spearman dosis × outcome, n por punto."""
+
+    def _points(self, pairs):
+        return [{"repo": f"r{i}", "dose": d, "ah_check_findings": v}
+                for i, (d, v) in enumerate(pairs)]
+
+    def test_monotona_creciente_rho_1(self):
+        pts = self._points([(0.0, 1), (0.3, 2), (0.6, 3), (1.0, 4)])
+        out = ddl.dose_response(pts, "ah_check_findings")
+        self.assertAlmostEqual(out["spearman_rho"], 1.0)
+        self.assertEqual(out["n"], 4)
+
+    def test_monotona_decreciente_rho_menos_1(self):
+        pts = self._points([(0.0, 4), (0.3, 3), (0.6, 2), (1.0, 1)])
+        out = ddl.dose_response(pts, "ah_check_findings")
+        self.assertAlmostEqual(out["spearman_rho"], -1.0)
+
+    def test_empates_promedian_rangos(self):
+        # dosis [1,1,0.5,0.3] vs outcome [1,2,3,4]: anticorrelación casi
+        # perfecta con empate promediado en el top → rho ≈ −0.9487
+        pts = self._points([(1.0, 1), (1.0, 2), (0.5, 3), (0.3, 4)])
+        out = ddl.dose_response(pts, "ah_check_findings")
+        self.assertAlmostEqual(out["spearman_rho"], -0.9487, places=3)
+
+    def test_n_insuficiente_no_estima(self):
+        pts = self._points([(0.0, 1), (1.0, 4)])
+        out = ddl.dose_response(pts, "ah_check_findings")
+        self.assertIsNone(out["spearman_rho"])
+        self.assertEqual(out["reason"], "n_insuficiente")
+        self.assertEqual(out["n"], 2)  # visible, no oculto
+
+    def test_borde_n_3_si_estima(self):
+        pts = self._points([(0.0, 1), (0.5, 3), (1.0, 4)])
+        out = ddl.dose_response(pts, "ah_check_findings")
+        self.assertIsNone(out.get("reason"))
+        self.assertEqual(out["n"], 3)
+
+    def test_pares_con_none_excluidos_del_n(self):
+        pts = self._points([(0.0, 1), (0.3, None), (0.6, 3), (None, 4),
+                            (1.0, 5)])
+        out = ddl.dose_response(pts, "ah_check_findings")
+        self.assertEqual(out["n"], 3)
+        self.assertAlmostEqual(out["spearman_rho"], 1.0)
+
+    def test_dosis_sin_varianza_degenerada(self):
+        # toda la flota viva con dosis ~1 (design Riesgos) → rho None
+        # declarado, no correlación fake
+        pts = self._points([(1.0, 1), (1.0, 2), (1.0, 3), (1.0, 4)])
+        out = ddl.dose_response(pts, "ah_check_findings")
+        self.assertIsNone(out["spearman_rho"])
+        self.assertEqual(out["reason"], "sin_varianza")
+        self.assertEqual(out["n"], 4)
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=1)

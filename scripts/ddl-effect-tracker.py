@@ -588,6 +588,46 @@ def did_2x2(deltas, control_repos, min_n=3):
     return out
 
 
+def _avg_ranks(values):
+    """Rangos de Spearman con empates promediados (estándar)."""
+    order = sorted(range(len(values)), key=lambda i: values[i])
+    ranks = [0.0] * len(values)
+    i = 0
+    while i < len(order):
+        j = i
+        while j + 1 < len(order) and values[order[j + 1]] == values[order[i]]:
+            j += 1
+        avg = (i + j) / 2.0 + 1.0
+        for k in range(i, j + 1):
+            ranks[order[k]] = avg
+        i = j + 1
+    return ranks
+
+
+def dose_response(points, metric, min_n=3):
+    """Spearman dosis × outcome (design D5): correlación de rangos por métrica,
+    con n de la celda visible. Pares con dosis u outcome None no cuentan.
+    Regla dura: n < min_n → rho None con reason 'n_insuficiente'. Dosis sin
+    varianza (toda la flota ~1, design Riesgos) → rho None con reason
+    'sin_varianza' — degenerada declarada, nunca correlación fake.
+    """
+    import statistics
+    pairs = [(p["dose"], p[metric]) for p in points
+             if p.get("dose") is not None and p.get(metric) is not None]
+    n = len(pairs)
+    if n < min_n:
+        return {"spearman_rho": None, "n": n, "reason": "n_insuficiente"}
+    doses = _avg_ranks([d for d, _ in pairs])
+    outcomes = _avg_ranks([v for _, v in pairs])
+    mean_x, mean_y = statistics.fmean(doses), statistics.fmean(outcomes)
+    cov = sum((x - mean_x) * (y - mean_y) for x, y in zip(doses, outcomes))
+    var_x = sum((x - mean_x) ** 2 for x in doses)
+    var_y = sum((y - mean_y) ** 2 for y in outcomes)
+    if var_x == 0 or var_y == 0:
+        return {"spearman_rho": None, "n": n, "reason": "sin_varianza"}
+    return {"spearman_rho": cov / (var_x * var_y) ** 0.5, "n": n}
+
+
 # ---------------------------------------------------------------------------
 # main
 # ---------------------------------------------------------------------------
