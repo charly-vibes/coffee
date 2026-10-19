@@ -68,8 +68,10 @@ coffe-nea + coffe-pp0).
 
 - [ ] 6.1 (coffe-tw6) `nightly-update.sh`: tracker tras usage-tracker, viz tras tracker;
   `--no-push` testeable
-- [ ] 6.2 (coffe-6io) Análisis #22 en `docs/fpa-analyses-guide.md` (4 niveles, español) +
-  grounding en `viz_fpa_guide.py` (`--check`)
+- [ ] 6.2 (coffe-6io) Análisis #21 en `docs/fpa-analyses-guide.md` (siguiente
+  sección numerada de la guía; el "19 análisis" del README ya estaba stale —
+  bug pre-existente, coffe-4j9) (4 niveles, español) + grounding en
+  `viz_fpa_guide.py` (`--check`)
 - [ ] 6.3+6.4 (coffe-zx5) README: layout de `data/ddl_effect.json`, cache gh/terapia, gaps
 - [ ] 6.5 (coffe-q9z) Regenerar `data/ddl_effect.json` + `data/ddl-dashboard.html` con datos
   reales, revisar cifras contra insumos antes de commitear
