@@ -118,7 +118,7 @@ componente (in/out/cache). Los agregados se computan sobre el set limpio
 - **THEN** el mes tiene dos filas en `monthly_model`, cada una con sus percentiles
   y growth per turno por fuente
 
-## MODIFIED Requirements
+## ADDED Requirements
 
 ### Requirement: métricas de sesión con señal de compaction para Pi
 
