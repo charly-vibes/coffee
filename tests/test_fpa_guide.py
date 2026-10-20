@@ -282,6 +282,17 @@ class TestFiguresDerivadas(unittest.TestCase):
         self.assertIn(f"{n} análisis × 4 niveles",
                       guide.render_guide_html(gd, CONFIG))
 
+    def test_readme_cita_la_cantidad_de_analisis_reales(self):
+        """coffe-4j9: la fila de fpa-guide.html en el README cita la misma
+        cantidad derivada que el header del HTML — nunca hardcodeada."""
+        gd = guide.load_guide(GUIDE_MD)
+        n = len(guide.analyses_flat(gd))
+        readme = (REPO / "README.md").read_text()
+        row = [l for l in readme.splitlines() if "fpa-guide.html" in l
+               and "Guía de análisis" in l]
+        self.assertEqual(1, len(row), "fila de fpa-guide.html no encontrada")
+        self.assertIn(f"Los {n} análisis", row[0])
+
 
 class TestCheckDocumentation(unittest.TestCase):
     """check_documentation(): mapeo roto o umbral divergente → errores."""
@@ -349,7 +360,6 @@ class TestRenderGuideHtml(unittest.TestCase):
         again = guide.render_guide_html(
             guide.load_guide(GUIDE_MD), CONFIG, generated="2026-09-20 12:00")
         self.assertEqual(self.html, again)
-
 
 if __name__ == "__main__":
     unittest.main()
