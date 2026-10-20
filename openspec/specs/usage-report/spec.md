@@ -1,39 +1,46 @@
 # usage-report Specification
 
 ## Purpose
-TBD - created by archiving change add-fpa-dashboard. Update Purpose after archive.
+Contrato del dataset de uso de IA (`data/usage_report_v3.json`) que produce
+`scripts/usage-tracker.py` a partir de los logs locales (Claude, Pi, Amp,
+Codex, Gemini): agregaciones mensuales/diarias por tool, modelo y proyecto,
+sesiones multi-tool, cash real desde el ledger `data/charges.json`, energía
+estimada y métricas de contexto. Es la única fuente de los dashboards
+(`viz-fpa.py`, `viz-gantt.py`, `viz-ctx.py`, `viz_ddl.py`); el schema
+contractual vive en `specs/usage-report-v3.schema.json`.
 
 ## Requirements
 
 ### Requirement: emisiones para dashboard FP&A
 
-El tracker SHALL (debe) emitir, además de lo existente: breakdown mensual por tool
-y modelo (interacciones y coste efectivo), project totals por mes vía
-`project_daily`, cargas pay-per-token separadas de las cargas de suscripción,
-commits y releases por proyecto/mes donde haya token de GitHub configurado, tokens
-input/output/cache-read/cache-write por mes y modelo, interacciones por kind
-(user prompts, assistant turns, tool calls), interacciones y coste de los proyectos
-excluidos por el charly-filter, timezone usada para el bucketing horario/diario, y
-las métricas de concurrencia (proyectos distintos por hora, picos de sesiones
-simultáneas, project switches por hora activa) para el dashboard FP&A.
+El tracker SHALL (debe) emitir, además de lo existente: breakdown mensual por
+tool y modelo, project totals por mes vía `project_daily`, cargas pay-per-token
+separadas de suscripciones, commits y releases por proyecto/mes (donde haya
+token de GitHub), tokens input/output/cache-read/cache-write por mes y modelo,
+interacciones por kind, interacciones y coste de los excluidos por el
+charly-filter, timezone de bucketing y métricas de concurrencia.
 
-Desde coffe-a31.2 (CRG-F1) el tracker SHALL (debe) consumir el ledger de cargos
-reales `data/charges.json` y emitirlo de forma aditiva: `charges_real_by_month`
-(proveedor → mes → USD, solo kinds IA, provenance *reported*),
-`charges_reconciliation_by_month` (por mes y tool: cash real del ledger vs fee
-implícito del calendario vs efectivo estimado — insumo de la reconciliación
-FPA-082) y metadata `charges_source`/`charges_total_real`/`charges_provenance`.
-El campo `pay_per_token_charges` mensual SHALL (debe) ser *reported* cuando el
-ledger tiene cargas pay-per-token reales del mes (créditos/reembolsos — FPA-013
-deja de ser assumed) y *assumed* (estimado tokens × pricing) si no; los fees
-implícitos del calendario NUNCA se mezclan en ese campo. Los cargos del ledger
-son cash cost: medida separada del coste efectivo, jamás sumadas (FPA-002).
+#### Scenario: concurrencia desglosada
+
+- **WHEN** el tracker emite las métricas de concurrencia del mes
+- **THEN** incluyen proyectos distintos por hora, picos de sesiones simultáneas
+  y project switches por hora activa
+
+#### Scenario: kinds declarados
+
+- **WHEN** el tracker desglosa interacciones por kind
+- **THEN** los kinds son user prompts, assistant turns y tool calls (FPA-140)
 
 #### Scenario: tokens por modelo presentes
 
 - **WHEN** el tracker genera `usage_report_v3.json`
 - **THEN** el reporte incluye tokens input/output/cache-read/cache-write por mes
   y modelo, validables contra el schema extendido
+
+#### Scenario: breakdown mensual desglosado
+
+- **WHEN** se revisa el breakdown mensual por tool y modelo
+- **THEN** cada celda trae interacciones y coste efectivo
 
 #### Scenario: interacciones por kind presentes
 
@@ -77,6 +84,23 @@ son cash cost: medida separada del coste efectivo, jamás sumadas (FPA-002).
   `subscription_fees_by_month`, sin doble conteo (coffe-a31.2: resuelve la
   divergencia 381.62 vs 611.62 del dataset previo)
 
+### Requirement: cash real desde el ledger de cargos (CRG-F1)
+
+El tracker SHALL (debe) consumir el ledger `data/charges.json` y emitir de
+forma aditiva `charges_real_by_month`, `charges_reconciliation_by_month`
+(insumo de FPA-082) y metadata de source/total/provenance. `pay_per_token_charges`
+mensual SHALL (debe) ser *reported* con cargas p2p reales del ledger (FPA-013
+deja de ser assumed) y *assumed* si no; los fees implícitos del calendario NUNCA
+se mezclan ahí. Los cargos del ledger son cash cost: jamás sumados al coste
+efectivo (FPA-002).
+
+#### Scenario: emisión aditiva del ledger
+
+- **WHEN** el tracker genera el reporte con el ledger presente
+- **THEN** `charges_real_by_month` es proveedor → mes → USD solo kinds IA con
+  provenance *reported*, y la metadata registra `charges_source`,
+  `charges_total_real` y `charges_provenance`
+
 ### Requirement: ledger de cargos reales
 
 El repo SHALL (debe) mantener `data/charges.json` como única fuente de cargos
@@ -102,17 +126,11 @@ con amount negativo.
 
 ### Requirement: estimación de energía por modelo (assumed)
 
-El tracker SHALL (debe) emitir por mes `energy_kwh_by_model` (modelo → kWh
-estimado como número de 3 decimales, o — solo para modelos sin telemetría de
-tokens, ver requirement siguiente — `{"kwh": null, "reason": ...}`) y
-`energy_kwh` (total mensual), calculados como
+El tracker SHALL (debe) emitir por mes `energy_kwh_by_model` (modelo → kWh con
+3 decimales, o `{"kwh": null, "reason": ...}` solo para modelos sin telemetría
+de tokens) y `energy_kwh` (total mensual), calculados como
 `(tokens_frescos + cache_read × cache_read_energy_factor) × J/token del tier /
-3.6e6`. La metadata SHALL (debe) incluir `energy_provenance` (siempre
-"assumed" — ningún proveedor reporta energía), `energy_config_source`,
-`energy_cache_read_factor` y `energy_method` con la fórmula documentada. Los
-campos son aditivos al reporte existente y jamás se mezclan con los costes USD
-(FPA-002). Cada modelo SHALL (debe) registrar su `energy_tier` efectivo dentro
-de `energy_kwh_by_model` para que la clasificación sea auditable.
+3.6e6`. Los campos son aditivos y jamás se mezclan con los costes USD (FPA-002).
 
 #### Scenario: energía mensual por modelo presente
 
@@ -121,6 +139,13 @@ de `energy_kwh_by_model` para que la clasificación sea auditable.
 - **THEN** cada mes incluye `energy_kwh_by_model` y `energy_kwh`, y la metadata
   incluye `energy_provenance` = "assumed", `energy_cache_read_factor` y
   `energy_method`, validables contra el schema extendido
+
+#### Scenario: provenance siempre assumed y tier auditable
+
+- **WHEN** se revisa la metadata y las entradas de `energy_kwh_by_model`
+- **THEN** `energy_provenance` es siempre "assumed" (ningún proveedor reporta
+  energía), la metadata incluye `energy_config_source`, y cada modelo registra
+  su `energy_tier` efectivo para auditar la clasificación
 
 #### Scenario: cache_read ponderado
 
@@ -137,27 +162,32 @@ de `energy_kwh_by_model` para que la clasificación sea auditable.
 
 ### Requirement: coeficientes de energía versionados y fail-loud en config
 
-`config/fpa.json` SHALL (debe) tener un bloque `energy_coefficients` con:
-tiers de J/token entregado (mínimo `flash`, `mid`, `frontier`), mapping
-modelo→tier (incluyendo todas las variantes de nombre presentes en el dataset:
-`google/…`, `anthropic/…`, `:free`, `<synthetic>`), `default_tier`,
-`cache_read_energy_factor` y versionado por `effective` (mismo patrón que
-`model_pricing.versions`). Si el bloque falta o está malformado, el tracker
-SHALL (debe) abortar con error no-cero listando el campo faltante (criterio
-coffe-mbz). Un modelo sin mapping SHALL (debe) usar `default_tier` y su tier
-efectivo SHALL (debe) quedar registrado como `energy_tier` en el reporte —
-sin defaults silenciosos invisibles. La versión de coeficientes para un bucket
-mensual SHALL (debe) seleccionarse por la fecha de inicio del mes (última
-`effective` ≤ primer día del mes) — el agregado mensual de tokens no permite
-partir un mes entre versiones (a diferencia de `estimate_cost(when)`, que es
-por interacción). Un mes que arranque antes que toda versión declarada SHALL
-(debe) abortar con error no-cero: el autor de config cubre el rango de datos.
+`config/fpa.json` SHALL (debe) tener un bloque `energy_coefficients`: tiers de
+J/token entregado (mínimo `flash`, `mid`, `frontier`), mapping modelo→tier,
+`default_tier`, `cache_read_energy_factor` y versionado por `effective`. Si
+falta o está malformado, el tracker SHALL (debe) abortar con error no-cero
+nombrando el campo (coffe-mbz).
 
 #### Scenario: config válida
 
 - **WHEN** el tracker corre con `energy_coefficients` completo
 - **THEN** cada bucket mensual usa la versión con `effective` más reciente ≤
-  primer día del mes y el reporte registra `energy_config_source`
+  primer día del mes (mismo patrón que `model_pricing.versions`) y el reporte
+  registra `energy_config_source`
+
+#### Scenario: variantes de nombre cubiertas
+
+- **WHEN** el dataset trae variantes de nombre (`google/…`, `anthropic/…`,
+  `:free`, `<synthetic>`)
+- **THEN** el mapping las cubre todas; un modelo sin mapping usa `default_tier`
+  con su `energy_tier` registrado (sin defaults silenciosos)
+
+#### Scenario: un mes, una versión
+
+- **WHEN** cambia la versión de coeficientes a mitad de un bucket mensual
+- **THEN** el mes entero usa la versión vigente al primer día (el agregado
+  mensual de tokens no permite partir el mes; a diferencia de
+  `estimate_cost(when)`, que es por interacción)
 
 #### Scenario: mes sin cobertura de versión
 
@@ -230,13 +260,9 @@ Las líneas de logs descartadas por errores de parseo SHALL (debe)N contarse en
 ### Requirement: banda de sensibilidad de caché por mes
 
 El reporte SHALL (debe) emitir `monthly[m].energy_kwh_band: {low, high}` —
-kWh estimados recomputados con `cache_read_energy_factor` 0.0 y 1.0
-respectivamente, mismos buckets, coeficientes versionados y `energy_version`
-que la emisión nominal de 7mj.1. La banda por modelo replica la semántica
-nominal: modelos sin telemetría quedan excluidos de ambos extremos (igual que
-del total nominal), así un mes cuyo total es 0.0 (solo modelos sin telemetría)
-emite banda 0.0/0.0. La metadata SHALL (debe) registrar
-`energy_band_cache_factors: [0.0, 1.0]`.
+kWh recomputados con `cache_read_energy_factor` 0.0 y 1.0, mismos buckets,
+coeficientes versionados y `energy_version` que la emisión nominal de 7mj.1.
+La metadata SHALL (debe) registrar `energy_band_cache_factors: [0.0, 1.0]`.
 
 #### Scenario: extremos de banda coherentes con el nominal
 
@@ -249,6 +275,12 @@ emite banda 0.0/0.0. La metadata SHALL (debe) registrar
 - **WHEN** un mes solo tiene modelos sin telemetría de tokens (p.ej. amp)
 - **THEN** `energy_kwh_band` es `{low: 0.0, high: 0.0}` (igual que su
   `energy_kwh` 0.0) y las entradas por modelo conservan `null` con razón
+
+#### Scenario: banda replica la semántica nominal
+
+- **WHEN** un mes tiene modelos sin telemetría junto a modelos con tokens
+- **THEN** los sin telemetría quedan excluidos de ambos extremos, igual que en
+  el total nominal
 
 ### Requirement: granularidad proyecto × mes con tokens y cost_real
 
@@ -287,13 +319,11 @@ La actividad por proyecto/día sigue cubierta por `project_daily` (Gantt).
 ### Requirement: sección context_metrics por sesión de Pi
 
 El reporte SHALL (debe) incluir una sección `context_metrics` con una fila por
-sesión de Pi in-scope, conteniendo como mínimo: `month`, `project`, `model`,
+sesión de Pi in-scope, conteniendo como mínimo `month`, `project`, `model`,
 `models_turns`, `provider`, `turns`, `peak_ctx_est`, `final_ctx_est`,
-`compactions`, atribución de chars por fuente (`asst_text`, `asst_thinking`,
-`asst_args`, y resultados por `toolName`), `big_results` por tool y
+`compactions`, la atribución de chars por fuente, `big_results` por tool y
 `cost_in/out/cr/cw`. La emisión es aditiva: ningún campo existente cambia de
-semántica. Sesiones sin turnos (stubs) quedan fuera del array y se cuentan en
-`context_metrics.meta.stubs`.
+semántica.
 
 #### Scenario: sesión con atribución completa
 
@@ -307,6 +337,12 @@ semántica. Sesiones sin turnos (stubs) quedan fuera del array y se cuentan en
 - **WHEN** se suma la atribución por fuente de una sesión
 - **THEN** el total es la suma de chars de user + assistant content + toolResults
   observados en el JSONL, sin duplicar ni omitir roles
+
+#### Scenario: fuentes de la atribución
+
+- **WHEN** se desglosa la atribución de chars por fuente
+- **THEN** cubre `asst_text`, `asst_thinking`, `asst_args` y los resultados por
+  `toolName`
 
 #### Scenario: stubs sin turnos
 

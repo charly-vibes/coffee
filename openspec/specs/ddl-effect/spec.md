@@ -1,7 +1,12 @@
 # ddl-effect Specification
 
 ## Purpose
-TBD - created by archiving change add-ddl-effectiveness-analysis. Update Purpose after archive.
+Medir el efecto del toolset ddl en la calidad de las entregas: panel
+repo × mes (dosis de cobertura de herramientas, métricas de lazo de
+feedback y calidad de código) derivado del tracker de coffee, con
+análisis de interrupción (ITS) y diferencias-en-diferencias contra
+repos control. Emite `data/ddl_effect.json` y el dashboard
+`data/ddl-dashboard.html` (`scripts/viz_ddl.py`).
 
 ## Requirements
 
@@ -48,13 +53,10 @@ provenance — nunca fecha estimada.
 ### Requirement: dosis de cobertura de herramientas, como serie temporal
 
 El tracker SHALL (debe) calcular la dosis de cada repo como fracción de las 13
-herramientas del registry gestionadas que están presentes y sanas. La dosis es
-una serie temporal: `dose(month)` por cada mes del panel, derivada hacia atrás
-desde fechas de adopción (`tools_first_use`, primer commit de `.ddl/`, presencia
-histórica de canarios). `ddl status` es solo el snapshot corriente que valida la
-derivación: si difiere, gana `ddl status` y el delta se reporta en metadata.
-`dose_detail` lista present/sanas/faltantes por nombre; la fuente efectiva de
-cada celda va en provenance.
+herramientas del registry gestionadas que están presentes y sanas, como serie
+temporal `dose(month)` por cada mes del panel, derivada desde las fechas de
+adopción. `dose_detail` lista present/sanas/faltantes por nombre y la fuente
+efectiva de cada celda va en provenance.
 
 #### Scenario: dosis desde ddl status
 
@@ -69,37 +71,56 @@ cada celda va en provenance.
 - **THEN** `dose(month)` para los meses previos a 2026-08 no la cuenta y sube
   en el mes de primer uso, sin saltos no explicables por las fechas de adopción
 
-#### Scenario: dosis desde ddl status
-
-- **WHEN** `ddl status` corre contra un repo y reporta 10 de 13 herramientas sanas
-- **THEN** `dose` es 10/13 con provenance `reported` y `dose_detail.healthy`
-  lista exactamente esas 10
-
 #### Scenario: ddl no instalado
 
 - **WHEN** el binario `ddl` no está disponible o falla para un repo
 - **THEN** la dosis se calcula por canarios git/usos de sesión y su provenance lo
   declara (no cambia silenciosamente de significado)
 
+#### Scenario: ddl status diverge de la derivación
+
+- **WHEN** `ddl status` difiere de la derivación retroactiva para un repo × mes
+- **THEN** gana `ddl status` (snapshot corriente) y el delta se reporta en
+  metadata
+
+#### Scenario: derivación retroactiva de la serie
+
+- **WHEN** se deriva `dose(month)` hacia atrás desde `tools_first_use`, primer
+  commit de `.ddl/` y presencia histórica de canarios
+- **THEN** la serie no usa snapshots que no existían en el mes (no lookahead)
+
 ### Requirement: métricas de lazo de feedback
 
-El tracker SHALL (debe) emitir por repo × mes: `recovery_p50_interactions`
-(mediana de interacciones entre un error de tool/API y la siguiente invocación
-exitosa del mismo tool, calculada sobre el **walk de JSONLs de sesiones Pi** —
-el reporte de usage no tiene filas por evento —, con eventos censurados por fin
-de sesión excluidos de la mediana y contados en `recovery_censored_rate`),
-`session_commit_latency_p50_h` (latencia entre el último timestamp de sesión del
-repo y el primer commit posterior asistido; latencias negativas por sesgo de
-reloj se clampean a 0 y se cuentan en metadata), y `ci_fail_rate` (runs fallidos /
-runs totales del mes vía gh api, excluyendo runs de dependabot; repo
-renombrado/eliminado → cache stale conservado + provenance `missing` con razón
-`repo_gone`).
+El tracker SHALL (debe) emitir por repo × mes `recovery_p50_interactions`,
+`session_commit_latency_p50_h` y `ci_fail_rate`, con la definición, la censura,
+el clamp y las degradaciones declaradas en provenance/metadata en vez de
+silenciosas.
 
 #### Scenario: walk de sesiones como fuente de recuperación
 
 - **WHEN** el tracker calcula `recovery_p50_interactions` para un repo × mes
 - **THEN** lo deriva de los eventos de error e invocaciones de los JSONLs de
   sesiones Pi de ese cwd, no de agregados del reporte de usage
+
+#### Scenario: definición de la mediana de recuperación
+
+- **WHEN** se calcula `recovery_p50_interactions` para un repo × mes
+- **THEN** es la mediana de interacciones entre un error de tool/API y la
+  siguiente invocación exitosa del mismo tool; el reporte de usage no tiene
+  filas por evento, por eso la fuente es el walk de sesiones
+
+#### Scenario: latencia sesión → commit
+
+- **WHEN** se calcula `session_commit_latency_p50_h` para un repo × mes
+- **THEN** es la latencia entre el último timestamp de sesión del repo y el
+  primer commit posterior asistido; latencias negativas por sesgo de reloj se
+  clampean a 0 y se cuentan en metadata
+
+#### Scenario: definición de ci_fail_rate
+
+- **WHEN** se calcula `ci_fail_rate` para un repo × mes
+- **THEN** es runs fallidos / runs totales del mes vía gh api, excluyendo runs
+  de dependabot
 
 #### Scenario: ITS sin ventana pre suficiente
 
@@ -125,6 +146,12 @@ renombrado/eliminado → cache stale conservado + provenance `missing` con razó
 - **WHEN** existe `data/cache/gh_runs/<repo>.json` con `fetched_until`
 - **THEN** el tracker refetch solo runs posteriores a esa marca y nunca re-descarga
   el historial completo
+
+#### Scenario: repo renombrado o eliminado
+
+- **WHEN** el repo ya no es accesible por gh api
+- **THEN** se conserva el cache stale y `ci_fail_rate` lleva provenance
+  `missing` con razón `repo_gone`
 
 ### Requirement: métricas de tasa de error
 
