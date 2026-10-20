@@ -34,8 +34,14 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import site_theme  # noqa: E402
 
+import argparse
+import re
+
 REPORT = Path("data/usage_report_v3.json")
 OUT = Path("data/context-dashboard.html")
+
+CTX_DOC_BEGIN = "<!-- CTX-DOCS:BEGIN -->"
+CTX_DOC_END = "<!-- CTX-DOCS:END -->"
 
 PCT_KEYS = ("p50", "p75", "p90", "p95", "p99")
 N_BINS = 10
@@ -351,6 +357,68 @@ def _hist_svg(hist, band, w=760, h=240):
                      f'>{k}</text>')
     parts.append("</svg>")
     return "\n".join(parts)
+
+
+def expected_ctx_figures(report):
+    """coffe-ruk (3.2): cifras de contexto con el formato del bloque
+    CTX-DOCS del README — TODO sale del JSON (estilo FPA-143 de viz-fpa;
+    bloque propio: el CHECK-DOCS de viz-fpa no admite cifras extra)."""
+    cm = report.get("context_metrics") or {}
+    if not cm.get("available"):
+        return {"Sesiones con contexto": "n/a",
+                "Excluidas (patológicas)": "n/a",
+                "Stubs": "n/a",
+                "Pico p50 (tok)": "n/a",
+                "Ratio validación": "n/a",
+                "Factor chars/token": "n/a"}
+    sessions = cm.get("sessions") or []
+    meta = cm.get("meta") or {}
+    clean = [s for s in sessions
+             if s.get("turns", 0) > 0 and not s.get("pathological")]
+    peaks = sorted(s["peak_ctx_est"] for s in clean)
+    p50 = _pctl(peaks, 0.5)
+    vr = meta.get("validation_ratio_median")
+    return {
+        "Sesiones con contexto": str(len(clean)),
+        "Excluidas (patológicas)": str(meta.get("excluded_pathological",
+                                               sum(1 for s in sessions
+                                                   if s.get("pathological")))),
+        "Stubs": str(meta.get("stubs", 0)),
+        "Pico p50 (tok)": f"{p50:.0f}" if p50 else "n/a",
+        "Ratio validación": f"{vr:.2f}" if vr else "n/a",
+        "Factor chars/token": str(meta.get("chars_per_token")),
+    }
+
+
+def check_docs_ctx(report, readme_path):
+    """Las cifras del bloque CTX-DOCS del README deben salir del JSON.
+    Devuelve la lista de desvíos ([] = consistente)."""
+    try:
+        text = Path(readme_path).read_text()
+    except OSError as e:
+        return [f"no se pudo leer {readme_path}: {e}"]
+    if CTX_DOC_BEGIN not in text or CTX_DOC_END not in text:
+        return [f"README sin bloque CTX-DOCS (marcadores "
+                f"{CTX_DOC_BEGIN} … {CTX_DOC_END})"]
+    block = text.split(CTX_DOC_BEGIN, 1)[1].split(CTX_DOC_END, 1)[0]
+    expected = expected_ctx_figures(report)
+    seen = set()
+    errors = []
+    for line in block.splitlines():
+        m = re.match(r"-\s+([^:]+):\s*(.+)$", line.strip())
+        if not m:
+            continue
+        key, val = m.group(1).strip(), m.group(2).strip()
+        seen.add(key)
+        exp = expected.get(key)
+        if exp is None:
+            errors.append(f"cifra desconocida en README: {key}")
+        elif val != exp:
+            errors.append(f"{key}: README dice {val}, JSON dice {exp}")
+    for key in expected:
+        if key not in seen:
+            errors.append(f"falta cifra en README: {key}")
+    return errors
 
 
 def render(model):
@@ -737,16 +805,41 @@ body {{ margin: 0; padding: 18px; background: {t['--bg']}; color: {t['--fg']};
 </body></html>"""
 
 
-def main():
-    report = json.loads(REPORT.read_text())
+def main(argv=None):
+    ap = argparse.ArgumentParser(
+        description="Dashboard de contexto de sesiones Pi (viz-ctx.py)")
+    ap.add_argument("--report", default=str(REPORT))
+    ap.add_argument("--out", default=str(OUT))
+    ap.add_argument(
+        "--check-docs", action="store_true",
+        help="verificar cifras CTX-DOCS del README contra el JSON (coffe-ruk)")
+    ap.add_argument("--readme", default="README.md")
+    args = ap.parse_args(argv)
+
+    try:
+        report = json.loads(Path(args.report).read_text())
+    except (OSError, json.JSONDecodeError) as e:
+        print(f"ERROR: no se pudo leer el reporte: {e}", file=sys.stderr)
+        return 1
+
+    if args.check_docs:
+        errors = check_docs_ctx(report, args.readme)
+        if errors:
+            print("ERROR: README desviado del JSON (CTX-DOCS):",
+                  file=sys.stderr)
+            for e in errors:
+                print(f"  - {e}", file=sys.stderr)
+            return 1
+        print("OK: README consistente con context_metrics (CTX-DOCS)")
+        return 0
+
     model = build_model(report)
-    OUT.write_text(render(model))
+    Path(args.out).write_text(render(model))
     if not model.get("available"):
-        print(f"viz-ctx: data/context-dashboard.html — placeholder: "
-              f"{model.get('reason')}")
+        print(f"viz-ctx: {args.out} — placeholder: {model.get('reason')}")
         return
     d = model["dist"]
-    print(f"viz-ctx: data/context-dashboard.html — {d['n_clean']} sesiones "
+    print(f"viz-ctx: {args.out} — {d['n_clean']} sesiones "
           f"limpias, {d['excluded_pathological']} excluidas, "
           f"{d['stubs']} stubs")
 

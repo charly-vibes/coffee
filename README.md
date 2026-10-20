@@ -259,3 +259,12 @@ Con los datos actuales podemos generar:
 3. [x] ~~Generar dashboard HTML con Chart.js~~ ✅ **Descartado: `scripts/viz-fpa.py` genera `data/fpa-dashboard.html` con SVG inline, stdlib-only (FPA-145)**
 4. [ ] Empezar a escribir post principal con datos reales
 5. [ ] Interpretar el Gantt: los gaps sin actividad (vacaciones?) y los bloques densos de julio-agosto (¿migración masiva? ¿agentes paralelos?)
+
+<!-- CTX-DOCS:BEGIN -->
+- Sesiones con contexto: 2067
+- Excluidas (patológicas): 34
+- Stubs: 0
+- Pico p50 (tok): 73673
+- Ratio validación: 1.27
+- Factor chars/token: 4
+<!-- CTX-DOCS:END -->

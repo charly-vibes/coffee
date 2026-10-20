@@ -312,6 +312,16 @@ class TestVizPages(unittest.TestCase):
                     n = pg.eval_on_selector_all(
                         ".export-csv", "els => els.length")
                     self.assertGreater(n, 0, "ctx: sin botones export CSV")
+                    # al menos 1 SVG por vista con chart (coffe-ruk 2.8)
+                    for view, sel in (("dist", ".ctx-hist"),
+                                      ("comp", ".stack"),
+                                      ("ley", ".scatter")):
+                        pg.evaluate(f"window.__ctx.setView('{view}')")
+                        n = pg.eval_on_selector_all(
+                            f"#{view} {sel}", "els => els.length")
+                        self.assertGreater(
+                            n, 0, f"ctx: vista {view} sin SVG ({sel})")
+                    pg.evaluate("window.__ctx.setView('dist')")
                 else:  # gantt
                     n = pg.eval_on_selector_all(".cell", "els => els.length")
                     self.assertGreater(n, 100, f"gantt: solo {n} celdas")

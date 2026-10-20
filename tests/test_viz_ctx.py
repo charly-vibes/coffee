@@ -399,6 +399,62 @@ class TestTabs(unittest.TestCase):
         self.assertNotIn("<script src", self.html)
 
 
+class TestCheckDocs(unittest.TestCase):
+    """coffe-ruk (3.2): --check-docs de viz-ctx.py — consistencia README ↔
+    JSON al estilo expected_doc_figures() de viz-fpa, con bloque propio
+    CTX-DOCS (el bloque CHECK-DOCS de viz-fpa no admite cifras extra)."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.viz = load_viz()
+        cls.report = report_sintetico()
+        cls.expected = cls.viz.expected_ctx_figures(cls.report)
+
+    def test_expected_figures_shape(self):
+        self.assertIn("Sesiones con contexto", self.expected)
+        self.assertIn("Excluidas (patológicas)", self.expected)
+        self.assertIn("Factor chars/token", self.expected)
+
+    def test_bloque_consistente_sin_errores(self):
+        block = "\n".join(f"- {k}: {v}" for k, v in self.expected.items())
+        readme = self._readme(block)
+        self.assertEqual([], self.viz.check_docs_ctx(self.report, readme))
+
+    def test_cifra_desviada_da_error(self):
+        k = next(iter(self.expected))
+        block = "\n".join(
+            f"- {key}: {'1' if key == k else v}"
+            for key, v in self.expected.items())
+        readme = self._readme(block)
+        errors = self.viz.check_docs_ctx(self.report, readme)
+        self.assertTrue(errors)
+        self.assertIn(k, errors[0])
+
+    def test_bloque_vacio_da_falta_cifras(self):
+        readme = self._readme("")
+        errors = self.viz.check_docs_ctx(self.report, readme)
+        self.assertTrue(any("falta cifra" in e for e in errors))
+
+    def test_sin_bloque_da_error(self):
+        import tempfile
+        f = tempfile.NamedTemporaryFile("w", suffix=".md", delete=False)
+        f.write("README sin bloque\n")
+        f.close()
+        self.addCleanup(lambda: Path(f.name).unlink(missing_ok=True))
+        errors = self.viz.check_docs_ctx(self.report, f.name)
+        self.assertTrue(any("CTX-DOCS" in e for e in errors))
+
+    def _readme(self, block):
+        # check_docs_ctx recibe una ruta (estilo viz-fpa): tmpfile
+        import tempfile
+        f = tempfile.NamedTemporaryFile("w", suffix=".md", delete=False)
+        f.write(self.viz.CTX_DOC_BEGIN + "\n" + block + "\n"
+                + self.viz.CTX_DOC_END)
+        f.close()
+        self.addCleanup(lambda: Path(f.name).unlink(missing_ok=True))
+        return f.name
+
+
 class TestRenderHtml(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
