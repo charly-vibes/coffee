@@ -199,7 +199,7 @@ el reporte antes de renderizar (`--validate`).
 
 #### Scenario: reporte válido pasa la validación
 
-- **WHEN** se ejecuta `python3 scripts/viz-dashboard.py --validate`
+- **WHEN** se ejecuta `python3 scripts/viz-gantt.py --validate`
 - **THEN** el reporte satisface el schema y el script imprime `schema OK`
 
 #### Scenario: clave requerida ausente falla la validación
