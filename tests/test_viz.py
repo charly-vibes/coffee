@@ -28,6 +28,7 @@ REPO = Path(__file__).resolve().parent.parent
 PAGES = [
     REPO / "data" / "gantt-multitasking.html",
     REPO / "data" / "fpa-dashboard.html",
+    REPO / "data" / "context-dashboard.html",
 ]
 
 try:
@@ -289,6 +290,13 @@ class TestVizPages(unittest.TestCase):
                     n_ph = pg.eval_on_selector_all(
                         "[class~='ph']", "els => els.length")
                     self.assertEqual(0, n_ph, "fpa: placeholders sin valor")
+                elif page_path.name == "context-dashboard.html":
+                    # ctx-viz (coffe-0tw): header Pi-only + histograma con barras
+                    self.assertIn("Pi", pg.inner_text("h1"))
+                    n = pg.eval_on_selector_all(".bar", "els => els.length")
+                    self.assertGreater(n, 0, "ctx: histograma sin barras")
+                    band = pg.eval_on_selector_all(".pctl", "els => els.length")
+                    self.assertGreaterEqual(band, 1, "ctx: banda de percentiles ausente")
                 else:  # gantt
                     n = pg.eval_on_selector_all(".cell", "els => els.length")
                     self.assertGreater(n, 100, f"gantt: solo {n} celdas")

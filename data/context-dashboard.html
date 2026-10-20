@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Contexto — distribución del pico por sesión (Pi)</title>
+<style>
+:root {--bg:#c0c0c0;--panel:#ffffff;--fg:#000000;--muted:#404040;--accent:#800000;--accent2:#000080;--good:#008080;--grid:#c0c0c0;--navy:#000080;--yellow:#ffff00;--card:#ffffff;--line:#c0c0c0;--acc:#800000;--ok:#008080;--bad:#800000;--font-stack:Arial, Helvetica, 'MS Sans Serif', sans-serif;}:root {--bg:#c0c0c0;--panel:#ffffff;--fg:#000000;--muted:#404040;--accent:#800000;--accent2:#000080;--good:#008080;--grid:#c0c0c0;--navy:#000080;--yellow:#ffff00;--card:#ffffff;--line:#c0c0c0;--acc:#800000;--ok:#008080;--bad:#800000;--font-stack:Arial, Helvetica, 'MS Sans Serif', sans-serif;}
+* { box-sizing: border-box; }
+body { font-family: var(--font-stack); }
+.marginalia { display: flex; flex-wrap: wrap; gap: .4rem; align-items: flex-start; margin: .3rem 0 .8rem; }
+.marginalia > .mlabel { color: var(--muted); font-size: .78rem; align-self: center; }
+.marginalia details.mchip { min-height: 44px; }
+.marginalia details.mchip > summary { display: inline-flex; align-items: center; min-height: 44px; cursor: pointer; background: var(--card); border: 2px outset #fff; padding: .2rem .6rem; font-size: .8rem; }
+.marginalia details.mchip > summary:hover { color: var(--accent); }
+.marginalia details.mchip[open] > summary { border-style: inset; }
+.marginalia .mnote { background: var(--panel); border: 1px solid #404040; box-shadow: 3px 3px 0 #404040; padding: .6rem .8rem; font-size: .82rem; max-width: 640px; }
+.marginalia .mnote .mlevel { margin: .3rem 0; }
+.marginalia .mnote details.mchip-deep > summary { cursor: pointer; color: var(--navy); font-size: .78rem; }
+.marginalia .mnote a { color: var(--navy); }
+
+  body { margin: 0; padding: 18px; background: var(--bg); color: var(--fg);
+          font-size: 13px; font-family: Arial, sans-serif; }
+  h1 { font-size: 16px; margin: 0 0 4px; }
+  .scope { color: var(--muted); margin: 0 0 12px; }
+  .card { background: var(--panel); border: 1px solid var(--line);
+           padding: 12px; margin-bottom: 12px; }
+  .muted { color: var(--muted); }
+  .ctx-hist { width: 100%; height: auto; }
+  .axis { stroke: var(--grid); }
+  .bar { fill: var(--accent2); }
+  .bar:hover { fill: var(--accent); }
+  .tick { font-size: 10px; fill: var(--muted); }
+  .pctl-acc { stroke: var(--accent); }
+  .pctl-good { stroke: var(--good); }
+  .pctl-acc2, .pctl-navy { stroke: var(--navy); }
+  .pctl-bad { stroke: var(--bad); }
+  .pctl.acc { fill: var(--accent); }
+  .pctl.good { fill: var(--good); }
+  .pctl.acc2, .pctl.navy { fill: var(--navy); }
+  .pctl.bad { fill: var(--bad); }
+  .tag { background: var(--yellow); font-size: 10px; padding: 1px 4px;
+          border: 1px solid var(--line); }
+  dl { display: grid; grid-template-columns: max-content 1fr; gap: 4px 12px; }
+  dt { color: var(--muted); }  dd { margin: 0; }
+</style>
+</head>
+<body>
+<h1>Contexto de sesiones (Pi) · Distribución del pico</h1>
+<p class="scope">sesiones de Pi únicamente</p>
+<div class="card">
+  <h2>Pico de contexto por sesión — 2067 sesiones limpias · 34 excluidas (patológicas)</h2>
+  <svg viewBox="0 0 760 240" role="img" aria-label="Histograma del pico de contexto" class="ctx-hist">
+<line x1="56" y1="210" x2="744" y2="210" class="axis"/>
+<rect x="58.0" y="12.0" width="64.8" height="198.0" class="bar"><title>0–110k: 1485 sesiones</title></rect>
+<text x="90.4" y="224" text-anchor="middle" class="tick">0</text>
+<rect x="126.8" y="139.9" width="64.8" height="70.1" class="bar"><title>110k–221k: 526 sesiones</title></rect>
+<rect x="195.6" y="203.3" width="64.8" height="6.7" class="bar"><title>221k–331k: 50 sesiones</title></rect>
+<text x="228.0" y="224" text-anchor="middle" class="tick">221k</text>
+<rect x="264.4" y="209.7" width="64.8" height="0.3" class="bar"><title>331k–441k: 2 sesiones</title></rect>
+<rect x="333.2" y="209.9" width="64.8" height="0.1" class="bar"><title>441k–552k: 1 sesiones</title></rect>
+<text x="365.6" y="224" text-anchor="middle" class="tick">441k</text>
+<rect x="402.0" y="210.0" width="64.8" height="0.0" class="bar"><title>552k–662k: 0 sesiones</title></rect>
+<rect x="470.8" y="209.9" width="64.8" height="0.1" class="bar"><title>662k–772k: 1 sesiones</title></rect>
+<text x="503.2" y="224" text-anchor="middle" class="tick">662k</text>
+<rect x="539.6" y="210.0" width="64.8" height="0.0" class="bar"><title>772k–882k: 0 sesiones</title></rect>
+<rect x="608.4" y="209.9" width="64.8" height="0.1" class="bar"><title>882k–993k: 1 sesiones</title></rect>
+<text x="640.8" y="224" text-anchor="middle" class="tick">882k</text>
+<rect x="677.2" y="209.9" width="64.8" height="0.1" class="bar"><title>993k–1103k: 1 sesiones</title></rect>
+<line x1="102.0" y1="12" x2="102.0" y2="210" class="pctl pctl-p50"><title>p50: 74k tok</title></line>
+<text x="102.0" y="14" text-anchor="middle" class="tick acc">p50</text>
+<line x1="129.8" y1="12" x2="129.8" y2="210" class="pctl pctl-p75"><title>p75: 118k tok</title></line>
+<text x="129.8" y="14" text-anchor="middle" class="tick good">p75</text>
+<line x1="161.0" y1="12" x2="161.0" y2="210" class="pctl pctl-p90"><title>p90: 168k tok</title></line>
+<text x="161.0" y="14" text-anchor="middle" class="tick acc2">p90</text>
+<line x1="180.6" y1="12" x2="180.6" y2="210" class="pctl pctl-p95"><title>p95: 200k tok</title></line>
+<text x="180.6" y="14" text-anchor="middle" class="tick navy">p95</text>
+<line x1="220.5" y1="12" x2="220.5" y2="210" class="pctl pctl-p99"><title>p99: 264k tok</title></line>
+<text x="220.5" y="14" text-anchor="middle" class="tick bad">p99</text>
+</svg>
+  <p class="muted">Estimación: chars / chars_per_token
+     (<span class="tag">assumed</span> = 4)
+     — subestima el contexto real (~40%): español/código ~3 chars/token y overhead de serialización; consistente entre eras — ver ratio de validación · ratio de validación vs usage real: 1.27 (mediana).</p>
+</div>
+<div class="card">
+  <h2>Procedencia</h2>
+  <dl>
+    <dt>Set limpio</dt><dd>2067 sesiones (turns > 0, sin
+      patológicas) — base de histograma y percentiles</dd>
+    <dt>Excluidas</dt><dd>34 patológicas (bloque assistant > umbral
+      de config), visibles en la vista Patologías</dd>
+    <dt>Stubs</dt><dd>0 sesiones sin turnos — nunca sumadas como 0
+      (loss visible)</dd>
+    <dt>Factor</dt><dd>chars_per_token 4 — <span class="tag">assumed</span>,
+      dirección de bias documentada</dd>
+  </dl>
+</div>
+</body></html>
