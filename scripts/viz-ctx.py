@@ -128,6 +128,7 @@ def build_model(report):
             "validation_ratio_median": meta.get("validation_ratio_median"),
         },
         "comp": _build_comp(clean, th),
+        "growth": _build_growth(clean),
         "cost": _build_cost(sessions),
         "pathological_list": [{
             "project": s.get("project"),
@@ -149,6 +150,43 @@ def build_model(report):
                             .get("date_range", {}).get("end")),
         "monthly_model": cm.get("monthly_model") or [],
     }
+
+
+def _ols(xs, ys):
+    """OLS simple: pendiente e intersección de y = a + b·x (stdlib)."""
+    n = len(xs)
+    mx = sum(xs) / n
+    my = sum(ys) / n
+    sxx = sum((x - mx) ** 2 for x in xs)
+    if sxx == 0:
+        return None, my  # sin varianza en x: pendiente indefinida
+    sxy = sum((x - mx) * (y - my) for x, y in zip(xs, ys))
+    b = sxy / sxx
+    return b, my - b * mx
+
+
+def _build_growth(clean):
+    """Vista Ley de crecimiento (coffe-r3c 2.6): dispersivo pico vs turnos
+    por modelo con pendiente OLS pre-calculada en Python (hallazgo del
+    epic: ~850 tok/turno constante entre eras). Sin varianza en turnos →
+    pendiente null con razón (nada silencioso)."""
+    by_model = []
+    for m in sorted({r.get("model") for r in clean}, key=str):
+        rows = [r for r in clean if r.get("model") == m]
+        xs = [r["turns"] for r in rows]
+        ys = [r["peak_ctx_est"] for r in rows]
+        b, a = _ols(xs, ys)
+        by_model.append({
+            "model": m,
+            "n": len(rows),
+            "slope": b,
+            "intercept": a,
+            "slope_reason": None if b is not None
+                            else "sin varianza en turnos (n=1 o todos iguales)"
+                                 " — pendiente indefinida",
+            "points": list(zip(xs, ys)),
+        })
+    return {"by_model": by_model}
 
 
 def _fmt_human(n):
@@ -461,6 +499,78 @@ body {{ margin: 0; padding: 18px; background: {t['--bg']}; color: {t['--fg']};
     if stubs:
         title_extra.append(f"{stubs} stubs")
     extra = (" · " + " · ".join(title_extra)) if title_extra else ""
+
+    # vista Ley de crecimiento (coffe-r3c 2.6): scatter pico vs turnos por
+    # modelo + pendiente OLS pre-calculada
+    growth = model.get("growth") or {"by_model": []}
+    ley_html = ""
+    if growth["by_model"]:
+        rows_g = ""
+        for g in growth["by_model"]:
+            slope = (f"~{g['slope']:.0f} tok/turno"
+                     if g["slope"] is not None else
+                     html.escape(g["slope_reason"] or "indefinida"))
+            pts = " ".join(f"{t},{p}" for t, p in g["points"][:50])
+            xs = [t for t, _ in g["points"]] or [0]
+            ys = [p for _, p in g["points"]] or [0]
+            xmax, ymax = max(xs), max(ys) or 1
+            dots = "".join(
+                f'<circle cx="{20 + (t / xmax) * 300:.1f}" '
+                f'cy="{110 - (p / ymax) * 90:.1f}" r="2.5" '
+                f'class="dot"/><title>{g["model"]}: {t} turnos → '
+                f'{_fmt_k(p)} tok</title>'
+                for t, p in g["points"])
+            rows_g += f"""
+    <div class="sc-wrap">
+      <svg viewBox="0 0 340 130" class="scatter" role="img"
+           aria-label="pico vs turnos {html.escape(str(g['model']))}">
+        <line x1="20" y1="110" x2="320" y2="110" class="axis"/>
+        <line x1="20" y1="10" x2="20" y2="110" class="axis"/>
+        {dots}
+      </svg>
+      <p><strong>{html.escape(str(g["model"]))}</strong> ({g["n"]} sesiones)
+         — pendiente OLS: {slope} · pico = a + b·turnos (tok estimados)</p>
+    </div>"""
+        ley_html = f"""
+<div class="card">
+  <h2>Ley de crecimiento — pico vs turnos</h2>
+  {rows_g}
+  <p class="muted">pendiente OLS pre-calculada en Python; hallazgo del
+     epic: ~850 tok/turno constante entre eras → la pendiente traduce
+     higiene de sesiones a presupuesto.</p>
+</div>"""
+    else:
+        ley_html = '<div class="card"><h2>Ley de crecimiento</h2>' \
+                   '<p class="muted">sin sesiones limpias: sin ajuste</p></div>'
+
+    tabs = (("dist", "Distribución"), ("comp", "Composición"),
+            ("time", "Tiempo"), ("cost", "Coste"), ("ley", "Ley"),
+            ("pat", "Patologías"))
+    views_json = json.dumps([k for k, _ in tabs])
+    nav = "".join(f'<a class="tab" role="tab" href="#{k}" '
+                  f'data-view="{k}">{label}</a>'
+                  for k, label in tabs)
+
+    def _sec(sec_id, inner):
+        if not inner.strip():
+            inner = ('<div class="card"><h2>sin datos</h2>'
+                     '<p class="muted">esta vista no tiene filas en el '
+                     'reporte actual</p></div>')
+        return (f'<section id="{sec_id}" class="ctx-view">{inner}</section>')
+
+    comp_html = _sec("comp", comp_html)
+    time_html = _sec("time", time_html)
+    cost_html = _sec("cost", cost_html)
+    ley_html = _sec("ley", ley_html)
+    pat_html = _sec("pat", pat_html)
+    dist_html = _sec("dist", f"""
+<div class="card">
+  <h2>Pico de contexto por sesión — {n_clean} sesiones limpias{extra}</h2>
+  {hist_html}
+  <p class="muted">Estimación: chars / chars_per_token
+     (<span class="tag">{tag}</span> = {cpt})
+     — {bias} · ratio de validación vs usage real: {ratio} (mediana).</p>
+</div>""")
     return f"""<!DOCTYPE html>
 <html lang="es">
 <head>
@@ -512,21 +622,41 @@ body {{ margin: 0; padding: 18px; background: {t['--bg']}; color: {t['--fg']};
   .ctx-table th, .ctx-table td {{ border: 1px solid var(--line);
                                   padding: 3px 8px; text-align: left; }}
   .ctx-table th {{ background: var(--panel); color: var(--muted); }}
+  /* tabs una vista a la vez a todo ancho (coffe-r3c 2.8, patrón fpa) */
+  .topbar {{ display: flex; gap: 4px; flex-wrap: wrap; margin: 0 0 12px;
+             border: 1px solid var(--line); background: var(--panel);
+             padding: 4px; }}
+  .tab {{ display: inline-block; padding: 6px 12px; min-height: 44px;
+          line-height: 32px; text-decoration: none; color: var(--fg);
+          border: 1px solid var(--line); background: var(--card);
+          font-size: .85rem; }}
+  .tab[aria-current="true"] {{ background: var(--accent); color: #fff; }}
+  .ctx-view {{ display: none; }}
+  body[data-view="dist"] #dist,
+  body[data-view="comp"] #comp,
+  body[data-view="time"] #time,
+  body[data-view="cost"] #cost,
+  body[data-view="ley"] #ley,
+  body[data-view="pat"] #pat {{ display: block; }}
+  .scatter {{ width: 340px; max-width: 100%; height: auto; }}
+  .scatter .axis {{ stroke: var(--grid); }}
+  .scatter .dot {{ fill: var(--accent2); }}
+  .scatter .dot:hover {{ fill: var(--accent); }}
+  .sc-wrap {{ margin-bottom: 10px; }}
+  .export-csv, .dl-svg {{ font-size: .8rem; background: var(--card);
+                          border: 1px solid var(--line); padding: 4px 8px;
+                          margin: 4px 4px 8px 0; cursor: pointer; }}
 </style>
 </head>
-<body>
-<h1>Contexto de sesiones (Pi) · Distribución del pico</h1>
+<body data-view="dist">
+<h1>Contexto de sesiones (Pi)</h1>
 <p class="scope">{scope}</p>
-<div class="card">
-  <h2>Pico de contexto por sesión — {n_clean} sesiones limpias{extra}</h2>
-  {hist_html}
-  <p class="muted">Estimación: chars / chars_per_token
-     (<span class="tag">{tag}</span> = {cpt})
-     — {bias} · ratio de validación vs usage real: {ratio} (mediana).</p>
-</div>
+<nav class="topbar" role="tablist">{nav}</nav>
+{dist_html}
 {comp_html}
 {time_html}
 {cost_html}
+{ley_html}
 {pat_html}
 <div class="card">
   <h2>Procedencia</h2>
@@ -541,6 +671,69 @@ body {{ margin: 0; padding: 18px; background: {t['--bg']}; color: {t['--fg']};
       dirección de bias documentada</dd>
   </dl>
 </div>
+<script>
+(function () {{
+  var VIEWS = {views_json};
+  function setView(key) {{
+    if (VIEWS.indexOf(key) < 0) return;
+    document.body.setAttribute("data-view", key);
+    document.querySelectorAll(".tab").forEach(function (t) {{
+      if (t.getAttribute("data-view") === key)
+        t.setAttribute("aria-current", "true");
+      else t.removeAttribute("aria-current");
+    }});
+  }}
+  function fromHash() {{
+    var h = (location.hash || "").replace("#", "");
+    setView(h || "dist");
+  }}
+  document.querySelectorAll(".tab").forEach(function (t) {{
+    t.addEventListener("click", function () {{
+      setView(t.getAttribute("data-view"));
+    }});
+  }});
+  window.addEventListener("hashchange", fromHash);
+  fromHash();
+  // export CSV (tablas) / SVG (charts) — sin librerías (FPA-169 patrón)
+  function tableToCSV(table) {{
+    return Array.prototype.slice.call(table.querySelectorAll("tr"))
+      .map(function (tr) {{
+        return Array.prototype.slice.call(tr.querySelectorAll("th,td"))
+          .map(function (c) {{
+            var t = c.textContent.replace(/\\s+/g, " ").trim();
+            return /[",\\n]/.test(t) ? '"' + t.replace(/"/g, '""') + '"' : t;
+          }}).join(",");
+      }}).join("\\n");
+  }}
+  function downloadText(name, text, mime) {{
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([text], {{type: mime}}));
+    a.download = name;
+    document.body.appendChild(a); a.click(); a.remove();
+  }}
+  document.querySelectorAll(".ctx-table").forEach(function (t) {{
+    var b = document.createElement("button");
+    b.className = "export-csv"; b.type = "button";
+    b.textContent = "Exportar CSV";
+    b.addEventListener("click", function () {{
+      downloadText("ctx-tabla.csv", tableToCSV(t), "text/csv");
+    }});
+    t.parentNode.insertBefore(b, t);
+  }});
+  document.querySelectorAll(".ctx-hist, .scatter, .stack").forEach(function (s) {{
+    var b = document.createElement("button");
+    b.className = "dl-svg"; b.type = "button";
+    b.textContent = "Descargar SVG";
+    b.addEventListener("click", function () {{
+      downloadText("ctx-chart.svg",
+        '<?xml version="1.0" encoding="UTF-8"?>\\n' + s.outerHTML,
+        "image/svg+xml");
+    }});
+    s.parentNode.insertBefore(b, s);
+  }});
+  window.__ctx = {{ setView: setView }};
+}})();
+</script>
 </body></html>"""
 
 

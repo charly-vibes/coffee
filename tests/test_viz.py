@@ -297,6 +297,21 @@ class TestVizPages(unittest.TestCase):
                     self.assertGreater(n, 0, "ctx: histograma sin barras")
                     band = pg.eval_on_selector_all(".pctl", "els => els.length")
                     self.assertGreaterEqual(band, 1, "ctx: banda de percentiles ausente")
+                    # coffe-r3c: tabs una vista a la vez + deep-link por hash
+                    self.assertTrue(
+                        pg.is_visible("#dist"), "ctx: dist default visible")
+                    self.assertFalse(
+                        pg.is_visible("#cost"), "ctx: cost no visible en default")
+                    pg.evaluate("window.__ctx.setView('cost')")
+                    self.assertTrue(pg.is_visible("#cost"))
+                    self.assertFalse(pg.is_visible("#dist"))
+                    pg.evaluate("location.hash = '#ley'")
+                    pg.wait_for_timeout(200)
+                    self.assertTrue(
+                        pg.is_visible("#ley"), "ctx: hashchange no activa vista")
+                    n = pg.eval_on_selector_all(
+                        ".export-csv", "els => els.length")
+                    self.assertGreater(n, 0, "ctx: sin botones export CSV")
                 else:  # gantt
                     n = pg.eval_on_selector_all(".cell", "els => els.length")
                     self.assertGreater(n, 100, f"gantt: solo {n} celdas")

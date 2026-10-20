@@ -316,6 +316,89 @@ class TestPatologias(unittest.TestCase):
         self.assertIn("16.0M", html)  # tamaño formateado
 
 
+class TestLeyCrecimiento(unittest.TestCase):
+    """coffe-r3c (2.6): dispersivo pico vs turnos por modelo con pendiente
+    OLS pre-calculada (hallazgo: ~850 tok/turno constante entre eras).
+    Anti-goal: la pendiente se calcula, nunca constante fijada."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.viz = load_viz()
+        sessions = []
+        for t in (20, 40, 60, 80):
+            sessions.append(sesion(850 * t, model="m-a", turns=t))
+        for t in (20, 40, 60, 80):
+            sessions.append(sesion(400 * t, model="m-b", turns=t))
+        sessions.append(sesion(16_000_000, pathological=True, turns=200,
+                               max_assistant_block_chars=16_000_000))
+        report = {"context_metrics": {
+            "available": True, "reason": None, "sessions": sessions,
+            "monthly_model": [],
+            "meta": {"chars_per_token": 4, "chars_per_token_tag": "assumed",
+                     "chars_per_token_bias": "subestima",
+                     "validation_ratio_median": 1.0,
+                     "thresholds": {"big_result_chars": 100_000,
+                                    "big_session_tokens": 100_000,
+                                    "pathological_chars": 500_000,
+                                    "chars_per_token": 4},
+                     "stubs": 0, "excluded_pathological": 1}}}
+        cls.model = cls.viz.build_model(report)
+        cls.growth = {g["model"]: g for g in cls.model["growth"]["by_model"]}
+
+    def test_pendiente_ols_era_850(self):
+        """m-a: pico = 850×turnos exactos → pendiente 850 (±1%)."""
+        g = self.growth["m-a"]
+        self.assertAlmostEqual(850, g["slope"], delta=8.5)
+        self.assertEqual(4, g["n"])
+
+    def test_orden_de_eras_comparado(self):
+        """Dos eras con pendientes distintas: 850 > 400 — comparable."""
+        self.assertGreater(self.growth["m-a"]["slope"],
+                           self.growth["m-b"]["slope"])
+        self.assertAlmostEqual(400, self.growth["m-b"]["slope"], delta=4)
+
+    def test_patologica_fuera_del_ajuste(self):
+        """La sesión glitch (16M, 200 turnos) no entra en el ajuste."""
+        self.assertEqual(4, self.growth["m-a"]["n"])
+
+    def test_puntos_del_scatter_en_render(self):
+        html = self.viz.render(self.model)
+        self.assertIn("Ley de crecimiento", html)
+        self.assertIn("850", html)  # pendiente visible
+        self.assertIn("scatter", html)
+
+
+class TestTabs(unittest.TestCase):
+    """coffe-r3c (2.8): tabs una vista a la vez a todo ancho, deep-link por
+    hash, export CSV/SVG — como fpa-dashboard."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.viz = load_viz()
+        cls.model = cls.viz.build_model(report_sintetico())
+        cls.html = cls.viz.render(cls.model)
+
+    def test_nav_con_data_view(self):
+        self.assertIn('class="tab"', self.html)
+        self.assertIn('data-view="dist"', self.html)
+
+    def test_secciones_con_id_y_hidden_por_css(self):
+        self.assertIn('id="dist"', self.html)
+        self.assertIn('body[data-view="dist"] #dist', self.html)
+
+    def test_deeplink_hash_js(self):
+        self.assertIn("hashchange", self.html)
+        self.assertIn("setView", self.html)
+        self.assertIn("window.__ctx", self.html)
+
+    def test_export_csv_y_svg(self):
+        self.assertIn("export-csv", self.html)
+        self.assertIn("dl-svg", self.html)
+
+    def test_sin_js_externo(self):
+        self.assertNotIn("<script src", self.html)
+
+
 class TestRenderHtml(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
