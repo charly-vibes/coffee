@@ -4219,6 +4219,7 @@ def render_html(report, cfg, generated=None, today=None):
 <body data-view="summary">
 <a class="skip" href="#summary">Saltar al contenido</a>
 <header class="site">
+  {site_theme.back_link()}
   <h1>{site_name}</h1>
   <p class="meta">Generado: {generated} · {tracker_cell} · periodo
   {period_cell}</p>

@@ -3,7 +3,7 @@
 
 Cubre:
 - build_stats: cifras derivadas del reporte/charges (función pura)
-- render: enlaces a los 3 dashboards + JSON, título coffee, sin entradas
+- render: enlaces a los 5 dashboards + JSON, título coffee, sin entradas
   retiradas (v2 sin filtrar, tool_timeline), determinismo byte-a-byte
 """
 
@@ -52,8 +52,16 @@ class TestRender(unittest.TestCase):
     def test_links_dashboards_and_json(self):
         for href in ("data/fpa-dashboard.html", "data/fpa-guide.html",
                      "data/gantt-multitasking.html",
+                     "data/context-dashboard.html",
+                     "data/ddl-dashboard.html",
                      "data/usage_report_v3.json"):
             self.assertIn(f'href="{href}"', self.html)
+
+    def test_links_every_data_html(self):
+        """Guard: todo dashboard HTML publicado en data/ aparece en el
+        índice (los guardas finos viven en tests/test_site_nav.py)."""
+        for page in sorted((ROOT / "data").glob("*.html")):
+            self.assertIn(f'href="data/{page.name}"', self.html)
 
     def test_insights_eliminado_del_indice(self):
         """coffe-gen.5: el dashboard de insights se elimina — ni entrada

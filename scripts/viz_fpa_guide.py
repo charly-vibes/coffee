@@ -607,6 +607,7 @@ def render_guide_html(guide_dict, cfg, generated=None):
 <body>
 <a class="skip" href="#toc">Saltar al índice</a>
 <header class="site">
+  {site_theme.back_link()}
   <h1>Guía de análisis — {html_mod.escape(site_name)}</h1>
   <p class="meta">Generado: {generated} · fuente: docs/fpa-analyses-guide.md
   ({n_analyses} análisis × 4 niveles)</p>

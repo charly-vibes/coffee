@@ -113,6 +113,33 @@ MARGINALIA_CSS = (
 ) 
 
 
+# Navegación cruzada del sitio: back-link "← Volver al índice" en toda
+# página generada (los dashboards viven en data/ y el índice en la raíz,
+# por eso el href relativo ../index.html — jamás data/data: coffe-ulw).
+BACK_LINK_CSS = (
+    # position:absolute sin ancestro posicionado → ancla al origen del
+    # documento (esquina superior derecha), SIN desplazar el layout: el
+    # smoke 390×844 del primer viewport (FPA-109) no tolera filas extra.
+    'a.back-index { position: absolute; top: .35rem; right: .4rem; '
+    'z-index: 10; display: inline-flex; align-items: center; '
+    'min-height: 44px; padding: .3rem .55rem; font-size: .78rem; '
+    'font-weight: bold; color: var(--navy); background: var(--card); '
+    'border: 2px outset #fff; text-decoration: none; }\n'
+    'a.back-index:hover { color: var(--accent); '
+    'border-style: inset; }\n'
+)
+
+
+def back_link(href="../index.html", label="← Volver al índice"):
+    """Back-link al índice del sitio (primera pieza del <body>/header).
+
+    La ruta relativa es ../index.html porque las páginas publicadas viven
+    en data/ y el índice en la raíz de Pages; el guard en
+    tests/test_site_nav.py falla si alguna página generada lo pierde.
+    """
+    return f'<a class="back-index" href="{href}">{label}</a>'
+
+
 def css_vars():
     """Bloque :root con exactamente las variables de TOKENS (orden estable)."""
     body = "".join(f"{k}:{v};" for k, v in TOKENS.items())
@@ -130,4 +157,5 @@ def base_css():
         "* { box-sizing: border-box; }\n"
         "body { font-family: var(--font-stack); }\n"
         + MARGINALIA_CSS
+        + BACK_LINK_CSS
     )

@@ -542,6 +542,7 @@ def build_html(report):
 </head>
 <body>
 <header>
+  {site_theme.back_link()}
   <h1>{esc(title)}</h1>
 </header>
 <main>

@@ -22,8 +22,8 @@ de los últimos meses.
 | `scripts/viz-gantt.py` | Genera `data/gantt-multitasking.html`: Gantt de actividad proyecto × día con concurrencia diaria. Autocontenido, sin dependencias. |
 | `scripts/viz-fpa.py` | Genera `data/fpa-dashboard.html`: dashboard principal "Uso y costos de IA" (nombre llano del `site_name` del config; presupuestos, bridge PVM, forecast, alertas, economía de suscripción). Un solo HTML autocontenido, **SVG inline, sin librería de charts externa** (FPA-145); las matemáticas se pre-calculan en Python y el JS solo re-escala. Tema compartido del sitio en `scripts/site_theme.py` (coffe-gen.2). Config en `config/fpa.json`. Flags: `--check-docs` (consistencia README↔JSON FPA-143 + grounding de la guía, coffe-gen.3). |
 | `scripts/viz_fpa_guide.py` | Parser de `docs/fpa-analyses-guide.md` (guía de análisis a 4 niveles, en español) → `data/fpa-guide.html` + marginalia con chips expandibles en el dashboard y el Gantt (coffe-gen.3/4). `--check` valida el grounding (mapeo + umbrales vs config). |
-| `scripts/site_theme.py` | Tokens del tema compartido del sitio ("Corporate Infographics™ 1996"): única fuente de la paleta/tipografía para viz-fpa, viz-index y viz-gantt. |
-| `scripts/viz-index.py` | Genera `index.html`: entrada del sitio en Pages (estética 90s-corporate). Deriva las cifras del marquee y la fecha de actualización del reporte, así el índice nunca queda stale. Se regenera en el deploy de CI. |
+| `scripts/site_theme.py` | Tokens del tema compartido del sitio ("Corporate Infographics™ 1996"): única fuente de la paleta/tipografía para viz-fpa, viz-index y viz-gantt. También emite `back_link()`: chip "← Volver al índice" que todos los dashboards/guía insertan al inicio (absolute, sin desplazar el primer viewport) y cuyo guard vive en `tests/test_site_nav.py`. |
+| `scripts/viz-index.py` | Genera `index.html`: entrada del sitio en Pages (estética 90s-corporate). Enlaza TODOS los dashboards publicados (fpa, guía, Gantt, contexto, ddl — guard anti-huérfanos en `tests/test_site_nav.py`). Deriva las cifras del marquee y la fecha de actualización del reporte, así el índice nunca queda stale. Se regenera en el deploy de CI. |
 | `scripts/viz-ctx.py` | Genera `data/context-dashboard.html`: dashboard de contexto de sesiones Pi (epic add-context-dashboard). Vistas: Distribución (histograma del pico + banda p50-p99 sobre el set limpio), Composición (share por fuente global y en sesiones >100k), Tiempo (mes×modelo, meses parciales con días FPA-041), Coste (split in/out/cache; claude-cli aparte con provenance *subscription*, sin suma combinada), Ley de crecimiento (scatter pico vs turnos con pendiente OLS) y Patologías (outliers con razón, FPA-008). SVG inline sin librerías, tabs + deep-link por hash, export CSV/SVG; `--check-docs` verifica el bloque CTX-DOCS del README. |
 | `scripts/update-readme-docs.py` | Refresca el bloque CHECK-DOCS del README con las cifras del reporte actual. Reutiliza `expected_doc_figures()` de `viz-fpa.py` (FPA-143) vía importlib — misma fuente que `--check-docs`, así el bloque nunca diverge. Lo usa el nightly; también a mano tras regenerar el reporte. |
 | `scripts/nightly-update.sh` | **Job nocturno**: regenera reporte + Gantt + dashboard de contexto + dashboard FPA + guía + índice, sincroniza el CHECK-DOCS del README y, si hay cambios, commitea y pushea (deploy a Pages sale del push vía CI). Corre vía systemd user timer `coffee-nightly.timer` (03:30, `Persistent=true`). `--no-push` para probar sin tocar git. |
@@ -38,7 +38,10 @@ costos de IA** (`data/fpa-dashboard.html`); el dashboard de insights
 (`data/dashboard.html`, antes generado por `scripts/viz-dashboard.py`)
 fue **eliminado** del repo y del deploy — todo su contenido está cubierto
 por el dashboard principal (sin visitas registradas; histórico en git).
-El Gantt se conserva como visualización única de su tipo.
+El Gantt se conserva como visualización única de su tipo. El índice
+enlaza todos los dashboards publicados y cada página publicada lleva el
+chip "← Volver al índice" (`site_theme.back_link()`); ambos invariantes
+los cuida `tests/test_site_nav.py`.
 
 | Archivo | Tamaño | Contenido |
 |---------|--------|-----------|
@@ -52,7 +55,7 @@ El Gantt se conserva como visualización única de su tipo.
 | `data/daily_summary.json` | 33K | Resumen diario v2. |
 | `data/tool_timeline.json` | 1.6K | Timeline de herramientas (primera/última vez). |
 | `data/ddl_effect.json` | 92K | **Efecto del toolset ddl.** Panel repo × mes (adopción, dosis, recovery, latencia, CI, proxies git, ah findings) + ITS/DiD/dosis-respuesta con provenance por cifra (coffe-q9z). |
-| `data/ddl-dashboard.html` | 73K | **Dashboard ddl.** 6 vistas (adopción, dosis-respuesta, pre/post+DiD, lazo de feedback, errores, calidad) + disclosure de confusores (coffe-31l..46h). |
+| `data/ddl-dashboard.html` | 73K | **Dashboard ddl.** 6 vistas (adopción, dosis-respuesta, pre/post+DiD, lazo de feedback, errores, calidad) + disclosure de confusores (coffe-31l..46h). En <https://charly-vibes.github.io/coffee/data/ddl-dashboard.html>. |
 
 ### Documentos
 

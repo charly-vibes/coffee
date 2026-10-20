@@ -17,6 +17,8 @@ body { font-family: var(--font-stack); }
 .marginalia .mnote .mlevel { margin: .3rem 0; }
 .marginalia .mnote details.mchip-deep > summary { cursor: pointer; color: var(--navy); font-size: .78rem; }
 .marginalia .mnote a { color: var(--navy); }
+a.back-index { position: absolute; top: .35rem; right: .4rem; z-index: 10; display: inline-flex; align-items: center; min-height: 44px; padding: .3rem .55rem; font-size: .78rem; font-weight: bold; color: var(--navy); background: var(--card); border: 2px outset #fff; text-decoration: none; }
+a.back-index:hover { color: var(--accent); border-style: inset; }
 
 body { max-width: 960px; margin: 0 auto; padding: 0 1rem; }
 .tabs { display: flex; flex-wrap: wrap; gap: .25rem; margin: 1rem 0; }
@@ -34,6 +36,7 @@ body { max-width: 960px; margin: 0 auto; padding: 0 1rem; }
 </head>
 <body>
 <header>
+  <a class="back-index" href="../index.html">← Volver al índice</a>
   <h1>Efecto del toolset ddl</h1>
 </header>
 <main>

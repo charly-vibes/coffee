@@ -19,6 +19,8 @@ body { font-family: var(--font-stack); }
 .marginalia .mnote .mlevel { margin: .3rem 0; }
 .marginalia .mnote details.mchip-deep > summary { cursor: pointer; color: var(--navy); font-size: .78rem; }
 .marginalia .mnote a { color: var(--navy); }
+a.back-index { position: absolute; top: .35rem; right: .4rem; z-index: 10; display: inline-flex; align-items: center; min-height: 44px; padding: .3rem .55rem; font-size: .78rem; font-weight: bold; color: var(--navy); background: var(--card); border: 2px outset #fff; text-decoration: none; }
+a.back-index:hover { color: var(--accent); border-style: inset; }
 
   body { margin: 0; padding: 18px; background: var(--bg); color: var(--fg);
          font-size: 13px; line-height: 1.45; font-family: var(--font-stack); }
@@ -72,6 +74,14 @@ body { font-family: var(--font-stack); }
     <tr>
       <td><a href="data/gantt-multitasking.html">Gantt de multitasking</a><br>
           <span class="desc">Actividad proyecto × día con concurrencia diaria</span></td>
+    </tr>
+    <tr>
+      <td><a href="data/context-dashboard.html">Contexto de sesiones</a><br>
+          <span class="desc">Pico de contexto por sesión: histograma, percentiles, composición, costos, patologías</span></td>
+    </tr>
+    <tr>
+      <td><a href="data/ddl-dashboard.html">Efecto del toolset DDL</a><br>
+          <span class="desc">Adopción, dosis-respuesta, pre/post con DiD e ITS, lazo de feedback y calidad</span></td>
     </tr>
     <tr>
       <td><a href="data/usage_report_v3.json">usage_report_v3.json</a><br>

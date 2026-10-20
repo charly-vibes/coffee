@@ -17,6 +17,8 @@ body { font-family: var(--font-stack); }
 .marginalia .mnote .mlevel { margin: .3rem 0; }
 .marginalia .mnote details.mchip-deep > summary { cursor: pointer; color: var(--navy); font-size: .78rem; }
 .marginalia .mnote a { color: var(--navy); }
+a.back-index { position: absolute; top: .35rem; right: .4rem; z-index: 10; display: inline-flex; align-items: center; min-height: 44px; padding: .3rem .55rem; font-size: .78rem; font-weight: bold; color: var(--navy); background: var(--card); border: 2px outset #fff; text-decoration: none; }
+a.back-index:hover { color: var(--accent); border-style: inset; }
 
   body { margin: 0; padding: 18px; background: var(--bg); color: var(--fg);
           font-size: 13px; font-family: Arial, sans-serif; }
@@ -89,6 +91,7 @@ body { font-family: var(--font-stack); }
 </style>
 </head>
 <body data-view="dist">
+<a class="back-index" href="../index.html">← Volver al índice</a>
 <h1>Contexto de sesiones (Pi)</h1>
 <p class="scope">sesiones de Pi únicamente</p>
 <nav class="topbar" role="tablist"><a class="tab" role="tab" href="#dist" data-view="dist">Distribución</a><a class="tab" role="tab" href="#comp" data-view="comp">Composición</a><a class="tab" role="tab" href="#time" data-view="time">Tiempo</a><a class="tab" role="tab" href="#cost" data-view="cost">Coste</a><a class="tab" role="tab" href="#ley" data-view="ley">Ley</a><a class="tab" role="tab" href="#pat" data-view="pat">Patologías</a></nav>

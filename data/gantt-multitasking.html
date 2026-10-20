@@ -20,6 +20,8 @@ body { font-family: var(--font-stack); }
 .marginalia .mnote .mlevel { margin: .3rem 0; }
 .marginalia .mnote details.mchip-deep > summary { cursor: pointer; color: var(--navy); font-size: .78rem; }
 .marginalia .mnote a { color: var(--navy); }
+a.back-index { position: absolute; top: .35rem; right: .4rem; z-index: 10; display: inline-flex; align-items: center; min-height: 44px; padding: .3rem .55rem; font-size: .78rem; font-weight: bold; color: var(--navy); background: var(--card); border: 2px outset #fff; text-decoration: none; }
+a.back-index:hover { color: var(--accent); border-style: inset; }
 
   body {
     margin: 0; padding: 18px; background: var(--bg); color: var(--fg);
@@ -73,6 +75,7 @@ body { font-family: var(--font-stack); }
 </head>
 <body>
 <div class="banner">
+  <a class="back-index" href="../index.html">← Volver al índice</a>
   <h1>☢ charly analytics — GRÁFICO DE GANTT MULTITASKING</h1>
   <div class="tag">anexo estadístico · actividad concurrente por proyecto y día</div>
 </div>

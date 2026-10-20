@@ -97,6 +97,7 @@ TEMPLATE = """<!DOCTYPE html>
 </head>
 <body>
 <div class="banner">
+  @@BACK@@
   <h1>☢ charly analytics — GRÁFICO DE GANTT MULTITASKING</h1>
   <div class="tag">anexo estadístico · actividad concurrente por proyecto y día</div>
 </div>
@@ -257,6 +258,7 @@ def main():
 
     html = (TEMPLATE
             .replace("@@THEME_BASE@@", site_theme.base_css())
+            .replace("@@BACK@@", site_theme.back_link())
             .replace("@@MARGINALIA@@", marginalia_gantt())
             .replace("__DATA__", json.dumps(pd, ensure_ascii=False))
             .replace("__SUB__", sub))

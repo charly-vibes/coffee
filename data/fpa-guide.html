@@ -18,6 +18,8 @@ body { font-family: var(--font-stack); }
 .marginalia .mnote .mlevel { margin: .3rem 0; }
 .marginalia .mnote details.mchip-deep > summary { cursor: pointer; color: var(--navy); font-size: .78rem; }
 .marginalia .mnote a { color: var(--navy); }
+a.back-index { position: absolute; top: .35rem; right: .4rem; z-index: 10; display: inline-flex; align-items: center; min-height: 44px; padding: .3rem .55rem; font-size: .78rem; font-weight: bold; color: var(--navy); background: var(--card); border: 2px outset #fff; text-decoration: none; }
+a.back-index:hover { color: var(--accent); border-style: inset; }
 
 * { box-sizing: border-box; }
 body { margin: 0; background: var(--bg); color: var(--fg);
@@ -50,8 +52,9 @@ nav.toc a { color: var(--navy); text-decoration: none; }
 <body>
 <a class="skip" href="#toc">Saltar al índice</a>
 <header class="site">
+  <a class="back-index" href="../index.html">← Volver al índice</a>
   <h1>Guía de análisis — Uso y costos de IA</h1>
-  <p class="meta">Generado: 2026-10-20 03:30 · fuente: docs/fpa-analyses-guide.md
+  <p class="meta">Generado: 2026-10-20 15:43 · fuente: docs/fpa-analyses-guide.md
   (22 análisis × 4 niveles)</p>
 </header>
 <main>

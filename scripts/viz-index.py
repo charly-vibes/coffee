@@ -9,9 +9,11 @@ dashboards — así el índice nunca queda desactualizado (bd coffe-85z).
 Estética 90s-corporate deliberada (ver snap 2026-09-19); el tema vive en
 scripts/site_theme.py (coffe-gen.2) y el label del dashboard sale del
 site_name del config (sin jerga, coffe-gen.2/gen.3); el contenido es
-una lista corta: el dashboard + su guía de análisis + el Gantt + el
-reporte JSON crudo. Los JSON históricos/auxiliares (v2 sin filtrar,
-tool_timeline) NO se enlazan.
+una lista corta: el dashboard + su guía de análisis + el Gantt + los
+dashboards de contexto y efecto DDL + el reporte JSON crudo. Los JSON
+históricos/auxiliares (v2 sin filtrar, tool_timeline) NO se enlazan.
+El guard de cobertura vive en tests/test_site_nav.py: todo data/*.html
+debe estar enlazado desde acá (sin dashboards huérfanos).
 
 Sin dependencias. Determinista: ninguna fecha viene del reloj; la fecha
 de actualización sale de metadata.date_range.end del reporte.
@@ -116,6 +118,14 @@ TEMPLATE = """<!DOCTYPE html>
     <tr>
       <td><a href="data/gantt-multitasking.html">Gantt de multitasking</a><br>
           <span class="desc">Actividad proyecto × día con concurrencia diaria</span></td>
+    </tr>
+    <tr>
+      <td><a href="data/context-dashboard.html">Contexto de sesiones</a><br>
+          <span class="desc">Pico de contexto por sesión: histograma, percentiles, composición, costos, patologías</span></td>
+    </tr>
+    <tr>
+      <td><a href="data/ddl-dashboard.html">Efecto del toolset DDL</a><br>
+          <span class="desc">Adopción, dosis-respuesta, pre/post con DiD e ITS, lazo de feedback y calidad</span></td>
     </tr>
     <tr>
       <td><a href="data/usage_report_v3.json">usage_report_v3.json</a><br>

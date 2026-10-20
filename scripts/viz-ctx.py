@@ -437,6 +437,7 @@ body {{ margin: 0; padding: 18px; background: {t['--bg']}; color: {t['--fg']};
         font-size: 13px; font-family: Arial, sans-serif; }}
 </style></head>
 <body>
+{site_theme.back_link()}
 <h1>Contexto de sesiones (Pi)</h1>
 <p class="placeholder">sin datos — {reason}</p>
 </body></html>"""
@@ -717,6 +718,7 @@ body {{ margin: 0; padding: 18px; background: {t['--bg']}; color: {t['--fg']};
 </style>
 </head>
 <body data-view="dist">
+{site_theme.back_link()}
 <h1>Contexto de sesiones (Pi)</h1>
 <p class="scope">{scope}</p>
 <nav class="topbar" role="tablist">{nav}</nav>
