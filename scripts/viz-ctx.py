@@ -128,10 +128,88 @@ def build_model(report):
             "validation_ratio_median": meta.get("validation_ratio_median"),
         },
         "comp": _build_comp(clean, th),
+        "cost": _build_cost(sessions),
+        "pathological_list": [{
+            "project": s.get("project"),
+            "month": s.get("month"),
+            "model": s.get("model"),
+            "max_assistant_block_chars": s.get("max_assistant_block_chars"),
+            "threshold": (meta.get("thresholds") or {})
+                         .get("pathological_chars"),
+            "reason": (
+                f"bloque assistant de "
+                f"{_fmt_human(s.get('max_assistant_block_chars') or 0)} "
+                f"> umbral patológico de "
+                f"{_fmt_human((meta.get('thresholds') or {})
+                             .get('pathological_chars') or 0)} "
+                "(config) — excluida de percentiles"),
+        } for s in sessions if s.get("pathological")],
         "time": _build_time(cm.get("monthly_model") or [],
                             (report.get("metadata") or {})
                             .get("date_range", {}).get("end")),
         "monthly_model": cm.get("monthly_model") or [],
+    }
+
+
+def _fmt_human(n):
+    """16_000_000 → '16.0M', 500_000 → '500.0k', 999 → '999'."""
+    if n >= 1_000_000:
+        return f"{n/1_000_000:.1f}M"
+    if n >= 1000:
+        return f"{n/1000:.1f}k"
+    return str(int(n))
+
+
+def _build_cost(sessions):
+    """Vista Coste (coffe-dv6 2.5): spend por modelo con split
+    in/out/cache, spend mensual y $/sesión — SOLO sesiones pagas (pi con
+    usage.cost). claude-cli emite fila aparte con provenancia
+    "subscription" y jamás se suma al total pagó (sin suma combinada).
+    Coste null con razón visible (n + muestra de la razón)."""
+    paid = [s for s in sessions
+            if s.get("context_source") == "pi" and s.get("cost_in") is not None]
+    sub = [s for s in sessions if s.get("context_source") == "claude-cli"]
+    nulls = [s for s in sessions if s.get("cost_in") is None
+             and s.get("context_source") != "claude-cli"]
+    null_reasons = [s.get("cost_null_reason") for s in nulls
+                    if s.get("cost_null_reason")]
+
+    def _spend(rows, key=None):
+        rows = [r for r in rows if key is None or r.get("model") == key]
+        return {"spend_in": round(sum(r["cost_in"] for r in rows), 2),
+                "spend_out": round(sum(r["cost_out"] for r in rows), 2),
+                "spend_cr": round(sum(r["cost_cr"] for r in rows), 2),
+                "spend_cw": round(sum(r["cost_cw"] for r in rows), 2)}
+
+    by_model = []
+    for m in sorted({r.get("model") for r in paid}, key=str):
+        sp = _spend(paid, m)
+        n = sum(1 for r in paid if r.get("model") == m)
+        by_model.append(dict(model=m, sessions=n, **sp,
+                             spend_per_session=round(
+                                 (sp["spend_in"] + sp["spend_out"]
+                                  + sp["spend_cr"] + sp["spend_cw"]) / n, 4)
+                             if n else 0.0))
+    by_month = []
+    for ym in sorted({r.get("month") for r in paid}, key=str):
+        by_month.append(dict(month=ym, **_spend([r for r in paid
+                                                 if r.get("month") == ym])))
+    tot = _spend(paid)
+    return {
+        "by_model": by_model,
+        "by_month": by_month,
+        "spend_total_in": tot["spend_in"],
+        "spend_total_out": tot["spend_out"],
+        "spend_total_cr": tot["spend_cr"],
+        "spend_total_cw": tot["spend_cw"],
+        "subscription": {
+            "sessions": len(sub),
+            "provenance": "subscription",
+            "spend_in": 0.0, "spend_out": 0.0,
+            "spend_cr": 0.0, "spend_cw": 0.0,
+        },
+        "n_null_cost": len(nulls),
+        "null_reason_sample": null_reasons[0] if null_reasons else None,
     }
 
 
@@ -283,6 +361,65 @@ body {{ margin: 0; padding: 18px; background: {t['--bg']}; color: {t['--fg']};
       f'<span class="lg"><span class="sw {seg_colors[i % len(seg_colors)]}"></span>'
       f'{html.escape(src)}</span>' for i, src in enumerate(legend))}</p>
 </div>"""
+    cost = model.get("cost") or {}
+    cost_html = ""
+    if cost:
+        rows_m = "".join(
+            f'<tr><td>{html.escape(str(m["model"]))}</td>'
+            f'<td>{m["sessions"]}</td>'
+            f'<td>${m["spend_in"]:.2f}</td><td>${m["spend_out"]:.2f}</td>'
+            f'<td>${m["spend_cr"]:.2f}</td><td>${m["spend_cw"]:.2f}</td>'
+            f'<td>${m["spend_per_session"]:.2f}</td></tr>'
+            for m in cost["by_model"])
+        rows_mm = "".join(
+            f'<tr><td>{html.escape(str(r["month"]))}</td>'
+            f'<td>${r["spend_in"]:.2f}</td><td>${r["spend_out"]:.2f}</td>'
+            f'<td>${r["spend_cr"]:.2f}</td><td>${r["spend_cw"]:.2f}</td></tr>'
+            for r in cost["by_month"])
+        sub = cost["subscription"]
+        null_line = (f'<p class="muted">{cost["n_null_cost"]} sesiones sin '
+                     f'coste (null con razón): '
+                     f'{html.escape(str(cost["null_reason_sample"]))}</p>'
+                     if cost["n_null_cost"] else "")
+        cost_html = f"""
+<div class="card">
+  <h2>Coste por sesión (pagas)</h2>
+  <table class="ctx-table">
+    <thead><tr><th>modelo</th><th>sesiones</th><th>in</th><th>out</th>
+      <th>cache read</th><th>cache write</th><th>$/sesión</th></tr></thead>
+    <tbody>{rows_m}</tbody>
+  </table>
+  <table class="ctx-table">
+    <thead><tr><th>mes</th><th>in</th><th>out</th><th>cr</th><th>cw</th></tr></thead>
+    <tbody>{rows_mm}</tbody>
+  </table>
+  <p>Sesiones claude-cli: <strong>{sub["sessions"]}</strong> —
+     <span class="tag">subscription</span> (sin billing por token):
+     NUNCA se suma al spend pagó (${cost['spend_total_in']:.2f} in +
+     ${cost['spend_total_out']:.2f} out pagas).</p>
+  {null_line}
+</div>"""
+    pats = model.get("pathological_list") or []
+    pat_html = ""
+    if pats:
+        pat_rows = "".join(
+            f'<tr><td>{html.escape(str(p["project"]))}</td>'
+            f'<td>{html.escape(str(p["month"]))}</td>'
+            f'<td>{html.escape(str(p["model"]))}</td>'
+            f'<td>{_fmt_human(p["max_assistant_block_chars"])}</td>'
+            f'<td>{html.escape(p["reason"])}</td></tr>'
+            for p in pats)
+        pat_html = f"""
+<div class="card">
+  <h2>Patologías ({len(pats)} excluidas de percentiles)</h2>
+  <table class="ctx-table">
+    <thead><tr><th>proyecto</th><th>mes</th><th>modelo</th>
+      <th>bloque máx</th><th>razón</th></tr></thead>
+    <tbody>{pat_rows}</tbody>
+  </table>
+  <p class="muted">nada silencioso (FPA-008): cada exclusión lleva su
+     tamaño y razón — el umbral viene de config.</p>
+</div>"""
     time_html = ""
     if time_rows:
         rows_html = ""
@@ -389,6 +526,8 @@ body {{ margin: 0; padding: 18px; background: {t['--bg']}; color: {t['--fg']};
 </div>
 {comp_html}
 {time_html}
+{cost_html}
+{pat_html}
 <div class="card">
   <h2>Procedencia</h2>
   <dl>
