@@ -24,14 +24,15 @@ de los últimos meses.
 | `scripts/viz_fpa_guide.py` | Parser de `docs/fpa-analyses-guide.md` (guía de análisis a 4 niveles, en español) → `data/fpa-guide.html` + marginalia con chips expandibles en el dashboard y el Gantt (coffe-gen.3/4). `--check` valida el grounding (mapeo + umbrales vs config). |
 | `scripts/site_theme.py` | Tokens del tema compartido del sitio ("Corporate Infographics™ 1996"): única fuente de la paleta/tipografía para viz-fpa, viz-index y viz-gantt. |
 | `scripts/viz-index.py` | Genera `index.html`: entrada del sitio en Pages (estética 90s-corporate). Deriva las cifras del marquee y la fecha de actualización del reporte, así el índice nunca queda stale. Se regenera en el deploy de CI. |
+| `scripts/viz-ctx.py` | Genera `data/context-dashboard.html`: dashboard de contexto de sesiones Pi (epic add-context-dashboard). Vistas: Distribución (histograma del pico + banda p50-p99 sobre el set limpio), Composición (share por fuente global y en sesiones >100k), Tiempo (mes×modelo, meses parciales con días FPA-041), Coste (split in/out/cache; claude-cli aparte con provenance *subscription*, sin suma combinada), Ley de crecimiento (scatter pico vs turnos con pendiente OLS) y Patologías (outliers con razón, FPA-008). SVG inline sin librerías, tabs + deep-link por hash, export CSV/SVG; `--check-docs` verifica el bloque CTX-DOCS del README. |
 | `scripts/update-readme-docs.py` | Refresca el bloque CHECK-DOCS del README con las cifras del reporte actual. Reutiliza `expected_doc_figures()` de `viz-fpa.py` (FPA-143) vía importlib — misma fuente que `--check-docs`, así el bloque nunca diverge. Lo usa el nightly; también a mano tras regenerar el reporte. |
-| `scripts/nightly-update.sh` | **Job nocturno**: regenera reporte + Gantt + dashboard + guía + índice, sincroniza el CHECK-DOCS del README y, si hay cambios, commitea y pushea (deploy a Pages sale del push vía CI). Corre vía systemd user timer `coffee-nightly.timer` (03:30, `Persistent=true`). `--no-push` para probar sin tocar git. |
+| `scripts/nightly-update.sh` | **Job nocturno**: regenera reporte + Gantt + dashboard de contexto + dashboard FPA + guía + índice, sincroniza el CHECK-DOCS del README y, si hay cambios, commitea y pushea (deploy a Pages sale del push vía CI). Corre vía systemd user timer `coffee-nightly.timer` (03:30, `Persistent=true`). `--no-push` para probar sin tocar git. |
 
 ### Datos generados
 
 | Archivo | Tamaño | Contenido |
 |---------|--------|-----------|
-| `data/usage_report_v3.json` | 1.0M | **Reporte principal.** Interacciones del scope in-scope (charly/sk/ak, coffe-vp8). Incluye hourly, daily, monthly, projects, sessions, skills, commands, multitasking, project_daily (matriz para el Gantt) y energía estimada por modelo (coffe-7mj, *assumed*). Última regeneración: 2026-10-05 (193,608 interacciones). |
+| `data/usage_report_v3.json` | 1.0M | **Reporte principal.** Interacciones del scope in-scope (charly/sk/ak, coffe-vp8). Incluye hourly, daily, monthly, projects, sessions, skills, commands, multitasking, project_daily (matriz para el Gantt), energía estimada por modelo (coffe-7mj, *assumed*) y context_metrics por sesión de Pi (epic add-context-dashboard: pico por segmento de compactación, atribución de chars por fuente, models_turns, coste por sesión con null con razón; estimación chars/chars_per_token — *assumed*, default 4, subestima ~25% el contexto real: español/código ~3 chars/token; ver ratio de validación en context_metrics.meta). Última regeneración: ver CHECK-DOCS. |
 Jerarquía del sitio (coffe-gen.5): el dashboard principal es **Uso y
 costos de IA** (`data/fpa-dashboard.html`); el dashboard de insights
 (`data/dashboard.html`, antes generado por `scripts/viz-dashboard.py`)
@@ -41,8 +42,9 @@ El Gantt se conserva como visualización única de su tipo.
 
 | Archivo | Tamaño | Contenido |
 |---------|--------|-----------|
-| `data/usage_report_v3.json` | 1.0M | **Reporte principal.** Interacciones del scope in-scope (charly/sk/ak, coffe-vp8). Incluye hourly, daily, monthly, projects, sessions, skills, commands, multitasking, project_daily (matriz para el Gantt) y energía estimada por modelo (coffe-7mj, *assumed*). Última regeneración: 2026-10-05 (193,608 interacciones). |
+| `data/usage_report_v3.json` | 1.0M | **Reporte principal.** Interacciones del scope in-scope (charly/sk/ak, coffe-vp8). Incluye hourly, daily, monthly, projects, sessions, skills, commands, multitasking, project_daily (matriz para el Gantt), energía estimada por modelo (coffe-7mj, *assumed*) y context_metrics por sesión de Pi (epic add-context-dashboard: pico por segmento de compactación, atribución de chars por fuente, models_turns, coste por sesión con null con razón; estimación chars/chars_per_token — *assumed*, default 4, subestima ~25% el contexto real: español/código ~3 chars/token; ver ratio de validación en context_metrics.meta). Última regeneración: ver CHECK-DOCS. |
 | `data/fpa-dashboard.html` | 1.7M | **Dashboard principal — Uso y costos de IA.** Resumen ejecutivo, KPIs, presupuestos, bridge precio-volumen-mix (con selector de mes), forecast, alertas, economía de suscripción, patrones de uso. 6 vistas (una a la vez a todo ancho, tabs + deep-link por hash) + selector de periodo; export CSV/SVG; share-URL; disclosure por defecto solo en la sección primaria de cada vista; marginalia con guía a 4 niveles. En <https://charly-vibes.github.io/coffee/data/fpa-dashboard.html>. |
+| `data/context-dashboard.html` | ~7K | **Dashboard de contexto** (Pi-only): distribución del pico por sesión, composición por fuente, tiempo mes×modelo, coste, ley de crecimiento y patologías. En <https://charly-vibes.github.io/coffee/data/context-dashboard.html>. |
 | `data/fpa-guide.html` | — | **Guía de análisis.** Los 19 análisis del dashboard explicados a 4 niveles (ELI5 → experto), en español, con grounding verificado por `--check-docs`. En <https://charly-vibes.github.io/coffee/data/fpa-guide.html>. |
 | `data/gantt-multitasking.html` | 41K | **Visualización Gantt.** Actividad por proyecto/día, fila de concurrencia diaria, toggle interacciones/presencia, tooltips. Abrir en navegador (o en <https://charly-vibes.github.io/coffee/data/gantt-multitasking.html>). |
 | `data/usage_report_v2.json` | 285K | Reporte v2 sin filtrar. 94,115 interacciones (incluye proyectos no-charly). |
@@ -115,12 +117,12 @@ El deploy es vía **GitHub Actions** (no hay branch `gh-pages`): `.github/workfl
 ## Estado de los datos
 
 <!-- CHECK-DOCS:BEGIN -->
-- Interacciones: 282,112
+- Interacciones: 282,622
 - Proyectos: 111
-- Costo efectivo: $5,916.75
-- Costo real: $1,226.31
+- Costo efectivo: $5,918.95
+- Costo real: $1,228.51
 - Cash real (ledger): $1,516.72
-- Sesiones: 4,312
+- Sesiones: 4,319
 - Periodo: 2025-12-23 → 2026-10-19
 <!-- CHECK-DOCS:END -->
 
@@ -261,10 +263,10 @@ Con los datos actuales podemos generar:
 5. [ ] Interpretar el Gantt: los gaps sin actividad (vacaciones?) y los bloques densos de julio-agosto (¿migración masiva? ¿agentes paralelos?)
 
 <!-- CTX-DOCS:BEGIN -->
-- Sesiones con contexto: 2067
+- Sesiones con contexto: 2074
 - Excluidas (patológicas): 34
 - Stubs: 0
-- Pico p50 (tok): 73673
+- Pico p50 (tok): 73460
 - Ratio validación: 1.27
 - Factor chars/token: 4
 <!-- CTX-DOCS:END -->

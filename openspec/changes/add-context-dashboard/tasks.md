@@ -42,21 +42,21 @@ los anteriores + coffe-9w0 — suite pre-existente en rojo).
 Tickets: coffe-0tw (2.1+2.2) · coffe-opo (2.3+2.4) · coffe-dv6 (2.5+2.7) ·
 coffe-r3c (2.6+2.8) · coffe-ruk (smoke + --check-docs) — cadena secuencial.
 
-- [ ] 2.1 `scripts/viz-ctx.py`: lee `usage_report_v3.json` → pre-calcular en Python
+- [x] 2.1 `scripts/viz-ctx.py`: lee `usage_report_v3.json` → pre-calcular en Python
       (histograma, shares, pendientes OLS por modelo, tablas mes × modelo)
-- [ ] 2.2 Vista *Distribución*: histograma del pico + banda de percentiles, tags
+- [x] 2.2 Vista *Distribución*: histograma del pico + banda de percentiles, tags
       *assumed* en el factor chars/4, conteo de excluidas junto al título
-- [ ] 2.3 Vista *Composición*: share por fuente global y en sesiones grandes (SVG
+- [x] 2.3 Vista *Composición*: share por fuente global y en sesiones grandes (SVG
       stacked inline, tooltips, leyenda completa en ambas vistas)
-- [ ] 2.4 Vista *Tiempo*: mes × modelo (pico mediano, % > umbral, tok/turno) con
+- [x] 2.4 Vista *Tiempo*: mes × modelo (pico mediano, % > umbral, tok/turno) con
       meses parciales marcados como fpa-dashboard
-- [ ] 2.5 Vista *Coste*: spend por modelo, split in/out/cache, spend mensual,
+- [x] 2.5 Vista *Coste*: spend por modelo, split in/out/cache, spend mensual,
       $/sesión; sesiones claude-cli separadas con provenancia *subscription* y
       sin suma combinada; coste null con razón visible
-- [ ] 2.6 Vista *Ley de crecimiento*: dispersivo pico vs turnos por modelo con
+- [x] 2.6 Vista *Ley de crecimiento*: dispersivo pico vs turnos por modelo con
       pendiente OLS pre-calculada, comparable entre eras
-- [ ] 2.7 Vista *Patologías*: outliers listados con tamaño, modelo y razón
-- [ ] 2.8 Cross-cutting: deep-link por hash, export CSV/SVG, tema compartido,
+- [x] 2.7 Vista *Patologías*: outliers listados con tamaño, modelo y razón
+- [x] 2.8 Cross-cutting: deep-link por hash, export CSV/SVG, tema compartido,
       smoke en Chromium vía `tests/test_viz.py` (0 pageerrors, charts renderizan)
 
 ## 3. Cierre
@@ -64,10 +64,10 @@ coffe-r3c (2.6+2.8) · coffe-ruk (smoke + --check-docs) — cadena secuencial.
 Ticket: coffe-v5f (3.3+3.4; 3.5 es la mecánica de cierre de cada sesión).
 
 - [ ] 3.1 `python3 tests/test_tracker.py` y `python3 tests/test_viz.py` verdes
-- [ ] 3.2 `--check-docs` de viz-ctx.py: consistencia README ↔ JSON
-- [ ] 3.3 README: documentar emisión nueva + dashboard (tabla de scripts y de data/),
+- [x] 3.2 `--check-docs` de viz-ctx.py: consistencia README ↔ JSON
+- [x] 3.3 README: documentar emisión nueva + dashboard (tabla de scripts y de data/),
       corrección de la nota "sin señal en pi (compactions)", dirección de bias del
       estimador
-- [ ] 3.4 `nightly-update.sh`: paso de regeneración del dashboard de contexto,
+- [x] 3.4 `nightly-update.sh`: paso de regeneración del dashboard de contexto,
       midiendo duración extra del walk (1.4GB) — si pesa, `--since`
 - [ ] 3.5 `bd close` de los tickets y push

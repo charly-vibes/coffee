@@ -1,9 +1,13 @@
 #!/usr/bin/env python3
-"""Refresca el bloque CHECK-DOCS del README con las cifras del reporte actual.
+"""Refresca los bloques CHECK-DOCS y CTX-DOCS del README con las cifras del
+reporte actual.
 
 Reutiliza `expected_doc_figures()` de `scripts/viz-fpa.py` vía importlib —
 misma función que valida `--check-docs` (FPA-143), así el bloque queda
 siempre en sync con `data/usage_report_v3.json` sin edición manual.
+CTX-DOCS (coffe-v5f): cifras de context_metrics desde
+`expected_ctx_figures()` de `scripts/viz-ctx.py` — misma fuente que
+`viz-ctx.py --check-docs`.
 
 Lo usa el job nocturno (`scripts/nightly-update.sh`); también a mano tras
 regenerar el reporte. Sin argumentos: escribe README.md in-place.
@@ -28,6 +32,15 @@ def load_viz_fpa():
     return mod
 
 
+def load_viz_ctx():
+    """Importa scripts/viz-ctx.py (coffe-v5f: bloque CTX-DOCS)."""
+    spec = importlib.util.spec_from_file_location(
+        "viz_ctx", ROOT / "scripts" / "viz-ctx.py")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
 def main() -> int:
     report = json.loads(REPORT.read_text())
     viz_fpa = load_viz_fpa()
@@ -42,10 +55,31 @@ def main() -> int:
         re.escape(viz_fpa.DOC_BEGIN) + r".*?" + re.escape(viz_fpa.DOC_END),
         lambda m: viz_fpa.DOC_BEGIN + block + viz_fpa.DOC_END,
         text, flags=re.S)
-    if new_text != text:
+    changed = new_text != text
+    # CTX-DOCS (coffe-v5f): cifras de contexto desde viz-ctx.py
+    try:
+        viz_ctx = load_viz_ctx()
+        ctx_expected = viz_ctx.expected_ctx_figures(report)
+        ctx_block = "\n" + "".join(f"- {k}: {v}\n"
+                                   for k, v in ctx_expected.items())
+        if viz_ctx.CTX_DOC_BEGIN in new_text and viz_ctx.CTX_DOC_END in new_text:
+            newer = re.sub(
+                re.escape(viz_ctx.CTX_DOC_BEGIN) + r".*?"
+                + re.escape(viz_ctx.CTX_DOC_END),
+                lambda m: viz_ctx.CTX_DOC_BEGIN + ctx_block
+                          + viz_ctx.CTX_DOC_END,
+                new_text, flags=re.S)
+            if newer != new_text:
+                new_text, changed = newer, True
+                print("README: bloque CTX-DOCS actualizado")
+            else:
+                print("README: bloque CTX-DOCS ya estaba en sync")
+    except (OSError, ValueError) as e:
+        print(f"aviso: CTX-DOCS no actualizado: {e}", file=sys.stderr)
+    if changed:
         README.write_text(new_text)
         print("README: bloque CHECK-DOCS actualizado")
-    else:
+    elif not changed:
         print("README: bloque CHECK-DOCS ya estaba en sync")
     return 0
 

@@ -21,6 +21,10 @@ python3 scripts/usage-tracker.py
 # viz tras tracker (el dashboard es derivado, nunca fuente). Sin gh/terapia
 # cache degrada a provenance missing — el nightly no requiere red.
 python3 scripts/ddl-effect-tracker.py
+# ctx-tracker (epic add-context-dashboard, coffe-v5f): dashboard de
+# contexto tras ddl (consume context_metrics del reporte). El walk extra
+# (~12s de 40s de corrida total, medido en coffe-kup) cabe sin --since.
+python3 scripts/viz-ctx.py
 python3 scripts/viz-gantt.py
 python3 scripts/viz-fpa.py
 python3 scripts/viz-ddl.py
@@ -31,6 +35,7 @@ python3 scripts/viz-index.py
 # y verifica consistencia — si algo desincroniza, aborta antes de pushear.
 python3 scripts/update-readme-docs.py
 python3 scripts/viz-fpa.py --check-docs
+python3 scripts/viz-ctx.py --check-docs
 
 if [ "$NO_PUSH" -eq 1 ]; then
     log "modo --no-push: listo, sin tocar git"
