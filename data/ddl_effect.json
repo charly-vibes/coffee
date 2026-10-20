@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "generated_at": "2026-10-20T00:36:39+00:00",
+    "generated_at": "2026-10-20T06:30:46+00:00",
     "seed_bootstrap": 42,
     "managed_tools": [
       "wai",
@@ -145,7 +145,7 @@
       },
       "sessions_bias": "sessions cuenta s\u00f3lo sesiones pi (las otras fuentes no exponen cwd por sesi\u00f3n; coffe-i31)"
     },
-    "clamped_negative_latencies": 210
+    "clamped_negative_latencies": 212
   },
   "repos": [
     {
@@ -272,41 +272,28 @@
           "tools_first_use": "reported"
         }
       },
-      "dose": 0.9230769230769231,
+      "dose": 0.5384615384615384,
       "dose_detail": {
         "present": [
-          "wai",
-          "testaruda",
-          "turu",
-          "dont",
           "ah",
-          "pretender",
-          "vampiro",
-          "incitaciones",
           "bd",
+          "incitaciones",
           "openspec",
-          "specodelic",
-          "wild"
-        ],
-        "healthy": [
-          "wai",
-          "testaruda",
+          "pretender",
           "turu",
-          "dont",
-          "ah",
-          "pretender",
-          "vampiro",
-          "incitaciones",
-          "bd",
-          "openspec",
-          "specodelic",
-          "wild"
+          "wai"
         ],
+        "healthy": [],
         "missing": [
-          "funkalization"
+          "testaruda",
+          "dont",
+          "vampiro",
+          "specodelic",
+          "funkalization",
+          "wild"
         ]
       },
-      "dose_provenance": "reported"
+      "dose_provenance": "derived"
     },
     {
       "repo": "dont",
@@ -334,41 +321,28 @@
           "tools_first_use": "reported"
         }
       },
-      "dose": 0.9230769230769231,
+      "dose": 0.6923076923076923,
       "dose_detail": {
         "present": [
-          "wai",
+          "ah",
+          "bd",
+          "dont",
+          "openspec",
+          "pretender",
           "testaruda",
           "turu",
-          "dont",
-          "ah",
-          "pretender",
           "vampiro",
-          "incitaciones",
-          "bd",
-          "openspec",
-          "specodelic",
-          "wild"
+          "wai"
         ],
-        "healthy": [
-          "wai",
-          "testaruda",
-          "turu",
-          "dont",
-          "ah",
-          "pretender",
-          "vampiro",
-          "incitaciones",
-          "bd",
-          "openspec",
-          "specodelic",
-          "wild"
-        ],
+        "healthy": [],
         "missing": [
-          "funkalization"
+          "incitaciones",
+          "specodelic",
+          "funkalization",
+          "wild"
         ]
       },
-      "dose_provenance": "reported"
+      "dose_provenance": "derived"
     },
     {
       "repo": "ah",
@@ -445,41 +419,28 @@
           "tools_first_use": "reported"
         }
       },
-      "dose": 0.9230769230769231,
+      "dose": 0.6153846153846154,
       "dose_detail": {
         "present": [
-          "wai",
-          "testaruda",
-          "turu",
-          "dont",
           "ah",
-          "pretender",
-          "vampiro",
-          "incitaciones",
           "bd",
-          "openspec",
-          "specodelic",
-          "wild"
-        ],
-        "healthy": [
-          "wai",
-          "testaruda",
-          "turu",
           "dont",
-          "ah",
-          "pretender",
-          "vampiro",
-          "incitaciones",
-          "bd",
           "openspec",
+          "pretender",
           "specodelic",
-          "wild"
+          "turu",
+          "wai"
         ],
+        "healthy": [],
         "missing": [
-          "funkalization"
+          "testaruda",
+          "vampiro",
+          "incitaciones",
+          "funkalization",
+          "wild"
         ]
       },
-      "dose_provenance": "reported"
+      "dose_provenance": "derived"
     },
     {
       "repo": "vampiro",
@@ -507,41 +468,28 @@
           "tools_first_use": "reported"
         }
       },
-      "dose": 0.9230769230769231,
+      "dose": 0.6153846153846154,
       "dose_detail": {
         "present": [
-          "wai",
+          "bd",
+          "dont",
+          "openspec",
+          "pretender",
           "testaruda",
           "turu",
-          "dont",
-          "ah",
-          "pretender",
           "vampiro",
-          "incitaciones",
-          "bd",
-          "openspec",
-          "specodelic",
-          "wild"
+          "wai"
         ],
-        "healthy": [
-          "wai",
-          "testaruda",
-          "turu",
-          "dont",
-          "ah",
-          "pretender",
-          "vampiro",
-          "incitaciones",
-          "bd",
-          "openspec",
-          "specodelic",
-          "wild"
-        ],
+        "healthy": [],
         "missing": [
-          "funkalization"
+          "ah",
+          "incitaciones",
+          "specodelic",
+          "funkalization",
+          "wild"
         ]
       },
-      "dose_provenance": "reported"
+      "dose_provenance": "derived"
     },
     {
       "repo": "incitaciones",
@@ -569,41 +517,28 @@
           "tools_first_use": "reported"
         }
       },
-      "dose": 0.9230769230769231,
+      "dose": 0.46153846153846156,
       "dose_detail": {
         "present": [
-          "wai",
-          "testaruda",
-          "turu",
-          "dont",
           "ah",
-          "pretender",
-          "vampiro",
-          "incitaciones",
           "bd",
-          "openspec",
+          "pretender",
           "specodelic",
-          "wild"
-        ],
-        "healthy": [
-          "wai",
-          "testaruda",
           "turu",
-          "dont",
-          "ah",
-          "pretender",
-          "vampiro",
-          "incitaciones",
-          "bd",
-          "openspec",
-          "specodelic",
-          "wild"
+          "wai"
         ],
+        "healthy": [],
         "missing": [
-          "funkalization"
+          "testaruda",
+          "dont",
+          "vampiro",
+          "incitaciones",
+          "openspec",
+          "funkalization",
+          "wild"
         ]
       },
-      "dose_provenance": "reported"
+      "dose_provenance": "derived"
     },
     {
       "repo": "bd",
@@ -874,41 +809,28 @@
           "tools_first_use": "reported"
         }
       },
-      "dose": 0.9230769230769231,
+      "dose": 0.8461538461538461,
       "dose_detail": {
         "present": [
-          "wai",
+          "ah",
+          "bd",
+          "dont",
+          "incitaciones",
+          "openspec",
+          "pretender",
+          "specodelic",
           "testaruda",
           "turu",
-          "dont",
-          "ah",
-          "pretender",
           "vampiro",
-          "incitaciones",
-          "bd",
-          "openspec",
-          "specodelic",
-          "wild"
+          "wai"
         ],
-        "healthy": [
-          "wai",
-          "testaruda",
-          "turu",
-          "dont",
-          "ah",
-          "pretender",
-          "vampiro",
-          "incitaciones",
-          "bd",
-          "openspec",
-          "specodelic",
-          "wild"
-        ],
+        "healthy": [],
         "missing": [
-          "funkalization"
+          "funkalization",
+          "wild"
         ]
       },
-      "dose_provenance": "reported"
+      "dose_provenance": "derived"
     },
     {
       "repo": "coffee",
@@ -1181,7 +1103,7 @@
       "recovery_p50_interactions": 1,
       "recovery_censored_rate": 0.0034482758620689655,
       "recovery_n": 290,
-      "session_commit_latency_p50_h": 575.7668183333333,
+      "session_commit_latency_p50_h": 575.864596111111,
       "ci_fail_rate": 0.050505050505050504,
       "runs_total": 99,
       "runs_failed": 5,
@@ -1217,19 +1139,19 @@
       "repo": "coffee",
       "month": "2026-10",
       "sessions": 11,
-      "interactions": 1548,
+      "interactions": 1570,
       "errors_api_per_100": null,
       "errors_terapia_per_100": null,
-      "recovery_p50_interactions": 1,
-      "recovery_censored_rate": 0.015151515151515152,
-      "recovery_n": 66,
+      "recovery_p50_interactions": 1.0,
+      "recovery_censored_rate": 0.014925373134328358,
+      "recovery_n": 67,
       "session_commit_latency_p50_h": 0.0,
       "ci_fail_rate": 0.041666666666666664,
       "runs_total": 24,
       "runs_failed": 1,
       "revert_ratio": 0.0,
       "fix_ratio": null,
-      "test_commit_ratio": 0.3877551020408163,
+      "test_commit_ratio": 0.38235294117647056,
       "dose": 0.38461538461538464,
       "src": {
         "sessions": "reported",
@@ -3633,7 +3555,7 @@
       },
       {
         "metric": "recovery_p50_interactions",
-        "spearman_rho": 0.3861997313354397,
+        "spearman_rho": 0.16068988016033703,
         "n": 13,
         "points": [
           {
@@ -3648,12 +3570,12 @@
           },
           {
             "repo": "turu",
-            "dose": 0.9230769230769231,
+            "dose": 0.5384615384615384,
             "outcome": 1.0
           },
           {
             "repo": "dont",
-            "dose": 0.9230769230769231,
+            "dose": 0.6923076923076923,
             "outcome": 1.3333333333333333
           },
           {
@@ -3663,17 +3585,17 @@
           },
           {
             "repo": "pretender",
-            "dose": 0.9230769230769231,
+            "dose": 0.6153846153846154,
             "outcome": 1.2
           },
           {
             "repo": "vampiro",
-            "dose": 0.9230769230769231,
+            "dose": 0.6153846153846154,
             "outcome": 0.75
           },
           {
             "repo": "incitaciones",
-            "dose": 0.9230769230769231,
+            "dose": 0.46153846153846156,
             "outcome": 1.4166666666666667
           },
           {
@@ -3693,7 +3615,7 @@
           },
           {
             "repo": "dulce-de-leche",
-            "dose": 0.9230769230769231,
+            "dose": 0.8461538461538461,
             "outcome": 1.5
           },
           {
@@ -3705,7 +3627,7 @@
       },
       {
         "metric": "session_commit_latency_p50_h",
-        "spearman_rho": 0.09368225124350368,
+        "spearman_rho": -0.08604859293176628,
         "n": 12,
         "points": [
           {
@@ -3720,12 +3642,12 @@
           },
           {
             "repo": "turu",
-            "dose": 0.9230769230769231,
+            "dose": 0.5384615384615384,
             "outcome": 64.23504402777777
           },
           {
             "repo": "dont",
-            "dose": 0.9230769230769231,
+            "dose": 0.6923076923076923,
             "outcome": 866.8456541666666
           },
           {
@@ -3735,17 +3657,17 @@
           },
           {
             "repo": "pretender",
-            "dose": 0.9230769230769231,
+            "dose": 0.6153846153846154,
             "outcome": 950.749256611111
           },
           {
             "repo": "vampiro",
-            "dose": 0.9230769230769231,
+            "dose": 0.6153846153846154,
             "outcome": 705.8152131944445
           },
           {
             "repo": "incitaciones",
-            "dose": 0.9230769230769231,
+            "dose": 0.46153846153846156,
             "outcome": 1426.7711730092594
           },
           {
@@ -3760,19 +3682,19 @@
           },
           {
             "repo": "dulce-de-leche",
-            "dose": 0.9230769230769231,
+            "dose": 0.8461538461538461,
             "outcome": 881.891980625
           },
           {
             "repo": "coffee",
             "dose": 0.38461538461538464,
-            "outcome": 287.88340916666664
+            "outcome": 287.9322980555555
           }
         ]
       },
       {
         "metric": "ci_fail_rate",
-        "spearman_rho": 0.3290449626377132,
+        "spearman_rho": 0.7618064470073772,
         "n": 13,
         "points": [
           {
@@ -3787,12 +3709,12 @@
           },
           {
             "repo": "turu",
-            "dose": 0.9230769230769231,
+            "dose": 0.5384615384615384,
             "outcome": 0.15527950310559008
           },
           {
             "repo": "dont",
-            "dose": 0.9230769230769231,
+            "dose": 0.6923076923076923,
             "outcome": 0.32807622965803224
           },
           {
@@ -3802,17 +3724,17 @@
           },
           {
             "repo": "pretender",
-            "dose": 0.9230769230769231,
+            "dose": 0.6153846153846154,
             "outcome": 0.2614384285021975
           },
           {
             "repo": "vampiro",
-            "dose": 0.9230769230769231,
+            "dose": 0.6153846153846154,
             "outcome": 0.5406850787149249
           },
           {
             "repo": "incitaciones",
-            "dose": 0.9230769230769231,
+            "dose": 0.46153846153846156,
             "outcome": 0.003007518796992481
           },
           {
@@ -3832,7 +3754,7 @@
           },
           {
             "repo": "dulce-de-leche",
-            "dose": 0.9230769230769231,
+            "dose": 0.8461538461538461,
             "outcome": 0.597907612395145
           },
           {
@@ -3844,7 +3766,7 @@
       },
       {
         "metric": "revert_ratio",
-        "spearman_rho": -0.32710225430843876,
+        "spearman_rho": -0.07982824700322463,
         "n": 13,
         "points": [
           {
@@ -3859,12 +3781,12 @@
           },
           {
             "repo": "turu",
-            "dose": 0.9230769230769231,
+            "dose": 0.5384615384615384,
             "outcome": 0.0
           },
           {
             "repo": "dont",
-            "dose": 0.9230769230769231,
+            "dose": 0.6923076923076923,
             "outcome": 0.0
           },
           {
@@ -3874,17 +3796,17 @@
           },
           {
             "repo": "pretender",
-            "dose": 0.9230769230769231,
+            "dose": 0.6153846153846154,
             "outcome": 0.0
           },
           {
             "repo": "vampiro",
-            "dose": 0.9230769230769231,
+            "dose": 0.6153846153846154,
             "outcome": 0.0
           },
           {
             "repo": "incitaciones",
-            "dose": 0.9230769230769231,
+            "dose": 0.46153846153846156,
             "outcome": 0.0
           },
           {
@@ -3904,7 +3826,7 @@
           },
           {
             "repo": "dulce-de-leche",
-            "dose": 0.9230769230769231,
+            "dose": 0.8461538461538461,
             "outcome": 0.0
           },
           {
@@ -3916,7 +3838,7 @@
       },
       {
         "metric": "fix_ratio",
-        "spearman_rho": -0.36880333061353227,
+        "spearman_rho": 0.15501330979497288,
         "n": 11,
         "points": [
           {
@@ -3931,12 +3853,12 @@
           },
           {
             "repo": "turu",
-            "dose": 0.9230769230769231,
+            "dose": 0.5384615384615384,
             "outcome": 1.5666666666666667
           },
           {
             "repo": "dont",
-            "dose": 0.9230769230769231,
+            "dose": 0.6923076923076923,
             "outcome": 5.75
           },
           {
@@ -3946,17 +3868,17 @@
           },
           {
             "repo": "pretender",
-            "dose": 0.9230769230769231,
+            "dose": 0.6153846153846154,
             "outcome": 5.4
           },
           {
             "repo": "vampiro",
-            "dose": 0.9230769230769231,
+            "dose": 0.6153846153846154,
             "outcome": 10.833333333333334
           },
           {
             "repo": "incitaciones",
-            "dose": 0.9230769230769231,
+            "dose": 0.46153846153846156,
             "outcome": 1.5
           },
           {
@@ -3971,14 +3893,14 @@
           },
           {
             "repo": "dulce-de-leche",
-            "dose": 0.9230769230769231,
+            "dose": 0.8461538461538461,
             "outcome": 5.4375
           }
         ]
       },
       {
         "metric": "test_commit_ratio",
-        "spearman_rho": -0.020383316269592854,
+        "spearman_rho": 0.22740490955444095,
         "n": 13,
         "points": [
           {
@@ -3993,12 +3915,12 @@
           },
           {
             "repo": "turu",
-            "dose": 0.9230769230769231,
+            "dose": 0.5384615384615384,
             "outcome": 0.2648245260185559
           },
           {
             "repo": "dont",
-            "dose": 0.9230769230769231,
+            "dose": 0.6923076923076923,
             "outcome": 0.3393922668201908
           },
           {
@@ -4008,17 +3930,17 @@
           },
           {
             "repo": "pretender",
-            "dose": 0.9230769230769231,
+            "dose": 0.6153846153846154,
             "outcome": 0.35758237265262244
           },
           {
             "repo": "vampiro",
-            "dose": 0.9230769230769231,
+            "dose": 0.6153846153846154,
             "outcome": 0.23680462341536168
           },
           {
             "repo": "incitaciones",
-            "dose": 0.9230769230769231,
+            "dose": 0.46153846153846156,
             "outcome": 0.06472763225614216
           },
           {
@@ -4038,13 +3960,13 @@
           },
           {
             "repo": "dulce-de-leche",
-            "dose": 0.9230769230769231,
+            "dose": 0.8461538461538461,
             "outcome": 0.29595795277081066
           },
           {
             "repo": "coffee",
             "dose": 0.38461538461538464,
-            "outcome": 0.3788090578697232
+            "outcome": 0.3761079774375503
           }
         ]
       }
