@@ -41,6 +41,21 @@ PCT_KEYS = ("p50", "p75", "p90", "p95", "p99")
 N_BINS = 10
 
 
+def _month_days(ym):
+    """Días del mes YYYY-MM (FPA-041: denominador de días)."""
+    import calendar
+    y, m = int(ym[:4]), int(ym[5:7])
+    return calendar.monthrange(y, m)[1]
+
+
+def _month_elapsed(ym, end_date):
+    """Días transcurridos del mes: los completados toman el total; el mes
+    del fin de rango toma el día del fin (FPA-041)."""
+    if not end_date or ym != end_date[:7]:
+        return _month_days(ym)
+    return int(end_date[8:10])
+
+
 def _pctl(sorted_vals, p):
     """Percentil p (0..1) con interpolación lineal sobre lista ordenada."""
     if not sorted_vals:
@@ -112,8 +127,71 @@ def build_model(report):
             "chars_per_token_bias": meta.get("chars_per_token_bias"),
             "validation_ratio_median": meta.get("validation_ratio_median"),
         },
+        "comp": _build_comp(clean, th),
+        "time": _build_time(cm.get("monthly_model") or [],
+                            (report.get("metadata") or {})
+                            .get("date_range", {}).get("end")),
         "monthly_model": cm.get("monthly_model") or [],
     }
+
+
+def _build_comp(clean, th):
+    """Share por fuente global y en sesiones grandes (> big_session_tokens
+    de config) — coffe-opo 2.3. Leyenda = unión de fuentes en ambas."""
+    big_th = th.get("big_session_tokens") or 100_000
+    def _shares(rows):
+        totals = {}
+        for r in rows:
+            for src, n in (r.get("chars_by_source") or {}).items():
+                totals[src] = totals.get(src, 0) + n
+        total = sum(totals.values()) or 1
+        return {k: v / total for k, v in totals.items()}
+    big = [s for s in clean if s.get("peak_ctx_est", 0) > big_th]
+    glob = _shares(clean)
+    big_sh = _shares(big)
+    return {
+        "global": glob,
+        "big": big_sh,
+        "big_threshold": big_th,
+        "n_big": len(big),
+        "legend": sorted(set(glob) | set(big_sh)),
+    }
+
+
+def _build_time(monthly_model, end_date):
+    """Tabla mes × modelo dominante — coffe-opo 2.4. Meses parciales
+    marcados con días transcurridos/total (FPA-041)."""
+    rows = []
+    for r in sorted(monthly_model,
+                    key=lambda x: (str(x.get("month")), str(x.get("model")))):
+        ym = r.get("month")
+        partial = r.get("partial")
+        if ym:
+            elapsed = _month_elapsed(ym, end_date)
+            days = _month_days(ym)
+            days_label = f"{elapsed}/{days}" if partial else f"{days}/{days}"
+        else:
+            days_label = "n/a"
+        rows.append(dict(r, days_label=days_label))
+    return {"rows": rows}
+
+
+def _stacked_svg(shares, legend, colors, w=360, h=60):
+    """Barra stacked (100%) con tooltips nativos; leyenda aparte."""
+    parts = [f'<svg viewBox="0 0 {w} {h}" class="stack" role="img" '
+             f'aria-label="share por fuente">']
+    x = 0.0
+    order = [s for s in legend if s in shares]
+    for i, src in enumerate(order):
+        sw = shares[src] * w
+        cls = colors[i % len(colors)]
+        parts.append(f'<rect x="{x:.1f}" y="4" width="{max(sw, 0):.1f}" '
+                     f'height="{h - 20}" class="seg {cls}">'
+                     f'<title>{html.escape(src)}: {shares[src]*100:.1f}%</title>'
+                     f'</rect>')
+        x += sw
+    parts.append("</svg>")
+    return "\n".join(parts)
 
 
 def _hist_svg(hist, band, w=760, h=240):
@@ -180,9 +258,60 @@ body {{ margin: 0; padding: 18px; background: {t['--bg']}; color: {t['--fg']};
 </body></html>"""
     d = model["dist"]
     meta = model["meta"]
+    n_clean = d.get("n_clean", 0)
     vr = d.get("validation_ratio_median")
-    hist_html = _hist_svg(d["histogram"], d["band"])
     tag = html.escape(str(meta.get("chars_per_token_tag") or "assumed"))
+    hist_html = _hist_svg(d["histogram"], d["band"])
+    comp = model.get("comp") or {}
+    time_rows = (model.get("time") or {}).get("rows", [])
+    seg_colors = ("c1", "c2", "c3", "c4", "c5", "c6")
+    legend = comp.get("legend") or []
+    comp_html = ""
+    if comp:
+        stack_g = _stacked_svg(comp["global"], legend, seg_colors)
+        stack_b = _stacked_svg(comp["big"], legend, seg_colors)
+        n_big = comp.get("n_big", 0)
+        comp_html = f"""
+<div class="card">
+  <h2>Composición por fuente</h2>
+  <p>Global ({n_clean} sesiones)</p>
+  {stack_g}
+  <p>Sesiones grandes > {_fmt_k(comp['big_threshold'])} tok
+     ({n_big} sesiones) — {tag}</p>
+  {stack_b}
+  <p class="legend">{"".join(
+      f'<span class="lg"><span class="sw {seg_colors[i % len(seg_colors)]}"></span>'
+      f'{html.escape(src)}</span>' for i, src in enumerate(legend))}</p>
+</div>"""
+    time_html = ""
+    if time_rows:
+        rows_html = ""
+        for r in time_rows:
+            tpt = ", ".join(f"{html.escape(k)}: {_fmt_k(v)}"
+                            for k, v in (r.get("tokens_per_turn_by_source")
+                                         or {}).items())
+            badge = (" <span class=tag>parcial "
+                     + html.escape(r["days_label"]) + "</span>"
+                     if r["partial"] else "")
+            rows_html += (
+                f'<tr><td>{html.escape(str(r["month"]))}{badge}</td>'
+                f'<td>{html.escape(str(r["model"]))}</td>'
+                f'<td>{r["sessions"]}</td>'
+                f'<td>{_fmt_k(r["peak_p50"] or 0)}</td>'
+                f'<td>{r["pct_big_session"]:.1f}%</td>'
+                f'<td>{tpt or "n/a"}</td></tr>')
+        time_html = f"""
+<div class="card">
+  <h2>Tiempo — mes × modelo dominante</h2>
+  <table class="ctx-table">
+    <thead><tr><th>mes</th><th>modelo</th><th>sesiones</th>
+      <th>pico mediano (tok)</th><th>% > {_fmt_k(comp.get('big_threshold', 0)) if comp else '—'}</th>
+      <th>tok/turno por fuente</th></tr></thead>
+    <tbody>{rows_html}</tbody>
+  </table>
+  <p class="muted">meses parciales marcados con días transcurridos/total
+     (FPA-041); pico mediano y % sobre el set limpio de cada grupo.</p>
+</div>"""
     bias = html.escape(str(meta.get("chars_per_token_bias") or ""))
     cpt = meta.get("chars_per_token")
     ratio = f"{vr:.2f}" if vr else "n/a"
@@ -195,7 +324,6 @@ body {{ margin: 0; padding: 18px; background: {t['--bg']}; color: {t['--fg']};
     if stubs:
         title_extra.append(f"{stubs} stubs")
     extra = (" · " + " · ".join(title_extra)) if title_extra else ""
-    n_clean = d.get("n_clean", 0)
     return f"""<!DOCTYPE html>
 <html lang="es">
 <head>
@@ -227,6 +355,26 @@ body {{ margin: 0; padding: 18px; background: {t['--bg']}; color: {t['--fg']};
           border: 1px solid var(--line); }}
   dl {{ display: grid; grid-template-columns: max-content 1fr; gap: 4px 12px; }}
   dt {{ color: var(--muted); }}  dd {{ margin: 0; }}
+  .stack .seg.c1 {{ fill: var(--accent); }}
+  .stack .seg.c2 {{ fill: var(--accent2); }}
+  .stack .seg.c3 {{ fill: var(--good); }}
+  .stack .seg.c4 {{ fill: var(--navy); }}
+  .stack .seg.c5 {{ fill: var(--yellow); }}
+  .stack .seg.c6 {{ fill: var(--muted); }}
+  .legend .lg {{ margin-right: 10px; font-size: 11px; }}
+  .legend .sw {{ display: inline-block; width: 10px; height: 10px;
+                 border: 1px solid var(--line); vertical-align: -1px;
+                 margin-right: 3px; }}
+  .legend .sw.c1 {{ background: var(--accent); }}
+  .legend .sw.c2 {{ background: var(--accent2); }}
+  .legend .sw.c3 {{ background: var(--good); }}
+  .legend .sw.c4 {{ background: var(--navy); }}
+  .legend .sw.c5 {{ background: var(--yellow); }}
+  .legend .sw.c6 {{ background: var(--muted); }}
+  .ctx-table {{ border-collapse: collapse; width: 100%; }}
+  .ctx-table th, .ctx-table td {{ border: 1px solid var(--line);
+                                  padding: 3px 8px; text-align: left; }}
+  .ctx-table th {{ background: var(--panel); color: var(--muted); }}
 </style>
 </head>
 <body>
@@ -239,6 +387,8 @@ body {{ margin: 0; padding: 18px; background: {t['--bg']}; color: {t['--fg']};
      (<span class="tag">{tag}</span> = {cpt})
      — {bias} · ratio de validación vs usage real: {ratio} (mediana).</p>
 </div>
+{comp_html}
+{time_html}
 <div class="card">
   <h2>Procedencia</h2>
   <dl>

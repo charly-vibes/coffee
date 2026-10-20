@@ -42,6 +42,26 @@ body { font-family: var(--font-stack); }
           border: 1px solid var(--line); }
   dl { display: grid; grid-template-columns: max-content 1fr; gap: 4px 12px; }
   dt { color: var(--muted); }  dd { margin: 0; }
+  .stack .seg.c1 { fill: var(--accent); }
+  .stack .seg.c2 { fill: var(--accent2); }
+  .stack .seg.c3 { fill: var(--good); }
+  .stack .seg.c4 { fill: var(--navy); }
+  .stack .seg.c5 { fill: var(--yellow); }
+  .stack .seg.c6 { fill: var(--muted); }
+  .legend .lg { margin-right: 10px; font-size: 11px; }
+  .legend .sw { display: inline-block; width: 10px; height: 10px;
+                 border: 1px solid var(--line); vertical-align: -1px;
+                 margin-right: 3px; }
+  .legend .sw.c1 { background: var(--accent); }
+  .legend .sw.c2 { background: var(--accent2); }
+  .legend .sw.c3 { background: var(--good); }
+  .legend .sw.c4 { background: var(--navy); }
+  .legend .sw.c5 { background: var(--yellow); }
+  .legend .sw.c6 { background: var(--muted); }
+  .ctx-table { border-collapse: collapse; width: 100%; }
+  .ctx-table th, .ctx-table td { border: 1px solid var(--line);
+                                  padding: 3px 8px; text-align: left; }
+  .ctx-table th { background: var(--panel); color: var(--muted); }
 </style>
 </head>
 <body>
@@ -80,6 +100,79 @@ body { font-family: var(--font-stack); }
   <p class="muted">Estimación: chars / chars_per_token
      (<span class="tag">assumed</span> = 4)
      — subestima el contexto real (~40%): español/código ~3 chars/token y overhead de serialización; consistente entre eras — ver ratio de validación · ratio de validación vs usage real: 1.27 (mediana).</p>
+</div>
+
+<div class="card">
+  <h2>Composición por fuente</h2>
+  <p>Global (2067 sesiones)</p>
+  <svg viewBox="0 0 360 60" class="stack" role="img" aria-label="share por fuente">
+<rect x="0.0" y="4" width="67.1" height="40" class="seg c1"><title>asst_args: 18.6%</title></rect>
+<rect x="67.1" y="4" width="18.1" height="40" class="seg c2"><title>asst_text: 5.0%</title></rect>
+<rect x="85.2" y="4" width="74.1" height="40" class="seg c3"><title>asst_thinking: 20.6%</title></rect>
+<rect x="159.3" y="4" width="1.3" height="40" class="seg c4"><title>tool:ah_check: 0.4%</title></rect>
+<rect x="160.6" y="4" width="0.0" height="40" class="seg c5"><title>tool:ah_doctor: 0.0%</title></rect>
+<rect x="160.6" y="4" width="0.0" height="40" class="seg c6"><title>tool:ah_explain: 0.0%</title></rect>
+<rect x="160.6" y="4" width="0.0" height="40" class="seg c1"><title>tool:ah_signals: 0.0%</title></rect>
+<rect x="160.6" y="4" width="0.0" height="40" class="seg c2"><title>tool:ash: 0.0%</title></rect>
+<rect x="160.6" y="4" width="136.0" height="40" class="seg c3"><title>tool:bash: 37.8%</title></rect>
+<rect x="296.6" y="4" width="0.0" height="40" class="seg c4"><title>tool:bd: 0.0%</title></rect>
+<rect x="296.6" y="4" width="0.0" height="40" class="seg c5"><title>tool:cat: 0.0%</title></rect>
+<rect x="296.6" y="4" width="0.0" height="40" class="seg c6"><title>tool:claim: 0.0%</title></rect>
+<rect x="296.6" y="4" width="0.0" height="40" class="seg c1"><title>tool:commit: 0.0%</title></rect>
+<rect x="296.6" y="4" width="1.6" height="40" class="seg c2"><title>tool:edit: 0.4%</title></rect>
+<rect x="298.2" y="4" width="0.0" height="40" class="seg c3"><title>tool:find: 0.0%</title></rect>
+<rect x="298.2" y="4" width="0.0" height="40" class="seg c4"><title>tool:g-rep: 0.0%</title></rect>
+<rect x="298.2" y="4" width="0.0" height="40" class="seg c5"><title>tool:grep: 0.0%</title></rect>
+<rect x="298.2" y="4" width="0.0" height="40" class="seg c6"><title>tool:head: 0.0%</title></rect>
+<rect x="298.2" y="4" width="0.0" height="40" class="seg c1"><title>tool:mkdir: 0.0%</title></rect>
+<rect x="298.2" y="4" width="58.7" height="40" class="seg c2"><title>tool:read: 16.3%</title></rect>
+<rect x="356.9" y="4" width="0.0" height="40" class="seg c3"><title>tool:rg: 0.0%</title></rect>
+<rect x="356.9" y="4" width="0.0" height="40" class="seg c4"><title>tool:rm: 0.0%</title></rect>
+<rect x="356.9" y="4" width="0.0" height="40" class="seg c5"><title>tool:todo_write: 0.0%</title></rect>
+<rect x="356.9" y="4" width="0.0" height="40" class="seg c6"><title>tool:unknown: 0.0%</title></rect>
+<rect x="356.9" y="4" width="0.3" height="40" class="seg c1"><title>tool:write: 0.1%</title></rect>
+<rect x="357.2" y="4" width="2.8" height="40" class="seg c2"><title>user_text: 0.8%</title></rect>
+</svg>
+  <p>Sesiones grandes > 100k tok
+     (675 sesiones) — assumed</p>
+  <svg viewBox="0 0 360 60" class="stack" role="img" aria-label="share por fuente">
+<rect x="0.0" y="4" width="69.5" height="40" class="seg c1"><title>asst_args: 19.3%</title></rect>
+<rect x="69.5" y="4" width="16.5" height="40" class="seg c2"><title>asst_text: 4.6%</title></rect>
+<rect x="86.0" y="4" width="76.3" height="40" class="seg c3"><title>asst_thinking: 21.2%</title></rect>
+<rect x="162.2" y="4" width="0.9" height="40" class="seg c4"><title>tool:ah_check: 0.2%</title></rect>
+<rect x="163.1" y="4" width="0.0" height="40" class="seg c5"><title>tool:ah_doctor: 0.0%</title></rect>
+<rect x="163.1" y="4" width="0.0" height="40" class="seg c6"><title>tool:ah_explain: 0.0%</title></rect>
+<rect x="163.1" y="4" width="0.0" height="40" class="seg c1"><title>tool:ash: 0.0%</title></rect>
+<rect x="163.1" y="4" width="133.7" height="40" class="seg c2"><title>tool:bash: 37.1%</title></rect>
+<rect x="296.8" y="4" width="0.0" height="40" class="seg c3"><title>tool:bd: 0.0%</title></rect>
+<rect x="296.8" y="4" width="0.0" height="40" class="seg c4"><title>tool:cat: 0.0%</title></rect>
+<rect x="296.8" y="4" width="0.0" height="40" class="seg c5"><title>tool:claim: 0.0%</title></rect>
+<rect x="296.8" y="4" width="0.0" height="40" class="seg c6"><title>tool:commit: 0.0%</title></rect>
+<rect x="296.8" y="4" width="1.9" height="40" class="seg c1"><title>tool:edit: 0.5%</title></rect>
+<rect x="298.7" y="4" width="0.0" height="40" class="seg c2"><title>tool:find: 0.0%</title></rect>
+<rect x="298.7" y="4" width="0.0" height="40" class="seg c3"><title>tool:g-rep: 0.0%</title></rect>
+<rect x="298.7" y="4" width="0.0" height="40" class="seg c4"><title>tool:grep: 0.0%</title></rect>
+<rect x="298.7" y="4" width="0.0" height="40" class="seg c5"><title>tool:head: 0.0%</title></rect>
+<rect x="298.7" y="4" width="0.0" height="40" class="seg c6"><title>tool:mkdir: 0.0%</title></rect>
+<rect x="298.7" y="4" width="59.2" height="40" class="seg c1"><title>tool:read: 16.4%</title></rect>
+<rect x="357.9" y="4" width="0.0" height="40" class="seg c2"><title>tool:rg: 0.0%</title></rect>
+<rect x="357.9" y="4" width="0.0" height="40" class="seg c3"><title>tool:rm: 0.0%</title></rect>
+<rect x="357.9" y="4" width="0.3" height="40" class="seg c4"><title>tool:write: 0.1%</title></rect>
+<rect x="358.2" y="4" width="1.8" height="40" class="seg c5"><title>user_text: 0.5%</title></rect>
+</svg>
+  <p class="legend"><span class="lg"><span class="sw c1"></span>asst_args</span><span class="lg"><span class="sw c2"></span>asst_text</span><span class="lg"><span class="sw c3"></span>asst_thinking</span><span class="lg"><span class="sw c4"></span>tool:ah_check</span><span class="lg"><span class="sw c5"></span>tool:ah_doctor</span><span class="lg"><span class="sw c6"></span>tool:ah_explain</span><span class="lg"><span class="sw c1"></span>tool:ah_signals</span><span class="lg"><span class="sw c2"></span>tool:ash</span><span class="lg"><span class="sw c3"></span>tool:bash</span><span class="lg"><span class="sw c4"></span>tool:bd</span><span class="lg"><span class="sw c5"></span>tool:cat</span><span class="lg"><span class="sw c6"></span>tool:claim</span><span class="lg"><span class="sw c1"></span>tool:commit</span><span class="lg"><span class="sw c2"></span>tool:edit</span><span class="lg"><span class="sw c3"></span>tool:find</span><span class="lg"><span class="sw c4"></span>tool:g-rep</span><span class="lg"><span class="sw c5"></span>tool:grep</span><span class="lg"><span class="sw c6"></span>tool:head</span><span class="lg"><span class="sw c1"></span>tool:mkdir</span><span class="lg"><span class="sw c2"></span>tool:read</span><span class="lg"><span class="sw c3"></span>tool:rg</span><span class="lg"><span class="sw c4"></span>tool:rm</span><span class="lg"><span class="sw c5"></span>tool:todo_write</span><span class="lg"><span class="sw c6"></span>tool:unknown</span><span class="lg"><span class="sw c1"></span>tool:write</span><span class="lg"><span class="sw c2"></span>user_text</span></p>
+</div>
+
+<div class="card">
+  <h2>Tiempo — mes × modelo dominante</h2>
+  <table class="ctx-table">
+    <thead><tr><th>mes</th><th>modelo</th><th>sesiones</th>
+      <th>pico mediano (tok)</th><th>% > 100k</th>
+      <th>tok/turno por fuente</th></tr></thead>
+    <tbody><tr><td>2026-04</td><td>claude-opus-4-6</td><td>4</td><td>7k</td><td>0.0%</td><td>asst_args: 32, asst_text: 632, asst_thinking: 17, tool:bash: 211, tool:read: 17, user_text: 21</td></tr><tr><td>2026-04</td><td>claude-sonnet-4-6</td><td>51</td><td>2k</td><td>0.0%</td><td>asst_text: 486, user_text: 265</td></tr><tr><td>2026-04</td><td>gemini-3-flash-preview</td><td>3</td><td>114k</td><td>100.0%</td><td>asst_args: 110, asst_text: 40, asst_thinking: 83, tool:bash: 758, tool:edit: 2, tool:read: 534, tool:write: 1, user_text: 8</td></tr><tr><td>2026-04</td><td>gemini-3-pro-preview</td><td>7</td><td>42k</td><td>14.3%</td><td>asst_args: 89, asst_text: 86, asst_thinking: 86, tool:bash: 220, tool:edit: 2, tool:read: 200, tool:write: 0, user_text: 2</td></tr><tr><td>2026-04</td><td>gpt-5.3-codex</td><td>3</td><td>46k</td><td>0.0%</td><td>asst_args: 152, asst_text: 81, asst_thinking: 0, tool:bash: 386, tool:edit: 1, tool:read: 627, tool:write: 4, user_text: 3</td></tr><tr><td>2026-04</td><td>gpt-5.4</td><td>103</td><td>75k</td><td>27.2%</td><td>asst_args: 174, asst_text: 63, asst_thinking: 73, tool:bash: 606, tool:edit: 3, tool:read: 467, tool:write: 1, user_text: 10</td></tr><tr><td>2026-05</td><td>claude-opus-4-6</td><td>2</td><td>694</td><td>0.0%</td><td>asst_text: 237, user_text: 192</td></tr><tr><td>2026-05</td><td>claude-opus-4-7</td><td>5</td><td>4k</td><td>0.0%</td><td>asst_text: 1k, user_text: 65</td></tr><tr><td>2026-05</td><td>claude-sonnet-4-6</td><td>119</td><td>3k</td><td>0.0%</td><td>asst_args: 1, asst_text: 720, asst_thinking: 0, tool:bash: 0, user_text: 207</td></tr><tr><td>2026-05</td><td>deepseek/deepseek-v4-flash</td><td>1</td><td>68k</td><td>0.0%</td><td>asst_args: 253, asst_text: 48, asst_thinking: 110, tool:bash: 441, tool:edit: 7, tool:read: 249, tool:write: 2, user_text: 9</td></tr><tr><td>2026-05</td><td>gemini-2.5-pro</td><td>2</td><td>677</td><td>0.0%</td><td>asst_text: 143, user_text: 26</td></tr><tr><td>2026-05</td><td>gpt-5.4</td><td>58</td><td>79k</td><td>32.8%</td><td>asst_args: 161, asst_text: 55, asst_thinking: 71, tool:bash: 637, tool:edit: 3, tool:read: 420, tool:write: 1, user_text: 11</td></tr><tr><td>2026-05</td><td>gpt-5.5</td><td>46</td><td>75k</td><td>21.7%</td><td>asst_args: 159, asst_text: 47, asst_thinking: 49, tool:bash: 603, tool:edit: 3, tool:read: 410, tool:write: 1, user_text: 17</td></tr><tr><td>2026-06</td><td>anthropic/claude-sonnet-4.6</td><td>1</td><td>185k</td><td>100.0%</td><td>asst_args: 136, asst_text: 83, asst_thinking: 33, tool:bash: 269, tool:edit: 9, tool:read: 126, tool:write: 0, user_text: 10</td></tr><tr><td>2026-06</td><td>claude-sonnet-4-6</td><td>1</td><td>1k</td><td>0.0%</td><td>asst_text: 2, user_text: 286</td></tr><tr><td>2026-06</td><td>deepseek/deepseek-v4-flash</td><td>6</td><td>47k</td><td>33.3%</td><td>asst_args: 213, asst_text: 54, asst_thinking: 128, tool:bash: 274, tool:edit: 5, tool:read: 250, tool:write: 1, user_text: 15</td></tr><tr><td>2026-06</td><td>google/gemini-3.1-pro-preview-customtools</td><td>1</td><td>34k</td><td>0.0%</td><td>asst_args: 282, asst_text: 179, asst_thinking: 124, tool:bash: 144, tool:edit: 4, tool:read: 354, user_text: 7</td></tr><tr><td>2026-06</td><td>gpt-5.4</td><td>1</td><td>105k</td><td>100.0%</td><td>asst_args: 253, asst_text: 48, asst_thinking: 68, tool:bash: 670, tool:edit: 5, tool:read: 396, tool:write: 1, user_text: 16</td></tr><tr><td>2026-07</td><td>anthropic/claude-sonnet-4.6</td><td>5</td><td>83k</td><td>0.0%</td><td>asst_args: 172, asst_text: 92, asst_thinking: 158, tool:bash: 371, tool:edit: 0, tool:read: 256, tool:write: 0, user_text: 8</td></tr><tr><td>2026-07</td><td>deepseek/deepseek-v4-flash</td><td>260</td><td>141k</td><td>70.8%</td><td>asst_args: 152, asst_text: 50, asst_thinking: 109, tool:ash: 0, tool:bash: 250, tool:bd: 0, tool:cat: 0, tool:claim: 0, tool:commit: 0, tool:edit: 6, tool:g-rep: 0, tool:grep: 0, tool:head: 0, tool:mkdir: 0, tool:read: 181, tool:rm: 0, tool:write: 1, user_text: 5</td></tr><tr><td>2026-07</td><td>deepseek/deepseek-v4-pro</td><td>1</td><td>82k</td><td>0.0%</td><td>asst_args: 200, asst_text: 165, asst_thinking: 131, tool:bash: 179, tool:edit: 13, tool:read: 489, tool:todo_write: 0, tool:write: 0, user_text: 10</td></tr><tr><td>2026-07</td><td>google/gemini-2.5-flash</td><td>1</td><td>197k</td><td>100.0%</td><td>asst_args: 47, asst_text: 639, asst_thinking: 110, tool:bash: 2, tool:read: 837, tool:write: 0, user_text: 6</td></tr><tr><td>2026-07</td><td>z-ai/glm-5.2</td><td>18</td><td>133k</td><td>77.8%</td><td>asst_args: 188, asst_text: 65, asst_thinking: 176, tool:bash: 173, tool:edit: 6, tool:read: 203, tool:write: 2, user_text: 1</td></tr><tr><td>2026-08</td><td>deepseek/deepseek-v4-flash</td><td>36</td><td>120k</td><td>61.1%</td><td>asst_args: 123, asst_text: 67, asst_thinking: 138, tool:bash: 218, tool:edit: 7, tool:find: 0, tool:read: 149, tool:rg: 0, tool:write: 0, user_text: 1</td></tr><tr><td>2026-08</td><td>google/gemini-2.5-flash-image</td><td>1</td><td>53</td><td>0.0%</td><td>user_text: 54</td></tr><tr><td>2026-08</td><td>stealth/ox-alpha</td><td>1</td><td>23k</td><td>0.0%</td><td>asst_args: 95, asst_text: 30, asst_thinking: 139, tool:bash: 149, tool:edit: 6, tool:read: 17, user_text: 3</td></tr><tr><td>2026-08</td><td>z-ai/glm-5.3-flash</td><td>7</td><td>70k</td><td>42.9%</td><td>asst_args: 153, asst_text: 50, asst_thinking: 207, tool:bash: 204, tool:edit: 4, tool:read: 49, tool:write: 1, user_text: 2</td></tr><tr><td>2026-09</td><td>deepseek/deepseek-v4-flash</td><td>1</td><td>138k</td><td>100.0%</td><td>asst_args: 100, asst_text: 48, asst_thinking: 196, tool:bash: 86, tool:edit: 6, tool:read: 74, tool:write: 1, user_text: 2</td></tr><tr><td>2026-09</td><td>deepseek/deepseek-v4.1-flash</td><td>1</td><td>139k</td><td>100.0%</td><td>asst_args: 249, asst_text: 91, asst_thinking: 791, tool:bash: 642, tool:edit: 5, tool:read: 230, user_text: 5</td></tr><tr><td>2026-09</td><td>google/gemini-3.8-flash</td><td>1</td><td>42k</td><td>0.0%</td><td>asst_args: 47, asst_text: 90, asst_thinking: 60, tool:bash: 131, tool:edit: 2, tool:read: 245, user_text: 3</td></tr><tr><td>2026-09</td><td>z-ai/glm-5.3-flash</td><td>365</td><td>75k</td><td>29.0%</td><td>asst_args: 158, asst_text: 37, asst_thinking: 199, tool:bash: 256, tool:edit: 4, tool:read: 91, tool:unknown: 0, tool:write: 1, user_text: 6</td></tr><tr><td>2026-10 <span class=tag>parcial 19/31</span></td><td>deepseek/deepseek-v4.1-flash</td><td>1</td><td>177k</td><td>100.0%</td><td>asst_args: 374, asst_text: 86, asst_thinking: 529, tool:bash: 563, tool:edit: 2, tool:read: 284, tool:write: 4, user_text: 2</td></tr><tr><td>2026-10 <span class=tag>parcial 19/31</span></td><td>google/gemini-2.5-flash</td><td>4</td><td>5k</td><td>0.0%</td><td>asst_args: 92, asst_text: 47, asst_thinking: 117, tool:bash: 344, tool:read: 68, tool:write: 2, user_text: 33</td></tr><tr><td>2026-10 <span class=tag>parcial 19/31</span></td><td>moonshotai/kimi-k2.5</td><td>7</td><td>13k</td><td>0.0%</td><td>asst_args: 25, asst_text: 146, asst_thinking: 826, tool:read: 1k, user_text: 56</td></tr><tr><td>2026-10 <span class=tag>parcial 19/31</span></td><td>z-ai/glm-5.3-flash</td><td>943</td><td>73k</td><td>29.4%</td><td>asst_args: 149, asst_text: 24, asst_thinking: 197, tool:ah_check: 6, tool:ah_doctor: 0, tool:ah_explain: 0, tool:ah_signals: 0, tool:bash: 326, tool:edit: 2, tool:read: 81, tool:write: 0, user_text: 4</td></tr></tbody>
+  </table>
+  <p class="muted">meses parciales marcados con días transcurridos/total
+     (FPA-041); pico mediano y % sobre el set limpio de cada grupo.</p>
 </div>
 <div class="card">
   <h2>Procedencia</h2>

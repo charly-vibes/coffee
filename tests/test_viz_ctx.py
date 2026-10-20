@@ -33,15 +33,17 @@ def load_viz():
 
 
 def sesion(peak_est, model="claude-sonnet-4-6", month="2026-09",
-           pathological=False, turns=10, project="charly-coffee"):
+           pathological=False, turns=10, project="charly-coffee",
+           chars_by_source=None, big_tool_results=0):
     """Fila de sesión con el shape emitido por reduce_context."""
     return {
         "month": month, "project": project, "model": model,
         "models_turns": {model: turns}, "provider": "anthropic",
         "turns": turns, "turns_no_usage": 0,
-        "chars_by_source": {"asst_text": peak_est * 4 - 100,
-                            "user_text": 100},
-        "big_results": 0, "big_results_by_tool": {},
+        "chars_by_source": chars_by_source or {"asst_text": peak_est * 4 - 100,
+                                               "user_text": 100},
+        "big_results": big_tool_results,
+        "big_results_by_tool": {"read": big_tool_results} if big_tool_results else {},
         "compactions": 0, "segment_count": 1,
         "peak_ctx_chars": peak_est * 4, "final_ctx_chars": peak_est * 4,
         "peak_ctx_est": peak_est, "final_ctx_est": peak_est,
@@ -55,6 +57,10 @@ def sesion(peak_est, model="claude-sonnet-4-6", month="2026-09",
 def report_sintetico(peaks=(50_000, 100_000, 150_000, 200_000, 400_000),
                      n_pathological=1, n_stubs=2, meta=None):
     sessions = [sesion(p) for p in peaks]
+    # sesiones grandes (>100k) con composición distinta para la vista
+    sessions[2]["chars_by_source"] = {"asst_text": 400_000,
+                                      "tool:read": 150_000,
+                                      "asst_thinking": 50_000}
     sessions += [sesion(16_000_000, pathological=True)
                  for _ in range(n_pathological)]
     cm = {
@@ -131,6 +137,83 @@ class TestBuildModelDistribucion(unittest.TestCase):
     def test_scoped_pi_only(self):
         """El header declara alcance Pi-only (spec: alcance visible)."""
         self.assertIn("Pi", self.model["scope_note"])
+
+
+class TestComposicion(unittest.TestCase):
+    """coffe-opo (2.3): share por fuente global y en sesiones grandes
+    (>100k), leyenda completa en ambas, SVG stacked."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.viz = load_viz()
+        cls.model = cls.viz.build_model(report_sintetico())
+        cls.comp = cls.model["comp"]
+
+    def test_shares_global_normalizados(self):
+        shares = self.comp["global"]
+        self.assertAlmostEqual(1.0, sum(shares.values()), places=6)
+        self.assertIn("asst_text", shares)
+        self.assertIn("user_text", shares)
+
+    def test_sesiones_grandes_por_umbral_de_config(self):
+        """>100k (big_session_tokens de config): las sesiones pico 150k,
+        200k, 400k entran; 50k y 100k no (el umbral es estricto)."""
+        self.assertEqual(100_000, self.comp["big_threshold"])
+        self.assertEqual(3, self.comp["n_big"])
+        # en las grandes aparece tool:read (solo ellas lo tienen)
+        self.assertIn("tool:read", self.comp["big"])
+        self.assertAlmostEqual(1.0, sum(self.comp["big"].values()), places=6)
+
+    def test_leyenda_fuentes_unidas(self):
+        """Leyenda completa: ninguna fuente desaparece (spec) — la unión de
+        fuentes global∪grandes es la leyenda y va al modelo."""
+        union = set(self.comp["global"]) | set(self.comp["big"])
+        self.assertEqual(union, set(self.comp["legend"]))
+
+    def test_svg_stacked_en_render(self):
+        html = self.viz.render(self.model)
+        self.assertIn("Composición", html)
+        self.assertIn("stack", html)
+        self.assertIn("tool:read", html)  # fuente de las grandes en leyenda
+
+
+class TestTiempo(unittest.TestCase):
+    """coffe-opo (2.4): mes × modelo — pico mediano, % > umbral, tok/turno,
+    meses parciales marcados con días transcurridos/total (FPA-041)."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.viz = load_viz()
+        report = report_sintetico()
+        # end del rango en el mes máximo del fixture (coherencia partial)
+        report["metadata"] = {"date_range": {"start": "2025-12-23",
+                                             "end": "2026-09-19"}}
+        cls.model = cls.viz.build_model(report)
+        cls.time_rows = cls.model["time"]["rows"]
+
+    def test_fila_por_mes_modelo(self):
+        f = self.time_rows[0]
+        self.assertEqual("2026-09", f["month"])
+        self.assertEqual("claude-sonnet-4-6", f["model"])
+        self.assertAlmostEqual(150_000, f["peak_p50"])
+        self.assertAlmostEqual(40.0, f["pct_big_session"])
+
+    def test_tok_por_turno_por_fuente(self):
+        f = self.time_rows[0]
+        self.assertIn("asst_text", f["tokens_per_turn_by_source"])
+
+    def test_mes_parcial_con_dias(self):
+        """El mes máximo (2026-10… aquí el fixture tiene 2026-09) se marca
+        parcial con días transcurridos/total como FPA-041."""
+        parcial = [r for r in self.time_rows if r["partial"]]
+        self.assertTrue(parcial)
+        f = parcial[0]
+        self.assertEqual("19/30", f["days_label"])  # FPA-041: elapsed/total
+
+    def test_render_tabla_tiempo(self):
+        html = self.viz.render(self.model)
+        self.assertIn("Tiempo", html)
+        self.assertIn("pico mediano", html.lower())
 
 
 class TestRenderHtml(unittest.TestCase):
