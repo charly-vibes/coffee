@@ -63,11 +63,11 @@ coffe-r3c (2.6+2.8) · coffe-ruk (smoke + --check-docs) — cadena secuencial.
 
 Ticket: coffe-v5f (3.3+3.4; 3.5 es la mecánica de cierre de cada sesión).
 
-- [ ] 3.1 `python3 tests/test_tracker.py` y `python3 tests/test_viz.py` verdes
+- [x] 3.1 `python3 tests/test_tracker.py` y `python3 tests/test_viz.py` verdes
 - [x] 3.2 `--check-docs` de viz-ctx.py: consistencia README ↔ JSON
 - [x] 3.3 README: documentar emisión nueva + dashboard (tabla de scripts y de data/),
       corrección de la nota "sin señal en pi (compactions)", dirección de bias del
       estimador
 - [x] 3.4 `nightly-update.sh`: paso de regeneración del dashboard de contexto,
       midiendo duración extra del walk (1.4GB) — si pesa, `--since`
-- [ ] 3.5 `bd close` de los tickets y push
+- [x] 3.5 `bd close` de los tickets y push
