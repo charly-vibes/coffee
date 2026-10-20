@@ -88,6 +88,14 @@ los viz scripts lo validan con `--validate` (requiere `jsonschema`, opcional).
 dataset cambian de forma intencional, regenerarlos con `REGEN_GOLDEN=1` y
 revisar el diff antes de aceptar (coffe-9w0).
 
+El golden de las agregaciones del dashboard
+(`tests/golden/fpa-summary-snapshot.json`, `tests/test_fpa.py`) corre contra
+un **dataset congelado** (`tests/fixtures/usage-report-frozen.json`), no
+contra el dataset vivo — así el regen diario del nightly no amanece la suite
+roja (coffe-xvt). Se regenera solo ante cambios de lógica/schema:
+`REGEN_GOLDEN=1 python3 tests/test_fpa.py` (y refrescar el fixture si el
+regen es intencional).
+
 ```bash
 python3 scripts/usage-tracker.py   # regenera data/usage_report_v3.json (requiere los logs locales)
 python3 scripts/usage-tracker.py --since 2026-01-01 --until 2026-06-30 --output data/usage_report_v2.json

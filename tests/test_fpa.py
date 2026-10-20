@@ -12,6 +12,9 @@ Cubre el alcance del ticket coffe-lat.2 (FPA-001…009, 093, 095, 108):
 - tema claro/oscuro (FPA-093), formatos USD con separadores (FPA-095)
 - placeholder-check: resumen nunca vacío, sin placeholders sin valor (FPA-108)
 - golden test de las agregaciones base (FPA-100, fase 1): REGEN_GOLDEN=1
+  contra el dataset congelado tests/fixtures/usage-report-frozen.json
+  (coffe-xvt: el golden ya no amanece rojo cuando el nightly regenera el
+  dataset vivo; regen del golden solo ante cambios de lógica/schema)
 """
 
 import importlib.util
@@ -372,11 +375,24 @@ class TestRender(unittest.TestCase):
         self.assertNotEqual(a, viz.render_html(REPORT, CONFIG, generated="T2"))
 
 
+FROZEN_REPORT = json.loads((REPO / "tests" / "fixtures"
+                            / "usage-report-frozen.json").read_text())
+
+
 class TestGolden(unittest.TestCase):
-    """FPA-100: golden de las agregaciones base (fase 1)."""
+    """FPA-100: golden de las agregaciones base (fase 1).
+
+    coffe-xvt: corre contra el dataset congelado (fixtures), no contra el
+    dataset vivo del nightly — mismo dataset, misma regresión, sin drift
+    diario. Regenerar: REGEN_GOLDEN=1 python3 tests/test_fpa.py"""
+
+    def test_dataset_congelado_existe_y_es_valido(self):
+        """El pin existe y es un reporte válido (guarda del fixture)."""
+        schema = json.loads((REPO / "specs" / "usage-report-v3.schema.json").read_text())
+        self.assertEqual([], viz.validate_against_schema(FROZEN_REPORT, schema))
 
     def test_golden_agregaciones(self):
-        model = viz.build_model(REPORT, CONFIG)
+        model = viz.build_model(FROZEN_REPORT, CONFIG)
         model.pop("usage", None)  # F5 (coffe-lat.6): golden propio en test_fpa_f5
         if REGEN_GOLDEN:
             GOLDEN.write_text(json.dumps(model, indent=2, ensure_ascii=False,
