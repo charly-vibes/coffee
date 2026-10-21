@@ -971,6 +971,10 @@
       "verdict": "✘"
     }
   ],
+  "daily_spend": {
+    "available": false,
+    "reason": "el reporte no trae project_daily_spend ni session_spend (dataset anterior al cambio o regen pendiente del nightly)"
+  },
   "data_notes": {
     "concurrency": {
       "distinct_projects_per_hour": {

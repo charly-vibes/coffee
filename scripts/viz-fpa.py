@@ -329,6 +329,8 @@ def build_model(report, cfg):
         "reconciliation": build_reconciliation(report),
         # coffe-5ng (F8): energía estimada con banda de caché
         "energy": build_energy(report),
+        # add-session-spend-report: vista Gasto diario con drill-down
+        "daily_spend": build_daily_spend(report),
     }
 
 
@@ -2725,6 +2727,156 @@ def energy_html(energy):
   {no_tel_html}"""
 
 
+# ======================================================================
+# add-session-spend-report: vista "Gasto diario" con drill-down por sesión
+# ======================================================================
+
+def build_daily_spend(report):
+    """Datos de la vista "Gasto diario": por día, total con delta vs media
+    de los 7 días previos disponibles, desglose por proyecto y sesiones del
+    día. Todo pre-calculado desde project_daily_spend + session_spend.
+    Los dos costes son serie *assumed* del tracker (el cash del ledger se
+    concilia a nivel mensual, CRG-F1 — nunca mezclado en esta vista)."""
+    pds = report.get("project_daily_spend") or {}
+    ss = report.get("session_spend") or []
+    if not pds and not ss:
+        return {"available": False,
+                "reason": ("el reporte no trae project_daily_spend ni "
+                           "session_spend (dataset anterior al cambio o "
+                           "regen pendiente del nightly)")}
+    days = sorted({d for days in pds.values() for d in days}
+                  | {r["day"] for r in ss})
+    sessions_by_day = {}
+    for s in ss:
+        sessions_by_day.setdefault(s["day"], []).append(s)
+    day_totals = {}
+    for i, day in enumerate(days):
+        projects = []
+        for p in sorted(pds):
+            v = pds[p].get(day)
+            if v:
+                projects.append({
+                    "project": p,
+                    "interactions": v["interactions"],
+                    "cost_effective": v["cost_effective"],
+                    "cost_real": v["cost_real"],
+                    "tokens": dict(v["tokens"]),
+                })
+        total_eff = round(sum(p["cost_effective"] for p in projects), 8)
+        total_real = round(sum(p["cost_real"] for p in projects), 8)
+        day_tokens = {t: sum(p["tokens"][t] for p in projects)
+                      for t in ("in", "out", "cache_read", "cache_write")}
+        prev = [day_totals[d]["total_effective"] for d in days[max(0, i - 7):i]]
+        delta7 = (round(total_eff - sum(prev) / len(prev), 8)) if prev else None
+        sess = sorted(sessions_by_day.get(day, []), key=lambda s: s["start"])
+        razones = [s["cost_reason"] for s in sess if s.get("cost_reason")]
+        razon = None
+        if total_eff == 0 and (day_tokens["in"] or day_tokens["out"]
+                               or day_tokens["cache_read"]
+                               or day_tokens["cache_write"]):
+            razon = ("coste efectivo 0.0 con tokens > 0: modelos sin pricing "
+                     "en config o sesiones sin telemetría de coste")
+        day_totals[day] = {
+            "total_effective": total_eff,
+            "total_real": total_real,
+            "tokens": day_tokens,
+            "delta7": delta7,
+            "projects": projects,
+            "sessions": [{
+                "session_id": s["session_id"],
+                "project": s["project"],
+                "start": s["start"][11:16],
+                "source": s["source"],
+                "model": s["model"],
+                "n_interactions": s["n_interactions"],
+                "cost_effective": s["cost_effective"],
+                "cost_reason": s.get("cost_reason"),
+                "crosses_midnight": s.get("crosses_midnight", False),
+            } for s in sess],
+            "razon": razon,
+            "razones_sesiones": razones,
+        }
+    return {"available": True, "provenance": "assumed", "days_keys": days,
+            "days": day_totals}
+
+
+def daily_spend_html(ds):
+    """HTML de la vista "Gasto diario": selector de día (templates
+    pre-calculados, JS solo monta — mismo patrón del selector de mes del
+    bridge), tabla por proyecto y drill-down por sesión. Provenance y
+    alcance del cash declarados; día sin datos → n/a con razón."""
+    if not ds.get("available"):
+        return (f'\n  <p class="finding"><span class="na">n/a</span></p>'
+                f'\n  <p class="finding-meta">{esc_html(ds["reason"])}</p>')
+    days = ds["days"]
+    default = ds["days_keys"][-1]
+    opts = "".join(
+        f'<option value="{d}"{" selected" if d == default else ""}>{d}</option>'
+        for d in ds["days_keys"])
+
+    def _day_block(day):
+        d = days[day]
+        delta = (f" Δ {fmt_usd(d['delta7'])} vs media 7d"
+                 if d["delta7"] is not None else
+                 " <span class=\"na\">Δ n/a (sin días previos suficientes)</span>")
+        razon = (f'<p class="finding-meta">{esc_html(d["razon"])}</p>'
+                 if d.get("razon") else "")
+        proj_rows = "".join(
+            f'<tr><td>{esc_html(p["project"])}</td>'
+            f'<td class="num">{p["interactions"]}</td>'
+            f'<td class="num">{fmt_usd(p["cost_effective"])}</td>'
+            f'<td class="num">{fmt_usd(p["cost_real"])}</td>'
+            f'<td class="num">{fmt_int(sum(p["tokens"].values()))}</td></tr>'
+            for p in d["projects"])
+        if d["sessions"]:
+            sess_rows = "".join(
+                f'<tr><td>{esc_html(s["start"])}</td>'
+                f'<td>{esc_html(s["project"])}</td>'
+                f'<td>{esc_html(s["source"])}</td>'
+                f'<td>{esc_html(s["model"])}'
+                f'{" <span class=\"na\">(cruza medianoche)</span>" if s["crosses_midnight"] else ""}'
+                f'</td><td class="num">{s["n_interactions"]}</td>'
+                f'<td class="num">'
+                + (fmt_usd(s["cost_effective"]) if s["cost_effective"] is not None
+                   else f'<span class="na">n/a — {esc_html(s["cost_reason"])}</span>')
+                + '</td></tr>'
+                for s in d["sessions"])
+            faltantes = sum(1 for s in d["sessions"]
+                            if s["cost_effective"] is None)
+            nota_falt = (f' <span class="na">({faltantes} sesión(es) sin '
+                         'telemetría de coste, excluidas del total)</span>'
+                         if faltantes else "")
+            sess_table = (f'<h3>Sesiones del día</h3>'
+                          f'<table class="small"><tr><th>Inicio</th><th>Proyecto</th>'
+                          f'<th>Source</th><th>Modelo</th><th>Inter.</th><th>Coste</th></tr>'
+                          f'{sess_rows}</table><p class="small">{nota_falt}</p>')
+        else:
+            sess_table = '<p class="small">Sin sesiones registradas este día.</p>'
+        return (f'<p class="finding"><span class="val">{fmt_usd(d["total_effective"])}'
+                f'</span> <span class="small">efectivo {delta}</span></p>'
+                f'<p class="finding-meta">coste real sub_cost '
+                f'{fmt_usd(d["total_real"])} · tokens '
+                f'{fmt_int(sum(d["tokens"].values()))}</p>'
+                f'{razon}'
+                f'<h3>Por proyecto</h3>'
+                f'<table class="small"><tr><th>Proyecto</th><th>Inter.</th>'
+                f'<th>Coste efectivo</th><th>Coste real (sub_cost)</th><th>Tokens</th></tr>'
+                f'{proj_rows}</table>'
+                f'{sess_table}')
+
+    templates = "".join(
+        f'<template data-daily-day="{d}">{_day_block(d)}</template>'
+        for d in ds["days_keys"])
+    return f'''
+  <p class="finding-meta">costes serie <em>assumed</em> del tracker — el cash
+  del ledger de cargos se concilia a nivel mensual (CRG-F1) y no se mezcla
+  en este desglose diario. El selector solo lista días con actividad.</p>
+  <label class="small" for="daily-spend-day">Día
+    <select id="daily-spend-day">{opts}</select></label>
+  <div id="daily-spend-figure"></div>
+  {templates}'''
+
+
 def build_data_notes(report):
     """Sección Data: definición de interacción + kinds (FPA-140), share
     filtrado (FPA-141), timezone (FPA-142) y concurrencia (FPA-120)."""
@@ -4097,16 +4249,18 @@ def render_html(report, cfg, generated=None, today=None):
     forecast_only_html = forecast_html(model["forecast"])
     # coffe-5ng (F8): vista Energía
     energy_only_html = energy_html(model["energy"])
+    # add-session-spend-report: vista Gasto diario
+    gasto_only_html = daily_spend_html(model["daily_spend"])
     # F6: CTAs del Summary desde el config (FPA-165/168)
     ctas_block = ctas_html(cfg)
 
     model_json = json.dumps(model, ensure_ascii=False, sort_keys=True)
-    tabs = ("summary", "cost", "breakdown", "habits", "outlook",
+    tabs = ("summary", "cost", "breakdown", "gasto", "habits", "outlook",
             "energy", "data")
     tab_labels = {"summary": "Resumen", "cost": "Costo",
-                  "breakdown": "Desglose", "habits": "Hábitos",
-                  "outlook": "Pronóstico", "energy": "Energía",
-                  "data": "Datos y método"}
+                  "breakdown": "Desglose", "gasto": "Gasto diario",
+                  "habits": "Hábitos", "outlook": "Pronóstico",
+                  "energy": "Energía", "data": "Datos y método"}
     tab_html = "".join(
         f'<a class="tab" role="tab" href="#{k}" data-view="{k}"'
         f'{" aria-current=\"true\"" if k == "summary" else ""}>'
@@ -4134,10 +4288,10 @@ def render_html(report, cfg, generated=None, today=None):
         figures = guide.derive_figures(report, cfg)
         marginalia = {
             s: guide.marginalia_html(guide_dict, cfg, s, figures=figures)
-            for s in ("summary", "cost", "breakdown", "habits", "outlook",
-                      "energy", "data")}
+            for s in ("summary", "cost", "breakdown", "gasto", "habits",
+                      "outlook", "energy", "data")}
     else:
-        marginalia = {s: "" for s in ("summary", "cost", "breakdown",
+        marginalia = {s: "" for s in ("summary", "cost", "breakdown", "gasto",
                                       "habits", "outlook", "energy", "data")}
 
     body_inner = f"""<main id="main">
@@ -4157,6 +4311,11 @@ def render_html(report, cfg, generated=None, today=None):
     {budget_bridge_html}
     {f4_html}
     {recon_html}
+  </section>
+  <section id="gasto" class="fpa-view" aria-label="Gasto diario">
+    <h2>¿Cuánto gasté hoy y en qué?</h2>
+    {marginalia["gasto"]}
+    {gasto_only_html}
   </section>
   <section id="breakdown" class="fpa-view" aria-label="Desglose">
     <h2>¿A dónde va el gasto?</h2>
@@ -4435,7 +4594,7 @@ def render_html(report, cfg, generated=None, today=None):
   }});
 
   // ============ F6: vistas, tabs, top-5, export, share, readout ============
-  var VIEWS = ["summary", "cost", "breakdown", "habits", "outlook",
+  var VIEWS = ["summary", "cost", "breakdown", "gasto", "habits", "outlook",
                "energy", "data"];
   function setView(key) {{
     if (VIEWS.indexOf(key) < 0) return;
@@ -4551,6 +4710,22 @@ def render_html(report, cfg, generated=None, today=None):
     bridgeSel.addEventListener("change", mountBridge);
     mountBridge();
   }}
+  // add-session-spend-report: vista Gasto diario — monta el día elegido
+  // desde templates data-daily-day (pre-calculados en Python), sin recarga.
+  var dailySel = document.getElementById("daily-spend-day");
+  function mountDaily() {{
+    var fig = document.getElementById("daily-spend-figure");
+    if (!dailySel || !fig) return;
+    var t = document.querySelector(
+      'template[data-daily-day="' + dailySel.value + '"]');
+    fig.textContent = "";
+    if (t && t.content) fig.appendChild(t.content.cloneNode(true));
+    bindReadout();
+  }}
+  if (dailySel) {{
+    dailySel.addEventListener("change", mountDaily);
+    mountDaily();
+  }}
   // FPA-170/171: Share view — URL con periodo, vista y expansión de árbol;
   // al cargar se restaura solo con parámetros válidos (los inválidos se
   // ignoran y quedan los defaults).
@@ -4578,6 +4753,13 @@ def render_html(report, cfg, generated=None, today=None):
     try {{ var q = new URLSearchParams(location.search); }} catch (err) {{ return; }}
     var v = q.get("view");
     if (v && VIEWS.indexOf(v) >= 0) setView(v);  // FPA-171: inválidos ignorados
+    // add-session-spend-report: deep-link de la vista con el día
+    // (?view=gasto&day=YYYY-MM-DD) — días inválidos se ignoran (default).
+    var gd = q.get("day");
+    if (gd && dailySel && dailySel.querySelector('option[value="' + gd + '"]')) {{
+      dailySel.value = gd;
+      mountDaily();
+    }}
     var pd = q.get("period");
     if (pd && sel && MODEL.views[pd]) {{ sel.value = pd; renderView(pd); }}
     var open = q.get("open");
