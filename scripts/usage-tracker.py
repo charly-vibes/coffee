@@ -2009,6 +2009,12 @@ def aggregate(interactions, sessions, skills_total=None, skills_by_project=None,
     project_monthly = defaultdict(lambda: defaultdict(lambda: {
         "interactions": 0, "cost_effective": 0.0, "cost_real": 0.0,
         "tokens": {"in": 0, "out": 0, "cache_read": 0, "cache_write": 0}}))
+    # add-session-spend-report: gasto por proyecto × día (sparse, solo días
+    # con actividad; misma semántica de coste que los buckets). Aditivo:
+    # project_daily (Gantt) y project_monthly no cambian.
+    project_daily_spend = defaultdict(lambda: defaultdict(lambda: {
+        "interactions": 0, "cost_effective": 0.0, "cost_real": 0.0,
+        "tokens": {"in": 0, "out": 0, "cache_read": 0, "cache_write": 0}}))
     project_models = defaultdict(lambda: defaultdict(lambda: {
         "interactions": 0, "cost_effective": 0.0}))
 
@@ -2058,6 +2064,14 @@ def aggregate(interactions, sessions, skills_total=None, skills_by_project=None,
         pmo = project_models[proj][r["model_raw"]]
         pmo["interactions"] += 1
         pmo["cost_effective"] += r.get("cost_effective", 0) or 0
+        pds = project_daily_spend[proj][d]
+        pds["interactions"] += 1
+        pds["cost_effective"] += r.get("cost_effective", 0) or 0
+        pds["cost_real"] += real
+        pds["tokens"]["in"] += r.get("input_tokens", 0) or 0
+        pds["tokens"]["out"] += r.get("output_tokens", 0) or 0
+        pds["tokens"]["cache_read"] += r.get("cache_read_tokens", 0) or 0
+        pds["tokens"]["cache_write"] += r.get("cache_write_tokens", 0) or 0
         # FPA-140: interacciones por kind — filas (assistant/tool) + inyectados
         # (user prompts de extractores)
         kind_key = (r.get("timestamp") or "")[:7]
@@ -2337,6 +2351,14 @@ def aggregate(interactions, sessions, skills_total=None, skills_by_project=None,
         },
         "multitasking": multitasking,
         "project_daily": project_daily,
+        "project_daily_spend": {
+            p: {day: {
+                "interactions": v["interactions"],
+                "cost_effective": round(v["cost_effective"], 8),
+                "cost_real": round(v["cost_real"], 8),
+                "tokens": dict(v["tokens"]),
+            } for day, v in sorted(days.items())}
+            for p, days in sorted(project_daily_spend.items())},
         "project_monthly": {p: dict(ms) for p, ms in project_monthly.items()},
         "project_models": {p: {m: {"interactions": v["interactions"],
                                    "cost_effective": round(v["cost_effective"], 8)}

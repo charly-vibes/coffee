@@ -17,7 +17,8 @@
     "project_daily",
     "subscription_config",
     "subscription_fees_by_month",
-    "context_metrics"
+    "context_metrics",
+    "project_daily_spend"
   ],
   "properties": {
     "metadata": {
@@ -1104,6 +1105,65 @@
             "excluded_pathological": {
               "type": "integer",
               "minimum": 0
+            }
+          }
+        }
+      }
+    },
+    "project_daily_spend": {
+      "description": "add-session-spend-report: gasto por proyecto y día (sparse — solo días con actividad). Misma semántica de coste que los buckets; rollup mensual cuadra con project_monthly.",
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "patternProperties": {
+          "^[0-9]{4}-[0-9]{2}-[0-9]{2}$": {
+            "type": "object",
+            "required": [
+              "interactions",
+              "cost_effective",
+              "cost_real",
+              "tokens"
+            ],
+            "properties": {
+              "interactions": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "cost_effective": {
+                "type": "number",
+                "minimum": 0
+              },
+              "cost_real": {
+                "type": "number",
+                "minimum": 0
+              },
+              "tokens": {
+                "type": "object",
+                "required": [
+                  "in",
+                  "out",
+                  "cache_read",
+                  "cache_write"
+                ],
+                "properties": {
+                  "in": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "out": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "cache_read": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "cache_write": {
+                    "type": "integer",
+                    "minimum": 0
+                  }
+                }
+              }
             }
           }
         }

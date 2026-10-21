@@ -489,8 +489,29 @@ class TestPiCostEstimate(unittest.TestCase):
 
 class TestGolden(unittest.TestCase):
 
+    @staticmethod
+    def _injected_skills():
+        """Skills/comandos herméticos: derivados del propio golden.
+
+        aggregate() es pura e inyectable (project.md: probar con rows
+        sintéticos, no logs reales) — inyectar evita que la colección en
+        vivo de skills de la máquina contamine el snapshot (drift entre
+        entornos). Sin golden todavía: colección en vivo (regen inicial).
+        """
+        if GOLDEN.exists():
+            g = json.loads(GOLDEN.read_text())
+            return (g.get("skills") or {},
+                    {p: v.get("skills") or {}
+                     for p, v in (g.get("projects") or {}).items()},
+                    g.get("commands") or {})
+        return None
+
     def test_aggregate_golden(self):
-        report = ut.aggregate(synthetic_rows(), synthetic_sessions())
+        skills = self._injected_skills()
+        report = ut.aggregate(synthetic_rows(), synthetic_sessions(),
+                              skills_total=skills[0],
+                              skills_by_project=skills[1],
+                              commands=skills[2])
         if REGEN_GOLDEN:
             GOLDEN.parent.mkdir(parents=True, exist_ok=True)
             GOLDEN.write_text(json.dumps(report, indent=2, sort_keys=True, default=str) + "\n")
