@@ -27,6 +27,12 @@ y día, con agregación pura e inyectable y emisión sparse igual que
 - **WHEN** un proyecto no tiene interacciones en un día
 - **THEN** no existe la entrada `project_daily_spend[proj][day]`
 
+#### Scenario: rollup mensual cuadra con project_monthly
+
+- **WHEN** se suman los días de `project_daily_spend[proj]` de un mes
+- **THEN** los tokens y el coste efectivo del mes cuadran con
+  `project_monthly[proj]` (FPA-012) para ese proyecto
+
 ### Requirement: emisión aditiva de granularidades nuevas
 
 La emisión de `project_daily_spend` y `session_spend` SHALL (debe) ser
@@ -39,8 +45,6 @@ cambia de semántica.
 - **THEN** el diff solo muestra las claves nuevas; las cifras existentes son
   byte a byte idénticas
 
-## ADDED Requirements
-
 ### Requirement: filas por sesión con coste y tokens
 
 El tracker SHALL (debe) emitir en `session_spend` una fila por sesión
@@ -52,17 +56,25 @@ primera interacción), `source` (tool proveedor), `model` dominante (o
 
 #### Scenario: sesión con coste completo
 
-- **WHEN** el tracker procesa una sesión con telemetría `usage.cost`
+- **WHEN** el tracker procesa una sesión con telemetría `usage.cost` que no
+  cruza medianoche
 - **THEN** la fila trae coste y tokens consistentes con la suma de sus
   interacciones, y la suma de `session_spend` del día cuadra con
   `project_daily_spend` y con el bucket diario global
+
+#### Scenario: sesión sin identificador nativo
+
+- **WHEN** el log de una sesión no trae identificador de sesión nativo
+- **THEN** la fila se emite igual con un `session_id` de reserva derivado de
+  la ruta del archivo (hash), marcando `session_id_fallback: true`
 
 ### Requirement: coste ausente en filas de sesión es null con razón
 
 Cuando el coste no esté disponible para una sesión (turnos abortados o
 proveedor sin billing por token), los campos de coste de su fila en
 `session_spend` SHALL (debe) ser `null` con una `cost_reason` en la fila —
-mismo patrón "null con razón" del coste por sesión existente — nunca 0 fake.
+mismo patrón "null con razón" del coste por sesión existente, reutilizando
+las mismas cadenas de razón del tracker — nunca 0 fake.
 
 #### Scenario: sesión sin telemetría de coste
 
@@ -79,8 +91,10 @@ asimetría se documenta.
 #### Scenario: sesión abarca dos días
 
 - **WHEN** una sesión abarca dos días locales
-- **THEN** la fila se atribuye al día de su primera interacción y el
-  contra-cuadre con los buckets diarios se documenta en `README.md`
+- **THEN** la fila se atribuye al día de su primera interacción, la suma
+  `session_spend` del día difiere de `project_daily_spend` exactamente en
+  las sesiones que cruzan medianoche, y esta asimetría se documenta en
+  `README.md`
 
 ### Requirement: schema y golden actualizados
 
@@ -95,3 +109,15 @@ regenerarse de forma que el diff solo contenga los campos nuevos.
   secciones nuevas
 - **THEN** valida sin errores, y un reporte sin `project_daily_spend` o
   `session_spend` falla la validación
+
+### Requirement: semántica de día heredada
+
+El día de `project_daily_spend` y de `session_spend` SHALL (debe) usar la
+misma TZ local de extracción (`LOCAL_TZ`) que los buckets diarios
+existentes, heredando su advertencia documentada de que cambiar de máquina
+de extracción desplaza los límites de día.
+
+#### Scenario: sesión cerca de medianoche
+
+- **WHEN** una interacción cae a segundos del límite de día local
+- **THEN** se bucketea con la misma TZ que `daily`, sin conversión adicional

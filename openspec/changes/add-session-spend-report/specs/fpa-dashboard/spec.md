@@ -5,9 +5,9 @@
 El Dashboard SHALL (debe) incluir una vista "Gasto diario" que, a partir de
 `project_daily_spend` del reporte, muestre para el día (o rango) seleccionado
 el gasto total con delta vs. media de los 7 días previos y el desglose por
-proyecto en tabla (coste efectivo, real y tokens), siguiendo las convenciones
-del dashboard: provenance, lenguaje llano, deep-link, export CSV y
-pre-cálculo en Python.
+proyecto en tabla (coste efectivo *assumed*, coste real sub_cost y tokens),
+siguiendo las convenciones del dashboard: provenance, lenguaje llano,
+deep-link, export CSV y pre-cálculo en Python.
 
 #### Scenario: gasto de un día por proyecto
 
@@ -26,6 +26,19 @@ pre-cálculo en Python.
 - **THEN** la vista muestra el estado vacío con la razón (sin actividad o
   fuera del rango del reporte) en vez de un error o tabla vacía silenciosa
 
+#### Scenario: total 0.0 con tokens positivos
+
+- **WHEN** el día tiene tokens > 0 pero coste efectivo 0.0 (modelos sin
+  pricing, FPA-008)
+- **THEN** la vista muestra la razón junto al total, no un cero silencioso
+
+#### Scenario: alcance del cash real
+
+- **WHEN** se consulta la vista buscando el cash del ledger de cargos
+- **THEN** la vista declara que el desglose diario usa la serie *assumed*
+  (sub_cost) y que el cash del ledger se concilia a nivel mensual (CRG-F1),
+  sin mezclar ambas series en la misma columna
+
 ### Requirement: vista Gasto diario: drill-down por sesión
 
 La vista "Gasto diario" SHALL (debe) incluir un drill-down con las sesiones
@@ -37,7 +50,8 @@ CSV.
 
 - **WHEN** se expande el drill-down de un día con varias sesiones
 - **THEN** la tabla lista cada sesión con su proyecto y coste, y la suma de
-  la tabla cuadra con `project_daily_spend` del día
+  la tabla cuadra con `project_daily_spend` del día salvo las sesiones que
+  cruzan medianoche, marcadas como tales
 
 #### Scenario: sesión sin coste en el drill-down
 

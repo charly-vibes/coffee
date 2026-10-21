@@ -4,8 +4,9 @@
 
 Hoy no existe un reporte de gasto por día × proyecto × sesión:
 
-- El reporte (`usage_report_v3.json`) emite gasto por día global (`daily`) y
-  por proyecto × mes (`project_monthly`), pero la especificación excluye
+- El reporte (`usage_report_v3.json`) emite gasto por día agregado
+  (`daily`) y por proyecto × mes (`project_monthly`), pero la
+  especificación excluye
   explícitamente el coste por proyecto × día
   ("granularidad proyecto × día fuera de alcance").
 - La sección `sessions` del reporte solo trae contadores agregados

@@ -6,9 +6,9 @@
       y shape esperado de `project_daily_spend` (cuadre con `daily` y con
       `project_monthly`)
 - [ ] 1.2 Red: `tests/test_tracker_spend.py` falla porque la sección no existe
-- [ ] 1.3 Implementar emisión en `scripts/usage-tracker.py` (agregación pura,
-      inyectable, sparse por proyecto/día) y registro en el schema
-      `specs/usage-report-v3.schema.json`
+- [ ] 1.3 Implementar emisión en `scripts/usage-tracker.py` (agregación
+      pura, inyectable, sparse por proyecto/día) y actualizar el schema
+      `specs/usage-report-v3.schema.json` con aserción de schema en el test
 - [ ] 1.4 Green: tests pasan; regenerar golden (`REGEN_GOLDEN=1`) y verificar
       que el diff solo añade claves nuevas
 
