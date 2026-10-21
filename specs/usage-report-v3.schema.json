@@ -18,7 +18,8 @@
     "subscription_config",
     "subscription_fees_by_month",
     "context_metrics",
-    "project_daily_spend"
+    "project_daily_spend",
+    "session_spend"
   ],
   "properties": {
     "metadata": {
@@ -1163,6 +1164,97 @@
                     "minimum": 0
                   }
                 }
+              }
+            }
+          }
+        }
+      }
+    },
+    "session_spend": {
+      "description": "add-session-spend-report: una fila por sesión in-scope. day = día local de la primera interacción (los buckets diarios reparten por interacción — sesiones que cruzan medianoche no cuadran 1:1, ver README). Coste ausente → null + cost_reason, nunca 0 fake. session_id_fallback: true cuando el log no trae identificador nativo (hash de reserva).",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "session_id",
+          "project",
+          "day",
+          "source",
+          "model",
+          "n_interactions",
+          "cost_effective",
+          "cost_real",
+          "cost_reason",
+          "tokens",
+          "session_id_fallback"
+        ],
+        "properties": {
+          "session_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "session_id_fallback": {
+            "type": "boolean"
+          },
+          "project": {
+            "type": "string"
+          },
+          "day": {
+            "type": "string",
+            "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+          },
+          "source": {
+            "type": "string"
+          },
+          "model": {
+            "type": "string"
+          },
+          "n_interactions": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "cost_effective": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "cost_real": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "cost_reason": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "tokens": {
+            "type": "object",
+            "required": [
+              "in",
+              "out",
+              "cache_read",
+              "cache_write"
+            ],
+            "properties": {
+              "in": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "out": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "cache_read": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "cache_write": {
+                "type": "integer",
+                "minimum": 0
               }
             }
           }

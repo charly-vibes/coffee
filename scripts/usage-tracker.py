@@ -675,6 +675,7 @@ def extract_claude(skipped=None, kinds=None, excluded=None):
                                 "cache_write_tokens": cache_c,
                                 "cost_effective": cost,
                                 "kind": _kind_of_claude(entry, msg),
+                                "session_file": f.name,  # add-session-spend-report
                             })
             except (json.JSONDecodeError, OSError, ValueError, TypeError, KeyError) as e:
                 if skipped is not None:
@@ -733,6 +734,8 @@ def extract_claude(skipped=None, kinds=None, excluded=None):
                 "cache_write_tokens": 0,
                 "cost_effective": cost,
                 "kind": "assistant_turn",
+                # add-session-spend-report: sin archivo de sesión → fila con
+                # session_id de reserva (hash), nunca atribuida a una sesión ajena
             })
 
     return merged, excluded_rows
@@ -817,6 +820,7 @@ def extract_pi(skipped=None, kinds=None, excluded=None, sessions_dir=None):
                             "cache_write_tokens": cache_w or 0,
                             "cost_effective": cost,
                             "kind": "tool_call" if _pi_has_tool_call(msg) else "assistant_turn",
+                            "session_file": f.name,  # add-session-spend-report
                         })
             except (json.JSONDecodeError, OSError, ValueError, TypeError, KeyError) as e:
                 if skipped is not None:
@@ -899,6 +903,7 @@ def extract_amp():
                     "input_tokens": 0, "output_tokens": 0,
                     "cache_read_tokens": 0, "cache_write_tokens": 0,
                     "cost_effective": 0,
+                    "session_file": td.name,  # add-session-spend-report (hilo amp = sesión)
                 })
     return rows
 
@@ -992,6 +997,7 @@ def _parse_codex_rollout(f, rows, skipped=None):
             "cache_read_tokens": cached,
             "cache_write_tokens": u.get("cache_write_input_tokens") or 0,
             "cost_effective": cost,
+            "session_file": f.name,  # add-session-spend-report
         })
 
 
@@ -1983,6 +1989,68 @@ def collect_skills_and_commands():
     return by_skill_total, skills_by_project, commands
 
 
+def _session_spend(interactions):
+    """add-session-spend-report: filas por sesión con coste y tokens.
+
+    Agrupa rows por (tool, project, session_file) — el archivo ES la sesión
+    en pi/claude/codex (stem = uuid nativo) y el hilo en amp. Rows sin
+    session_file (claude_cache_only) → session_id de reserva (hash),
+    session_id_fallback: true. Sesión atribuida al día local de su primera
+    interacción (los buckets diarios reparten por interacción — asimetría
+    documentada en README). Coste ausente (todos los turnos a 0.0 sin
+    tokens) → null con cost_reason, mismo patrón que context_metrics.
+    """
+    import hashlib
+    groups = defaultdict(list)
+    for r in interactions:
+        groups[(r["tool"], clean_proj_name(r.get("project", "unknown")),
+                r.get("session_file"))].append(r)
+    out = []
+    for (tool, proj, sfile), rows in groups.items():
+        rows.sort(key=lambda r: r["timestamp"])
+        if sfile:
+            session_id = Path(sfile).stem
+            fallback = False
+        else:
+            seed = f"{tool}|{proj}|{rows[0]['timestamp']}"
+            session_id = "cache-only-" + hashlib.sha1(seed.encode()).hexdigest()[:12]
+            fallback = True
+        costs = [r.get("cost_effective", 0) or 0 for r in rows]
+        tokens_sum = {
+            "in": sum(r.get("input_tokens", 0) or 0 for r in rows),
+            "out": sum(r.get("output_tokens", 0) or 0 for r in rows),
+            "cache_read": sum(r.get("cache_read_tokens", 0) or 0 for r in rows),
+            "cache_write": sum(r.get("cache_write_tokens", 0) or 0 for r in rows),
+        }
+        if all(c == 0 for c in costs):
+            cost_eff = cost_real = None
+            cost_reason = ("sin usage.cost en ningún turno (turnos abortados "
+                           "o proveedor sin billing por token)")
+        else:
+            cost_eff = round(sum(costs), 8)
+            cost_real = round(sum(
+                get_sub_cost(r["tool"], r.get("timestamp", ""),
+                             r.get("cost_effective", 0) or 0)[0]
+                for r in rows), 8)
+            cost_reason = None
+        models = {r["model_raw"] for r in rows}
+        out.append({
+            "session_id": session_id,
+            "session_id_fallback": fallback,
+            "project": proj,
+            "day": rows[0]["hour"][:10],  # día local (misma TZ que los buckets)
+            "source": tool,
+            "model": models.pop() if len(models) == 1 else "mixed",
+            "n_interactions": len(rows),
+            "cost_effective": cost_eff,
+            "cost_real": cost_real,
+            "cost_reason": cost_reason,
+            "tokens": tokens_sum,
+        })
+    out.sort(key=lambda r: (r["day"], r["project"], r["session_id"]))
+    return out
+
+
 def aggregate(interactions, sessions, skills_total=None, skills_by_project=None,
               commands=None, excluded=None, interaction_kinds=None,
               outcomes=None, outcomes_reason=None, context_metrics=None):
@@ -2351,6 +2419,7 @@ def aggregate(interactions, sessions, skills_total=None, skills_by_project=None,
         },
         "multitasking": multitasking,
         "project_daily": project_daily,
+        "session_spend": _session_spend(interactions),
         "project_daily_spend": {
             p: {day: {
                 "interactions": v["interactions"],
