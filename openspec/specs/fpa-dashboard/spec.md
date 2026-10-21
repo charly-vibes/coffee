@@ -9,7 +9,9 @@ evidencia, economía de suscripción, patrones de uso, energía estimada y guía
 de análisis marginalia. Generador Python stdlib-only que produce un único HTML
 autocontenido sobre el dataset del contrato `usage-report`, en el tema
 compartido del sitio, con grounding y check-docs de sus cifras.
+
 ## Requirements
+
 ### Requirement: Generador stdlib-only autocontenido
 
 El Dashboard SHALL (debe) generarse con un script Python stdlib-only
@@ -95,7 +97,6 @@ igualar la suma de hijos ($0.01 / 1 interacción) y los árboles y KPIs SHALL
 - **THEN** la suma de sus hijos difiere del padre en ≤ $0.01 y ≤ 1 interacción
   (verificado por test dorado FPA-101)
 
-
 #### Scenario: drill de Portfolio
 
 - **WHEN** un proyecto del árbol Portfolio tiene datos por modelo
@@ -120,7 +121,6 @@ parcial SHALL (debe) comparar daily rates (FPA-045).
 
 - **WHEN** un KPI tiene denominador 0 (p.ej. 0 interacciones)
 - **THEN** la card muestra "n/a" con la razón
-
 
 #### Scenario: KPIs de tokens excluidos por tool sin datos
 
@@ -222,7 +222,6 @@ bajo el header de la vista.
 - **THEN** los chips ocupan un único strip bajo el header de la vista y no
   quedan chips flotando fuera de él
 
-
 #### Scenario: nombres, idioma y Data & method
 
 - **WHEN** se renderiza una vista
@@ -274,7 +273,6 @@ y overlay de fechas de creación de repos en el trend mensual (FPA-098).
 
 - **WHEN** el tracker no registró timezone
 - **THEN** las vistas hora/día se marcan "unverified" (FPA-142)
-
 
 #### Scenario: gaps flag en el timeline
 
@@ -361,7 +359,6 @@ de docs en CI.
 - **WHEN** el generador corre dos veces con el mismo input
 - **THEN** el output es idéntico salvo la fecha de generación (FPA-104)
 
-
 #### Scenario: smoke Playwright falla loud
 
 - **WHEN** el smoke Playwright corre contra la página renderizada
@@ -397,7 +394,6 @@ separados, jamás sumados (FPA-002).
 - **WHEN** el ledger incluye un refund negativo en el periodo
   (p.ej. claude-cli −$28.22 el 2026-02-19)
 - **THEN** el cash del periodo lo descuenta (es dinero devuelto, no gastado)
-
 
 #### Scenario: fees implícitos no son cash
 
@@ -509,7 +505,6 @@ difiera del real.
 - **THEN** falla loud si el mapeo referencia un análisis inexistente en la guía
   o si un umbral citado por la guía difiere de su valor real en config/código
 
-
 ### Requirement: consolidación de dashboards
 
 El Dashboard SHALL (debe) ser el dashboard único del sitio con su nombre
@@ -579,7 +574,6 @@ cifra primaria.
 - **WHEN** se renderiza la fila de CTAs del Summary
 - **THEN** cada CTA mide ≤ 64px de alto y la fila ocupa una sola línea de
   layout a ≥600px
-
 
 #### Scenario: contenedor sin columnas muertas
 
@@ -678,7 +672,6 @@ y 100% de acierto de caché y el escenario base el factor nominal (10%).
 - **THEN** la vista renderiza sin errores de consola y su total es legible en
   el readout accesible
 
-
 #### Scenario: accesibilidad y guía de la vista energía
 
 - **WHEN** se revisa la vista Energía
@@ -711,7 +704,6 @@ tooltips, deep-link y export CSV/SVG.
 - **WHEN** se abre el dashboard con el hash de la vista y proyecto
 - **THEN** la vista Proyectos: timeline abre con ese proyecto seleccionado
 
-
 #### Scenario: composición de tokens y mes sin coste
 
 - **WHEN** se lee el volumen de tokens de un mes o un mes tiene coste efectivo
@@ -720,3 +712,61 @@ tooltips, deep-link y export CSV/SVG.
   coste 0.0 muestra la razón (FPA-008, p.ej. modelos sin pricing en config),
   no un área vacía silenciosa
 
+### Requirement: vista Gasto diario: total y desglose por proyecto
+
+El Dashboard SHALL (debe) incluir una vista "Gasto diario" que, a partir de
+`project_daily_spend` del reporte, muestre para el día (o rango) seleccionado
+el gasto total con delta vs. media de los 7 días previos y el desglose por
+proyecto en tabla (coste efectivo *assumed*, coste real sub_cost y tokens),
+siguiendo las convenciones del dashboard: provenance, lenguaje llano,
+deep-link, export CSV y pre-cálculo en Python.
+
+#### Scenario: gasto de un día por proyecto
+
+- **WHEN** se selecciona un día con actividad en varios proyectos
+- **THEN** la vista muestra el total del día y la tabla por proyecto, y la
+  suma de la tabla cuadra con el bucket diario global del reporte
+
+#### Scenario: deep-link de la vista
+
+- **WHEN** se abre el dashboard con el hash de la vista y el día
+- **THEN** la vista abre con ese día seleccionado
+
+#### Scenario: día sin actividad
+
+- **WHEN** se selecciona un día sin sesiones in-scope
+- **THEN** la vista muestra el estado vacío con la razón (sin actividad o
+  fuera del rango del reporte) en vez de un error o tabla vacía silenciosa
+
+#### Scenario: total 0.0 con tokens positivos
+
+- **WHEN** el día tiene tokens > 0 pero coste efectivo 0.0 (modelos sin
+  pricing, FPA-008)
+- **THEN** la vista muestra la razón junto al total, no un cero silencioso
+
+#### Scenario: alcance del cash real
+
+- **WHEN** se consulta la vista buscando el cash del ledger de cargos
+- **THEN** la vista declara que el desglose diario usa la serie *assumed*
+  (sub_cost) y que el cash del ledger se concilia a nivel mensual (CRG-F1),
+  sin mezclar ambas series en la misma columna
+
+### Requirement: vista Gasto diario: drill-down por sesión
+
+La vista "Gasto diario" SHALL (debe) incluir un drill-down con las sesiones
+del día seleccionado: tabla por sesión con proyecto, hora de inicio,
+source, model, interacciones y coste, filtrable por proyecto y exportable a
+CSV.
+
+#### Scenario: sesiones de un día por proyecto
+
+- **WHEN** se expande el drill-down de un día con varias sesiones
+- **THEN** la tabla lista cada sesión con su proyecto y coste, y la suma de
+  la tabla cuadra con `project_daily_spend` del día salvo las sesiones que
+  cruzan medianoche, marcadas como tales
+
+#### Scenario: sesión sin coste en el drill-down
+
+- **WHEN** una sesión listada no tiene telemetría de coste
+- **THEN** su fila muestra la razón (p.ej. "sin billing por token") en lugar
+  de un cero, y el total excluye esas sesiones marcándolas como faltantes

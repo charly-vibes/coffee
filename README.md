@@ -249,6 +249,40 @@ terapia_errors, ah_findings) — TTL 7 días.
   cache). Plan: híbrido — Pi vía cache toolpath (o conteo de archivos como v1),
   Claude vía dashboard-cache, Amp hand-rolled, provenance por fuente.
 
+## Gasto por proyecto × día y por sesión (add-session-spend-report)
+
+El reporte emite dos secciones nuevas (schema `usage-report-v3.schema.json`,
+ambas requeridas):
+
+- **`project_daily_spend[proyecto][día]`** — coste efectivo, coste real
+  sub_cost y tokens (`in`/`out`/`cache_read`/`cache_write`) por proyecto y
+  día. Sparse: solo días con actividad. El rollup mensual cuadra con
+  `project_monthly` (testeado); la suma del día cuadra con el bucket
+  `daily` global.
+- **`session_spend[]`** — una fila por sesión in-scope: `session_id`
+  (stem del archivo — el archivo ES la sesión en pi/claude/codex; el hilo
+  en amp), `project`, `day`, `start`/`end`, `source`, `model` (o `mixed`),
+  `n_interactions`, costes y tokens. Coste ausente → `null` +
+  `cost_reason` (misma cadena canónica de context_metrics), nunca 0 fake.
+  `session_id_fallback: true` cuando el log no trae identificador nativo
+  (claude_cache_only: hash de reserva).
+
+**Asimetría documentada (sesiones que cruzan medianoche):** la fila de
+`session_spend` se atribuye al día local de su primera interacción
+(`LOCAL_TZ`, misma TZ que los buckets — cambiar de máquina de extracción
+desplaza los límites de día), mientras que los buckets diarios reparten
+por interacción. Una sesión que cruza medianoche suma su coste completo
+en un solo día: la suma `session_spend` del día difiere de
+`project_daily_spend` exactamente en esas sesiones (flag
+`crosses_midnight`). El dashboard las marca en el drill-down.
+
+**Placeholders {} / [] en `data/` y en el fixture congelado:** los logs
+de claude-cli de ~mayo 2026 fueron podados localmente después del nightly
+de 2026-10-21 (ver issue beads coffe-jg3) — una regen local produciría un
+dataset parcial. Hasta que el nightly regenere con las secciones reales,
+ambos archivos llevan las claves vacías (honestas: no afirman datos) y la
+vista "Gasto diario" del dashboard muestra n/a con razón.
+
 ## Lo único que sigue sin resolver
 
 - **Enero 1-10.** Información no disponible. Los primeros commits (jams, fabbro) son del 6-7 de enero pero no hay logs de qué herramienta se usó. Amp arranca recién el 11. Posiblemente Claude Code sin persistencia de sesiones en ese entonces.
