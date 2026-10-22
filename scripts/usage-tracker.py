@@ -2034,11 +2034,15 @@ def _session_spend(interactions):
                 for r in rows), 8)
             cost_reason = None
         models = {r["model_raw"] for r in rows}
+        local_days = {r["hour"][:10] for r in rows}
         out.append({
             "session_id": session_id,
             "session_id_fallback": fallback,
             "project": proj,
             "day": rows[0]["hour"][:10],  # día local (misma TZ que los buckets)
+            "start": rows[0]["timestamp"],
+            "end": max(r["timestamp"] for r in rows),
+            "crosses_midnight": len(local_days) > 1,
             "source": tool,
             "model": models.pop() if len(models) == 1 else "mixed",
             "n_interactions": len(rows),

@@ -1257,6 +1257,15 @@
                 "minimum": 0
               }
             }
+          },
+          "start": {
+            "type": "string"
+          },
+          "end": {
+            "type": "string"
+          },
+          "crosses_midnight": {
+            "type": "boolean"
           }
         }
       }

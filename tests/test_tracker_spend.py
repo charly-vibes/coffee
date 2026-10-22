@@ -151,6 +151,22 @@ class TestSessionSpend(unittest.TestCase):
             {"in": 2000, "out": 1000, "cache_read": 200, "cache_write": 40},
             s["tokens"])
         self.assertIsNone(s["cost_reason"])
+        # start/end (drill-down: hora de inicio + flag medianoche)
+        self.assertIn("2026-05-10T14:23", s["start"])
+        self.assertIn("2026-05-10T15:40", s["end"])
+        self.assertFalse(s["crosses_midnight"])
+
+    def test_medianoche_flag_explicito(self):
+        rows = [
+            row(ts="2026-05-10T23:59:00-03:00", project="charly-coffee",
+                session_file="019eeee.jsonl"),
+            row(ts="2026-05-11T00:01:00-03:00", project="charly-coffee",
+                session_file="019eeee.jsonl"),
+        ]
+        rep = ut.aggregate(rows, [])
+        ss = rep["session_spend"]
+        self.assertTrue(ss[0]["crosses_midnight"])
+        self.assertEqual("2026-05-10", ss[0]["day"])
 
     def test_modelo_cambiado_es_mixed(self):
         rows = spend_rows() + [
