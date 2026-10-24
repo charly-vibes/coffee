@@ -431,7 +431,7 @@ def render(model):
         reason = html.escape(model.get("reason") or "unavailable")
         return f"""<!DOCTYPE html>
 <html lang="es">
-<head><meta charset="utf-8"><title>Contexto — sin datos</title>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Contexto — sin datos</title>
 <style>{v}{base}
 body {{ margin: 0; padding: 18px; background: {t['--bg']}; color: {t['--fg']};
         font-size: 13px; font-family: Arial, sans-serif; }}
@@ -644,6 +644,7 @@ body {{ margin: 0; padding: 18px; background: {t['--bg']}; color: {t['--fg']};
 <html lang="es">
 <head>
 <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Contexto — distribución del pico por sesión (Pi)</title>
 <style>
 {v}{base}

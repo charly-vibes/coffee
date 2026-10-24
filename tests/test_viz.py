@@ -974,5 +974,59 @@ class TestVizDdlChromium(unittest.TestCase):
         pg.close()
 
 
+class TestMobileViewportMeta(unittest.TestCase):
+    """coffe-tmm.2: índice, Contexto y Gantt usan el viewport real del
+    teléfono. Ambas plantillas omitían meta viewport → Chromium móvil con
+    pantalla de 390px reportaba clientWidth=980 (fallback). Gate: las tres
+    páginas declaran width=device-width, initial-scale=1 sin bloquear zoom,
+    y en Chromium móvil 390x844 documentElement.clientWidth=390 CSS px.
+    No se exige innerWidth=390: el overflow preexistente de Gantt (421px) es
+    de coffe-tmm.3."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.chrome = find_chromium()
+        if not cls.chrome:
+            raise unittest.SkipTest("chromium de playwright no encontrado")
+
+    PAGES = (
+        ("índice", REPO / "index.html"),
+        ("contexto", REPO / "data" / "context-dashboard.html"),
+        ("gantt", REPO / "data" / "gantt-multitasking.html"),
+    )
+
+    def test_clientwidth_es_viewport_real_y_meta_declarada(self):
+        for nombre, page_path in self.PAGES:
+            with self.subTest(pagina=nombre):
+                if not page_path.exists():
+                    self.fail(f"página no generada: {page_path}")
+                with sync_playwright() as p:
+                    browser = p.chromium.launch(executable_path=self.chrome,
+                                                args=["--no-sandbox"])
+                    pg = browser.new_page(
+                        viewport={"width": 390, "height": 844},
+                        is_mobile=True, has_touch=True)
+                    pg.goto(f"file://{page_path}")
+                    pg.wait_for_timeout(300)
+                    meta = pg.evaluate(
+                        "document.querySelector('meta[name=viewport]')"
+                        "?.content || ''")
+                    self.assertIn("width=device-width", meta,
+                        f"{nombre}: meta viewport sin width=device-width")
+                    self.assertIn("initial-scale=1", meta,
+                        f"{nombre}: meta viewport sin initial-scale=1")
+                    self.assertNotIn("user-scalable=no", meta,
+                        f"{nombre}: meta viewport bloquea zoom")
+                    self.assertNotIn("maximum-scale", meta,
+                        f"{nombre}: meta viewport bloquea zoom (maximum-scale)")
+                    client_width = pg.evaluate(
+                        "document.documentElement.clientWidth")
+                    self.assertEqual(
+                        client_width, 390,
+                        f"{nombre}: clientWidth={client_width}, esperado 390 "
+                        "(viewport real del teléfono)")
+                    browser.close()
+
+
 if __name__ == "__main__":
     unittest.main()
