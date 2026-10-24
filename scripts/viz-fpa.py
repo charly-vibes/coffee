@@ -3407,6 +3407,14 @@ body[data-view="data"] #data { display: block; }
      la línea decorativa retro sale, la topbar y los márgenes se aprietan. */
   header.site .retro { display: none; }
   .topbar { padding: .25rem .4rem; gap: .3rem; }
+  /* coffe-tmm.3/FPA-109: título + selector + primera headline completos en
+     el primer viewport 390x844. El topbar con tabs de texto ancho apilaba
+     3 filas (~46px c/u); tabs más compactos (misma min-height 44px táctil)
+     bajan a 2 filas, y la headline card se aprieta ~14px vía padding.
+     Estructura y tema intactos. */
+  .topbar .tab { padding: .4rem .45rem; font-size: .85rem; }
+  .headline { padding: .5rem .6rem; }
+  .headline .interp, .headline .reason { margin: .15rem 0 0; }
   main .fpa-view > h2 { font-size: 1.2rem; margin: .3rem 0 .1rem; }
   #summary { margin: .5rem 0; }
   .banner-partial { padding: .3rem .6rem; }

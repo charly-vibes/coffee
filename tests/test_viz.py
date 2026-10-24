@@ -1028,5 +1028,79 @@ class TestMobileViewportMeta(unittest.TestCase):
                     browser.close()
 
 
+class TestDocumentOverflowMatrix(unittest.TestCase):
+    """coffe-tmm.3 (EDGE-002): matriz de overflow de documento. Las 6 páginas
+    (índice, FPA, Contexto, DDL, Gantt, guía) a 320/390/768/1280px, con
+    disclosures abiertos y cerrados: documentElement.scrollWidth <=
+    clientWidth (0px overflow de documento). Tablas y Gantt desplazan solo
+    dentro de sus contenedores (no se oculta contenido con
+    overflow-x:hidden global). FPA se renderiza desde fixture (test_fpa_f6),
+    el resto son los HTML versionados en data/."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.chrome = find_chromium()
+        if not cls.chrome:
+            raise unittest.SkipTest("chromium de playwright no encontrado")
+        # FPA desde fixture seguro (igual que test_fpa_f6_smoke), no de logs
+        import importlib.util
+
+        def _load(name, relpath):
+            spec = importlib.util.spec_from_file_location(name, REPO / relpath)
+            mod = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(mod)
+            return mod
+
+        f6 = _load("test_fpa_f6", "tests/test_fpa_f6.py")
+        viz = _load("viz_fpa_f6", "scripts/viz-fpa.py")
+        config = json.loads((REPO / "config" / "fpa.json").read_text())
+        cls.fpa_path = Path("/tmp/fpa_overflow_matrix.html")
+        cls.fpa_path.write_text(
+            viz.render_html(f6.f6_fixture(), config, generated="T"))
+
+    PAGES = (
+        ("índice", REPO / "index.html"),
+        ("fpa", Path("/tmp/fpa_overflow_matrix.html")),
+        ("contexto", REPO / "data" / "context-dashboard.html"),
+        ("ddl", REPO / "data" / "ddl-dashboard.html"),
+        ("gantt", REPO / "data" / "gantt-multitasking.html"),
+        ("guía", REPO / "data" / "fpa-guide.html"),
+    )
+    VIEWPORTS = ((320, 844), (390, 844), (768, 1024), (1280, 900))
+
+    def test_documento_sin_overflow_en_matriz_completa(self):
+        violations = []
+        with sync_playwright() as p:
+            browser = p.chromium.launch(executable_path=self.chrome,
+                                        args=["--no-sandbox"])
+            for vw, vh in self.VIEWPORTS:
+                pg = browser.new_page(viewport={"width": vw, "height": vh})
+                for nombre, path in self.PAGES:
+                    if not path.exists():
+                        violations.append(f"{nombre}: página no generada {path}")
+                        continue
+                    for disc in ("cerrado", "abierto"):
+                        pg.goto(f"file://{path}")
+                        pg.wait_for_timeout(200)
+                        if disc == "abierto":
+                            pg.evaluate(
+                                "() => { document.querySelectorAll("
+                                "'details:not([open])').forEach(d => "
+                                "d.open = true); }")
+                        sw = pg.evaluate(
+                            "document.documentElement.scrollWidth")
+                        cw = pg.evaluate(
+                            "document.documentElement.clientWidth")
+                        if sw > cw:
+                            violations.append(
+                                f"{nombre} {vw}px disclosures-{disc}: "
+                                f"scrollWidth={sw} > clientWidth={cw}")
+                pg.close()
+            browser.close()
+        self.assertEqual(
+            violations, [],
+            "overflow de documento (EDGE-002): " + "; ".join(violations))
+
+
 if __name__ == "__main__":
     unittest.main()
