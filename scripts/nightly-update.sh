@@ -16,6 +16,22 @@ NO_PUSH=0
 [ "${1:-}" = "--no-push" ] && NO_PUSH=1
 
 log "regenerando reporte + dashboards"
+
+# coffe-0c8 (antecedente coffe-jg3): snapshot diario del cache frágil ANTES
+# de regenerar. dashboard-cache.json es fuente única de claude-cli para
+# sesiones cuyo jsonl ya no existe, y Claude Code lo reescribe truncando
+# turns viejos sin aviso. Destino fuera del repo (~50MB/día no va a git);
+# rotación de 14 días. Si no hay cache, seguir sin romper el timer.
+CACHE="$HOME/.claude/dashboard-cache.json"
+SNAP_DIR="$HOME/.claude/cache-snapshots"
+if [ -f "$CACHE" ]; then
+    mkdir -p "$SNAP_DIR"
+    cp -f "$CACHE" "$SNAP_DIR/cache-$(date +%Y-%m-%d).json"
+    # Rotación: conservar los 14 más recientes
+    ls -1t "$SNAP_DIR"/cache-*.json 2>/dev/null | tail -n +15 | xargs -r rm -f
+    log "snapshot del cache: $SNAP_DIR/cache-$(date +%Y-%m-%d).json"
+fi
+
 python3 scripts/usage-tracker.py
 # ddl-effect: tracker tras usage-tracker (consume usage_report_v3.json),
 # viz tras tracker (el dashboard es derivado, nunca fuente). Sin gh/terapia

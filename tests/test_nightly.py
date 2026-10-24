@@ -54,5 +54,42 @@ class NightlyStructureTest(unittest.TestCase):
                         "--no-push debe salir antes de tocar git")
 
 
+class NightlyCacheSnapshotTest(unittest.TestCase):
+    """coffe-0c8: snapshot diario del cache frágil de Claude ANTES de la regen
+    (dashboard-cache.json es fuente única de claude-cli para sesiones cuyo
+    jsonl ya no existe, y Claude Code lo trunca sin aviso — coffe-jg3)."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.text = SCRIPT.read_text()
+
+    def _index(self, needle):
+        i = self.text.find(needle)
+        self.assertGreaterEqual(i, 0, f"no está en el script: {needle}")
+        return i
+
+    def test_snapshot_antes_de_regen(self):
+        self.assertLess(self._index("dashboard-cache.json"),
+                        self._index("scripts/usage-tracker.py"),
+                        "el snapshot del cache debe correr antes del tracker")
+
+    def test_snapshot_fuera_de_git(self):
+        """El cache pesa ~50MB: el destino NO puede ser el repo (data/ entra
+        en STAGED). Vive junto a la fuente, en ~/.claude/cache-snapshots/."""
+        self.assertNotIn("data/cache-snapshots", self.text)
+        self.assertIn("$HOME/.claude/cache-snapshots", self.text)
+
+    def test_snapshot_con_rotacion(self):
+        """Rotación: conservar solo los 14 snapshots más recientes."""
+        self.assertIn("tail -n +15", self.text)
+        self.assertIn("cache-$(date +%Y-%m-%d).json", self.text)
+
+    def test_snapshot_tolerante_a_fallo(self):
+        """Si el cache no existe, el nightly sigue (no rompe el timer)."""
+        block = self.text[self._index("dashboard-cache.json") - 500:
+                          self._index("dashboard-cache.json") + 500]
+        self.assertIn('cp -f "$CACHE"', block)
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -248,6 +248,20 @@ terapia_errors, ah_findings) — TTL 7 días.
   cualquier uso requiere preflight (binario, versión de kind, frescura del
   cache). Plan: híbrido — Pi vía cache toolpath (o conteo de archivos como v1),
   Claude vía dashboard-cache, Amp hand-rolled, provenance por fuente.
+- **El dashboard-cache es frágil y el tracker lo protege (coffe-0c8,
+  antecedente coffe-jg3).** Claude Code reescribe
+  `~/.claude/dashboard-cache.json` truncando turns de sesiones viejas sin
+  aviso — el 2026-10-21 una reescritura v9 borró ~49k interacciones
+  históricas (abril–mayo) en silencio. Mitigación en dos capas: (1) el
+  nightly snapshottea el cache a `~/.claude/cache-snapshots/`
+  (`cache-YYYY-MM-DD.json`, rotación 14 días) antes de regenerar; (2) el
+  tracker aborta la regen (fail-loud) si las interacciones claude-cli de un
+  mes caen >20% (`TRACKER_MONTHLY_DROP_PCT`) respecto al reporte vigente —
+  recuperar el snapshot más reciente y reintentar; solo con `--force`
+  explícito se acepta una caída conocida. La corrección estructural
+  (claude-cache-only → fuente estable) queda abierta como decisión futura:
+  mientras los jsonl vivos no cubran el histórico, el cache sigue siendo la
+  única fuente para abril–mayo 2026.
 
 ## Gasto por proyecto × día y por sesión (add-session-spend-report)
 

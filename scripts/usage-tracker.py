@@ -70,6 +70,13 @@ UNTIL = None  # date límite superior (inclusive) de --until; None = sin límite
 # sin --force, para no destruir el dataset versionado en data/.
 MIN_INTERACTIONS = 1000
 
+# coffe-0c8 (antecedente coffe-jg3): dashboard-cache.json es fuente única de
+# claude-cli para sesiones cuyo jsonl ya no existe, y Claude Code lo reescribe
+# truncando turns viejos sin aviso. Guard fail-loud: si las interacciones
+# claude-cli de un mes caen más de este % respecto al reporte vigente, abortar
+# la regen en vez de pisar el dataset. Ajustable con TRACKER_MONTHLY_DROP_PCT.
+DEFAULT_MONTHLY_DROP_PCT = 20.0
+
 # =====================================================================
 # Config (coffe-mbz): SUBSCRIPTIONS y MODEL_PRICING viven en
 # config/fpa.json (fuente de verdad F0, pricing versionado por fecha
@@ -2456,6 +2463,113 @@ def aggregate(interactions, sessions, skills_total=None, skills_by_project=None,
         },
     })
 
+def detect_monthly_regressions(new_rows, old_report, threshold_pct=DEFAULT_MONTHLY_DROP_PCT):
+    """coffe-0c8: compara interacciones claude-cli por mes entre la extracción
+    nueva y el reporte vigente. Devuelve una lista de dicts
+    {mes, old, new, drop_pct} para los meses cuya caída supere threshold_pct.
+
+    Scope: SOLO claude-cli — es la fuente frágil (dashboard-cache.json puede
+    ser truncado por Claude Code, coffe-jg3); las demás tools tienen logs
+    on-disk estables. El mes en curso se ignora (crece mes a mes, una "caída"
+    a mitad de mes es ruido de reloj, no poda). Meses con old==0 o ausentes
+    del reporte viejo no tienen contra qué comparar: nunca regresan.
+
+    Shape del reporte viejo: monthly[mes]["tools"]["claude-cli"]["interactions"]
+    (lo que produce aggregate(); reportes previos a esa estructura se tratan
+    como sin-datos y no disparan el guard).
+    """
+    if not old_report:
+        return []
+    old_monthly = old_report.get("monthly") or {}
+    if not isinstance(old_monthly, dict):
+        return []
+
+    new_claude = Counter()
+    for r in new_rows:
+        if r.get("tool") == "claude-cli":
+            new_claude[r["timestamp"][:7]] += 1
+
+    mes_actual = datetime.now().strftime("%Y-%m")
+    regressions = []
+    for mes, bucket in sorted(old_monthly.items()):
+        if mes == mes_actual:
+            continue
+        try:
+            old_n = bucket["tools"]["claude-cli"]["interactions"] or 0
+        except (KeyError, TypeError):
+            continue  # sin datos claude-cli comparables en ese mes
+        if not old_n:
+            continue
+        new_n = new_claude.get(mes, 0)
+        if new_n >= old_n:
+            continue
+        drop_pct = (old_n - new_n) / old_n * 100.0
+        if drop_pct > threshold_pct:
+            regressions.append({
+                "mes": mes, "old": old_n, "new": new_n,
+                "drop_pct": round(drop_pct, 1),
+            })
+    return regressions
+
+
+def check_monthly_regressions(new_rows, out_path, force=False):
+    """coffe-0c8: wiring del guard en main(). Lee el reporte vigente en
+    out_path (si existe), corre detect_monthly_regressions y aborta con
+    SystemExit(1) si hay caídas — fail-loud ANTES de pisar el dataset.
+    --force lo salta explícitamente. Umbral vía TRACKER_MONTHLY_DROP_PCT.
+    """
+    try:
+        threshold = float(os.environ.get(
+            "TRACKER_MONTHLY_DROP_PCT", DEFAULT_MONTHLY_DROP_PCT))
+    except ValueError:
+        print(f"ADVERTENCIA: TRACKER_MONTHLY_DROP_PCT no numérico, "
+              f"usando {DEFAULT_MONTHLY_DROP_PCT}%", file=sys.stderr)
+        threshold = DEFAULT_MONTHLY_DROP_PCT
+
+    old_report = None
+    out_path = Path(out_path)
+    if out_path.exists():
+        try:
+            old_report = json.loads(out_path.read_text())
+        except (json.JSONDecodeError, OSError) as e:
+            print(f"ADVERTENCIA: no se pudo leer el reporte vigente "
+                  f"({out_path}): {e} — guard de regresión mensual desactivado",
+                  file=sys.stderr)
+            return
+
+    regressions = detect_monthly_regressions(new_rows, old_report, threshold)
+    if not regressions:
+        return
+    if force:
+        print("\n--force: regresión mensual claude-cli detectada pero se "
+              "escribe de todas formas:", flush=True)
+        for reg in regressions:
+            print(f"  {reg['mes']}: {reg['old']:,} → {reg['new']:,} "
+                  f"(-{reg['drop_pct']}%)", flush=True)
+        return
+
+    print(
+        "\nABORTADO (coffe-0c8): las interacciones claude-cli de uno o más "
+        "meses cayeron vs el reporte vigente:",
+        flush=True)
+    for reg in regressions:
+        print(f"  {reg['mes']}: {reg['old']:,} → {reg['new']:,} "
+              f"(-{reg['drop_pct']}%)", flush=True)
+    print(
+        "\nCausa probable: Claude Code reescribió ~/.claude/dashboard-cache.json"
+        "\ntruncando turns de sesiones viejas (ver coffe-jg3). El cache es "
+        "fuente única\nde claude-cli para sesiones cuyo jsonl ya no existe."
+        "\n\nRecuperación: snapshot diario en ~/.claude/cache-snapshots/ "
+        "(cache-YYYY-MM-DD.json).\n"
+        "Restaurar el más reciente ANTES del recorte y reintentar. Antes de "
+        "que exista\nese snapshot: hay backup manual en ~/.claude/backups/ "
+        "(pre-recorte, 2026-10-21)."
+        "\n\nSi la caída es legítima y conocida, usa --force para escribir "
+        "de todas formas.",
+        flush=True)
+    sys.exit(1)
+
+
 def main():
     ap = argparse.ArgumentParser(description="Extractor de uso de IA (filtro de proyectos configurable)")
     ap.add_argument("--output", default=None,
@@ -2550,6 +2664,11 @@ def main():
             flush=True,
         )
         sys.exit(1)
+
+    # coffe-0c8: guard fail-loud contra poda del cache frágil de Claude
+    # (coffe-jg3). Compara claude-cli por mes contra el reporte vigente ANTES
+    # de escribir; aborta si un mes cae más del umbral (TRACKER_MONTHLY_DROP_PCT).
+    check_monthly_regressions(unique, out_path, force=args.force)
 
     print("Session stats...", flush=True)
     sessions = extract_sessions()  # coffe-i31: claude + pi + amp con provenance
