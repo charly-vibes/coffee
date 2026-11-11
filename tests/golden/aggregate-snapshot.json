@@ -1218,7 +1218,7 @@
     }
   ],
   "sessions": {
-    "agent_semantics": "claude-cli: sesi\u00f3n con herramienta Agent (subagentes); amp: aut\u00f3nomo por definici\u00f3n (has_agent=True); pi: sin se\u00f1al de subagentes (has_agent=False)",
+    "agent_semantics": "claude-cli: sesi\u00f3n con herramienta Agent (subagentes); amp: aut\u00f3nomo por definici\u00f3n (has_agent=True); pi: sin se\u00f1al de subagentes (has_agent=False); omp: sin se\u00f1al de subagentes (has_agent=False)",
     "avg_skills": 0.5,
     "avg_tools": 3.0,
     "avg_turns": 62.5,

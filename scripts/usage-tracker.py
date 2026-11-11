@@ -58,6 +58,7 @@ CLAUDE_DIR = Path.home() / ".claude"
 PI_DIR = Path.home() / ".pi" / "agent"  # Gemini llega vía logs de Pi (google-gemini-cli), no hay extractor propio
 AMP_DIR = Path.home() / ".amp"
 CODEX_DIR = Path.home() / ".codex"  # coffe-2sy: rollouts del CLI standalone (sesiones/*/*/*/rollout-*.jsonl)
+OMP_DIR = Path.home() / ".omp" / "agent" / "sessions"  # omp: <cwd-mungeado>/<ts>_<uuid>.jsonl
 OUTPUT_DIR = Path("data")
 LOCAL_TZ = datetime.now().astimezone().tzinfo  # OJO: los buckets hourly/daily usan la TZ local de la máquina que extrae
 
@@ -1078,6 +1079,212 @@ def extract_codex_sessions(sessions_dir=None):
     return sessions
 
 
+def _omp_scan(f):
+    """1 archivo de sesión omp → (meta, calls) — formato verificado
+    2026-11-11 (runtime 18.18.8).
+
+    - record "session": {id, timestamp, cwd} — cwd REAL, no mungeado
+    - turno principal: "message" role=assistant con message.usage
+      {input, output, cacheRead, cacheWrite, cost{total}} (costo *reported*)
+    - llamadas auxiliares del harness: record "model_usage" (purpose
+      title/job-caption/find/…) — también facturan tokens → fila propia
+      con kind "aux_model_call"
+    - prompts: "message" role=user (los inyectados del harness viajan como
+      records "custom", no como user messages)
+    - tools: "custom" customType=tool_execution_start (data.toolName)
+
+    Malformed lines best-effort (una línea rota no tira la sesión), como
+    codex (coffe-2sy). Devuelve (None, []) si el archivo no trae session
+    record ni actividad.
+    """
+    cwd = session_ts = first_ts = last_ts = None
+    first_raw = last_raw = None
+    user_ts = []
+    n_errors = 0
+    tools = set()
+    calls = []  # (ts, model, usage, kind)
+    with open(f) as fh:
+        for line in fh:
+            try:
+                entry = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+            typ = entry.get("type")
+            ts = parse_ts(entry.get("timestamp"))
+            if typ == "session":
+                cwd = entry.get("cwd") or cwd
+                session_ts = ts or session_ts
+            elif typ == "message":
+                msg = entry.get("message", {}) or {}
+                if msg.get("role") == "user":
+                    if ts:
+                        user_ts.append(ts)
+                elif msg.get("role") == "assistant":
+                    usage = msg.get("usage") or {}
+                    if not usage:
+                        continue  # sin telemetría: nada facturable
+                    if msg.get("errorId"):
+                        n_errors += 1
+                    if ts:
+                        calls.append((ts, msg.get("model", "unknown"),
+                                      usage, "assistant_turn"))
+            elif typ == "model_usage":
+                usage = entry.get("usage") or {}
+                if ts and usage:
+                    calls.append((ts, entry.get("model", "unknown"),
+                                  usage, "aux_model_call"))
+            elif (typ == "custom"
+                  and entry.get("customType") == "tool_execution_start"):
+                name = (entry.get("data") or {}).get("toolName")
+                if name:
+                    tools.add(str(name))
+            if ts:
+                if first_ts is None:
+                    first_ts, first_raw = ts, entry.get("timestamp")
+                last_ts, last_raw = ts, entry.get("timestamp")
+    if cwd is None and not calls and not user_ts:
+        return None, []
+    meta = {
+        "cwd": cwd, "session_ts": session_ts,
+        "first_ts": first_ts, "last_ts": last_ts,
+        "first_raw": first_raw, "last_raw": last_raw,
+        "user_ts": user_ts, "n_errors": n_errors, "tools": tools,
+    }
+    return meta, calls
+
+
+def extract_omp(skipped=None, kinds=None, excluded=None, sessions_dir=None):
+    """Extrae sesiones omp (~/.omp/agent/sessions). kinds/excluded como
+    extract_pi/extract_claude (FPA-140/141). sessions_dir permite tests
+    con tmpdir.
+
+    Una fila por llamada facturada: turnos principales (assistant con
+    usage) + llamadas auxiliares del harness (model_usage). El costo de
+    usage.cost.total es *reported* por el harness; sin costo → estimación
+    pay-per-token como pi (coffe-8t8). omp paga por token vía OpenRouter:
+    no está en SUBSCRIPTIONS → cost_real = cost_effective.
+    """
+    rows = []
+    excluded_rows = []
+    sessions_dir = sessions_dir or OMP_DIR
+    if not sessions_dir.exists():
+        return rows, excluded_rows
+    for sd in sorted(sessions_dir.iterdir()):
+        if not sd.is_dir():
+            continue
+        for f in sorted(sd.glob("*.jsonl")):
+            try:
+                meta, calls = _omp_scan(f)
+            except OSError as e:
+                if skipped is not None:
+                    skipped[f"omp:{f.name}"] = skipped.get(f"omp:{f.name}", 0) + 1
+                elif os.environ.get("TRACKER_DEBUG"):
+                    print(f"  [skipped omp] {f.name}: {e}", file=sys.stderr)
+                continue
+            if meta is None:
+                continue
+            cwd = meta["cwd"] or sd.name
+            if not is_charly(cwd):
+                # FPA-141: registrar lo excluido, no descartarlo en silencio
+                excluded_rows.append({
+                    "project": amp_proj_from_uri(cwd) or clean_proj_name(sd.name),
+                    "tool": "omp",
+                    "interactions": len(calls),
+                    "cost_effective": None,
+                    "timestamp": None,
+                })
+                continue
+            if kinds is not None:
+                # FPA-140: user prompts se cuentan aparte (no generan fila)
+                for ts_u in meta["user_ts"]:
+                    if in_window(ts_u):
+                        kinds.setdefault(ts_u.strftime("%Y-%m"), Counter())["user_prompt"] += 1
+            proj = amp_proj_from_uri(cwd) or "omp-unknown"
+            for ts, model, usage, kind in calls:
+                if not in_window(ts):
+                    continue  # coffe-snj: ventana
+                fam, ver = model_details(model)
+                inp = usage.get("input") or 0
+                out = usage.get("output") or 0
+                cache_r = usage.get("cacheRead") or 0
+                cache_w = usage.get("cacheWrite") or 0
+                cost_info = usage.get("cost")
+                cost = cost_info.get("total") if isinstance(cost_info, dict) else None
+                if not cost and (inp or out or cache_r):
+                    cost = estimate_cost(fam, ver, inp, out, cache_r, cache_w,
+                                         when=ts.date())
+                rows.append({
+                    "source": "omp",
+                    "tool": "omp",
+                    "model_raw": model,
+                    "model_family": fam,
+                    "model_version": ver,
+                    "project": proj,
+                    "timestamp": ts.isoformat(),
+                    "hour": hour_key(ts),
+                    "input_tokens": inp,
+                    "output_tokens": out,
+                    "cache_read_tokens": cache_r,
+                    "cache_write_tokens": cache_w,
+                    "cost_effective": cost or 0,
+                    "kind": kind,
+                    "session_file": f.name,  # add-session-spend-report
+                })
+    return rows, excluded_rows
+
+
+def extract_omp_sessions(sessions_dir=None):
+    """Sesiones omp — 1 archivo JSONL = 1 sesión (misma semántica de reset
+    que pi: cada sesión abre archivo nuevo, el archivo ES la señal).
+
+    n_turns = llamadas principales (assistant con usage); las auxiliares
+    (model_usage) facturan tokens pero no son turnos de conversación.
+    n_errors es señal real del log (errorId en la llamada); skills y
+    compactions sin señal en el formato omp (None — _session_stats las
+    excluye de los totales, no las cuenta como 0). has_agent=False: sin
+    señal de subagentes. La ventana --since/--until se aplica en
+    extract_sessions() (filter_sessions). sessions_dir permite tests.
+    """
+    sessions = []
+    sessions_dir = sessions_dir or OMP_DIR
+    if not sessions_dir.exists():
+        return sessions
+    for sd in sorted(sessions_dir.iterdir()):
+        if not sd.is_dir():
+            continue
+        for f in sorted(sd.glob("*.jsonl")):
+            try:
+                meta, calls = _omp_scan(f)
+            except OSError:
+                continue
+            if meta is None:
+                continue
+            cwd = meta["cwd"] or sd.name
+            if not is_charly(cwd):
+                continue
+            n_turns = sum(1 for c in calls if c[3] == "assistant_turn")
+            first = meta["first_ts"] or meta["session_ts"]
+            if not n_turns and not meta["user_ts"] and first is None:
+                continue  # archivo sin actividad
+            last = meta["last_ts"] or first
+            sessions.append({
+                "tool": "omp",
+                "source": "omp_session_files",
+                "project": amp_proj_from_uri(cwd) or "omp-unknown",
+                "first_ts": first.isoformat()[:10],
+                "first_ts_full": meta["first_raw"] or first.isoformat(),
+                "last_ts_full": meta["last_raw"] or (last or first).isoformat(),
+                "duration_msgs": len(meta["user_ts"]),
+                "n_turns": n_turns,
+                "n_tools": len(meta["tools"]),
+                "has_agent": False,
+                "n_skills": None,
+                "n_errors": meta["n_errors"],
+                "n_compactions": None,
+            })
+    return sessions
+
+
 def extract_session_stats():
     """Extrae estadísticas de sesión desde el cache de Claude."""
     sessions = []
@@ -1254,7 +1461,8 @@ def extract_sessions():
     return (extract_session_stats()
             + filter_sessions(extract_pi_sessions(), SINCE, UNTIL)
             + filter_sessions(extract_amp_sessions(), SINCE, UNTIL)
-            + filter_sessions(extract_codex_sessions(), SINCE, UNTIL))  # coffe-2sy
+            + filter_sessions(extract_codex_sessions(), SINCE, UNTIL)  # coffe-2sy
+            + filter_sessions(extract_omp_sessions(), SINCE, UNTIL))
 
 
 def collect_outcomes():
@@ -1894,7 +2102,8 @@ def _session_stats(sessions, commands=None):
         "agent_semantics": (
             "claude-cli: sesión con herramienta Agent (subagentes); "
             "amp: autónomo por definición (has_agent=True); "
-            "pi: sin señal de subagentes (has_agent=False)"),
+            "pi: sin señal de subagentes (has_agent=False); "
+            "omp: sin señal de subagentes (has_agent=False)"),
         "by_tool": defaultdict(lambda: {
             "total": 0, "with_agent": 0,
             "resets": {"signal": "", "count": 0}}),
@@ -1941,6 +2150,9 @@ def _session_stats(sessions, commands=None):
                             "count": commands.get("/clear", 0)}
         elif tool == "pi":
             bt["resets"] = {"signal": "archivos de sesión pi (1 archivo = 1 /new)",
+                            "count": bt["total"]}
+        elif tool == "omp":
+            bt["resets"] = {"signal": "archivos de sesión omp (1 archivo = 1 sesión)",
                             "count": bt["total"]}
         else:
             bt["resets"] = {"signal": f"tareas {tool} (1 dir = 1 corrida)",
@@ -2556,16 +2768,17 @@ def check_monthly_regressions(new_rows, out_path, force=False):
         print(f"  {reg['mes']}: {reg['old']:,} → {reg['new']:,} "
               f"(-{reg['drop_pct']}%)", flush=True)
     print(
-        "\nCausa probable: Claude Code reescribió ~/.claude/dashboard-cache.json"
-        "\ntruncando turns de sesiones viejas (ver coffe-jg3). El cache es "
-        "fuente única\nde claude-cli para sesiones cuyo jsonl ya no existe."
-        "\n\nRecuperación: snapshot diario en ~/.claude/cache-snapshots/ "
-        "(cache-YYYY-MM-DD.json).\n"
-        "Restaurar el más reciente ANTES del recorte y reintentar. Antes de "
-        "que exista\nese snapshot: hay backup manual en ~/.claude/backups/ "
-        "(pre-recorte, 2026-10-21)."
-        "\n\nSi la caída es legítima y conocida, usa --force para escribir "
-        "de todas formas.",
+        "\nCausa probable: Claude Code perdió el detalle histórico de "
+        "claude-cli en la fuente:"
+        "\ntruncó los turns viejos de ~/.claude/dashboard-cache.json "
+        "(coffe-jg3) y los\njsonl ya no están en disco. Verificado "
+        "2026-11-11: el cache vivo, el backup manual\nde ~/.claude/backups/ "
+        "(POST-recorte, pese a su nombre) y todos los snapshots de\n"
+        "~/.claude/cache-snapshots/ son byte-idénticos — no hay copia "
+        "pre-recorte\nque restaurar."
+        "\n\nSi la caída es legítima y la pérdida de fuente está "
+        "confirmada, usa --force\npara escribir de todas formas y documenta "
+        "la caída en el README (Nota de vigencia).",
         flush=True)
     sys.exit(1)
 
@@ -2628,14 +2841,17 @@ def main():
 
     claude_rows, claude_excluded = extract_claude(skipped, kinds, excluded)
     pi_rows, pi_excluded = extract_pi(skipped, kinds, excluded)
+    omp_rows, omp_excluded = extract_omp(skipped, kinds, excluded)
     all_sources = [
         ("Claude", claude_rows),
         ("Pi", pi_rows),
         ("Amp", extract_amp()),
         ("Codex", extract_codex(skipped)),  # coffe-2sy: CLI standalone
+        ("omp", omp_rows),
     ]
     excluded.extend(claude_excluded)
     excluded.extend(pi_excluded)
+    excluded.extend(omp_excluded)
 
     for name, rows in all_sources:
         print(f"  {name}: {len(rows)} rows", flush=True)

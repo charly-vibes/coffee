@@ -32,7 +32,13 @@ if [ -f "$CACHE" ]; then
     log "snapshot del cache: $SNAP_DIR/cache-$(date +%Y-%m-%d).json"
 fi
 
-python3 scripts/usage-tracker.py
+# coffe-0c8: el guard aborta si un mes de claude-cli cae vs el reporte
+# vigente. Una caída confirmada (pérdida de fuente verificada — cache
+# truncado + jsonl podados, sin copia pre-recorte que restaurar) se acepta
+# UNA vez con TRACKER_FORCE=1: el reporte nuevo pasa a ser el baseline.
+FORCE_FLAG=""
+[ "${TRACKER_FORCE:-0}" = "1" ] && FORCE_FLAG="--force"
+python3 scripts/usage-tracker.py $FORCE_FLAG
 # ddl-effect: tracker tras usage-tracker (consume usage_report_v3.json),
 # viz tras tracker (el dashboard es derivado, nunca fuente). Sin gh/terapia
 # cache degrada a provenance missing — el nightly no requiere red.

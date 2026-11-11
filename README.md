@@ -18,7 +18,7 @@ de los últimos meses.
 
 | Archivo | Propósito |
 |---------|-----------|
-| `scripts/usage-tracker.py` | Extractor de uso de IA v4.5. Lee datos de Claude, Pi (incluye Gemini vía google-gemini-cli), Amp y Codex CLI standalone (~/.codex/sessions, coffe-2sy; antes solo entraba Codex-via-Pi). Filtra solo proyectos charly. Produce reporte JSON con hourly/daily/monthly/projects/sessions/skills/commands/multitasking/project_daily. Flags: `--output RUTA`, `--force`, `--filter {charly,all}` (default charly), `--since/--until YYYY-MM-DD` (ventana inclusive, coffe-snj), `--config RUTA` (ver "Uso"). SUBSCRIPTIONS/MODEL_PRICING se cargan de `config/fpa.json` (coffe-mbz). |
+| `scripts/usage-tracker.py` | Extractor de uso de IA v4.5. Lee datos de Claude, Pi (incluye Gemini vía google-gemini-cli), Amp, Codex CLI standalone (~/.codex/sessions, coffe-2sy) y omp (~/.omp/agent/sessions: 1 archivo = 1 sesión, cwd real en el record `session`; turnos = assistant con usage, llamadas auxiliares del harness vía `model_usage`, costo *reported*). Filtra solo proyectos charly. Produce reporte JSON con hourly/daily/monthly/projects/sessions/skills/commands/multitasking/project_daily. Flags: `--output RUTA`, `--force`, `--filter {charly,all}` (default charly), `--since/--until YYYY-MM-DD` (ventana inclusive, coffe-snj), `--config RUTA` (ver "Uso"). SUBSCRIPTIONS/MODEL_PRICING se cargan de `config/fpa.json` (coffe-mbz). |
 | `scripts/viz-gantt.py` | Genera `data/gantt-multitasking.html`: Gantt de actividad proyecto × día con concurrencia diaria. Autocontenido, sin dependencias. |
 | `scripts/viz-fpa.py` | Genera `data/fpa-dashboard.html`: dashboard principal "Uso y costos de IA" (nombre llano del `site_name` del config; presupuestos, bridge PVM, forecast, alertas, economía de suscripción). Un solo HTML autocontenido, **SVG inline, sin librería de charts externa** (FPA-145); las matemáticas se pre-calculan en Python y el JS solo re-escala. Tema compartido del sitio en `scripts/site_theme.py` (coffe-gen.2). Config en `config/fpa.json`. Flags: `--check-docs` (consistencia README↔JSON FPA-143 + grounding de la guía, coffe-gen.3). |
 | `scripts/viz_fpa_guide.py` | Parser de `docs/fpa-analyses-guide.md` (guía de análisis a 4 niveles, en español) → `data/fpa-guide.html` + marginalia con chips expandibles en el dashboard y el Gantt (coffe-gen.3/4). `--check` valida el grounding (mapeo + umbrales vs config). |
@@ -128,13 +128,13 @@ El deploy es vía **GitHub Actions** (no hay branch `gh-pages`): `.github/workfl
 ## Estado de los datos
 
 <!-- CHECK-DOCS:BEGIN -->
-- Interacciones: 287,950
-- Proyectos: 112
-- Costo efectivo: $5,941.63
-- Costo real: $1,251.19
+- Interacciones: 269,555
+- Proyectos: 119
+- Costo efectivo: $3,657.20
+- Costo real: $1,709.08
 - Cash real (ledger): $1,516.72
-- Sesiones: 4,402
-- Periodo: 2025-12-23 → 2026-10-20
+- Sesiones: 2,965
+- Periodo: 2025-12-23 → 2026-11-11
 <!-- CHECK-DOCS:END -->
 
 Nota: `Costo real` es la suma mensual del tracker (fees implícitos del
@@ -258,10 +258,24 @@ terapia_errors, ah_findings) — TTL 7 días.
   tracker aborta la regen (fail-loud) si las interacciones claude-cli de un
   mes caen >20% (`TRACKER_MONTHLY_DROP_PCT`) respecto al reporte vigente —
   recuperar el snapshot más reciente y reintentar; solo con `--force`
-  explícito se acepta una caída conocida. La corrección estructural
+  explícito se acepta una caída conocida (el nightly la acepta con
+  `TRACKER_FORCE=1`, una vez y documentada). La corrección estructural
   (claude-cache-only → fuente estable) queda abierta como decisión futura:
   mientras los jsonl vivos no cubran el histórico, el cache sigue siendo la
   única fuente para abril–mayo 2026.
+- **Pérdida confirmada e irrecuperable (2026-11-11).** El detalle
+  interaction-level de claude-cli de mar–may 2026 se perdió en la fuente:
+  el cache truncó esos turns y los jsonl fueron podados después del nightly
+  de 2026-10-21. Verificación por checksum: el cache vivo, el backup manual
+  de `~/.claude/backups/` (POST-recorte, pese a su nombre) y los 14
+  snapshots sobrevivientes son byte-idénticos entre sí — no existe copia
+  pre-recorte que restaurar. El dataset vigente hasta esa fecha
+  (287,950 interacciones, periodo → 2026-10-21) conserva los agregados
+  mensuales de esos meses y sigue consultable en la historia de git; los
+  dashboards vivos muestran la caída como es (sin rellenar con los
+  agregados viejos — misma política FPA-008: nunca datos fake). El
+  regen con `--force` del 2026-11-11 (que además agrega omp como quinta
+  fuente) tomó el dataset nuevo como baseline del guard.
 
 ## Gasto por proyecto × día y por sesión (add-session-spend-report)
 
@@ -322,10 +336,10 @@ Con los datos actuales podemos generar:
 5. [ ] Interpretar el Gantt: los gaps sin actividad (vacaciones?) y los bloques densos de julio-agosto (¿migración masiva? ¿agentes paralelos?)
 
 <!-- CTX-DOCS:BEGIN -->
-- Sesiones con contexto: 2155
+- Sesiones con contexto: 2481
 - Excluidas (patológicas): 34
 - Stubs: 0
-- Pico p50 (tok): 72611
-- Ratio validación: 1.27
+- Pico p50 (tok): 71621
+- Ratio validación: 1.28
 - Factor chars/token: 4
 <!-- CTX-DOCS:END -->
