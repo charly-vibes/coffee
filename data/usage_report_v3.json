@@ -2,17 +2,17 @@
   "metadata": {
     "date_range": {
       "start": "2025-12-23",
-      "end": "2026-11-14"
+      "end": "2026-11-15"
     },
     "filter": "in-scope",
-    "total_interactions": 279166,
-    "total_input_tokens": 2222994403,
-    "total_output_tokens": 127942770,
-    "total_cache_read_tokens": 25941364895,
+    "total_interactions": 279169,
+    "total_input_tokens": 2223531909,
+    "total_output_tokens": 127945696,
+    "total_cache_read_tokens": 25942435743,
     "total_cache_write_tokens": 73562968,
-    "cost_total_effective": 3744.11,
-    "cost_total_real": 1795.99,
-    "cost_real_total_tracker": 1596.01,
+    "cost_total_effective": 3744.31,
+    "cost_total_real": 1796.19,
+    "cost_real_total_tracker": 1596.2,
     "subscription_fees": 199.98,
     "charges_total_real": 1716.72,
     "charges_source": "data/charges.json",
@@ -30,7 +30,7 @@
     "pay_per_token_note": "pay_per_token_charges es *reported* cuando el ledger tiene cargas pay-per-token reales del mes (cr\u00e9ditos/reembolsos, FPA-013); *assumed* (estimado tokens \u00d7 pricing) si no",
     "outcomes": "unavailable: no hay GITHUB_TOKEN \u2014 commits/releases no emisionados",
     "token_accounting": "cache_read/cache_write se reportan aparte de input/output. cache_read no se factura a input rate (10x mas barato); total tokens = input + output + cache_read + cache_write",
-    "total_hours": 1471,
+    "total_hours": 1472,
     "total_days": 228,
     "total_months": 12,
     "total_projects": 119,
@@ -38726,6 +38726,30 @@
         "deepseek-v4.1-flash-1017": 45
       },
       "projects_active": 1
+    },
+    "2026-11-14 21:00": {
+      "interactions": 3,
+      "input_tokens": 537506,
+      "output_tokens": 2926,
+      "cache_read_tokens": 1070848,
+      "cache_write_tokens": 0,
+      "cost_effective": 0.2,
+      "cost_real": 0.2,
+      "tools": {
+        "omp": {
+          "req": 3,
+          "in": 537506,
+          "out": 2926,
+          "cache_read": 1070848,
+          "cache_write": 0,
+          "cost_eff": 0.19688844,
+          "cost_real": 0.19688844
+        }
+      },
+      "models": {
+        "deepseek-v4.1-flash-1017": 3
+      },
+      "projects_active": 1
     }
   },
   "daily": {
@@ -42463,18 +42487,18 @@
       }
     },
     "2026-11-14": {
-      "interactions": 45,
-      "input_tokens": 40942,
-      "output_tokens": 17513,
-      "cache_read_tokens": 20771584,
+      "interactions": 48,
+      "input_tokens": 578448,
+      "output_tokens": 20439,
+      "cache_read_tokens": 21842432,
       "cache_write_tokens": 0,
-      "cost_effective": 0.66,
-      "cost_real": 0.66,
+      "cost_effective": 0.85,
+      "cost_real": 0.85,
       "tools": {
-        "omp": 45
+        "omp": 48
       },
       "models": {
-        "deepseek-v4.1-flash-1017": 45
+        "deepseek-v4.1-flash-1017": 48
       }
     }
   },
@@ -44397,13 +44421,13 @@
       }
     },
     "2026-11": {
-      "interactions": 27139,
-      "input_tokens": 55453206,
-      "output_tokens": 15505971,
-      "cache_read_tokens": 3004913620,
+      "interactions": 27142,
+      "input_tokens": 55990712,
+      "output_tokens": 15508897,
+      "cache_read_tokens": 3005984468,
       "cache_write_tokens": 247050,
-      "cost_effective": 231.37,
-      "cost_real": 231.37,
+      "cost_effective": 231.57,
+      "cost_real": 231.57,
       "tools": {
         "codex": {
           "interactions": 127,
@@ -44462,9 +44486,9 @@
           }
         },
         "omp": {
-          "interactions": 2619,
-          "cost_effective": 16.91794278,
-          "cost_real": 16.91794278,
+          "interactions": 2622,
+          "cost_effective": 17.11483122,
+          "cost_real": 17.11483122,
           "models": {
             "anthropic/claude-haiku-5.5": {
               "interactions": 74,
@@ -44475,8 +44499,8 @@
               "cost_effective": 0.6592608
             },
             "deepseek-v4.1-flash-1017": {
-              "interactions": 1721,
-              "cost_effective": 12.89051166
+              "interactions": 1724,
+              "cost_effective": 13.0874001
             },
             "jev-1.14.0": {
               "interactions": 23,
@@ -44584,8 +44608,8 @@
           "cost_effective": 2.35085718
         },
         "deepseek-v4.1-flash-1017": {
-          "interactions": 1721,
-          "cost_effective": 12.89051166
+          "interactions": 1724,
+          "cost_effective": 13.0874001
         },
         "deepseek/deepseek-v4-flash": {
           "interactions": 1,
@@ -44657,7 +44681,7 @@
         }
       },
       "subscription_fees": 0.0,
-      "cost_real_tracker": 231.37,
+      "cost_real_tracker": 231.57,
       "pay_per_token_provenance": "assumed",
       "tokens_by_model": {
         "MiniMax-M2.7": {
@@ -44685,9 +44709,9 @@
           "cache_write": 0
         },
         "deepseek-v4.1-flash-1017": {
-          "in": 3126317,
-          "out": 766069,
-          "cache_read": 367777792,
+          "in": 3663823,
+          "out": 768995,
+          "cache_read": 368848640,
           "cache_write": 0
         },
         "deepseek/deepseek-v4-flash": {
@@ -44793,7 +44817,7 @@
           "cache_write": 0
         }
       },
-      "pay_per_token_charges": 231.37,
+      "pay_per_token_charges": 231.57,
       "interaction_kinds": {
         "assistant_turn": 1251,
         "tool_call": 23143,
@@ -44819,7 +44843,7 @@
           "tier": "mid"
         },
         "deepseek-v4.1-flash-1017": {
-          "kwh": 1.13,
+          "kwh": 1.148,
           "tier": "mid"
         },
         "deepseek/deepseek-v4-flash": {
@@ -44891,10 +44915,10 @@
           "reason": "sin telemetr\u00eda de tokens"
         }
       },
-      "energy_kwh": 5.771,
+      "energy_kwh": 5.789,
       "energy_kwh_band": {
-        "low": 1.145,
-        "high": 47.357
+        "low": 1.16,
+        "high": 47.402
       }
     }
   },
@@ -45034,17 +45058,17 @@
       }
     },
     "charly-specodelic": {
-      "interactions": 34082,
-      "input_tokens": 157580672,
-      "output_tokens": 14394600,
-      "cache_read_tokens": 3591058995,
+      "interactions": 34085,
+      "input_tokens": 158118178,
+      "output_tokens": 14397526,
+      "cache_read_tokens": 3592129843,
       "cache_write_tokens": 242548,
-      "cost_effective": 162.3,
-      "cost_real": 162.3,
+      "cost_effective": 162.5,
+      "cost_real": 162.5,
       "tools": {
         "openrouter": 29309,
         "minimax": 2826,
-        "omp": 1426,
+        "omp": 1429,
         "kimi-coding": 386,
         "codex": 106,
         "qwen-token-plan-individual": 29
@@ -45052,7 +45076,7 @@
       "models": {
         "z-ai/glm-5.3-flash": 29417,
         "MiniMax-M2.7": 2826,
-        "deepseek-v4.1-flash-1017": 1271,
+        "deepseek-v4.1-flash-1017": 1274,
         "kimi-for-coding": 386,
         "gpt-6-astra": 105,
         "anthropic/claude-haiku-5.5": 47,
@@ -45060,7 +45084,7 @@
         "gpt-6-luna": 1
       },
       "first_seen": "2026-09-28",
-      "last_seen": "2026-11-14",
+      "last_seen": "2026-11-15",
       "skills": {}
     },
     "ak-catitas": {
@@ -47517,7 +47541,7 @@
     "with_agent": 265,
     "total_api_errors": 17,
     "total_compactions": 397,
-    "avg_turns": 91.64227108631441,
+    "avg_turns": 91.6432556613062,
     "avg_tools": 2.869379717755169,
     "avg_skills": 0.5274725274725275,
     "agent_semantics": "claude-cli: sesi\u00f3n con herramienta Agent (subagentes); amp: aut\u00f3nomo por definici\u00f3n (has_agent=True); pi: sin se\u00f1al de subagentes (has_agent=False); omp: sin se\u00f1al de subagentes (has_agent=False)",
@@ -147750,12 +147774,12 @@
   "multitasking": {
     "description": "Proyectos distintos con actividad en la misma ventana. 'context_switches' cuenta cambios de proyecto entre requests consecutivos (puede inflarse por agentes paralelos en el mismo minuto).",
     "hourly": {
-      "total_active_hours": 1471,
+      "total_active_hours": 1472,
       "hours_with_multiple_projects": 906,
-      "pct_hours_multitasking": 61.6,
+      "pct_hours_multitasking": 61.5,
       "avg_projects_per_active_hour": 2.83,
       "distribution": {
-        "1": 565,
+        "1": 566,
         "4+": 427,
         "2": 264,
         "3": 215
@@ -148890,7 +148914,7 @@
         1426,
         1673,
         3010,
-        45
+        48
       ],
       "charly-testaruda": [
         0,
@@ -253474,18 +253498,18 @@
       "project": "charly-specodelic",
       "day": "2026-11-13",
       "start": "2026-11-13T23:45:58.830000+00:00",
-      "end": "2026-11-14T03:24:33.105000+00:00",
+      "end": "2026-11-15T00:47:46.632000+00:00",
       "crosses_midnight": true,
       "source": "omp",
       "model": "deepseek-v4.1-flash-1017",
-      "n_interactions": 600,
-      "cost_effective": 5.89511976,
-      "cost_real": 5.89511976,
+      "n_interactions": 603,
+      "cost_effective": 6.0920082,
+      "cost_real": 6.0920082,
       "cost_reason": null,
       "tokens": {
-        "in": 620228,
-        "out": 221850,
-        "cache_read": 181427712,
+        "in": 1157734,
+        "out": 224776,
+        "cache_read": 182498560,
         "cache_write": 0
       }
     }
@@ -260489,13 +260513,13 @@
         }
       },
       "2026-11-14": {
-        "interactions": 45,
-        "cost_effective": 0.65644572,
-        "cost_real": 0.65644572,
+        "interactions": 48,
+        "cost_effective": 0.85333416,
+        "cost_real": 0.85333416,
         "tokens": {
-          "in": 40942,
-          "out": 17513,
-          "cache_read": 20771584,
+          "in": 578448,
+          "out": 20439,
+          "cache_read": 21842432,
           "cache_write": 0
         }
       }
@@ -267054,13 +267078,13 @@
         }
       },
       "2026-11": {
-        "interactions": 6629,
-        "cost_effective": 49.09844973729992,
-        "cost_real": 49.09844973729992,
+        "interactions": 6632,
+        "cost_effective": 49.295338177299925,
+        "cost_real": 49.295338177299925,
         "tokens": {
-          "in": 12280898,
-          "out": 4092911,
-          "cache_read": 816463988,
+          "in": 12818404,
+          "out": 4095837,
+          "cache_read": 817534836,
           "cache_write": 242548
         }
       }
@@ -269155,8 +269179,8 @@
         "cost_effective": 0.00010459
       },
       "deepseek-v4.1-flash-1017": {
-        "interactions": 1271,
-        "cost_effective": 10.76580936
+        "interactions": 1274,
+        "cost_effective": 10.9626978
       },
       "glm-5.3": {
         "interactions": 29,
@@ -269867,18 +269891,18 @@
     },
     "project_switches_per_active_hour": {
       "measure": "human-context-switching",
-      "value": 99.12
+      "value": 99.05
     }
   },
   "filtered_out": {
-    "interactions": 5595,
+    "interactions": 5627,
     "cost_effective": 0.0,
     "by_tool": {
       "claude-cli": 16,
       "pi": 11,
-      "omp": 277
+      "omp": 309
     },
-    "share": 0.0196
+    "share": 0.0198
   },
   "sessions_monthly": {
     "2025-12": {
@@ -271114,7 +271138,7 @@
         "charges_real": 0.0,
         "charges_provenance": "reported",
         "subscription_fee_implicit": 0.0,
-        "cost_effective": 16.91794278,
+        "cost_effective": 17.11483122,
         "fee_month_total": 0.0
       },
       "openai": {

@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "generated_at": "2026-11-14T06:31:42+00:00",
+    "generated_at": "2026-11-15T06:31:33+00:00",
     "seed_bootstrap": 42,
     "managed_tools": [
       "wai",
@@ -1103,7 +1103,7 @@
       "recovery_p50_interactions": 1,
       "recovery_censored_rate": 0.0034482758620689655,
       "recovery_n": 290,
-      "session_commit_latency_p50_h": 578.0715405555555,
+      "session_commit_latency_p50_h": 578.309735,
       "ci_fail_rate": 0.050505050505050504,
       "runs_total": 99,
       "runs_failed": 5,
@@ -1145,7 +1145,7 @@
       "recovery_p50_interactions": 1.0,
       "recovery_censored_rate": 0.010309278350515464,
       "recovery_n": 97,
-      "session_commit_latency_p50_h": 376.53665,
+      "session_commit_latency_p50_h": 383.86192777777774,
       "ci_fail_rate": 0.025,
       "runs_total": 40,
       "runs_failed": 1,
@@ -1189,7 +1189,7 @@
       "runs_failed": 0,
       "revert_ratio": 0.0,
       "fix_ratio": null,
-      "test_commit_ratio": 0.2,
+      "test_commit_ratio": 0.16666666666666666,
       "dose": 0.38461538461538464,
       "src": {
         "sessions": "missing",
@@ -2447,7 +2447,7 @@
       "repo": "specodelic",
       "month": "2026-11",
       "sessions": 43,
-      "interactions": 6629,
+      "interactions": 6632,
       "errors_api_per_100": null,
       "errors_terapia_per_100": null,
       "recovery_p50_interactions": 1.0,
@@ -4104,7 +4104,7 @@
           {
             "repo": "coffee",
             "dose": 0.38461538461538464,
-            "outcome": 477.3040952777778
+            "outcome": 481.0858313888889
           }
         ]
       },
@@ -4316,7 +4316,7 @@
       },
       {
         "metric": "test_commit_ratio",
-        "spearman_rho": -0.08392867835323402,
+        "spearman_rho": -0.014470461785040347,
         "n": 13,
         "points": [
           {
@@ -4382,7 +4382,7 @@
           {
             "repo": "coffee",
             "dose": 0.38461538461538464,
-            "outcome": 0.30662100456621005
+            "outcome": 0.2955098934550989
           }
         ]
       }
