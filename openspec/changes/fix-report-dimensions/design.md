@@ -11,7 +11,8 @@ Claude/Pi/Amp. Al sumar Pi con OpenRouter, omp, planes Qwen/Kimi y Codex CLI,
 ### D1: tres dimensiones canónicas
 
 - `source`: harness que produce el log (`pi`, `claude-cli`, `amp`, `codex`,
-  `omp`). Es la dimensión de `sessions.by_tool` y de `filtered_out.by_tool`.
+  `omp`). Es la dimensión de `sessions.by_source` y de
+  `filtered_out.by_source` (antes `by_tool`).
 - `provider`: proveedor/router que factura (`anthropic`, `openrouter`,
   `openai`, `minimax`, `mistral`, `github-copilot`, ...).
 - `plan`: plan de suscripción cuando el proveedor factura por plan
@@ -22,20 +23,21 @@ Claude/Pi/Amp. Al sumar Pi con OpenRouter, omp, planes Qwen/Kimi y Codex CLI,
 
 ### D2: reemplazo, no alias
 
-`monthly[].tools` y `projects[].tools` se reemplazan por
-`monthly[].sources`, `monthly[].providers`, `monthly[].plans` (y sus pares
-en `projects`). `session_spend[].source` pasa a harness; se agregan
-`provider` y `plan`. No se mantiene `tools` como alias: el dataset se
-regenera y se migran todos los consumidores en el mismo cambio (principio
-de cutover limpio).
+`monthly[].tools`, `projects[].tools` y `hourly[].tools` se reemplazan por
+`sources`, `providers` y `plans` (y sus pares en `projects`/`hourly`).
+`sessions.by_tool` y `filtered_out.by_tool` se renombran a `by_source`.
+`session_spend[].source` pasa a harness; se agregan `provider` y `plan`. No
+se mantiene `tools` como alias: el dataset se regenera y se migran todos los
+consumidores en el mismo cambio (principio de cutover limpio).
 
 ### D3: excluidos con unidades
 
 `filtered_out` publica `interactions`, `sessions`, `files` y
-`cost_effective` por separado. `share` se calcula con interacciones. Un
-extractor que solo puede contar archivos (Pi/Claude) no puede llenar
-`interactions` con archivos: emite `files` y deja `interactions=null` con
-razón, o cuenta las filas si las tiene.
+`cost_effective` por separado. `share` se calcula con interacciones; si
+`interactions` es `null`, `share` es `null` con razón y no se sustituye por
+archivos. Un extractor que solo puede contar archivos (Pi/Claude) emite
+`files` y deja `interactions=null` con razón, o cuenta las filas si las
+tiene.
 
 ### D4: dos períodos explícitos
 

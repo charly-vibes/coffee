@@ -37,8 +37,9 @@ Dos medidas que el dashboard presenta como equivalentes no reconcilian:
   reconciliación), `scripts/viz-fpa.py` (alertas, economía, Gasto diario),
   `config/fpa.json` (calendario), `data/charges.json`, tests, README,
   dashboards.
-- Datos: `cost_total_real` no cambia (mensual), pero la suma diaria sí; el
-  cash del ledger no cambia.
+- Datos: la suma diaria de `cost_real` cambia (deja de incluir fees);
+  `monthly.cost_real` cambia donde el ledger difiere del calendario (mayo
+  2026: $100 reportado vs $20 asumido); el cash del ledger no cambia.
 
 ## Dependencies
 

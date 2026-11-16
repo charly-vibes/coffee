@@ -3,11 +3,10 @@
 ### Requirement: dimensiones fuente, proveedor y plan
 
 El reporte SHALL (debe) separar `source` (harness), `provider` (router/API) y
-`plan` (suscripción) en `monthly`, `projects` y `session_spend`.
-`monthly[].tools` y `projects[].tools` SHALL (debe)N reemplazarse por
-`sources`, `providers` y `plans`; `session_spend.source` SHALL (debe) ser el
-harness y `provider`/`plan` campos separados. Cada cifra SHALL (debe)
-conservar la dimensión a la que pertenece.
+`plan` (suscripción) en `monthly`, `hourly`, `projects` y `session_spend`.
+Cada cifra SHALL (debe) conservar la dimensión a la que pertenece;
+`session_spend.source` SHALL (debe) ser el harness y `provider`/`plan` campos
+separados.
 
 #### Scenario: OpenRouter no es una herramienta
 
@@ -23,17 +22,36 @@ conservar la dimensión a la que pertenece.
 
 #### Scenario: sesiones por harness
 
-- **WHEN** se lee `sessions.by_tool`
+- **WHEN** se lee `sessions.by_source`
 - **THEN** las claves son `pi`, `claude-cli`, `amp`, `codex`, `omp` y no
   providers/planes
+
+### Requirement: migración de claves de dimensión
+
+Las claves `tools` de `monthly`, `hourly` y `projects` SHALL (debe)N
+reemplazarse por `sources`, `providers` y `plans`; `sessions.by_tool` y
+`filtered_out.by_tool` SHALL (debe)N renombrarse a `by_source`. No se mantiene
+`tools` como alias.
+
+#### Scenario: sin clave tools
+
+- **WHEN** se inspecciona un mes del reporte nuevo
+- **THEN** no existe `tools`; existen `sources`, `providers` y `plans` con
+  los datos que correspondan
+
+#### Scenario: excluidos por fuente
+
+- **WHEN** se lee `filtered_out`
+- **THEN** la clave es `by_source` y sus valores son harness, no providers
 
 ### Requirement: conteo de excluidos por unidad
 
 `filtered_out` SHALL (debe) emitir `interactions`, `sessions`, `files` y
 `cost_effective` por separado. `share` SHALL (debe) calcularse con
-interacciones. Un extractor que solo puede contar archivos SHALL (debe)
-llenar `files` y dejar `interactions=null` con razón, o contar las filas si
-las tiene; nunca reutilizar archivos como interacciones.
+interacciones; si `interactions` es `null`, `share` es `null` con razón. Un
+extractor que solo puede contar archivos SHALL (debe) llenar `files` y dejar
+`interactions=null` con razón, o contar las filas si las tiene; nunca
+reutilizar archivos como interacciones.
 
 #### Scenario: proyecto fuera de scope
 

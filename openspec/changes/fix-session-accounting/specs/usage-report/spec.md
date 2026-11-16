@@ -77,8 +77,9 @@ Amp multi-proyecto), `day` (día local de la primera interacción), `source`
 (harness: pi, claude-cli, amp, codex, omp), `provider` (proveedor/router),
 `plan` (plan de suscripción o `null`), `model` dominante (o `mixed`),
 `cost_effective`, `cost_real`, `tokens` con `in`/`out`/`cache_read`/
-`cache_write`, y `n_interactions`. Las sesiones de subagente omp SHALL (debe)N
-emitirse como filas propias (su `session_id` nativo las distingue).
+`cache_write`, y `n_interactions`. Las sesiones de subagente omp SHALL (debe)
+emitirse como filas propias en `session_spend` (su `session_id` nativo las
+distingue) y NO SHALL (debe)N fusionarse con la fila del padre.
 
 #### Scenario: sesión con coste completo
 

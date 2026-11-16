@@ -3,12 +3,14 @@
 ## 1. Dimensiones
 
 - [ ] 1.1 Test de taxonomía: `openrouter` es provider, no source; `pi` es
-      source; `qwen-token-plan-individual` es plan; `sessions.by_tool` usa
+      source; `qwen-token-plan-individual` es plan; `sessions.by_source` usa
       source.
-- [ ] 1.2 Emitir `sources`/`providers`/`plans` en `monthly` y `projects`;
-      migrar `session_spend` a `source`/`provider`/`plan`.
+- [ ] 1.2 Emitir `sources`/`providers`/`plans` en `monthly`, `hourly` y
+      `projects`; renombrar `sessions.by_tool`/`filtered_out.by_tool` a
+      `by_source`; migrar `session_spend` a `source`/`provider`/`plan`.
 - [ ] 1.3 Eliminar `tools` y actualizar schema/goldens.
-- [ ] 1.4 Migrar `viz-fpa.py`, `viz-index.py`, `viz-gantt.py` y tests.
+- [ ] 1.4 Migrar `viz-fpa.py`, `viz-index.py` y tests; verificar que
+      `viz-gantt.py` no consume `tools` (hoy lee `project_daily`, sin cambio).
 
 ## 2. Excluidos
 
@@ -16,7 +18,7 @@
       `interactions`, `sessions`, `files` y `cost_effective` con unidades
       separadas.
 - [ ] 2.2 Implementar el conteo real de interacciones excluidas o `null` con
-      razón; `share` usa interacciones.
+      razón; `share` usa interacciones y es `null` con razón si faltan.
 
 ## 3. Período
 
@@ -37,5 +39,6 @@
       excluidos), eliminar la fila duplicada de `usage_report_v3.json`,
       corregir los tamaños de artefactos (o derivarlos) y alinear el conteo
       del índice.
-- [ ] 5.2 Regenerar reporte, dashboards e índice; `--check-docs` verde.
+- [ ] 5.2 Actualizar `docs/fpa-analyses-guide.md` y regenerar reporte,
+      dashboards, guía e índice; `--check-docs` verde.
 - [ ] 5.3 Suite de tracker, viz, ctx, index y site-nav.

@@ -10,8 +10,9 @@ alcance no están separadas:
   (`openrouter`, `minimax`, `openai`, `mistral`) y plan
   (`qwen-token-plan-individual`, `kimi-coding`). El 84,6% de las
   interacciones aparece como `openrouter`, que no es una herramienta.
-- El índice publica "5 proveedores" leyendo `sessions.by_tool` (harness),
-  mientras el dashboard dice "herramientas" para proveedores/planes.
+- El índice publica "5 proveedores" como `len(charges["providers"])` del
+  ledger (no lee `sessions.by_tool`), mientras el dashboard lista 13 labels
+  de provider/plan; el label no declara que el conteo es ledger-only.
 - `filtered_out.interactions` cuenta archivos de sesión, no interacciones:
   5.868 reportado vs 19.550 mensajes Pi fuera de scope (7,0%).
 - `metadata.date_range` usa timestamps UTC y los buckets usan TZ local:
@@ -30,7 +31,9 @@ alcance no están separadas:
 - **usage-report**: `metadata.date_range` = rango local de buckets;
   `metadata.date_range_utc` = rango UTC de timestamps.
 - **fpa-dashboard**: glosario y labels usan la dimensión correcta; el índice
-  deriva su conteo de `metadata` y no de `sessions.by_tool`.
+  deriva su conteo de la dimensión declarada (`sources`/`providers`/`plans`)
+  o lo rotula "proveedores con cargos", sin reutilizar el conteo del ledger
+  como si fuera el total de proveedores del reporte.
 - **context-dashboard**: labels de proyecto normalizados en Patologías.
 - **BREAKING (dataset)**: `tools` desaparece en favor de `sources`,
   `providers` y `plans`; `session_spend.source` cambia de proveedor a

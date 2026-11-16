@@ -28,8 +28,10 @@
 
 - [ ] 4.1 Test: la vista declara que `cost_real` no incluye fees y que el
       cash se concilia a nivel mensual.
-- [ ] 4.2 Emitir `charges_total_real_period`; documentar ambos totales.
-- [ ] 4.3 Actualizar README y regenerar dashboards.
+- [ ] 4.2 Actualizar `docs/fpa-analyses-guide.md` (cash vs real, fees
+      diarios/mensuales).
+- [ ] 4.3 Emitir `charges_total_real_period`; documentar ambos totales.
+- [ ] 4.4 Actualizar README y regenerar dashboards.
 
 ## 5. Verificación
 

@@ -24,7 +24,8 @@ y en omp anidado.
 emiten en `sessions.subagents` (`{tool: {total, with_agent?, reason}}`) y sus
 llamadas facturables entran a `total_interactions`, `monthly`, `projects` y
 `session_spend`. Así el KPI de sesiones no se distorsiona y la cobertura de
-uso queda completa.
+uso queda completa. Por eso `session_spend` puede tener más filas que
+`total_sessions`; README lo documenta.
 
 ### D2: identidad de sesión explícita
 

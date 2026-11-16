@@ -16,8 +16,9 @@ El agregado `cost_effective` no distingue; el dashboard lo llama `reported`.
 ### D1: `None` y `0` son distintos
 
 `cost` se modela como `float | None`. `None` = no hay dato; `0` = el
-proveedor reportó gratuidad o el plan cubre el turno. Solo `None` dispara
-estimación, y solo si hay pricing conocido.
+proveedor reportó gratuidad o el plan cubre el turno. Solo `None` o
+`totalFromProvider:false` sin coste numérico disparan estimación, y solo si
+hay pricing conocido.
 
 ### D2: free y plan
 
@@ -35,8 +36,8 @@ estimación, y solo si hay pricing conocido.
 `reported` (factura/proveedor), `derived` (tokens × pricing configurado),
 `assumed` (default rates, plan, config) y `mixed` (agregado). Se emite por
 fila y por agregado (`monthly`, `projects`, `session_spend`, metadata).
-`cost_real` conserva su propia provenance (reported/assumed según ledger o
-calendario).
+`cost_real` emite su propio `cost_real_provenance` (`reported` si viene del
+ledger/proveedor, `assumed` si es calendario).
 
 ### D4: dashboard
 
