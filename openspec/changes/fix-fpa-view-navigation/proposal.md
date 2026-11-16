@@ -29,3 +29,7 @@ a la vez:
   `tests/test_viz.py`, `data/fpa-dashboard.html`.
 - Riesgo: bajo; es una corrección de contrato existente y un test más
   estricto.
+
+## Tickets
+
+- coffe-c15.4.

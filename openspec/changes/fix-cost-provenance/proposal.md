@@ -38,3 +38,7 @@ El reporte trata `coste = 0` como "sin dato" y estima a precio de lista:
   `data/fpa-dashboard.html`, `README.md`.
 - Coste: los totales de free/plan bajan; `cost_real` deja de incluir costo
   estimado. El resto de la contabilidad no cambia.
+
+## Tickets
+
+- coffe-c15.2 (0 vs ausente), coffe-c15.3 (provenance).

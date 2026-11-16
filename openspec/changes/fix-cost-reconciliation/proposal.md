@@ -44,3 +44,7 @@ Dos medidas que el dashboard presenta como equivalentes no reconcilian:
 
 - Implementar después de `fix-cost-provenance`: comparte los campos de coste
   por fila/agregado y la provenance de `cost_real`/`cost_effective`.
+
+## Tickets
+
+- coffe-c15.10 (diario vs mensual), coffe-c15.12 (calendario vs ledger).

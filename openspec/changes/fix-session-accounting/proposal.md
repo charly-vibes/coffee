@@ -43,3 +43,7 @@ identidad de sesión estable para deduplicar:
   de forma acotada.
 - No cambia la semántica de coste de las fuentes existentes; solo la
   completitud y la identidad de sesión.
+
+## Tickets
+
+- coffe-c15.1 (omp anidado), coffe-c15.9 (dedupe/session_spend), EDGE-001 (forks de Pi).

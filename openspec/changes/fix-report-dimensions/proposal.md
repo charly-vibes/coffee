@@ -53,3 +53,7 @@ alcance no están separadas:
   `source`/`provider`/`plan` en `session_spend` y la identidad de sesión. Este
   cambio generaliza la taxonomía a `monthly`/`projects` y migra los
   consumidores.
+
+## Tickets
+
+- coffe-c15.5 (taxonomía), coffe-c15.6 (filtered_out), coffe-c15.7 (período), coffe-c15.8 (labels de contexto), coffe-c15.11 (README).
