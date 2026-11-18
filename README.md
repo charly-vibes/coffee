@@ -128,13 +128,13 @@ El deploy es vía **GitHub Actions** (no hay branch `gh-pages`): `.github/workfl
 ## Estado de los datos
 
 <!-- CHECK-DOCS:BEGIN -->
-- Interacciones: 284,819
+- Interacciones: 287,742
 - Proyectos: 122
-- Costo efectivo: $3,783.78
-- Costo real: $1,835.66
+- Costo efectivo: $3,803.21
+- Costo real: $1,855.09
 - Cash real (ledger): $1,516.72
-- Sesiones: 3,079
-- Periodo: 2025-12-23 → 2026-11-16
+- Sesiones: 3,090
+- Periodo: 2025-12-23 → 2026-11-17
 <!-- CHECK-DOCS:END -->
 
 Nota: `Costo real` es la suma mensual del tracker (fees implícitos del
@@ -336,10 +336,10 @@ Con los datos actuales podemos generar:
 5. [ ] Interpretar el Gantt: los gaps sin actividad (vacaciones?) y los bloques densos de julio-agosto (¿migración masiva? ¿agentes paralelos?)
 
 <!-- CTX-DOCS:BEGIN -->
-- Sesiones con contexto: 2568
+- Sesiones con contexto: 2572
 - Excluidas (patológicas): 34
 - Stubs: 0
-- Pico p50 (tok): 71566
+- Pico p50 (tok): 71729
 - Ratio validación: 1.28
 - Factor chars/token: 4
 <!-- CTX-DOCS:END -->
