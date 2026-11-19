@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "generated_at": "2026-11-18T06:31:02+00:00",
+    "generated_at": "2026-11-19T06:32:49+00:00",
     "seed_bootstrap": 42,
     "managed_tools": [
       "wai",
@@ -48,7 +48,7 @@
         "pretender": {
           "git": true,
           "gh": true,
-          "sessions": 40
+          "sessions": 41
         },
         "vampiro": {
           "git": true,
@@ -58,7 +58,7 @@
         "incitaciones": {
           "git": true,
           "gh": true,
-          "sessions": 44
+          "sessions": 51
         },
         "bd": {
           "git": false,
@@ -73,7 +73,7 @@
         "specodelic": {
           "git": true,
           "gh": true,
-          "sessions": 296
+          "sessions": 301
         },
         "funkalization": {
           "git": true,
@@ -97,63 +97,63 @@
         }
       },
       "gh": {
-        "wai": "cached",
+        "wai": "reported",
         "testaruda": "cached",
         "turu": "cached",
-        "dont": "cached",
+        "dont": "reported",
         "ah": "cached",
         "pretender": "cached",
-        "vampiro": "cached",
+        "vampiro": "reported",
         "incitaciones": "cached",
         "bd": "missing",
         "openspec": "missing",
-        "specodelic": "cached",
+        "specodelic": "reported",
         "funkalization": "cached",
-        "wild": "cached",
+        "wild": "reported",
         "dulce-de-leche": "cached",
-        "coffee": "cached"
+        "coffee": "reported"
       },
       "terapia": {
         "data": {
-          "exit_nonzero": 7968,
-          "edit_mismatch": 1802,
-          "file_not_found": 1542,
-          "network": 164,
-          "other": 2153,
-          "lang_runtime": 1559,
-          "cli_flag_drift": 225
+          "exit_nonzero": 8200,
+          "edit_mismatch": 1881,
+          "file_not_found": 1628,
+          "network": 169,
+          "other": 2219,
+          "lang_runtime": 1637,
+          "cli_flag_drift": 229
         },
-        "provenance": "cached",
-        "fetched_until": "2026-11-11T15:50:52+00:00"
+        "provenance": "reported",
+        "fetched_until": "2026-11-19T06:32:46+00:00"
       },
       "ah": {
-        "wai": "cached",
-        "testaruda": "cached",
-        "turu": "cached",
-        "dont": "cached",
-        "ah": "cached",
-        "pretender": "cached",
-        "vampiro": "cached",
-        "incitaciones": "cached",
+        "wai": "missing",
+        "testaruda": "missing",
+        "turu": "missing",
+        "dont": "missing",
+        "ah": "missing",
+        "pretender": "missing",
+        "vampiro": "missing",
+        "incitaciones": "missing",
         "bd": "missing",
-        "openspec": "cached",
-        "specodelic": "cached",
-        "funkalization": "cached",
-        "wild": "cached",
-        "dulce-de-leche": "cached",
-        "coffee": "cached"
+        "openspec": "missing",
+        "specodelic": "missing",
+        "funkalization": "missing",
+        "wild": "missing",
+        "dulce-de-leche": "missing",
+        "coffee": "missing"
       },
       "sessions_bias": "sessions cuenta s\u00f3lo sesiones pi (las otras fuentes no exponen cwd por sesi\u00f3n; coffe-i31)"
     },
-    "clamped_negative_latencies": 209
+    "clamped_negative_latencies": 208
   },
   "repos": [
     {
       "repo": "wai",
-      "is_control": true,
+      "is_control": false,
       "is_outlier": false,
       "adoption": {
-        "first_ddl_commit": null,
+        "first_ddl_commit": "2026-11-18T13:03:39-03:00",
         "tools_first_use": {
           "wai": "2026-04-18T19:46:58.812Z",
           "testaruda": "2026-07-28T14:24:30.024Z",
@@ -170,7 +170,7 @@
           "wild": null
         },
         "provenance": {
-          "first_ddl_commit": "missing",
+          "first_ddl_commit": "reported",
           "tools_first_use": "reported"
         }
       },
@@ -346,10 +346,10 @@
     },
     {
       "repo": "ah",
-      "is_control": true,
+      "is_control": false,
       "is_outlier": false,
       "adoption": {
-        "first_ddl_commit": null,
+        "first_ddl_commit": "2026-11-18T13:02:33-03:00",
         "tools_first_use": {
           "wai": "2026-05-12T21:56:06.061Z",
           "testaruda": "2026-10-09T15:23:25.993Z",
@@ -366,7 +366,7 @@
           "wild": null
         },
         "provenance": {
-          "first_ddl_commit": "missing",
+          "first_ddl_commit": "reported",
           "tools_first_use": "reported"
         }
       },
@@ -638,10 +638,10 @@
     },
     {
       "repo": "specodelic",
-      "is_control": true,
+      "is_control": false,
       "is_outlier": false,
       "adoption": {
-        "first_ddl_commit": null,
+        "first_ddl_commit": "2026-11-18T12:59:57-03:00",
         "tools_first_use": {
           "wai": "2026-09-28T20:18:57.585Z",
           "testaruda": "2026-09-29T12:31:54.978Z",
@@ -658,7 +658,7 @@
           "wild": null
         },
         "provenance": {
-          "first_ddl_commit": "missing",
+          "first_ddl_commit": "reported",
           "tools_first_use": "reported"
         }
       },
@@ -893,7 +893,7 @@
       "recovery_p50_interactions": 1.0,
       "recovery_censored_rate": 0.0,
       "recovery_n": 46,
-      "session_commit_latency_p50_h": 3167.7532830555556,
+      "session_commit_latency_p50_h": 3168.080088611111,
       "ci_fail_rate": null,
       "runs_total": null,
       "runs_failed": null,
@@ -935,7 +935,7 @@
       "recovery_p50_interactions": 1,
       "recovery_censored_rate": 0.007042253521126761,
       "recovery_n": 142,
-      "session_commit_latency_p50_h": 1488.765426111111,
+      "session_commit_latency_p50_h": 1489.0015372222222,
       "ci_fail_rate": 0.08247422680412371,
       "runs_total": 97,
       "runs_failed": 8,
@@ -977,7 +977,7 @@
       "recovery_p50_interactions": 1.0,
       "recovery_censored_rate": 0.0,
       "recovery_n": 38,
-      "session_commit_latency_p50_h": 1370.41705,
+      "session_commit_latency_p50_h": 1370.6392722222222,
       "ci_fail_rate": 0.041666666666666664,
       "runs_total": 48,
       "runs_failed": 2,
@@ -1061,7 +1061,7 @@
       "recovery_p50_interactions": 1,
       "recovery_censored_rate": 0.0,
       "recovery_n": 155,
-      "session_commit_latency_p50_h": 771.2315011111111,
+      "session_commit_latency_p50_h": 771.2321955555556,
       "ci_fail_rate": 0.3620689655172414,
       "runs_total": 174,
       "runs_failed": 63,
@@ -1103,7 +1103,7 @@
       "recovery_p50_interactions": 1,
       "recovery_censored_rate": 0.0034482758620689655,
       "recovery_n": 290,
-      "session_commit_latency_p50_h": 579.4889016666666,
+      "session_commit_latency_p50_h": 579.4890405555556,
       "ci_fail_rate": 0.050505050505050504,
       "runs_total": 99,
       "runs_failed": 5,
@@ -1123,9 +1123,9 @@
         "revert_ratio": "reported",
         "fix_ratio": "missing",
         "test_commit_ratio": "reported",
-        "ci_fail_rate": "cached",
-        "runs_total": "cached",
-        "runs_failed": "cached",
+        "ci_fail_rate": "reported",
+        "runs_total": "reported",
+        "runs_failed": "reported",
         "dose": "derived"
       },
       "reasons": {
@@ -1145,7 +1145,7 @@
       "recovery_p50_interactions": 1.0,
       "recovery_censored_rate": 0.010309278350515464,
       "recovery_n": 97,
-      "session_commit_latency_p50_h": 484.14164999999997,
+      "session_commit_latency_p50_h": 487.1680388888889,
       "ci_fail_rate": 0.025,
       "runs_total": 40,
       "runs_failed": 1,
@@ -1165,9 +1165,9 @@
         "revert_ratio": "reported",
         "fix_ratio": "missing",
         "test_commit_ratio": "reported",
-        "ci_fail_rate": "cached",
-        "runs_total": "cached",
-        "runs_failed": "cached",
+        "ci_fail_rate": "reported",
+        "runs_total": "reported",
+        "runs_failed": "reported",
         "dose": "derived"
       },
       "reasons": {
@@ -1184,12 +1184,12 @@
       "interactions": 98,
       "errors_api_per_100": null,
       "errors_terapia_per_100": null,
-      "ci_fail_rate": 0.0,
-      "runs_total": 2,
-      "runs_failed": 0,
+      "ci_fail_rate": 0.0625,
+      "runs_total": 16,
+      "runs_failed": 1,
       "revert_ratio": 0.0,
       "fix_ratio": null,
-      "test_commit_ratio": 0.0625,
+      "test_commit_ratio": 0.058823529411764705,
       "dose": 0.38461538461538464,
       "src": {
         "sessions": "missing",
@@ -1199,9 +1199,9 @@
         "revert_ratio": "reported",
         "fix_ratio": "missing",
         "test_commit_ratio": "reported",
-        "ci_fail_rate": "cached",
-        "runs_total": "cached",
-        "runs_failed": "cached",
+        "ci_fail_rate": "reported",
+        "runs_total": "reported",
+        "runs_failed": "reported",
         "dose": "derived"
       },
       "reasons": {
@@ -1220,7 +1220,7 @@
       "recovery_p50_interactions": 1.0,
       "recovery_censored_rate": 0.0,
       "recovery_n": 32,
-      "session_commit_latency_p50_h": 448.7095186111111,
+      "session_commit_latency_p50_h": 450.32382416666667,
       "ci_fail_rate": 0.5294117647058824,
       "runs_total": 34,
       "runs_failed": 18,
@@ -1240,9 +1240,9 @@
         "revert_ratio": "reported",
         "fix_ratio": "missing",
         "test_commit_ratio": "reported",
-        "ci_fail_rate": "cached",
-        "runs_total": "cached",
-        "runs_failed": "cached",
+        "ci_fail_rate": "reported",
+        "runs_total": "reported",
+        "runs_failed": "reported",
         "dose": "derived"
       },
       "reasons": {
@@ -1262,7 +1262,7 @@
       "recovery_p50_interactions": 2,
       "recovery_censored_rate": 0.0,
       "recovery_n": 163,
-      "session_commit_latency_p50_h": 1443.4727319444444,
+      "session_commit_latency_p50_h": 1490.335648611111,
       "ci_fail_rate": 0.46564885496183206,
       "runs_total": 262,
       "runs_failed": 122,
@@ -1282,9 +1282,9 @@
         "revert_ratio": "reported",
         "fix_ratio": "missing",
         "test_commit_ratio": "reported",
-        "ci_fail_rate": "cached",
-        "runs_total": "cached",
-        "runs_failed": "cached",
+        "ci_fail_rate": "reported",
+        "runs_total": "reported",
+        "runs_failed": "reported",
         "dose": "derived"
       },
       "reasons": {
@@ -1304,7 +1304,7 @@
       "recovery_p50_interactions": 2.0,
       "recovery_censored_rate": 0.0,
       "recovery_n": 20,
-      "session_commit_latency_p50_h": 1342.3669155555556,
+      "session_commit_latency_p50_h": 1908.2703877777776,
       "ci_fail_rate": 0.3333333333333333,
       "runs_total": 42,
       "runs_failed": 14,
@@ -1324,9 +1324,9 @@
         "revert_ratio": "reported",
         "fix_ratio": "missing",
         "test_commit_ratio": "reported",
-        "ci_fail_rate": "cached",
-        "runs_total": "cached",
-        "runs_failed": "cached",
+        "ci_fail_rate": "reported",
+        "runs_total": "reported",
+        "runs_failed": "reported",
         "dose": "derived"
       },
       "reasons": {
@@ -1346,7 +1346,7 @@
       "recovery_p50_interactions": 1,
       "recovery_censored_rate": 0.003472222222222222,
       "recovery_n": 288,
-      "session_commit_latency_p50_h": 1481.5858491666668,
+      "session_commit_latency_p50_h": 1630.6568213888888,
       "ci_fail_rate": 0.25,
       "runs_total": 76,
       "runs_failed": 19,
@@ -1366,9 +1366,9 @@
         "revert_ratio": "reported",
         "fix_ratio": "reported",
         "test_commit_ratio": "reported",
-        "ci_fail_rate": "cached",
-        "runs_total": "cached",
-        "runs_failed": "cached",
+        "ci_fail_rate": "reported",
+        "runs_total": "reported",
+        "runs_failed": "reported",
         "dose": "derived"
       },
       "reasons": {
@@ -1388,7 +1388,7 @@
       "recovery_p50_interactions": 1.0,
       "recovery_censored_rate": 0.0,
       "recovery_n": 16,
-      "session_commit_latency_p50_h": 677.6062708333334,
+      "session_commit_latency_p50_h": 688.465576388889,
       "ci_fail_rate": 0.16279069767441862,
       "runs_total": 43,
       "runs_failed": 7,
@@ -1408,9 +1408,9 @@
         "revert_ratio": "reported",
         "fix_ratio": "reported",
         "test_commit_ratio": "reported",
-        "ci_fail_rate": "cached",
-        "runs_total": "cached",
-        "runs_failed": "cached",
+        "ci_fail_rate": "reported",
+        "runs_total": "reported",
+        "runs_failed": "reported",
         "dose": "derived"
       },
       "reasons": {
@@ -1430,7 +1430,7 @@
       "recovery_p50_interactions": 1.0,
       "recovery_censored_rate": 0.0,
       "recovery_n": 30,
-      "session_commit_latency_p50_h": 141.77802277777778,
+      "session_commit_latency_p50_h": 761.4231616666667,
       "ci_fail_rate": 0.2261904761904762,
       "runs_total": 84,
       "runs_failed": 19,
@@ -1450,9 +1450,9 @@
         "revert_ratio": "reported",
         "fix_ratio": "reported",
         "test_commit_ratio": "reported",
-        "ci_fail_rate": "cached",
-        "runs_total": "cached",
-        "runs_failed": "cached",
+        "ci_fail_rate": "reported",
+        "runs_total": "reported",
+        "runs_failed": "reported",
         "dose": "derived"
       },
       "reasons": {
@@ -1472,7 +1472,7 @@
       "recovery_p50_interactions": 2,
       "recovery_censored_rate": 0.0,
       "recovery_n": 31,
-      "session_commit_latency_p50_h": 1781.7759655555556,
+      "session_commit_latency_p50_h": 1782.341798888889,
       "ci_fail_rate": 0.9411764705882353,
       "runs_total": 17,
       "runs_failed": 16,
@@ -1514,7 +1514,7 @@
       "recovery_p50_interactions": 2,
       "recovery_censored_rate": 0.0,
       "recovery_n": 47,
-      "session_commit_latency_p50_h": 1664.2195569444445,
+      "session_commit_latency_p50_h": 1664.918723611111,
       "ci_fail_rate": 0.9333333333333333,
       "runs_total": 15,
       "runs_failed": 14,
@@ -1556,7 +1556,7 @@
       "recovery_p50_interactions": 1.0,
       "recovery_censored_rate": 0.0,
       "recovery_n": 70,
-      "session_commit_latency_p50_h": 348.89281666666665,
+      "session_commit_latency_p50_h": 349.18170555555554,
       "ci_fail_rate": 0.31386861313868614,
       "runs_total": 137,
       "runs_failed": 43,
@@ -1598,7 +1598,7 @@
       "recovery_p50_interactions": 1,
       "recovery_censored_rate": 0.008928571428571428,
       "recovery_n": 112,
-      "session_commit_latency_p50_h": 358.0180144444444,
+      "session_commit_latency_p50_h": 606.3021811111112,
       "ci_fail_rate": 0.21212121212121213,
       "runs_total": 297,
       "runs_failed": 63,
@@ -1640,13 +1640,13 @@
       "recovery_p50_interactions": 1,
       "recovery_censored_rate": 0.0625,
       "recovery_n": 16,
-      "session_commit_latency_p50_h": 241.95197277777777,
+      "session_commit_latency_p50_h": 286.2336394444444,
       "ci_fail_rate": 0.0,
       "runs_total": 10,
       "runs_failed": 0,
       "revert_ratio": 0.0,
-      "fix_ratio": 1.0,
-      "test_commit_ratio": 0.2857142857142857,
+      "fix_ratio": 3.0,
+      "test_commit_ratio": 0.28,
       "dose": 0.9230769230769231,
       "src": {
         "sessions": "reported",
@@ -1682,7 +1682,7 @@
       "recovery_p50_interactions": 1,
       "recovery_censored_rate": 0.0,
       "recovery_n": 11,
-      "session_commit_latency_p50_h": 659.47505,
+      "session_commit_latency_p50_h": 659.6214388888889,
       "ci_fail_rate": 0.07692307692307693,
       "runs_total": 13,
       "runs_failed": 1,
@@ -1823,7 +1823,7 @@
       "recovery_p50_interactions": 1,
       "recovery_censored_rate": 0.0,
       "recovery_n": 33,
-      "session_commit_latency_p50_h": 3432.9179658333333,
+      "session_commit_latency_p50_h": 3691.105326944444,
       "ci_fail_rate": 0.0,
       "runs_total": 18,
       "runs_failed": 0,
@@ -1865,7 +1865,7 @@
       "recovery_p50_interactions": 3,
       "recovery_censored_rate": 0.0,
       "recovery_n": 3,
-      "session_commit_latency_p50_h": 3023.7628161111115,
+      "session_commit_latency_p50_h": 3133.1603161111116,
       "ci_fail_rate": 0.0,
       "runs_total": 4,
       "runs_failed": 0,
@@ -1907,7 +1907,7 @@
       "recovery_p50_interactions": 1.0,
       "recovery_censored_rate": 0.0,
       "recovery_n": 44,
-      "session_commit_latency_p50_h": 1413.2577880555555,
+      "session_commit_latency_p50_h": 1465.7275102777776,
       "ci_fail_rate": 0.0,
       "runs_total": 18,
       "runs_failed": 0,
@@ -1949,7 +1949,7 @@
       "recovery_p50_interactions": 1.5,
       "recovery_censored_rate": 0.0,
       "recovery_n": 2,
-      "session_commit_latency_p50_h": 678.6123869444443,
+      "session_commit_latency_p50_h": 722.9548869444444,
       "ci_fail_rate": 0.0,
       "runs_total": 1,
       "runs_failed": 0,
@@ -1991,7 +1991,7 @@
       "recovery_p50_interactions": 1,
       "recovery_censored_rate": 0.0,
       "recovery_n": 69,
-      "session_commit_latency_p50_h": 339.29455333333334,
+      "session_commit_latency_p50_h": 339.41649777777775,
       "ci_fail_rate": 0.021052631578947368,
       "runs_total": 95,
       "runs_failed": 2,
@@ -2033,7 +2033,7 @@
       "recovery_p50_interactions": 1,
       "recovery_censored_rate": 0.0,
       "recovery_n": 25,
-      "session_commit_latency_p50_h": 317.49460527777774,
+      "session_commit_latency_p50_h": 795.4176608333332,
       "ci_fail_rate": 0.045454545454545456,
       "runs_total": 44,
       "runs_failed": 2,
@@ -2068,20 +2068,20 @@
     {
       "repo": "incitaciones",
       "month": "2026-11",
-      "sessions": 1,
-      "interactions": 73,
+      "sessions": 8,
+      "interactions": 602,
       "errors_api_per_100": null,
       "errors_terapia_per_100": null,
-      "recovery_p50_interactions": 1.0,
+      "recovery_p50_interactions": 1,
       "recovery_censored_rate": 0.0,
-      "recovery_n": 4,
+      "recovery_n": 25,
       "session_commit_latency_p50_h": 0.0,
       "ci_fail_rate": 0.0,
       "runs_total": 2,
       "runs_failed": 0,
       "revert_ratio": 0.0,
       "fix_ratio": null,
-      "test_commit_ratio": 0.0,
+      "test_commit_ratio": 0.22916666666666666,
       "dose": 0.46153846153846156,
       "src": {
         "sessions": "reported",
@@ -2117,7 +2117,7 @@
       "recovery_p50_interactions": 1,
       "recovery_censored_rate": 0.0,
       "recovery_n": 57,
-      "session_commit_latency_p50_h": 1800.5837897222223,
+      "session_commit_latency_p50_h": 2901.5746230555555,
       "ci_fail_rate": null,
       "runs_total": null,
       "runs_failed": null,
@@ -2192,7 +2192,7 @@
       "recovery_p50_interactions": 1,
       "recovery_censored_rate": 0.0,
       "recovery_n": 205,
-      "session_commit_latency_p50_h": 1468.3230658333332,
+      "session_commit_latency_p50_h": 1477.1348713888888,
       "ci_fail_rate": 0.2540983606557377,
       "runs_total": 122,
       "runs_failed": 31,
@@ -2234,7 +2234,7 @@
       "recovery_p50_interactions": 2,
       "recovery_censored_rate": 0.0,
       "recovery_n": 15,
-      "session_commit_latency_p50_h": 1364.3568169444445,
+      "session_commit_latency_p50_h": 1368.5490391666667,
       "ci_fail_rate": 0.5555555555555556,
       "runs_total": 9,
       "runs_failed": 5,
@@ -2276,7 +2276,7 @@
       "recovery_p50_interactions": 1,
       "recovery_censored_rate": 0.0,
       "recovery_n": 41,
-      "session_commit_latency_p50_h": 240.2796625,
+      "session_commit_latency_p50_h": 240.47841250000002,
       "ci_fail_rate": 0.045871559633027525,
       "runs_total": 109,
       "runs_failed": 5,
@@ -2318,7 +2318,7 @@
       "recovery_p50_interactions": 1,
       "recovery_censored_rate": 0.0,
       "recovery_n": 27,
-      "session_commit_latency_p50_h": 615.3148925,
+      "session_commit_latency_p50_h": 616.7418369444445,
       "ci_fail_rate": 0.21428571428571427,
       "runs_total": 84,
       "runs_failed": 18,
@@ -2353,20 +2353,20 @@
     {
       "repo": "pretender",
       "month": "2026-11",
-      "sessions": 3,
-      "interactions": 308,
+      "sessions": 4,
+      "interactions": 440,
       "errors_api_per_100": null,
       "errors_terapia_per_100": null,
-      "recovery_p50_interactions": 1.0,
+      "recovery_p50_interactions": 1,
       "recovery_censored_rate": 0.0,
-      "recovery_n": 14,
-      "session_commit_latency_p50_h": 268.3289052777778,
+      "recovery_n": 15,
+      "session_commit_latency_p50_h": 0.0,
       "ci_fail_rate": 0.14285714285714285,
       "runs_total": 14,
       "runs_failed": 2,
       "revert_ratio": 0.0,
-      "fix_ratio": 1.5,
-      "test_commit_ratio": 0.2222222222222222,
+      "fix_ratio": 2.0,
+      "test_commit_ratio": 0.20833333333333334,
       "dose": 0.6923076923076923,
       "src": {
         "sessions": "reported",
@@ -2402,7 +2402,7 @@
       "recovery_p50_interactions": 1,
       "recovery_censored_rate": 0.0,
       "recovery_n": 281,
-      "session_commit_latency_p50_h": 212.52231,
+      "session_commit_latency_p50_h": 213.8945322222222,
       "ci_fail_rate": 0.43414634146341463,
       "runs_total": 205,
       "runs_failed": 89,
@@ -2422,9 +2422,9 @@
         "revert_ratio": "reported",
         "fix_ratio": "reported",
         "test_commit_ratio": "reported",
-        "ci_fail_rate": "cached",
-        "runs_total": "cached",
-        "runs_failed": "cached",
+        "ci_fail_rate": "reported",
+        "runs_total": "reported",
+        "runs_failed": "reported",
         "dose": "derived"
       },
       "reasons": {
@@ -2444,7 +2444,7 @@
       "recovery_p50_interactions": 1,
       "recovery_censored_rate": 0.0,
       "recovery_n": 739,
-      "session_commit_latency_p50_h": 457.3620730555555,
+      "session_commit_latency_p50_h": 474.5231841666667,
       "ci_fail_rate": 0.2702702702702703,
       "runs_total": 592,
       "runs_failed": 160,
@@ -2464,9 +2464,9 @@
         "revert_ratio": "reported",
         "fix_ratio": "reported",
         "test_commit_ratio": "reported",
-        "ci_fail_rate": "cached",
-        "runs_total": "cached",
-        "runs_failed": "cached",
+        "ci_fail_rate": "reported",
+        "runs_total": "reported",
+        "runs_failed": "reported",
         "dose": "derived"
       },
       "reasons": {
@@ -2479,20 +2479,20 @@
     {
       "repo": "specodelic",
       "month": "2026-11",
-      "sessions": 43,
-      "interactions": 8756,
+      "sessions": 48,
+      "interactions": 9913,
       "errors_api_per_100": null,
       "errors_terapia_per_100": null,
-      "recovery_p50_interactions": 1.0,
+      "recovery_p50_interactions": 1,
       "recovery_censored_rate": 0.0,
-      "recovery_n": 134,
-      "session_commit_latency_p50_h": 50.14245916666667,
-      "ci_fail_rate": 0.46153846153846156,
-      "runs_total": 13,
-      "runs_failed": 6,
+      "recovery_n": 153,
+      "session_commit_latency_p50_h": 0.18048416666666667,
+      "ci_fail_rate": 0.4393939393939394,
+      "runs_total": 198,
+      "runs_failed": 87,
       "revert_ratio": 0.0,
-      "fix_ratio": 6.0,
-      "test_commit_ratio": 0.3655913978494624,
+      "fix_ratio": 7.0,
+      "test_commit_ratio": 0.3391304347826087,
       "dose": 0.6923076923076923,
       "src": {
         "sessions": "reported",
@@ -2506,9 +2506,9 @@
         "revert_ratio": "reported",
         "fix_ratio": "reported",
         "test_commit_ratio": "reported",
-        "ci_fail_rate": "cached",
-        "runs_total": "cached",
-        "runs_failed": "cached",
+        "ci_fail_rate": "reported",
+        "runs_total": "reported",
+        "runs_failed": "reported",
         "dose": "derived"
       },
       "reasons": {
@@ -2528,7 +2528,7 @@
       "recovery_p50_interactions": 1,
       "recovery_censored_rate": 0.005994005994005994,
       "recovery_n": 1001,
-      "session_commit_latency_p50_h": 1592.8116475,
+      "session_commit_latency_p50_h": 1607.6728975,
       "ci_fail_rate": 0.2947103274559194,
       "runs_total": 397,
       "runs_failed": 117,
@@ -2570,7 +2570,7 @@
       "recovery_p50_interactions": 1,
       "recovery_censored_rate": 0.0,
       "recovery_n": 37,
-      "session_commit_latency_p50_h": 932.2841413888889,
+      "session_commit_latency_p50_h": 958.2281691666667,
       "ci_fail_rate": 0.3333333333333333,
       "runs_total": 21,
       "runs_failed": 7,
@@ -2612,7 +2612,7 @@
       "recovery_p50_interactions": 1.0,
       "recovery_censored_rate": 0.0,
       "recovery_n": 88,
-      "session_commit_latency_p50_h": 332.29307666666665,
+      "session_commit_latency_p50_h": 332.35252111111106,
       "ci_fail_rate": 0.037037037037037035,
       "runs_total": 189,
       "runs_failed": 7,
@@ -2654,7 +2654,7 @@
       "recovery_p50_interactions": 1.0,
       "recovery_censored_rate": 0.0,
       "recovery_n": 84,
-      "session_commit_latency_p50_h": 146.8839625,
+      "session_commit_latency_p50_h": 185.1811847222222,
       "ci_fail_rate": 0.20754716981132076,
       "runs_total": 159,
       "runs_failed": 33,
@@ -2696,13 +2696,13 @@
       "recovery_p50_interactions": 1.0,
       "recovery_censored_rate": 0.0,
       "recovery_n": 8,
-      "session_commit_latency_p50_h": 0.0,
+      "session_commit_latency_p50_h": 265.7739172222222,
       "ci_fail_rate": 0.0,
       "runs_total": 1,
       "runs_failed": 0,
       "revert_ratio": 0.0,
       "fix_ratio": null,
-      "test_commit_ratio": 0.7,
+      "test_commit_ratio": 0.5,
       "dose": 0.6153846153846154,
       "src": {
         "sessions": "reported",
@@ -2738,7 +2738,7 @@
       "recovery_p50_interactions": 1,
       "recovery_censored_rate": 0.0,
       "recovery_n": 93,
-      "session_commit_latency_p50_h": 263.52522694444446,
+      "session_commit_latency_p50_h": 263.5674491666667,
       "ci_fail_rate": 0.07142857142857142,
       "runs_total": 56,
       "runs_failed": 4,
@@ -2780,7 +2780,7 @@
       "recovery_p50_interactions": 1.0,
       "recovery_censored_rate": 0.0,
       "recovery_n": 24,
-      "session_commit_latency_p50_h": 488.58628944444445,
+      "session_commit_latency_p50_h": 489.16392833333333,
       "ci_fail_rate": 0.24489795918367346,
       "runs_total": 49,
       "runs_failed": 12,
@@ -2822,13 +2822,13 @@
       "recovery_p50_interactions": 1,
       "recovery_censored_rate": 0.0,
       "recovery_n": 33,
-      "session_commit_latency_p50_h": 256.34939722222225,
+      "session_commit_latency_p50_h": 313.2713416666667,
       "ci_fail_rate": 1.0,
       "runs_total": 2,
       "runs_failed": 2,
       "revert_ratio": 0.0,
       "fix_ratio": 1.0,
-      "test_commit_ratio": 0.42857142857142855,
+      "test_commit_ratio": 0.2857142857142857,
       "dose": 0.5384615384615384,
       "src": {
         "sessions": "reported",
@@ -2864,7 +2864,7 @@
       "recovery_p50_interactions": 1.0,
       "recovery_censored_rate": 0.00851063829787234,
       "recovery_n": 470,
-      "session_commit_latency_p50_h": 1459.9073094444445,
+      "session_commit_latency_p50_h": 1460.6334205555556,
       "ci_fail_rate": 0.8789808917197452,
       "runs_total": 157,
       "runs_failed": 138,
@@ -2884,9 +2884,9 @@
         "revert_ratio": "reported",
         "fix_ratio": "reported",
         "test_commit_ratio": "reported",
-        "ci_fail_rate": "cached",
-        "runs_total": "cached",
-        "runs_failed": "cached",
+        "ci_fail_rate": "reported",
+        "runs_total": "reported",
+        "runs_failed": "reported",
         "dose": "derived"
       },
       "reasons": {
@@ -2906,7 +2906,7 @@
       "recovery_p50_interactions": 1,
       "recovery_censored_rate": 0.0,
       "recovery_n": 17,
-      "session_commit_latency_p50_h": 1345.6332863888888,
+      "session_commit_latency_p50_h": 1346.0856475,
       "ci_fail_rate": 0.9629629629629629,
       "runs_total": 27,
       "runs_failed": 26,
@@ -2926,9 +2926,9 @@
         "revert_ratio": "reported",
         "fix_ratio": "reported",
         "test_commit_ratio": "reported",
-        "ci_fail_rate": "cached",
-        "runs_total": "cached",
-        "runs_failed": "cached",
+        "ci_fail_rate": "reported",
+        "runs_total": "reported",
+        "runs_failed": "reported",
         "dose": "derived"
       },
       "reasons": {
@@ -2948,7 +2948,7 @@
       "recovery_p50_interactions": 1,
       "recovery_censored_rate": 0.0,
       "recovery_n": 51,
-      "session_commit_latency_p50_h": 113.86164583333333,
+      "session_commit_latency_p50_h": 327.0472013888889,
       "ci_fail_rate": 0.07079646017699115,
       "runs_total": 113,
       "runs_failed": 8,
@@ -2968,9 +2968,9 @@
         "revert_ratio": "reported",
         "fix_ratio": "reported",
         "test_commit_ratio": "reported",
-        "ci_fail_rate": "cached",
-        "runs_total": "cached",
-        "runs_failed": "cached",
+        "ci_fail_rate": "reported",
+        "runs_total": "reported",
+        "runs_failed": "reported",
         "dose": "derived"
       },
       "reasons": {
@@ -2990,7 +2990,7 @@
       "recovery_p50_interactions": 0,
       "recovery_censored_rate": 0.0,
       "recovery_n": 1,
-      "session_commit_latency_p50_h": 459.6042147222222,
+      "session_commit_latency_p50_h": 460.1310202777778,
       "ci_fail_rate": 0.2,
       "runs_total": 50,
       "runs_failed": 10,
@@ -3010,9 +3010,9 @@
         "revert_ratio": "reported",
         "fix_ratio": "reported",
         "test_commit_ratio": "reported",
-        "ci_fail_rate": "cached",
-        "runs_total": "cached",
-        "runs_failed": "cached",
+        "ci_fail_rate": "reported",
+        "runs_total": "reported",
+        "runs_failed": "reported",
         "dose": "derived"
       },
       "reasons": {
@@ -3032,10 +3032,10 @@
       "recovery_p50_interactions": 1,
       "recovery_censored_rate": 0.0,
       "recovery_n": 5,
-      "session_commit_latency_p50_h": 179.83372083333333,
-      "ci_fail_rate": 0.16666666666666666,
-      "runs_total": 24,
-      "runs_failed": 4,
+      "session_commit_latency_p50_h": 376.2167763888889,
+      "ci_fail_rate": 0.21875,
+      "runs_total": 32,
+      "runs_failed": 7,
       "revert_ratio": 0.0,
       "fix_ratio": null,
       "test_commit_ratio": 0.0,
@@ -3052,9 +3052,9 @@
         "revert_ratio": "reported",
         "fix_ratio": "missing",
         "test_commit_ratio": "reported",
-        "ci_fail_rate": "cached",
-        "runs_total": "cached",
-        "runs_failed": "cached",
+        "ci_fail_rate": "reported",
+        "runs_total": "reported",
+        "runs_failed": "reported",
         "dose": "derived"
       },
       "reasons": {
@@ -3119,9 +3119,9 @@
         "revert_ratio": "reported",
         "fix_ratio": "reported",
         "test_commit_ratio": "reported",
-        "ci_fail_rate": "cached",
-        "runs_total": "cached",
-        "runs_failed": "cached",
+        "ci_fail_rate": "reported",
+        "runs_total": "reported",
+        "runs_failed": "reported",
         "dose": "derived"
       },
       "reasons": {
@@ -3140,7 +3140,7 @@
       "recovery_p50_interactions": 2,
       "recovery_censored_rate": 0.0,
       "recovery_n": 39,
-      "session_commit_latency_p50_h": 3787.7191875,
+      "session_commit_latency_p50_h": 3787.848909722222,
       "ci_fail_rate": 0.3728813559322034,
       "runs_total": 59,
       "runs_failed": 22,
@@ -3160,9 +3160,9 @@
         "revert_ratio": "reported",
         "fix_ratio": "reported",
         "test_commit_ratio": "reported",
-        "ci_fail_rate": "cached",
-        "runs_total": "cached",
-        "runs_failed": "cached",
+        "ci_fail_rate": "reported",
+        "runs_total": "reported",
+        "runs_failed": "reported",
         "dose": "derived"
       },
       "reasons": {
@@ -3182,7 +3182,7 @@
       "recovery_p50_interactions": 1,
       "recovery_censored_rate": 0.0,
       "recovery_n": 39,
-      "session_commit_latency_p50_h": 3434.911181111111,
+      "session_commit_latency_p50_h": 3436.4578477777777,
       "ci_fail_rate": 0.0,
       "runs_total": 27,
       "runs_failed": 0,
@@ -3202,9 +3202,9 @@
         "revert_ratio": "reported",
         "fix_ratio": "reported",
         "test_commit_ratio": "reported",
-        "ci_fail_rate": "cached",
-        "runs_total": "cached",
-        "runs_failed": "cached",
+        "ci_fail_rate": "reported",
+        "runs_total": "reported",
+        "runs_failed": "reported",
         "dose": "derived"
       },
       "reasons": {
@@ -3236,9 +3236,9 @@
         "revert_ratio": "reported",
         "fix_ratio": "missing",
         "test_commit_ratio": "reported",
-        "ci_fail_rate": "cached",
-        "runs_total": "cached",
-        "runs_failed": "cached",
+        "ci_fail_rate": "reported",
+        "runs_total": "reported",
+        "runs_failed": "reported",
         "dose": "derived"
       },
       "reasons": {
@@ -3257,7 +3257,7 @@
       "recovery_p50_interactions": 1.0,
       "recovery_censored_rate": 0.0072992700729927005,
       "recovery_n": 137,
-      "session_commit_latency_p50_h": 1656.4970691666667,
+      "session_commit_latency_p50_h": 1656.689013611111,
       "ci_fail_rate": 0.3548387096774194,
       "runs_total": 62,
       "runs_failed": 22,
@@ -3277,9 +3277,9 @@
         "revert_ratio": "reported",
         "fix_ratio": "reported",
         "test_commit_ratio": "reported",
-        "ci_fail_rate": "cached",
-        "runs_total": "cached",
-        "runs_failed": "cached",
+        "ci_fail_rate": "reported",
+        "runs_total": "reported",
+        "runs_failed": "reported",
         "dose": "derived"
       },
       "reasons": {
@@ -3299,7 +3299,7 @@
       "recovery_p50_interactions": 1.0,
       "recovery_censored_rate": 0.0,
       "recovery_n": 76,
-      "session_commit_latency_p50_h": 1534.8806194444446,
+      "session_commit_latency_p50_h": 1535.0108972222224,
       "ci_fail_rate": 0.46153846153846156,
       "runs_total": 13,
       "runs_failed": 6,
@@ -3319,9 +3319,9 @@
         "revert_ratio": "reported",
         "fix_ratio": "reported",
         "test_commit_ratio": "reported",
-        "ci_fail_rate": "cached",
-        "runs_total": "cached",
-        "runs_failed": "cached",
+        "ci_fail_rate": "reported",
+        "runs_total": "reported",
+        "runs_failed": "reported",
         "dose": "derived"
       },
       "reasons": {
@@ -3341,7 +3341,7 @@
       "recovery_p50_interactions": 1,
       "recovery_censored_rate": 0.0,
       "recovery_n": 53,
-      "session_commit_latency_p50_h": 259.61134055555556,
+      "session_commit_latency_p50_h": 260.42606277777776,
       "ci_fail_rate": 0.24390243902439024,
       "runs_total": 41,
       "runs_failed": 10,
@@ -3361,9 +3361,9 @@
         "revert_ratio": "reported",
         "fix_ratio": "reported",
         "test_commit_ratio": "reported",
-        "ci_fail_rate": "cached",
-        "runs_total": "cached",
-        "runs_failed": "cached",
+        "ci_fail_rate": "reported",
+        "runs_total": "reported",
+        "runs_failed": "reported",
         "dose": "derived"
       },
       "reasons": {
@@ -3383,7 +3383,7 @@
       "recovery_p50_interactions": 1.0,
       "recovery_censored_rate": 0.0,
       "recovery_n": 270,
-      "session_commit_latency_p50_h": 404.1264316666667,
+      "session_commit_latency_p50_h": 404.23184833333335,
       "ci_fail_rate": 0.3076923076923077,
       "runs_total": 156,
       "runs_failed": 48,
@@ -3403,9 +3403,9 @@
         "revert_ratio": "reported",
         "fix_ratio": "reported",
         "test_commit_ratio": "reported",
-        "ci_fail_rate": "cached",
-        "runs_total": "cached",
-        "runs_failed": "cached",
+        "ci_fail_rate": "reported",
+        "runs_total": "reported",
+        "runs_failed": "reported",
         "dose": "derived"
       },
       "reasons": {
@@ -3425,13 +3425,13 @@
       "recovery_p50_interactions": 1,
       "recovery_censored_rate": 0.0,
       "recovery_n": 35,
-      "session_commit_latency_p50_h": 146.6522361111111,
-      "ci_fail_rate": 0.5,
-      "runs_total": 4,
-      "runs_failed": 2,
+      "session_commit_latency_p50_h": 147.39793055555555,
+      "ci_fail_rate": 0.4375,
+      "runs_total": 16,
+      "runs_failed": 7,
       "revert_ratio": 0.0,
-      "fix_ratio": 4.0,
-      "test_commit_ratio": 0.3,
+      "fix_ratio": 2.0,
+      "test_commit_ratio": 0.27631578947368424,
       "dose": 0.6923076923076923,
       "src": {
         "sessions": "reported",
@@ -3445,9 +3445,9 @@
         "revert_ratio": "reported",
         "fix_ratio": "reported",
         "test_commit_ratio": "reported",
-        "ci_fail_rate": "cached",
-        "runs_total": "cached",
-        "runs_failed": "cached",
+        "ci_fail_rate": "reported",
+        "runs_total": "reported",
+        "runs_failed": "reported",
         "dose": "derived"
       },
       "reasons": {
@@ -3467,7 +3467,7 @@
       "recovery_p50_interactions": 1.0,
       "recovery_censored_rate": 0.0031746031746031746,
       "recovery_n": 315,
-      "session_commit_latency_p50_h": 384.81581444444447,
+      "session_commit_latency_p50_h": 384.90081444444445,
       "ci_fail_rate": 0.8452380952380952,
       "runs_total": 84,
       "runs_failed": 71,
@@ -3487,9 +3487,9 @@
         "revert_ratio": "reported",
         "fix_ratio": "reported",
         "test_commit_ratio": "reported",
-        "ci_fail_rate": "cached",
-        "runs_total": "cached",
-        "runs_failed": "cached",
+        "ci_fail_rate": "reported",
+        "runs_total": "reported",
+        "runs_failed": "reported",
         "dose": "derived"
       },
       "reasons": {
@@ -3510,12 +3510,12 @@
       "recovery_censored_rate": 0.0,
       "recovery_n": 58,
       "session_commit_latency_p50_h": 0.0,
-      "ci_fail_rate": 0.0,
-      "runs_total": 6,
-      "runs_failed": 0,
+      "ci_fail_rate": 0.21052631578947367,
+      "runs_total": 19,
+      "runs_failed": 4,
       "revert_ratio": 0.0,
       "fix_ratio": null,
-      "test_commit_ratio": 0.10204081632653061,
+      "test_commit_ratio": 0.1,
       "dose": 0.7692307692307693,
       "src": {
         "sessions": "reported",
@@ -3529,9 +3529,9 @@
         "revert_ratio": "reported",
         "fix_ratio": "missing",
         "test_commit_ratio": "reported",
-        "ci_fail_rate": "cached",
-        "runs_total": "cached",
-        "runs_failed": "cached",
+        "ci_fail_rate": "reported",
+        "runs_total": "reported",
+        "runs_failed": "reported",
         "dose": "derived"
       },
       "reasons": {
@@ -3544,6 +3544,69 @@
   ],
   "analysis": {
     "its": [
+      {
+        "repo": "wai",
+        "metric": "errors_api_per_100",
+        "adoption_month": "2026-11",
+        "delta": null,
+        "n_pre": 0,
+        "n_post": 0,
+        "reason": "ventana_pre_insuficiente"
+      },
+      {
+        "repo": "wai",
+        "metric": "recovery_p50_interactions",
+        "adoption_month": "2026-11",
+        "delta": null,
+        "n_pre": 6,
+        "n_post": 1,
+        "reason": "ventana_ma_trimestral_insuficiente"
+      },
+      {
+        "repo": "wai",
+        "metric": "session_commit_latency_p50_h",
+        "adoption_month": "2026-11",
+        "delta": null,
+        "n_pre": 6,
+        "n_post": 1,
+        "reason": "ventana_ma_trimestral_insuficiente"
+      },
+      {
+        "repo": "wai",
+        "metric": "ci_fail_rate",
+        "adoption_month": "2026-11",
+        "delta": null,
+        "n_pre": 8,
+        "n_post": 1,
+        "reason": "ventana_ma_trimestral_insuficiente"
+      },
+      {
+        "repo": "wai",
+        "metric": "revert_ratio",
+        "adoption_month": "2026-11",
+        "delta": null,
+        "n_pre": 9,
+        "n_post": 1,
+        "reason": "ventana_ma_trimestral_insuficiente"
+      },
+      {
+        "repo": "wai",
+        "metric": "fix_ratio",
+        "adoption_month": "2026-11",
+        "delta": null,
+        "n_pre": 7,
+        "n_post": 1,
+        "reason": "ventana_ma_trimestral_insuficiente"
+      },
+      {
+        "repo": "wai",
+        "metric": "test_commit_ratio",
+        "adoption_month": "2026-11",
+        "delta": null,
+        "n_pre": 9,
+        "n_post": 1,
+        "reason": "ventana_ma_trimestral_insuficiente"
+      },
       {
         "repo": "turu",
         "metric": "errors_api_per_100",
@@ -3669,6 +3732,69 @@
         "n_pre": 5,
         "n_post": 1,
         "reason": "ventana_ma_trimestral_insuficiente"
+      },
+      {
+        "repo": "ah",
+        "metric": "errors_api_per_100",
+        "adoption_month": "2026-11",
+        "delta": null,
+        "n_pre": 0,
+        "n_post": 0,
+        "reason": "ventana_pre_insuficiente"
+      },
+      {
+        "repo": "ah",
+        "metric": "recovery_p50_interactions",
+        "adoption_month": "2026-11",
+        "delta": null,
+        "n_pre": 5,
+        "n_post": 0,
+        "reason": "sin_meses_post"
+      },
+      {
+        "repo": "ah",
+        "metric": "session_commit_latency_p50_h",
+        "adoption_month": "2026-11",
+        "delta": null,
+        "n_pre": 5,
+        "n_post": 0,
+        "reason": "sin_meses_post"
+      },
+      {
+        "repo": "ah",
+        "metric": "ci_fail_rate",
+        "adoption_month": "2026-11",
+        "delta": null,
+        "n_pre": 4,
+        "n_post": 0,
+        "reason": "sin_meses_post"
+      },
+      {
+        "repo": "ah",
+        "metric": "revert_ratio",
+        "adoption_month": "2026-11",
+        "delta": null,
+        "n_pre": 5,
+        "n_post": 0,
+        "reason": "sin_meses_post"
+      },
+      {
+        "repo": "ah",
+        "metric": "fix_ratio",
+        "adoption_month": "2026-11",
+        "delta": null,
+        "n_pre": 4,
+        "n_post": 0,
+        "reason": "sin_meses_post"
+      },
+      {
+        "repo": "ah",
+        "metric": "test_commit_ratio",
+        "adoption_month": "2026-11",
+        "delta": null,
+        "n_pre": 5,
+        "n_post": 0,
+        "reason": "sin_meses_post"
       },
       {
         "repo": "pretender",
@@ -3860,6 +3986,69 @@
         "reason": "ventana_ma_trimestral_insuficiente"
       },
       {
+        "repo": "specodelic",
+        "metric": "errors_api_per_100",
+        "adoption_month": "2026-11",
+        "delta": null,
+        "n_pre": 0,
+        "n_post": 0,
+        "reason": "ventana_pre_insuficiente"
+      },
+      {
+        "repo": "specodelic",
+        "metric": "recovery_p50_interactions",
+        "adoption_month": "2026-11",
+        "delta": null,
+        "n_pre": 2,
+        "n_post": 1,
+        "reason": "ventana_pre_insuficiente"
+      },
+      {
+        "repo": "specodelic",
+        "metric": "session_commit_latency_p50_h",
+        "adoption_month": "2026-11",
+        "delta": null,
+        "n_pre": 2,
+        "n_post": 1,
+        "reason": "ventana_pre_insuficiente"
+      },
+      {
+        "repo": "specodelic",
+        "metric": "ci_fail_rate",
+        "adoption_month": "2026-11",
+        "delta": null,
+        "n_pre": 2,
+        "n_post": 1,
+        "reason": "ventana_pre_insuficiente"
+      },
+      {
+        "repo": "specodelic",
+        "metric": "revert_ratio",
+        "adoption_month": "2026-11",
+        "delta": null,
+        "n_pre": 2,
+        "n_post": 1,
+        "reason": "ventana_pre_insuficiente"
+      },
+      {
+        "repo": "specodelic",
+        "metric": "fix_ratio",
+        "adoption_month": "2026-11",
+        "delta": null,
+        "n_pre": 2,
+        "n_post": 1,
+        "reason": "ventana_pre_insuficiente"
+      },
+      {
+        "repo": "specodelic",
+        "metric": "test_commit_ratio",
+        "adoption_month": "2026-11",
+        "delta": null,
+        "n_pre": 2,
+        "n_post": 1,
+        "reason": "ventana_pre_insuficiente"
+      },
+      {
         "repo": "dulce-de-leche",
         "metric": "errors_api_per_100",
         "adoption_month": "2026-09",
@@ -3937,56 +4126,62 @@
       {
         "metric": "recovery_p50_interactions",
         "adoption_frontier": "2026-09",
-        "n_treatment": 5,
-        "n_control": 3,
-        "delta_treatment": -0.5583333333333333,
-        "delta_control": -0.08333333333333333,
-        "did": -0.47500000000000003
+        "n_treatment": 7,
+        "n_control": 1,
+        "delta_treatment": -0.4345238095238095,
+        "delta_control": 0.0,
+        "did": null,
+        "reason": "n_insuficiente"
       },
       {
         "metric": "session_commit_latency_p50_h",
         "adoption_frontier": "2026-09",
-        "n_treatment": 5,
-        "n_control": 3,
-        "delta_treatment": -1283.1420589722222,
-        "delta_control": -1650.8752721759258,
-        "did": 367.7332132037036
+        "n_treatment": 7,
+        "n_control": 1,
+        "delta_treatment": -1475.0312833068783,
+        "delta_control": -1021.847992314815,
+        "did": null,
+        "reason": "n_insuficiente"
       },
       {
         "metric": "ci_fail_rate",
         "adoption_frontier": "2026-09",
-        "n_treatment": 5,
-        "n_control": 3,
-        "delta_treatment": -0.38955668192165904,
-        "delta_control": -0.013486923756982702,
-        "did": -0.37606975816467636
+        "n_treatment": 7,
+        "n_control": 1,
+        "delta_treatment": -0.2513175202366131,
+        "delta_control": -0.2324937614451738,
+        "did": null,
+        "reason": "n_insuficiente"
       },
       {
         "metric": "revert_ratio",
         "adoption_frontier": "2026-09",
-        "n_treatment": 5,
-        "n_control": 3,
-        "delta_treatment": 0.0,
-        "delta_control": 0.0005555555555555556,
-        "did": -0.0005555555555555556
+        "n_treatment": 7,
+        "n_control": 1,
+        "delta_treatment": 0.00023809523809523812,
+        "delta_control": 0.0,
+        "did": null,
+        "reason": "n_insuficiente"
       },
       {
         "metric": "fix_ratio",
         "adoption_frontier": "2026-09",
-        "n_treatment": 5,
-        "n_control": 3,
-        "delta_treatment": 1.1477777777777773,
-        "delta_control": -4.915404040404041,
-        "did": 6.063181818181818
+        "n_treatment": 7,
+        "n_control": 1,
+        "delta_treatment": -0.8319444444444447,
+        "delta_control": -3.017045454545455,
+        "did": null,
+        "reason": "n_insuficiente"
       },
       {
         "metric": "test_commit_ratio",
         "adoption_frontier": "2026-09",
-        "n_treatment": 5,
-        "n_control": 3,
-        "delta_treatment": -0.1748339481637951,
-        "delta_control": -0.005288311666466011,
-        "did": -0.1695456364973291
+        "n_treatment": 7,
+        "n_control": 1,
+        "delta_treatment": -0.1341305823064489,
+        "delta_control": 0.04417249417249419,
+        "did": null,
+        "reason": "n_insuficiente"
       }
     ],
     "dose_response": [
@@ -4071,85 +4266,85 @@
       },
       {
         "metric": "session_commit_latency_p50_h",
-        "spearman_rho": 0.08103458599622594,
+        "spearman_rho": 0.04341138535512104,
         "n": 13,
         "points": [
           {
             "repo": "wai",
             "dose": 0.6923076923076923,
-            "outcome": 1603.4854379365079
+            "outcome": 1604.00893
           },
           {
             "repo": "testaruda",
             "dose": 0.6153846153846154,
-            "outcome": 600.8545656111112
+            "outcome": 669.8417379444445
           },
           {
             "repo": "turu",
             "dose": 0.5384615384615384,
-            "outcome": 336.1536378703704
+            "outcome": 355.33423972222226
           },
           {
             "repo": "dont",
             "dose": 0.6923076923076923,
-            "outcome": 922.5865514814815
+            "outcome": 1154.91257
           },
           {
             "repo": "ah",
             "dose": 0.6923076923076923,
-            "outcome": 1402.4059502777777
+            "outcome": 1402.5631169444446
           },
           {
             "repo": "pretender",
             "dose": 0.6923076923076923,
-            "outcome": 959.5311887962963
+            "outcome": 1100.7464638425924
           },
           {
             "repo": "vampiro",
             "dose": 0.6923076923076923,
-            "outcome": 711.7680354444444
+            "outcome": 794.0228132222222
           },
           {
             "repo": "incitaciones",
             "dose": 0.46153846153846156,
-            "outcome": 1315.0485879365078
+            "outcome": 1449.683171269841
           },
           {
             "repo": "specodelic",
             "dose": 0.6923076923076923,
-            "outcome": 240.0089474074074
+            "outcome": 229.5327335185185
           },
           {
             "repo": "funkalization",
             "dose": 0.6153846153846154,
-            "outcome": 659.47505
+            "outcome": 659.6214388888889
           },
           {
             "repo": "wild",
             "dose": 0.7692307692307693,
-            "outcome": 192.40790722222224
+            "outcome": 192.45040722222222
           },
           {
             "repo": "dulce-de-leche",
             "dose": 0.9230769230769231,
-            "outcome": 878.9716652777777
+            "outcome": 937.7956097222223
           },
           {
             "repo": "coffee",
             "dose": 0.38461538461538464,
-            "outcome": 531.8152758333333
+            "outcome": 533.3285397222222
           }
         ]
       },
       {
         "metric": "ci_fail_rate",
-        "spearman_rho": 0.6714294268258721,
+        "spearman_rho": 0.7177349045380012,
         "n": 13,
         "points": [
           {
             "repo": "wai",
             "dose": 0.6923076923076923,
-            "outcome": 0.33342814154053135
+            "outcome": 0.32648369709608693
           },
           {
             "repo": "testaruda",
@@ -4179,7 +4374,7 @@
           {
             "repo": "vampiro",
             "dose": 0.6923076923076923,
-            "outcome": 0.45588139630527313
+            "outcome": 0.4662980629719399
           },
           {
             "repo": "incitaciones",
@@ -4189,7 +4384,7 @@
           {
             "repo": "specodelic",
             "dose": 0.6923076923076923,
-            "outcome": 0.38865169109071546
+            "outcome": 0.38127018370920807
           },
           {
             "repo": "funkalization",
@@ -4199,7 +4394,7 @@
           {
             "repo": "wild",
             "dose": 0.7692307692307693,
-            "outcome": 0.4226190476190476
+            "outcome": 0.5278822055137844
           },
           {
             "repo": "dulce-de-leche",
@@ -4209,7 +4404,7 @@
           {
             "repo": "coffee",
             "dose": 0.38461538461538464,
-            "outcome": 0.02516835016835017
+            "outcome": 0.04600168350168351
           }
         ]
       },
@@ -4287,13 +4482,13 @@
       },
       {
         "metric": "fix_ratio",
-        "spearman_rho": 0.257754430490237,
+        "spearman_rho": 0.26766806243216923,
         "n": 11,
         "points": [
           {
             "repo": "wai",
             "dose": 0.6923076923076923,
-            "outcome": 7.375
+            "outcome": 7.125
           },
           {
             "repo": "testaruda",
@@ -4318,7 +4513,7 @@
           {
             "repo": "pretender",
             "dose": 0.6923076923076923,
-            "outcome": 4.573333333333333
+            "outcome": 4.673333333333334
           },
           {
             "repo": "vampiro",
@@ -4333,7 +4528,7 @@
           {
             "repo": "specodelic",
             "dose": 0.6923076923076923,
-            "outcome": 4.023809523809524
+            "outcome": 4.357142857142857
           },
           {
             "repo": "wild",
@@ -4343,29 +4538,29 @@
           {
             "repo": "dulce-de-leche",
             "dose": 0.9230769230769231,
-            "outcome": 4.85
+            "outcome": 5.25
           }
         ]
       },
       {
         "metric": "test_commit_ratio",
-        "spearman_rho": 0.1041873248522905,
+        "spearman_rho": 0.23152738856064556,
         "n": 13,
         "points": [
           {
             "repo": "wai",
             "dose": 0.6923076923076923,
-            "outcome": 0.22587413831508255
+            "outcome": 0.22350571726245097
           },
           {
             "repo": "testaruda",
             "dose": 0.6153846153846154,
-            "outcome": 0.35566433566433564
+            "outcome": 0.31566433566433566
           },
           {
             "repo": "turu",
             "dose": 0.5384615384615384,
-            "outcome": 0.3175101933939326
+            "outcome": 0.269891145774885
           },
           {
             "repo": "dont",
@@ -4380,7 +4575,7 @@
           {
             "repo": "pretender",
             "dose": 0.6923076923076923,
-            "outcome": 0.3378305286454597
+            "outcome": 0.3358464016613327
           },
           {
             "repo": "vampiro",
@@ -4390,12 +4585,12 @@
           {
             "repo": "incitaciones",
             "dose": 0.46153846153846156,
-            "outcome": 0.0590672799113355
+            "outcome": 0.08453024287429846
           },
           {
             "repo": "specodelic",
             "dose": 0.6923076923076923,
-            "outcome": 0.3298777475113522
+            "outcome": 0.3210574264890676
           },
           {
             "repo": "funkalization",
@@ -4405,17 +4600,17 @@
           {
             "repo": "wild",
             "dose": 0.7692307692307693,
-            "outcome": 0.2128909117603876
+            "outcome": 0.21187050359712228
           },
           {
             "repo": "dulce-de-leche",
             "dose": 0.9230769230769231,
-            "outcome": 0.29425830225138183
+            "outcome": 0.2931154451085247
           },
           {
             "repo": "coffee",
             "dose": 0.38461538461538464,
-            "outcome": 0.2607876712328767
+            "outcome": 0.25956218103679823
           }
         ]
       }
