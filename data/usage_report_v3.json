@@ -2,17 +2,17 @@
   "metadata": {
     "date_range": {
       "start": "2025-12-23",
-      "end": "2026-11-20"
+      "end": "2026-11-22"
     },
     "filter": "in-scope",
-    "total_interactions": 296802,
-    "total_input_tokens": 2260851214,
-    "total_output_tokens": 137295177,
-    "total_cache_read_tokens": 29005152863,
+    "total_interactions": 299091,
+    "total_input_tokens": 2265334959,
+    "total_output_tokens": 138648218,
+    "total_cache_read_tokens": 29226960665,
     "total_cache_write_tokens": 73562968,
-    "cost_total_effective": 3853.93,
-    "cost_total_real": 1905.81,
-    "cost_real_total_tracker": 1705.82,
+    "cost_total_effective": 3860.86,
+    "cost_total_real": 1912.74,
+    "cost_real_total_tracker": 1712.76,
     "subscription_fees": 199.98,
     "charges_total_real": 1716.72,
     "charges_source": "data/charges.json",
@@ -30,8 +30,8 @@
     "pay_per_token_note": "pay_per_token_charges es *reported* cuando el ledger tiene cargas pay-per-token reales del mes (cr\u00e9ditos/reembolsos, FPA-013); *assumed* (estimado tokens \u00d7 pricing) si no",
     "outcomes": "unavailable: no hay GITHUB_TOKEN \u2014 commits/releases no emisionados",
     "token_accounting": "cache_read/cache_write se reportan aparte de input/output. cache_read no se factura a input rate (10x mas barato); total tokens = input + output + cache_read + cache_write",
-    "total_hours": 1524,
-    "total_days": 234,
+    "total_hours": 1537,
+    "total_days": 235,
     "total_months": 12,
     "total_projects": 123,
     "config_source": "config/fpa.json"
@@ -40362,6 +40362,426 @@
         "glm-5.3-flash": 4
       },
       "projects_active": 1
+    },
+    "2026-11-21 09:00": {
+      "interactions": 244,
+      "input_tokens": 316855,
+      "output_tokens": 129107,
+      "cache_read_tokens": 16658048,
+      "cache_write_tokens": 0,
+      "cost_effective": 0.61,
+      "cost_real": 0.61,
+      "tools": {
+        "omp": {
+          "req": 169,
+          "in": 236462,
+          "out": 93146,
+          "cache_read": 13543936,
+          "cache_write": 0,
+          "cost_eff": 0.48836038,
+          "cost_real": 0.48836038
+        },
+        "zai": {
+          "req": 75,
+          "in": 80393,
+          "out": 35961,
+          "cache_read": 3114112,
+          "cache_write": 0,
+          "cost_eff": 0.12346281,
+          "cost_real": 0.12346281
+        }
+      },
+      "models": {
+        "glm-5.3-flash": 244
+      },
+      "projects_active": 2
+    },
+    "2026-11-21 10:00": {
+      "interactions": 105,
+      "input_tokens": 188102,
+      "output_tokens": 76724,
+      "cache_read_tokens": 7365120,
+      "cache_write_tokens": 0,
+      "cost_effective": 0.29,
+      "cost_real": 0.29,
+      "tools": {
+        "omp": {
+          "req": 71,
+          "in": 130548,
+          "out": 46119,
+          "cache_read": 3726272,
+          "cache_write": 0,
+          "cost_eff": 0.15442986,
+          "cost_real": 0.15442986
+        },
+        "zai": {
+          "req": 34,
+          "in": 57554,
+          "out": 30605,
+          "cache_read": 3638848,
+          "cache_write": 0,
+          "cost_eff": 0.13310104,
+          "cost_real": 0.13310104
+        }
+      },
+      "models": {
+        "glm-5.3-flash": 105
+      },
+      "projects_active": 2
+    },
+    "2026-11-21 11:00": {
+      "interactions": 137,
+      "input_tokens": 165388,
+      "output_tokens": 54269,
+      "cache_read_tokens": 15532736,
+      "cache_write_tokens": 0,
+      "cost_effective": 0.52,
+      "cost_real": 0.52,
+      "tools": {
+        "omp": {
+          "req": 137,
+          "in": 165388,
+          "out": 54269,
+          "cache_read": 15532736,
+          "cache_write": 0,
+          "cost_eff": 0.51792478,
+          "cost_real": 0.51792478
+        }
+      },
+      "models": {
+        "glm-5.3-flash": 137
+      },
+      "projects_active": 2
+    },
+    "2026-11-21 12:00": {
+      "interactions": 99,
+      "input_tokens": 127961,
+      "output_tokens": 44110,
+      "cache_read_tokens": 14584832,
+      "cache_write_tokens": 0,
+      "cost_effective": 0.48,
+      "cost_real": 0.48,
+      "tools": {
+        "omp": {
+          "req": 89,
+          "in": 94022,
+          "out": 39293,
+          "cache_read": 14433024,
+          "cache_write": 0,
+          "cost_eff": 0.46674052,
+          "cost_real": 0.46674052
+        },
+        "zai": {
+          "req": 10,
+          "in": 33939,
+          "out": 4817,
+          "cache_read": 151808,
+          "cache_write": 0,
+          "cost_eff": 0.01205359,
+          "cost_real": 0.01205359
+        }
+      },
+      "models": {
+        "glm-5.3-flash": 99
+      },
+      "projects_active": 3
+    },
+    "2026-11-21 13:00": {
+      "interactions": 434,
+      "input_tokens": 470740,
+      "output_tokens": 200339,
+      "cache_read_tokens": 35984000,
+      "cache_write_tokens": 0,
+      "cost_effective": 1.25,
+      "cost_real": 1.25,
+      "tools": {
+        "omp": {
+          "req": 93,
+          "in": 98271,
+          "out": 36136,
+          "cache_read": 16144192,
+          "cache_write": 0,
+          "cost_eff": 0.51713441,
+          "cost_real": 0.51713441
+        },
+        "zai": {
+          "req": 341,
+          "in": 372469,
+          "out": 164203,
+          "cache_read": 19839808,
+          "cache_write": 0,
+          "cost_eff": 0.73316609,
+          "cost_real": 0.73316609
+        }
+      },
+      "models": {
+        "glm-5.3-flash": 434
+      },
+      "projects_active": 5
+    },
+    "2026-11-21 14:00": {
+      "interactions": 474,
+      "input_tokens": 650460,
+      "output_tokens": 248994,
+      "cache_read_tokens": 37327104,
+      "cache_write_tokens": 0,
+      "cost_effective": 1.33,
+      "cost_real": 1.33,
+      "tools": {
+        "omp": {
+          "req": 233,
+          "in": 397120,
+          "out": 132850,
+          "cache_read": 21243776,
+          "cache_write": 0,
+          "cost_eff": 0.75417594,
+          "cost_real": 0.75417594
+        },
+        "zai": {
+          "req": 241,
+          "in": 253340,
+          "out": 116144,
+          "cache_read": 16083328,
+          "cache_write": 0,
+          "cost_eff": 0.57857284,
+          "cost_real": 0.57857284
+        }
+      },
+      "models": {
+        "glm-5.3-flash": 462,
+        "jev-1.14.0": 12
+      },
+      "projects_active": 6
+    },
+    "2026-11-21 15:00": {
+      "interactions": 432,
+      "input_tokens": 1163652,
+      "output_tokens": 333645,
+      "cache_read_tokens": 44157690,
+      "cache_write_tokens": 0,
+      "cost_effective": 1.33,
+      "cost_real": 1.33,
+      "tools": {
+        "zai": {
+          "req": 55,
+          "in": 81413,
+          "out": 35605,
+          "cache_read": 3400256,
+          "cache_write": 0,
+          "cost_eff": 0.13202213,
+          "cost_real": 0.13202213
+        },
+        "omp": {
+          "req": 326,
+          "in": 876345,
+          "out": 199154,
+          "cache_read": 33180602,
+          "cache_write": 0,
+          "cost_eff": 0.99387044,
+          "cost_real": 0.99387044
+        },
+        "minimax": {
+          "req": 51,
+          "in": 205894,
+          "out": 98886,
+          "cache_read": 7576832,
+          "cache_write": 0,
+          "cost_eff": 0.20386818,
+          "cost_real": 0.20386818
+        }
+      },
+      "models": {
+        "glm-5.3-flash": 225,
+        "MiniMax-M3.1-Flash": 207
+      },
+      "projects_active": 4
+    },
+    "2026-11-21 16:00": {
+      "interactions": 78,
+      "input_tokens": 91845,
+      "output_tokens": 47435,
+      "cache_read_tokens": 6770944,
+      "cache_write_tokens": 0,
+      "cost_effective": 0.14,
+      "cost_real": 0.14,
+      "tools": {
+        "omp": {
+          "req": 40,
+          "in": 25256,
+          "out": 34881,
+          "cache_read": 4848128,
+          "cache_write": 0,
+          "cost_eff": 0.09743892,
+          "cost_real": 0.09743892
+        },
+        "minimax": {
+          "req": 38,
+          "in": 66589,
+          "out": 12554,
+          "cache_read": 1922816,
+          "cache_write": 0,
+          "cost_eff": 0.04636299,
+          "cost_real": 0.04636299
+        }
+      },
+      "models": {
+        "MiniMax-M3.1-Flash": 78
+      },
+      "projects_active": 3
+    },
+    "2026-11-21 18:00": {
+      "interactions": 16,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "cache_read_tokens": 0,
+      "cache_write_tokens": 0,
+      "cost_effective": 0.0,
+      "cost_real": 0.0,
+      "tools": {
+        "omp": {
+          "req": 16,
+          "in": 0,
+          "out": 0,
+          "cache_read": 0,
+          "cache_write": 0,
+          "cost_eff": 0.0,
+          "cost_real": 0.0
+        }
+      },
+      "models": {
+        "MiniMax-M3.1-Flash": 1,
+        "anthropic/claude-haiku-5.5": 1,
+        "google/gemini-3.8-flash": 1,
+        "google/gemini-3.7-flash": 1,
+        "google/gemini-3.6-flash": 1,
+        "google/gemini-3.5-flash": 1,
+        "meta/muse-spark-1.1": 1,
+        "glm-5.3-flash": 1,
+        "google/gemini-3.1-flash-lite": 1,
+        "google/gemini-2.0-flash-lite-001": 1,
+        "openai/gpt-oss-120b": 1,
+        "anthropic/claude-haiku-4.5": 1,
+        "anthropic/claude-3-haiku": 1,
+        "openai/gpt-5.6-luna": 1,
+        "openai/gpt-5.4-mini": 1,
+        "aion-labs/aion-3.0-mini": 1
+      },
+      "projects_active": 1
+    },
+    "2026-11-21 19:00": {
+      "interactions": 1,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "cache_read_tokens": 0,
+      "cache_write_tokens": 0,
+      "cost_effective": 0.0,
+      "cost_real": 0.0,
+      "tools": {
+        "omp": {
+          "req": 1,
+          "in": 0,
+          "out": 0,
+          "cache_read": 0,
+          "cache_write": 0,
+          "cost_eff": 0.0,
+          "cost_real": 0.0
+        }
+      },
+      "models": {
+        "glm-5.3-flash": 1
+      },
+      "projects_active": 1
+    },
+    "2026-11-21 20:00": {
+      "interactions": 177,
+      "input_tokens": 966983,
+      "output_tokens": 158450,
+      "cache_read_tokens": 28495232,
+      "cache_write_tokens": 0,
+      "cost_effective": 0.67,
+      "cost_real": 0.67,
+      "tools": {
+        "omp": {
+          "req": 121,
+          "in": 648645,
+          "out": 105937,
+          "cache_read": 21923968,
+          "cache_write": 0,
+          "cost_eff": 0.48971847,
+          "cost_real": 0.48971847
+        },
+        "minimax": {
+          "req": 56,
+          "in": 318338,
+          "out": 52513,
+          "cache_read": 6571264,
+          "cache_write": 0,
+          "cost_eff": 0.17782746,
+          "cost_real": 0.17782746
+        }
+      },
+      "models": {
+        "MiniMax-M3.1-Flash": 175,
+        "glm-5.3-flash": 2
+      },
+      "projects_active": 4
+    },
+    "2026-11-21 21:00": {
+      "interactions": 90,
+      "input_tokens": 341759,
+      "output_tokens": 59968,
+      "cache_read_tokens": 14932096,
+      "cache_write_tokens": 0,
+      "cost_effective": 0.31,
+      "cost_real": 0.31,
+      "tools": {
+        "omp": {
+          "req": 72,
+          "in": 335244,
+          "out": 42300,
+          "cache_read": 12042880,
+          "cache_write": 0,
+          "cost_eff": 0.2563098,
+          "cost_real": 0.2563098
+        },
+        "minimax": {
+          "req": 18,
+          "in": 6515,
+          "out": 17668,
+          "cache_read": 2889216,
+          "cache_write": 0,
+          "cost_eff": 0.05491629,
+          "cost_real": 0.05491629
+        }
+      },
+      "models": {
+        "MiniMax-M3.1-Flash": 90
+      },
+      "projects_active": 3
+    },
+    "2026-11-21 22:00": {
+      "interactions": 2,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "cache_read_tokens": 0,
+      "cache_write_tokens": 0,
+      "cost_effective": 0.0,
+      "cost_real": 0.0,
+      "tools": {
+        "omp": {
+          "req": 2,
+          "in": 0,
+          "out": 0,
+          "cache_read": 0,
+          "cache_write": 0,
+          "cost_eff": 0.0,
+          "cost_real": 0.0
+        }
+      },
+      "models": {
+        "MiniMax-M3.1-Flash": 2
+      },
+      "projects_active": 1
     }
   },
   "daily": {
@@ -44215,6 +44635,39 @@
       "models": {
         "glm-5.3-flash": 4
       }
+    },
+    "2026-11-21": {
+      "interactions": 2289,
+      "input_tokens": 4483745,
+      "output_tokens": 1353041,
+      "cache_read_tokens": 221807802,
+      "cache_write_tokens": 0,
+      "cost_effective": 6.93,
+      "cost_real": 6.93,
+      "tools": {
+        "omp": 1370,
+        "zai": 756,
+        "minimax": 163
+      },
+      "models": {
+        "glm-5.3-flash": 1710,
+        "MiniMax-M3.1-Flash": 553,
+        "jev-1.14.0": 12,
+        "anthropic/claude-haiku-5.5": 1,
+        "google/gemini-3.8-flash": 1,
+        "google/gemini-3.7-flash": 1,
+        "google/gemini-3.6-flash": 1,
+        "google/gemini-3.5-flash": 1,
+        "meta/muse-spark-1.1": 1,
+        "google/gemini-3.1-flash-lite": 1,
+        "google/gemini-2.0-flash-lite-001": 1,
+        "openai/gpt-oss-120b": 1,
+        "anthropic/claude-haiku-4.5": 1,
+        "anthropic/claude-3-haiku": 1,
+        "openai/gpt-5.6-luna": 1,
+        "openai/gpt-5.4-mini": 1,
+        "aion-labs/aion-3.0-mini": 1
+      }
     }
   },
   "monthly": {
@@ -46136,13 +46589,13 @@
       }
     },
     "2026-11": {
-      "interactions": 44775,
-      "input_tokens": 93310017,
-      "output_tokens": 24858378,
-      "cache_read_tokens": 6068701588,
+      "interactions": 47064,
+      "input_tokens": 97793762,
+      "output_tokens": 26211419,
+      "cache_read_tokens": 6290509390,
       "cache_write_tokens": 247050,
-      "cost_effective": 341.19,
-      "cost_real": 341.19,
+      "cost_effective": 348.12,
+      "cost_real": 348.12,
       "tools": {
         "codex": {
           "interactions": 127,
@@ -46171,17 +46624,17 @@
           }
         },
         "minimax": {
-          "interactions": 3018,
-          "cost_effective": 22.56985914,
-          "cost_real": 22.56985914,
+          "interactions": 3181,
+          "cost_effective": 23.05283406,
+          "cost_real": 23.05283406,
           "models": {
             "MiniMax-M2.7": {
               "interactions": 2826,
               "cost_effective": 22.03809087
             },
             "MiniMax-M3.1-Flash": {
-              "interactions": 192,
-              "cost_effective": 0.53176827
+              "interactions": 355,
+              "cost_effective": 1.01474319
             }
           }
         },
@@ -46201,12 +46654,28 @@
           }
         },
         "omp": {
-          "interactions": 17077,
-          "cost_effective": 118.6497848,
-          "cost_real": 118.6497848,
+          "interactions": 18447,
+          "cost_effective": 123.38588832,
+          "cost_real": 123.38588832,
           "models": {
+            "MiniMax-M3.1-Flash": {
+              "interactions": 390,
+              "cost_effective": 1.21730511
+            },
+            "aion-labs/aion-3.0-mini": {
+              "interactions": 1,
+              "cost_effective": 0.0
+            },
+            "anthropic/claude-3-haiku": {
+              "interactions": 1,
+              "cost_effective": 0.0
+            },
+            "anthropic/claude-haiku-4.5": {
+              "interactions": 1,
+              "cost_effective": 0.0
+            },
             "anthropic/claude-haiku-5.5": {
-              "interactions": 75,
+              "interactions": 76,
               "cost_effective": 0.00077972
             },
             "deepseek-v4-flash-0731": {
@@ -46218,12 +46687,52 @@
               "cost_effective": 97.56927048
             },
             "glm-5.3-flash": {
-              "interactions": 2288,
-              "cost_effective": 13.78661435
+              "interactions": 3242,
+              "cost_effective": 17.3030653
+            },
+            "google/gemini-2.0-flash-lite-001": {
+              "interactions": 1,
+              "cost_effective": 0.0
+            },
+            "google/gemini-3.1-flash-lite": {
+              "interactions": 1,
+              "cost_effective": 0.0
+            },
+            "google/gemini-3.5-flash": {
+              "interactions": 1,
+              "cost_effective": 0.0
+            },
+            "google/gemini-3.6-flash": {
+              "interactions": 1,
+              "cost_effective": 0.0
+            },
+            "google/gemini-3.7-flash": {
+              "interactions": 1,
+              "cost_effective": 0.0
+            },
+            "google/gemini-3.8-flash": {
+              "interactions": 1,
+              "cost_effective": 0.0
             },
             "jev-1.14.0": {
-              "interactions": 26,
-              "cost_effective": 0.00592922
+              "interactions": 38,
+              "cost_effective": 0.00827669
+            },
+            "meta/muse-spark-1.1": {
+              "interactions": 1,
+              "cost_effective": 0.0
+            },
+            "openai/gpt-5.4-mini": {
+              "interactions": 1,
+              "cost_effective": 0.0
+            },
+            "openai/gpt-5.6-luna": {
+              "interactions": 1,
+              "cost_effective": 0.0
+            },
+            "openai/gpt-oss-120b": {
+              "interactions": 1,
+              "cost_effective": 0.0
             },
             "z-ai/glm-5.3-flash": {
               "interactions": 1220,
@@ -46309,13 +46818,13 @@
           }
         },
         "zai": {
-          "interactions": 468,
-          "cost_effective": 0.99777406,
-          "cost_real": 0.99777406,
+          "interactions": 1224,
+          "cost_effective": 2.71015256,
+          "cost_real": 2.71015256,
           "models": {
             "glm-5.3-flash": {
-              "interactions": 468,
-              "cost_effective": 0.99777406
+              "interactions": 1224,
+              "cost_effective": 2.71015256
             }
           }
         }
@@ -46326,11 +46835,23 @@
           "cost_effective": 22.03809087
         },
         "MiniMax-M3.1-Flash": {
-          "interactions": 192,
-          "cost_effective": 0.53176827
+          "interactions": 745,
+          "cost_effective": 2.2320483
+        },
+        "aion-labs/aion-3.0-mini": {
+          "interactions": 1,
+          "cost_effective": 0.0
+        },
+        "anthropic/claude-3-haiku": {
+          "interactions": 1,
+          "cost_effective": 0.0
+        },
+        "anthropic/claude-haiku-4.5": {
+          "interactions": 1,
+          "cost_effective": 0.0
         },
         "anthropic/claude-haiku-5.5": {
-          "interactions": 75,
+          "interactions": 76,
           "cost_effective": 0.00077972
         },
         "deepseek-v4-flash-0731": {
@@ -46354,8 +46875,32 @@
           "cost_effective": 2.8531332
         },
         "glm-5.3-flash": {
-          "interactions": 2756,
-          "cost_effective": 14.78438841
+          "interactions": 4466,
+          "cost_effective": 20.01321786
+        },
+        "google/gemini-2.0-flash-lite-001": {
+          "interactions": 1,
+          "cost_effective": 0.0
+        },
+        "google/gemini-3.1-flash-lite": {
+          "interactions": 1,
+          "cost_effective": 0.0
+        },
+        "google/gemini-3.5-flash": {
+          "interactions": 1,
+          "cost_effective": 0.0
+        },
+        "google/gemini-3.6-flash": {
+          "interactions": 1,
+          "cost_effective": 0.0
+        },
+        "google/gemini-3.7-flash": {
+          "interactions": 1,
+          "cost_effective": 0.0
+        },
+        "google/gemini-3.8-flash": {
+          "interactions": 1,
+          "cost_effective": 0.0
         },
         "gpt-6-luna": {
           "interactions": 89,
@@ -46366,16 +46911,32 @@
           "cost_effective": 5.553718
         },
         "jev-1.14.0": {
-          "interactions": 26,
-          "cost_effective": 0.00592922
+          "interactions": 38,
+          "cost_effective": 0.00827669
         },
         "kimi-for-coding": {
           "interactions": 1425,
           "cost_effective": 30.88027199
         },
+        "meta/muse-spark-1.1": {
+          "interactions": 1,
+          "cost_effective": 0.0
+        },
         "minimax/minimax-m3.1-flash": {
           "interactions": 137,
           "cost_effective": 0.07958094
+        },
+        "openai/gpt-5.4-mini": {
+          "interactions": 1,
+          "cost_effective": 0.0
+        },
+        "openai/gpt-5.6-luna": {
+          "interactions": 1,
+          "cost_effective": 0.0
+        },
+        "openai/gpt-oss-120b": {
+          "interactions": 1,
+          "cost_effective": 0.0
         },
         "openrouter/free": {
           "interactions": 59,
@@ -46415,7 +46976,7 @@
         }
       },
       "subscription_fees": 0.0,
-      "cost_real_tracker": 341.19,
+      "cost_real_tracker": 348.12,
       "pay_per_token_provenance": "assumed",
       "tokens_by_model": {
         "MiniMax-M2.7": {
@@ -46425,9 +46986,27 @@
           "cache_write": 241846
         },
         "MiniMax-M3.1-Flash": {
-          "in": 339209,
-          "out": 117139,
-          "cache_read": 27373568,
+          "in": 2344285,
+          "out": 598267,
+          "cache_read": 101429690,
+          "cache_write": 0
+        },
+        "aion-labs/aion-3.0-mini": {
+          "in": 0,
+          "out": 0,
+          "cache_read": 0,
+          "cache_write": 0
+        },
+        "anthropic/claude-3-haiku": {
+          "in": 0,
+          "out": 0,
+          "cache_read": 0,
+          "cache_write": 0
+        },
+        "anthropic/claude-haiku-4.5": {
+          "in": 0,
+          "out": 0,
+          "cache_read": 0,
           "cache_write": 0
         },
         "anthropic/claude-haiku-5.5": {
@@ -46467,9 +47046,45 @@
           "cache_write": 0
         },
         "glm-5.3-flash": {
-          "in": 7319857,
-          "out": 1498581,
-          "cache_read": 431237312,
+          "in": 9742634,
+          "out": 2364306,
+          "cache_read": 578988992,
+          "cache_write": 0
+        },
+        "google/gemini-2.0-flash-lite-001": {
+          "in": 0,
+          "out": 0,
+          "cache_read": 0,
+          "cache_write": 0
+        },
+        "google/gemini-3.1-flash-lite": {
+          "in": 0,
+          "out": 0,
+          "cache_read": 0,
+          "cache_write": 0
+        },
+        "google/gemini-3.5-flash": {
+          "in": 0,
+          "out": 0,
+          "cache_read": 0,
+          "cache_write": 0
+        },
+        "google/gemini-3.6-flash": {
+          "in": 0,
+          "out": 0,
+          "cache_read": 0,
+          "cache_write": 0
+        },
+        "google/gemini-3.7-flash": {
+          "in": 0,
+          "out": 0,
+          "cache_read": 0,
+          "cache_write": 0
+        },
+        "google/gemini-3.8-flash": {
+          "in": 0,
+          "out": 0,
+          "cache_read": 0,
           "cache_write": 0
         },
         "gpt-6-luna": {
@@ -46485,8 +47100,8 @@
           "cache_write": 0
         },
         "jev-1.14.0": {
-          "in": 141172,
-          "out": 9018,
+          "in": 197064,
+          "out": 15206,
           "cache_read": 0,
           "cache_write": 0
         },
@@ -46496,10 +47111,34 @@
           "cache_read": 131442176,
           "cache_write": 0
         },
+        "meta/muse-spark-1.1": {
+          "in": 0,
+          "out": 0,
+          "cache_read": 0,
+          "cache_write": 0
+        },
         "minimax/minimax-m3.1-flash": {
           "in": 106242,
           "out": 53445,
           "cache_read": 12715968,
+          "cache_write": 0
+        },
+        "openai/gpt-5.4-mini": {
+          "in": 0,
+          "out": 0,
+          "cache_read": 0,
+          "cache_write": 0
+        },
+        "openai/gpt-5.6-luna": {
+          "in": 0,
+          "out": 0,
+          "cache_read": 0,
+          "cache_write": 0
+        },
+        "openai/gpt-oss-120b": {
+          "in": 0,
+          "out": 0,
+          "cache_read": 0,
           "cache_write": 0
         },
         "openrouter/free": {
@@ -46557,12 +47196,12 @@
           "cache_write": 0
         }
       },
-      "pay_per_token_charges": 341.19,
+      "pay_per_token_charges": 348.12,
       "interaction_kinds": {
-        "assistant_turn": 1598,
-        "tool_call": 25974,
-        "aux_model_call": 1426,
-        "user_prompt": 1562
+        "assistant_turn": 1664,
+        "tool_call": 26827,
+        "aux_model_call": 1631,
+        "user_prompt": 1638
       },
       "outcomes_by_project": {},
       "energy_kwh_by_model": {
@@ -46571,8 +47210,20 @@
           "tier": "mid"
         },
         "MiniMax-M3.1-Flash": {
-          "kwh": 0.089,
+          "kwh": 0.363,
           "tier": "mid"
+        },
+        "aion-labs/aion-3.0-mini": {
+          "kwh": null,
+          "reason": "sin telemetr\u00eda de tokens"
+        },
+        "anthropic/claude-3-haiku": {
+          "kwh": null,
+          "reason": "sin telemetr\u00eda de tokens"
+        },
+        "anthropic/claude-haiku-4.5": {
+          "kwh": null,
+          "reason": "sin telemetr\u00eda de tokens"
         },
         "anthropic/claude-haiku-5.5": {
           "kwh": 0.0,
@@ -46599,8 +47250,32 @@
           "tier": "mid"
         },
         "glm-5.3-flash": {
-          "kwh": 1.443,
+          "kwh": 1.945,
           "tier": "mid"
+        },
+        "google/gemini-2.0-flash-lite-001": {
+          "kwh": null,
+          "reason": "sin telemetr\u00eda de tokens"
+        },
+        "google/gemini-3.1-flash-lite": {
+          "kwh": null,
+          "reason": "sin telemetr\u00eda de tokens"
+        },
+        "google/gemini-3.5-flash": {
+          "kwh": null,
+          "reason": "sin telemetr\u00eda de tokens"
+        },
+        "google/gemini-3.6-flash": {
+          "kwh": null,
+          "reason": "sin telemetr\u00eda de tokens"
+        },
+        "google/gemini-3.7-flash": {
+          "kwh": null,
+          "reason": "sin telemetr\u00eda de tokens"
+        },
+        "google/gemini-3.8-flash": {
+          "kwh": null,
+          "reason": "sin telemetr\u00eda de tokens"
         },
         "gpt-6-luna": {
           "kwh": 0.028,
@@ -46611,16 +47286,32 @@
           "tier": "mid"
         },
         "jev-1.14.0": {
-          "kwh": 0.004,
+          "kwh": 0.006,
           "tier": "mid"
         },
         "kimi-for-coding": {
           "kwh": 0.465,
           "tier": "mid"
         },
+        "meta/muse-spark-1.1": {
+          "kwh": null,
+          "reason": "sin telemetr\u00eda de tokens"
+        },
         "minimax/minimax-m3.1-flash": {
           "kwh": 0.04,
           "tier": "mid"
+        },
+        "openai/gpt-5.4-mini": {
+          "kwh": null,
+          "reason": "sin telemetr\u00eda de tokens"
+        },
+        "openai/gpt-5.6-luna": {
+          "kwh": null,
+          "reason": "sin telemetr\u00eda de tokens"
+        },
+        "openai/gpt-oss-120b": {
+          "kwh": null,
+          "reason": "sin telemetr\u00eda de tokens"
         },
         "openrouter/free": {
           "kwh": 0.043,
@@ -46659,10 +47350,10 @@
           "reason": "sin telemetr\u00eda de tokens"
         }
       },
-      "energy_kwh": 14.873,
+      "energy_kwh": 15.651,
       "energy_kwh_band": {
-        "low": 2.276,
-        "high": 128.209
+        "low": 2.438,
+        "high": 134.532
       }
     }
   },
@@ -46769,18 +47460,19 @@
       }
     },
     "charly-specodelic": {
-      "interactions": 37366,
-      "input_tokens": 164897810,
-      "output_tokens": 16015147,
-      "cache_read_tokens": 4268608115,
+      "interactions": 37664,
+      "input_tokens": 165688690,
+      "output_tokens": 16264760,
+      "cache_read_tokens": 4294807923,
       "cache_write_tokens": 242548,
-      "cost_effective": 186.2,
-      "cost_real": 186.2,
+      "cost_effective": 186.97,
+      "cost_real": 186.97,
       "tools": {
         "openrouter": 29741,
         "omp": 4278,
-        "minimax": 2826,
+        "minimax": 2989,
         "kimi-coding": 386,
+        "zai": 135,
         "codex": 106,
         "qwen-token-plan-individual": 29
       },
@@ -46789,37 +47481,38 @@
         "deepseek-v4.1-flash-1017": 3853,
         "MiniMax-M2.7": 2826,
         "kimi-for-coding": 386,
-        "glm-5.3-flash": 213,
+        "glm-5.3-flash": 348,
+        "MiniMax-M3.1-Flash": 163,
         "gpt-6-astra": 105,
         "anthropic/claude-haiku-5.5": 48,
         "glm-5.3": 29,
         "gpt-6-luna": 1
       },
       "first_seen": "2026-09-28",
-      "last_seen": "2026-11-18",
+      "last_seen": "2026-11-22",
       "skills": {}
     },
     "charly-pretender": {
-      "interactions": 7601,
-      "input_tokens": 72741176,
-      "output_tokens": 3605760,
-      "cache_read_tokens": 683897936,
+      "interactions": 7772,
+      "input_tokens": 72979434,
+      "output_tokens": 3699585,
+      "cache_read_tokens": 697595536,
       "cache_write_tokens": 6410571,
-      "cost_effective": 183.93,
-      "cost_real": 37.69,
+      "cost_effective": 184.42,
+      "cost_real": 38.19,
       "tools": {
         "openrouter": 4676,
         "claude-cli": 1806,
         "codex": 747,
-        "omp": 264,
+        "omp": 435,
         "zai": 108
       },
       "models": {
         "deepseek/deepseek-v4-flash": 2663,
         "z-ai/glm-5.3-flash": 1811,
         "claude-sonnet-4-6": 1789,
+        "glm-5.3-flash": 543,
         "gpt-5.4": 491,
-        "glm-5.3-flash": 372,
         "gpt-5.5": 256,
         "z-ai/glm-5.2": 202,
         "claude-opus-4-7": 13,
@@ -46827,7 +47520,7 @@
         "claude-opus-4-6": 1
       },
       "first_seen": "2026-05-06",
-      "last_seen": "2026-11-20",
+      "last_seen": "2026-11-21",
       "skills": {
         "rule-of-5-universal": 10,
         "rule-of-5": 7,
@@ -46838,17 +47531,17 @@
       }
     },
     "ak-catitas": {
-      "interactions": 14855,
-      "input_tokens": 65735735,
-      "output_tokens": 6181445,
-      "cache_read_tokens": 1146101065,
+      "interactions": 14859,
+      "input_tokens": 65767798,
+      "output_tokens": 6182471,
+      "cache_read_tokens": 1146133193,
       "cache_write_tokens": 3372,
-      "cost_effective": 151.67,
-      "cost_real": 151.67,
+      "cost_effective": 151.68,
+      "cost_real": 151.68,
       "tools": {
         "openrouter": 13173,
         "codex": 872,
-        "omp": 672,
+        "omp": 676,
         "kimi-coding": 136,
         "claude-cli": 2
       },
@@ -46866,12 +47559,13 @@
         "anthropic/claude-haiku-5.5": 19,
         "recursive/flint-v1.0:free": 17,
         "gpt-6-astra": 16,
+        "glm-5.3-flash": 4,
         "jev-1.14.0": 2,
         "<synthetic>": 1,
         "claude-sonnet-4-6": 1
       },
       "first_seen": "2026-10-15",
-      "last_seen": "2026-11-18",
+      "last_seen": "2026-11-21",
       "skills": {}
     },
     "sk-REPLy-jl": {
@@ -46936,17 +47630,18 @@
       "skills": {}
     },
     "charly-wai": {
-      "interactions": 11529,
-      "input_tokens": 76561785,
-      "output_tokens": 3962848,
-      "cache_read_tokens": 1214233042,
+      "interactions": 11726,
+      "input_tokens": 76748681,
+      "output_tokens": 4037659,
+      "cache_read_tokens": 1225345554,
       "cache_write_tokens": 1500945,
-      "cost_effective": 129.85,
-      "cost_real": 43.88,
+      "cost_effective": 130.25,
+      "cost_real": 44.28,
       "tools": {
         "openrouter": 10337,
         "codex": 776,
         "amp": 223,
+        "zai": 197,
         "claude-cli": 129,
         "gemini-cli": 64
       },
@@ -46956,6 +47651,7 @@
         "gpt-5.4": 679,
         "z-ai/glm-5.2": 557,
         "amp": 223,
+        "glm-5.3-flash": 197,
         "claude-sonnet-4-6": 123,
         "gpt-5.5": 97,
         "gemini-3-flash-preview": 64,
@@ -46964,7 +47660,7 @@
         "anthropic/claude-sonnet-4.6": 2
       },
       "first_seen": "2026-01-31",
-      "last_seen": "2026-11-11",
+      "last_seen": "2026-11-21",
       "skills": {}
     },
     "sk-XAct-jl": {
@@ -47000,35 +47696,50 @@
       "skills": {}
     },
     "charly-tambor": {
-      "interactions": 12258,
-      "input_tokens": 60354115,
-      "output_tokens": 5173211,
-      "cache_read_tokens": 1163019872,
+      "interactions": 12825,
+      "input_tokens": 61902496,
+      "output_tokens": 5434448,
+      "cache_read_tokens": 1228532768,
       "cache_write_tokens": 0,
-      "cost_effective": 108.61,
-      "cost_real": 108.61,
+      "cost_effective": 110.92,
+      "cost_real": 110.92,
       "tools": {
         "openrouter": 9957,
-        "omp": 1359,
+        "omp": 1817,
         "qwen-token-plan-individual": 596,
         "minimax": 192,
-        "kimi-coding": 154
+        "kimi-coding": 154,
+        "zai": 109
       },
       "models": {
         "z-ai/glm-5.3-flash": 9345,
         "deepseek-v4.1-flash-1017": 1132,
+        "glm-5.3-flash": 669,
         "recursive/flint-v1.0:free": 539,
         "qwen3.8-flash": 456,
-        "MiniMax-M3.1-Flash": 192,
+        "MiniMax-M3.1-Flash": 204,
         "kimi-for-coding": 154,
         "deepseek-v4-flash-0731": 140,
         "minimax/minimax-m3.1-flash": 137,
-        "glm-5.3-flash": 128,
         "poolside/laguna-s-2.1:free": 19,
-        "openrouter/free": 16
+        "openrouter/free": 16,
+        "anthropic/claude-haiku-5.5": 1,
+        "google/gemini-3.8-flash": 1,
+        "google/gemini-3.7-flash": 1,
+        "google/gemini-3.6-flash": 1,
+        "google/gemini-3.5-flash": 1,
+        "meta/muse-spark-1.1": 1,
+        "google/gemini-3.1-flash-lite": 1,
+        "google/gemini-2.0-flash-lite-001": 1,
+        "openai/gpt-oss-120b": 1,
+        "anthropic/claude-haiku-4.5": 1,
+        "anthropic/claude-3-haiku": 1,
+        "openai/gpt-5.6-luna": 1,
+        "openai/gpt-5.4-mini": 1,
+        "aion-labs/aion-3.0-mini": 1
       },
       "first_seen": "2026-10-06",
-      "last_seen": "2026-11-18",
+      "last_seen": "2026-11-22",
       "skills": {}
     },
     "charly-incitaciones": {
@@ -47642,6 +48353,29 @@
       "last_seen": "2026-08-01",
       "skills": {}
     },
+    "charly-kaya": {
+      "interactions": 3626,
+      "input_tokens": 6674722,
+      "output_tokens": 1733591,
+      "cache_read_tokens": 704010880,
+      "cache_write_tokens": 0,
+      "cost_effective": 24.18,
+      "cost_real": 24.18,
+      "tools": {
+        "omp": 3348,
+        "openrouter": 203,
+        "zai": 75
+      },
+      "models": {
+        "deepseek-v4.1-flash-1017": 2384,
+        "glm-5.3-flash": 766,
+        "z-ai/glm-5.3-flash": 352,
+        "MiniMax-M3.1-Flash": 124
+      },
+      "first_seen": "2026-11-16",
+      "last_seen": "2026-11-22",
+      "skills": {}
+    },
     "ak-el-mundo-ha-vivido-equivocado": {
       "interactions": 4403,
       "input_tokens": 101994343,
@@ -47698,27 +48432,6 @@
       },
       "first_seen": "2026-10-06",
       "last_seen": "2026-11-12",
-      "skills": {}
-    },
-    "charly-kaya": {
-      "interactions": 3320,
-      "input_tokens": 6139611,
-      "output_tokens": 1569428,
-      "cache_read_tokens": 675529792,
-      "cache_write_tokens": 0,
-      "cost_effective": 23.41,
-      "cost_real": 23.41,
-      "tools": {
-        "omp": 3117,
-        "openrouter": 203
-      },
-      "models": {
-        "deepseek-v4.1-flash-1017": 2384,
-        "glm-5.3-flash": 584,
-        "z-ai/glm-5.3-flash": 352
-      },
-      "first_seen": "2026-11-16",
-      "last_seen": "2026-11-19",
       "skills": {}
     },
     "charly-coffee": {
@@ -47826,22 +48539,24 @@
       "skills": {}
     },
     "charly-dulce-de-leche": {
-      "interactions": 5537,
-      "input_tokens": 31901845,
-      "output_tokens": 1893331,
-      "cache_read_tokens": 485001800,
+      "interactions": 5677,
+      "input_tokens": 32055381,
+      "output_tokens": 1968265,
+      "cache_read_tokens": 496079880,
       "cache_write_tokens": 0,
-      "cost_effective": 16.49,
-      "cost_real": 16.49,
+      "cost_effective": 16.88,
+      "cost_real": 16.88,
       "tools": {
-        "openrouter": 5537
+        "openrouter": 5537,
+        "zai": 140
       },
       "models": {
         "z-ai/glm-5.3-flash": 4702,
-        "deepseek/deepseek-v4-flash": 835
+        "deepseek/deepseek-v4-flash": 835,
+        "glm-5.3-flash": 140
       },
       "first_seen": "2026-07-30",
-      "last_seen": "2026-11-05",
+      "last_seen": "2026-11-21",
       "skills": {}
     },
     "charly-sunshine": {
@@ -47863,6 +48578,30 @@
       },
       "first_seen": "2026-11-16",
       "last_seen": "2026-11-18",
+      "skills": {}
+    },
+    "charly-sad": {
+      "interactions": 3169,
+      "input_tokens": 6154647,
+      "output_tokens": 1767195,
+      "cache_read_tokens": 434180026,
+      "cache_write_tokens": 0,
+      "cost_effective": 15.27,
+      "cost_real": 15.27,
+      "tools": {
+        "omp": 2591,
+        "zai": 290,
+        "openrouter": 288
+      },
+      "models": {
+        "deepseek-v4.1-flash-1017": 1617,
+        "glm-5.3-flash": 944,
+        "z-ai/glm-5.3-flash": 342,
+        "MiniMax-M3.1-Flash": 254,
+        "jev-1.14.0": 12
+      },
+      "first_seen": "2026-11-16",
+      "last_seen": "2026-11-21",
       "skills": {}
     },
     "charly-fabbro": {
@@ -47907,28 +48646,6 @@
       },
       "first_seen": "2026-09-28",
       "last_seen": "2026-11-12",
-      "skills": {}
-    },
-    "charly-sad": {
-      "interactions": 2563,
-      "input_tokens": 5156027,
-      "output_tokens": 1333763,
-      "cache_read_tokens": 368486336,
-      "cache_write_tokens": 0,
-      "cost_effective": 13.47,
-      "cost_real": 13.47,
-      "tools": {
-        "omp": 2085,
-        "openrouter": 288,
-        "zai": 190
-      },
-      "models": {
-        "deepseek-v4.1-flash-1017": 1617,
-        "glm-5.3-flash": 604,
-        "z-ai/glm-5.3-flash": 342
-      },
-      "first_seen": "2026-11-16",
-      "last_seen": "2026-11-19",
       "skills": {}
     },
     "charly-bichos": {
@@ -49378,20 +50095,20 @@
     "/permissions": 2
   },
   "sessions": {
-    "total_sessions": 3150,
+    "total_sessions": 3165,
     "length_distribution": {
-      "101-300": 984,
-      "51-100": 726,
+      "101-300": 993,
+      "51-100": 731,
       "1-10": 594,
       "11-50": 721,
       "500+": 20,
-      "301-500": 105
+      "301-500": 106
     },
     "with_agent": 265,
-    "total_api_errors": 77,
+    "total_api_errors": 89,
     "total_compactions": 397,
-    "avg_turns": 93.87428571428572,
-    "avg_tools": 2.936825396825397,
+    "avg_turns": 94.08783570300157,
+    "avg_tools": 2.947551342812006,
     "avg_skills": 0.5274725274725275,
     "agent_semantics": "claude-cli: sesi\u00f3n con herramienta Agent (subagentes); amp: aut\u00f3nomo por definici\u00f3n (has_agent=True); pi: sin se\u00f1al de subagentes (has_agent=False); omp: sin se\u00f1al de subagentes (has_agent=False)",
     "by_tool": {
@@ -49404,11 +50121,11 @@
         }
       },
       "pi": {
-        "total": 2631,
+        "total": 2640,
         "with_agent": 0,
         "resets": {
           "signal": "archivos de sesi\u00f3n pi (1 archivo = 1 /new)",
-          "count": 2631
+          "count": 2640
         }
       },
       "amp": {
@@ -49428,11 +50145,11 @@
         }
       },
       "omp": {
-        "total": 70,
+        "total": 76,
         "with_agent": 0,
         "resets": {
           "signal": "archivos de sesi\u00f3n omp (1 archivo = 1 sesi\u00f3n)",
-          "count": 70
+          "count": 76
         }
       }
     },
@@ -50622,23 +51339,24 @@
       {
         "month": "2026-11",
         "model": "MiniMax-M3.1-Flash",
-        "sessions": 1,
+        "sessions": 3,
         "peak_p50": 194524.0,
-        "peak_p90": 194524.0,
+        "peak_p90": 211009.6,
         "pct_big_session": 100.0,
         "tokens_per_turn_by_source": {
-          "asst_args": 151.2,
-          "asst_text": 10.39,
-          "asst_thinking": 434.85,
-          "tool:bash": 248.33,
-          "tool:edit": 2.96,
-          "tool:read": 164.45,
-          "tool:write": 0.48,
-          "user_text": 0.48
+          "asst_args": 192.93,
+          "asst_text": 52.16,
+          "asst_thinking": 590.75,
+          "tool:ah_check": 13.41,
+          "tool:bash": 411.96,
+          "tool:edit": 2.36,
+          "tool:read": 151.5,
+          "tool:write": 1.05,
+          "user_text": 1.32
         },
-        "spend_in": 0.05,
-        "spend_out": 0.07,
-        "spend_cr": 0.41,
+        "spend_in": 0.15,
+        "spend_out": 0.19,
+        "spend_cr": 0.75,
         "spend_cw": 0.0,
         "partial": true
       },
@@ -50701,23 +51419,25 @@
       {
         "month": "2026-11",
         "model": "glm-5.3-flash",
-        "sessions": 7,
-        "peak_p50": 65279.0,
-        "peak_p90": 104167.6,
-        "pct_big_session": 14.29,
+        "sessions": 14,
+        "peak_p50": 72555.5,
+        "peak_p90": 116945.3,
+        "pct_big_session": 21.43,
         "tokens_per_turn_by_source": {
-          "asst_args": 112.93,
-          "asst_text": 59.79,
-          "asst_thinking": 460.94,
-          "tool:bash": 258.59,
-          "tool:edit": 0.66,
-          "tool:read": 92.86,
-          "tool:write": 0.16,
-          "user_text": 1.65
+          "asst_args": 113.32,
+          "asst_text": 56.25,
+          "asst_thinking": 366.88,
+          "tool:ah_check": 16.52,
+          "tool:ah_explain": 0.75,
+          "tool:bash": 250.86,
+          "tool:edit": 1.03,
+          "tool:read": 74.17,
+          "tool:write": 0.19,
+          "user_text": 1.47
         },
-        "spend_in": 0.12,
-        "spend_out": 0.15,
-        "spend_cr": 0.7,
+        "spend_in": 0.24,
+        "spend_out": 0.33,
+        "spend_cr": 2.03,
         "spend_cw": 0.0,
         "partial": true
       },
@@ -50939,7 +51659,7 @@
       "chars_per_token": 4,
       "chars_per_token_tag": "assumed",
       "chars_per_token_bias": "subestima el contexto real (~40%): espa\u00f1ol/c\u00f3digo ~3 chars/token y overhead de serializaci\u00f3n; consistente entre eras \u2014 ver ratio de validaci\u00f3n",
-      "validation_ratio_median": 1.2773767940670155,
+      "validation_ratio_median": 1.277095571307863,
       "thresholds": {
         "big_result_chars": 100000,
         "big_session_tokens": 100000,
@@ -84464,6 +85184,45 @@
         "project": "--var-home-sasha-para-areas-dev-gh-charly-dulce-de-leche--"
       },
       {
+        "turns": 140,
+        "turns_no_usage": 0,
+        "chars_by_source": {
+          "user_text": 388,
+          "asst_thinking": 195023,
+          "asst_args": 63475,
+          "tool:read": 29255,
+          "asst_text": 24207,
+          "tool:bash": 147961,
+          "tool:edit": 764,
+          "tool:write": 103
+        },
+        "big_results": 0,
+        "big_results_by_tool": {},
+        "compactions": 0,
+        "segment_count": 1,
+        "peak_ctx_chars": 461176,
+        "final_ctx_chars": 461176,
+        "peak_ctx_est": 115294,
+        "final_ctx_est": 115294,
+        "max_assistant_block_chars": 12364,
+        "chars_per_token": 4,
+        "model": "glm-5.3-flash",
+        "models_turns": {
+          "glm-5.3-flash": 140
+        },
+        "provider": "zai",
+        "tokens_reported": 11306550,
+        "final_turn_tokens": 140330,
+        "pathological": false,
+        "month": "2026-11",
+        "cost_in": 0.02303,
+        "cost_out": 0.037467,
+        "cost_cr": 0.332342,
+        "cost_cw": 0.0,
+        "context_source": "pi",
+        "project": "--var-home-sasha-para-areas-dev-gh-charly-dulce-de-leche--"
+      },
+      {
         "turns": 37,
         "turns_no_usage": 0,
         "chars_by_source": {
@@ -99474,6 +100233,44 @@
         "project": "--var-home-sasha-para-areas-dev-gh-charly-kaya--"
       },
       {
+        "turns": 75,
+        "turns_no_usage": 0,
+        "chars_by_source": {
+          "user_text": 801,
+          "asst_thinking": 106952,
+          "asst_args": 29363,
+          "tool:bash": 84953,
+          "asst_text": 30915,
+          "tool:ah_check": 324,
+          "tool:read": 29940
+        },
+        "big_results": 0,
+        "big_results_by_tool": {},
+        "compactions": 0,
+        "segment_count": 1,
+        "peak_ctx_chars": 283248,
+        "final_ctx_chars": 283248,
+        "peak_ctx_est": 70812,
+        "final_ctx_est": 70812,
+        "max_assistant_block_chars": 11204,
+        "chars_per_token": 4,
+        "model": "glm-5.3-flash",
+        "models_turns": {
+          "glm-5.3-flash": 75
+        },
+        "provider": "zai",
+        "tokens_reported": 3950029,
+        "final_turn_tokens": 90001,
+        "pathological": false,
+        "month": "2026-11",
+        "cost_in": 0.014595,
+        "cost_out": 0.022429,
+        "cost_cr": 0.114236,
+        "cost_cw": 0.0,
+        "context_source": "pi",
+        "project": "--var-home-sasha-para-areas-dev-gh-charly-kaya--"
+      },
+      {
         "turns": 42,
         "turns_no_usage": 0,
         "chars_by_source": {
@@ -104897,6 +105694,44 @@
         "cost_in": 0.005967,
         "cost_out": 0.002935,
         "cost_cr": 0.002135,
+        "cost_cw": 0.0,
+        "context_source": "pi",
+        "project": "--var-home-sasha-para-areas-dev-gh-charly-sad--"
+      },
+      {
+        "turns": 100,
+        "turns_no_usage": 0,
+        "chars_by_source": {
+          "user_text": 563,
+          "asst_thinking": 159453,
+          "asst_args": 33266,
+          "tool:read": 21495,
+          "asst_text": 21679,
+          "tool:bash": 64725,
+          "tool:edit": 786
+        },
+        "big_results": 0,
+        "big_results_by_tool": {},
+        "compactions": 0,
+        "segment_count": 1,
+        "peak_ctx_chars": 301967,
+        "final_ctx_chars": 301967,
+        "peak_ctx_est": 75491,
+        "final_ctx_est": 75491,
+        "max_assistant_block_chars": 11003,
+        "chars_per_token": 4,
+        "model": "glm-5.3-flash",
+        "models_turns": {
+          "glm-5.3-flash": 100
+        },
+        "provider": "zai",
+        "tokens_reported": 6405116,
+        "final_turn_tokens": 97635,
+        "pathological": false,
+        "month": "2026-11",
+        "cost_in": 0.016483,
+        "cost_out": 0.029086,
+        "cost_cr": 0.187112,
         "cost_cw": 0.0,
         "context_source": "pi",
         "project": "--var-home-sasha-para-areas-dev-gh-charly-sad--"
@@ -116120,6 +116955,124 @@
         "project": "--var-home-sasha-para-areas-dev-gh-charly-specodelic--"
       },
       {
+        "turns": 90,
+        "turns_no_usage": 0,
+        "chars_by_source": {
+          "user_text": 368,
+          "asst_thinking": 90396,
+          "asst_args": 39904,
+          "tool:read": 19313,
+          "asst_text": 12622,
+          "tool:bash": 95559,
+          "tool:edit": 214
+        },
+        "big_results": 0,
+        "big_results_by_tool": {},
+        "compactions": 0,
+        "segment_count": 1,
+        "peak_ctx_chars": 258376,
+        "final_ctx_chars": 258376,
+        "peak_ctx_est": 64594,
+        "final_ctx_est": 64594,
+        "max_assistant_block_chars": 12467,
+        "chars_per_token": 4,
+        "model": "glm-5.3-flash",
+        "models_turns": {
+          "glm-5.3-flash": 90
+        },
+        "provider": "zai",
+        "tokens_reported": 5405667,
+        "final_turn_tokens": 86571,
+        "pathological": false,
+        "month": "2026-11",
+        "cost_in": 0.01522,
+        "cost_out": 0.0185,
+        "cost_cr": 0.158016,
+        "cost_cw": 0.0,
+        "context_source": "pi",
+        "project": "--var-home-sasha-para-areas-dev-gh-charly-specodelic--"
+      },
+      {
+        "turns": 111,
+        "turns_no_usage": 0,
+        "chars_by_source": {
+          "user_text": 932,
+          "asst_thinking": 428698,
+          "asst_args": 82247,
+          "tool:bash": 242379,
+          "asst_text": 51367,
+          "tool:ah_check": 21460,
+          "tool:read": 32566,
+          "tool:write": 646,
+          "tool:edit": 230
+        },
+        "big_results": 0,
+        "big_results_by_tool": {},
+        "compactions": 0,
+        "segment_count": 1,
+        "peak_ctx_chars": 860525,
+        "final_ctx_chars": 860525,
+        "peak_ctx_est": 215131,
+        "final_ctx_est": 215131,
+        "max_assistant_block_chars": 47515,
+        "chars_per_token": 4,
+        "model": "MiniMax-M3.1-Flash",
+        "models_turns": {
+          "glm-5.3-flash": 45,
+          "MiniMax-M3.1-Flash": 66
+        },
+        "provider": "minimax",
+        "tokens_reported": 12235329,
+        "final_turn_tokens": 210063,
+        "pathological": false,
+        "month": "2026-11",
+        "cost_in": 0.07651,
+        "cost_out": 0.077051,
+        "cost_cr": 0.203462,
+        "cost_cw": 0.0,
+        "context_source": "pi",
+        "project": "--var-home-sasha-para-areas-dev-gh-charly-specodelic--"
+      },
+      {
+        "turns": 97,
+        "turns_no_usage": 0,
+        "chars_by_source": {
+          "user_text": 811,
+          "asst_thinking": 182534,
+          "asst_text": 24105,
+          "asst_args": 110316,
+          "tool:bash": 226037,
+          "tool:read": 83531,
+          "tool:write": 668,
+          "tool:edit": 1279
+        },
+        "big_results": 0,
+        "big_results_by_tool": {},
+        "compactions": 0,
+        "segment_count": 1,
+        "peak_ctx_chars": 629281,
+        "final_ctx_chars": 629281,
+        "peak_ctx_est": 157320,
+        "final_ctx_est": 157320,
+        "max_assistant_block_chars": 32100,
+        "chars_per_token": 4,
+        "model": "MiniMax-M3.1-Flash",
+        "models_turns": {
+          "MiniMax-M3.1-Flash": 97
+        },
+        "provider": "minimax",
+        "tokens_reported": 9599305,
+        "final_turn_tokens": 175355,
+        "pathological": false,
+        "month": "2026-11",
+        "cost_in": 0.026902,
+        "cost_out": 0.047418,
+        "cost_cr": 0.140114,
+        "cost_cw": 0.0,
+        "context_source": "pi",
+        "project": "--var-home-sasha-para-areas-dev-gh-charly-specodelic--"
+      },
+      {
         "turns": 94,
         "turns_no_usage": 0,
         "chars_by_source": {
@@ -124481,6 +125434,47 @@
         "cost_in": 0.010757,
         "cost_out": 0.004739,
         "cost_cr": 0.257071,
+        "cost_cw": 0.0,
+        "context_source": "pi",
+        "project": "--var-home-sasha-para-areas-dev-gh-charly-tambor--"
+      },
+      {
+        "turns": 109,
+        "turns_no_usage": 0,
+        "chars_by_source": {
+          "user_text": 868,
+          "asst_thinking": 140188,
+          "asst_args": 81587,
+          "tool:bash": 153324,
+          "asst_text": 37666,
+          "tool:read": 40087,
+          "tool:write": 385,
+          "tool:edit": 382,
+          "tool:ah_check": 15599,
+          "tool:ah_explain": 528
+        },
+        "big_results": 0,
+        "big_results_by_tool": {},
+        "compactions": 0,
+        "segment_count": 1,
+        "peak_ctx_chars": 470614,
+        "final_ctx_chars": 470614,
+        "peak_ctx_est": 117653,
+        "final_ctx_est": 117653,
+        "max_assistant_block_chars": 27921,
+        "chars_per_token": 4,
+        "model": "glm-5.3-flash",
+        "models_turns": {
+          "glm-5.3-flash": 109
+        },
+        "provider": "zai",
+        "tokens_reported": 6957473,
+        "final_turn_tokens": 137629,
+        "pathological": false,
+        "month": "2026-11",
+        "cost_in": 0.020692,
+        "cost_out": 0.033283,
+        "cost_cr": 0.202589,
         "cost_cw": 0.0,
         "context_source": "pi",
         "project": "--var-home-sasha-para-areas-dev-gh-charly-tambor--"
@@ -133619,6 +134613,85 @@
         "cost_in": 0.004793,
         "cost_out": 0.00429,
         "cost_cr": 0.169549,
+        "cost_cw": 0.0,
+        "context_source": "pi",
+        "project": "--var-home-sasha-para-areas-dev-gh-charly-wai--"
+      },
+      {
+        "turns": 105,
+        "turns_no_usage": 0,
+        "chars_by_source": {
+          "user_text": 605,
+          "asst_thinking": 71484,
+          "asst_args": 39591,
+          "tool:read": 30158,
+          "asst_text": 10136,
+          "tool:bash": 72100,
+          "tool:edit": 1036,
+          "tool:write": 100
+        },
+        "big_results": 0,
+        "big_results_by_tool": {},
+        "compactions": 0,
+        "segment_count": 1,
+        "peak_ctx_chars": 225210,
+        "final_ctx_chars": 225210,
+        "peak_ctx_est": 56302,
+        "final_ctx_est": 56302,
+        "max_assistant_block_chars": 7467,
+        "chars_per_token": 4,
+        "model": "glm-5.3-flash",
+        "models_turns": {
+          "glm-5.3-flash": 105
+        },
+        "provider": "zai",
+        "tokens_reported": 5590972,
+        "final_turn_tokens": 75846,
+        "pathological": false,
+        "month": "2026-11",
+        "cost_in": 0.011215,
+        "cost_out": 0.016085,
+        "cost_cr": 0.164521,
+        "cost_cw": 0.0,
+        "context_source": "pi",
+        "project": "--var-home-sasha-para-areas-dev-gh-charly-wai--"
+      },
+      {
+        "turns": 92,
+        "turns_no_usage": 0,
+        "chars_by_source": {
+          "user_text": 260,
+          "asst_thinking": 112462,
+          "asst_args": 35796,
+          "tool:read": 7409,
+          "asst_text": 16448,
+          "tool:bash": 81069,
+          "tool:ah_check": 60486,
+          "tool:ah_explain": 2938,
+          "tool:edit": 414
+        },
+        "big_results": 0,
+        "big_results_by_tool": {},
+        "compactions": 0,
+        "segment_count": 1,
+        "peak_ctx_chars": 317282,
+        "final_ctx_chars": 317282,
+        "peak_ctx_est": 79320,
+        "final_ctx_est": 79320,
+        "max_assistant_block_chars": 8614,
+        "chars_per_token": 4,
+        "model": "glm-5.3-flash",
+        "models_turns": {
+          "glm-5.3-flash": 92
+        },
+        "provider": "zai",
+        "tokens_reported": 5783247,
+        "final_turn_tokens": 99124,
+        "pathological": false,
+        "month": "2026-11",
+        "cost_in": 0.016819,
+        "cost_out": 0.02132,
+        "cost_cr": 0.168854,
         "cost_cw": 0.0,
         "context_source": "pi",
         "project": "--var-home-sasha-para-areas-dev-gh-charly-wai--"
@@ -151277,15 +152350,15 @@
   "multitasking": {
     "description": "Proyectos distintos con actividad en la misma ventana. 'context_switches' cuenta cambios de proyecto entre requests consecutivos (puede inflarse por agentes paralelos en el mismo minuto).",
     "hourly": {
-      "total_active_hours": 1524,
-      "hours_with_multiple_projects": 949,
-      "pct_hours_multitasking": 62.3,
+      "total_active_hours": 1537,
+      "hours_with_multiple_projects": 959,
+      "pct_hours_multitasking": 62.4,
       "avg_projects_per_active_hour": 2.88,
       "distribution": {
-        "1": 575,
-        "4+": 459,
-        "2": 268,
-        "3": 222
+        "1": 578,
+        "4+": 463,
+        "2": 271,
+        "3": 225
       },
       "max_projects_in_one_hour": {
         "count": 14,
@@ -151490,10 +152563,10 @@
       ]
     },
     "daily": {
-      "total_active_days": 234,
-      "days_with_multiple_projects": 159,
-      "pct_days_multitasking": 67.9,
-      "avg_projects_per_active_day": 4.44,
+      "total_active_days": 235,
+      "days_with_multiple_projects": 160,
+      "pct_days_multitasking": 68.1,
+      "avg_projects_per_active_day": 4.46,
       "top_10_days": [
         {
           "date": "2026-10-07",
@@ -151742,8 +152815,8 @@
       ]
     },
     "context_switches": {
-      "total": 156929,
-      "avg_per_active_day": 670.6,
+      "total": 157939,
+      "avg_per_active_day": 672.1,
       "max_in_one_day": 11161,
       "top_10_days": {
         "2026-07-28": 11161,
@@ -152093,7 +153166,8 @@
       "2026-11-17",
       "2026-11-18",
       "2026-11-19",
-      "2026-11-20"
+      "2026-11-20",
+      "2026-11-21"
     ],
     "matrix": {
       "charly-specodelic": [
@@ -152429,7 +153503,8 @@
         413,
         1157,
         0,
-        0
+        0,
+        298
       ],
       "ak-catitas": [
         0,
@@ -152764,7 +153839,8 @@
         344,
         117,
         0,
-        0
+        0,
+        4
       ],
       "charly-testaruda": [
         0,
@@ -153084,6 +154160,7 @@
         0,
         0,
         214,
+        0,
         0,
         0,
         0,
@@ -153434,6 +154511,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-gently": [
@@ -153755,6 +154833,7 @@
         0,
         824,
         415,
+        0,
         0,
         0,
         0,
@@ -154104,7 +155183,8 @@
         0,
         758,
         0,
-        0
+        0,
+        567
       ],
       "charly-wai": [
         0,
@@ -154439,7 +155519,8 @@
         0,
         0,
         0,
-        0
+        0,
+        197
       ],
       "charly-espectacular": [
         0,
@@ -154771,6 +155852,7 @@
         0,
         293,
         8,
+        0,
         0,
         0,
         0,
@@ -155109,6 +156191,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "sk-Testimonial-jl": [
@@ -155384,6 +156467,7 @@
         0,
         0,
         108,
+        0,
         0,
         0,
         0,
@@ -155779,6 +156863,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-wild": [
@@ -156111,6 +157196,7 @@
         0,
         0,
         47,
+        0,
         0,
         0,
         0,
@@ -156449,7 +157535,8 @@
         0,
         132,
         346,
-        4
+        4,
+        171
       ],
       "charly": [
         0,
@@ -156784,6 +157871,7 @@
         103,
         4,
         0,
+        0,
         0
       ],
       "charly-coffee": [
@@ -157111,6 +158199,7 @@
         0,
         0,
         98,
+        0,
         0,
         0,
         0,
@@ -157454,6 +158543,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-genesis": [
@@ -157789,6 +158879,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "sk-REPLy-jl": [
@@ -158080,6 +159171,7 @@
         0,
         0,
         246,
+        0,
         0,
         0,
         0,
@@ -158459,6 +159551,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-dulce-de-leche": [
@@ -158794,7 +159887,8 @@
         0,
         0,
         0,
-        0
+        0,
+        140
       ],
       "sk-Tray-jl": [
         0,
@@ -159019,6 +160113,7 @@
         0,
         0,
         152,
+        0,
         0,
         0,
         0,
@@ -159464,6 +160559,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "sk-titi": [
@@ -159755,6 +160851,7 @@
         0,
         0,
         172,
+        0,
         0,
         0,
         0,
@@ -160134,6 +161231,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "ak-el-mundo-ha-vivido-equivocado": [
@@ -160469,6 +161567,7 @@
         0,
         0,
         87,
+        0,
         0
       ],
       "charly-incitaciones": [
@@ -160803,340 +161902,6 @@
         0,
         0,
         529,
-        0,
-        0
-      ],
-      "charly-jams": [
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        4,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        12,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        616,
-        8,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        43,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        19,
-        34,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        211,
-        194,
-        113,
-        1124,
-        0,
-        428,
-        64,
-        675,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
         0,
         0,
         0
@@ -161474,6 +162239,343 @@
         1095,
         931,
         515,
+        0,
+        306
+      ],
+      "charly-jams": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        4,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        12,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        616,
+        8,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        43,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        19,
+        34,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        211,
+        194,
+        113,
+        1124,
+        0,
+        428,
+        64,
+        675,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
         0
       ],
       "charly-whisper": [
@@ -161809,7 +162911,344 @@
         0,
         0,
         0,
+        0,
         0
+      ],
+      "charly-sad": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        174,
+        562,
+        1245,
+        582,
+        0,
+        606
       ],
       "charly-evallerina": [
         0,
@@ -162144,6 +163583,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "sk-XAct-jl": [
@@ -162443,6 +163883,7 @@
         0,
         0,
         14,
+        0,
         0,
         0,
         0,
@@ -162814,341 +164255,7 @@
         0,
         0,
         0,
-        0
-      ],
-      "charly-sad": [
         0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        174,
-        562,
-        1245,
-        582,
         0
       ],
       "charly-sunshine": [
@@ -163483,6 +164590,7 @@
         626,
         406,
         1070,
+        0,
         0,
         0
       ],
@@ -163819,6 +164927,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-miblioteca": [
@@ -163987,6 +165096,7 @@
         0,
         0,
         227,
+        0,
         0,
         0,
         0,
@@ -164489,6 +165599,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "ak-presentations": [
@@ -164818,6 +165929,7 @@
         557,
         285,
         81,
+        0,
         0,
         0,
         0,
@@ -165159,6 +166271,7 @@
         0,
         1025,
         495,
+        0,
         0
       ],
       "charly-canticos": [
@@ -165494,6 +166607,7 @@
         0,
         0,
         63,
+        0,
         0
       ],
       "sk-elegua": [
@@ -165829,6 +166943,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-fabbro": [
@@ -165948,6 +167063,7 @@
         0,
         38,
         60,
+        0,
         0,
         0,
         0,
@@ -166499,6 +167615,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-atril": [
@@ -166644,6 +167761,7 @@
         0,
         0,
         4,
+        0,
         0,
         0,
         0,
@@ -167169,6 +168287,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-specodelic-gre-wt": [
@@ -167462,6 +168581,7 @@
         0,
         673,
         162,
+        0,
         0,
         0,
         0,
@@ -167839,6 +168959,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-ruta": [
@@ -167964,6 +169085,7 @@
         195,
         519,
         8,
+        0,
         0,
         0,
         0,
@@ -168509,6 +169631,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "sk-poco": [
@@ -168808,6 +169931,7 @@
         0,
         0,
         75,
+        0,
         0,
         0,
         0,
@@ -169179,6 +170303,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-superficies": [
@@ -169318,6 +170443,7 @@
         102,
         6,
         2,
+        0,
         0,
         0,
         0,
@@ -169849,6 +170975,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-microdancing": [
@@ -170121,6 +171248,7 @@
         96,
         0,
         54,
+        0,
         0,
         0,
         0,
@@ -170519,6 +171647,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-nayra": [
@@ -170632,6 +171761,7 @@
         59,
         0,
         128,
+        0,
         0,
         0,
         0,
@@ -171189,6 +172319,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-michael": [
@@ -171448,6 +172579,7 @@
         0,
         226,
         209,
+        0,
         0,
         0,
         0,
@@ -171859,6 +172991,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-fck": [
@@ -172194,6 +173327,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-rizomas": [
@@ -172257,6 +173391,7 @@
         12,
         8,
         5,
+        0,
         0,
         0,
         0,
@@ -172864,6 +173999,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-tambor-wt-y9d4": [
@@ -173165,6 +174301,7 @@
         0,
         0,
         199,
+        0,
         0,
         0,
         0,
@@ -173534,6 +174671,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-genesis-git-epic": [
@@ -173869,6 +175007,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "sk-clojure-tutor": [
@@ -174008,6 +175147,7 @@
         0,
         154,
         22,
+        0,
         0,
         0,
         0,
@@ -174539,6 +175679,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-tambor-.worktrees-x1": [
@@ -174832,6 +175973,7 @@
         0,
         0,
         165,
+        0,
         0,
         0,
         0,
@@ -175209,6 +176351,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "ak-hipervinculos": [
@@ -175544,6 +176687,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-tambor-.worktrees-c0": [
@@ -175836,6 +176980,7 @@
         0,
         0,
         149,
+        0,
         0,
         0,
         0,
@@ -176214,6 +177359,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-tambor-.worktrees-epi": [
@@ -176549,6 +177695,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-tambor-.worktrees-k5": [
@@ -176841,6 +177988,7 @@
         0,
         0,
         138,
+        0,
         0,
         0,
         0,
@@ -177219,6 +178367,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-tambor-.worktrees-r2": [
@@ -177554,6 +178703,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-tambor-.worktrees-t3": [
@@ -177846,6 +178996,7 @@
         0,
         0,
         121,
+        0,
         0,
         0,
         0,
@@ -178224,6 +179375,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "sk-cosito": [
@@ -178318,6 +179470,7 @@
         0,
         0,
         44,
+        0,
         0,
         0,
         0,
@@ -178894,6 +180047,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-tambor-.worktrees-k1": [
@@ -179186,6 +180340,7 @@
         0,
         0,
         106,
+        0,
         0,
         0,
         0,
@@ -179564,6 +180719,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-tambor-wt-y9d10": [
@@ -179899,6 +181055,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-tRAGar": [
@@ -180042,6 +181199,7 @@
         0,
         0,
         7,
+        0,
         0,
         0,
         0,
@@ -180569,6 +181727,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-bichos": [
@@ -180684,6 +181843,7 @@
         45,
         0,
         18,
+        0,
         0,
         0,
         0,
@@ -181239,6 +182399,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-wt-bz4": [
@@ -181541,6 +182702,7 @@
         0,
         0,
         89,
+        0,
         0,
         0,
         0,
@@ -181909,6 +183071,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-tambor-.worktrees-c5": [
@@ -182201,6 +183364,7 @@
         0,
         0,
         88,
+        0,
         0,
         0,
         0,
@@ -182579,6 +183743,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-tambor-.worktrees-r3": [
@@ -182872,6 +184037,7 @@
         0,
         0,
         82,
+        0,
         0,
         0,
         0,
@@ -183249,6 +184415,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-tambor-.worktrees-x3": [
@@ -183542,6 +184709,7 @@
         0,
         0,
         80,
+        0,
         0,
         0,
         0,
@@ -183919,6 +185087,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-tambor-.worktrees-k4": [
@@ -184211,6 +185380,7 @@
         0,
         0,
         77,
+        0,
         0,
         0,
         0,
@@ -184589,6 +185759,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "ak-arm-b-types-machine": [
@@ -184924,6 +186095,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-espectacular-git-epic": [
@@ -185218,6 +186390,7 @@
         0,
         0,
         73,
+        0,
         0,
         0,
         0,
@@ -185594,6 +186767,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-wt-bz2": [
@@ -185929,6 +187103,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-tambor-wt-y9d6": [
@@ -186230,6 +187405,7 @@
         0,
         0,
         61,
+        0,
         0,
         0,
         0,
@@ -186599,6 +187775,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-tambor-.worktrees-k6": [
@@ -186891,6 +188068,7 @@
         0,
         0,
         54,
+        0,
         0,
         0,
         0,
@@ -187269,6 +188447,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "ak-matadero-series-ct-catlab-runs-2026-11-02-kata09-local-attempt001": [
@@ -187587,6 +188766,7 @@
         0,
         0,
         51,
+        0,
         0,
         0,
         0,
@@ -187939,6 +189119,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-paseos": [
@@ -188195,6 +189376,7 @@
         0,
         0,
         47,
+        0,
         0,
         0,
         0,
@@ -188609,6 +189791,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-tambor-wt-y9d9": [
@@ -188910,6 +190093,7 @@
         0,
         0,
         47,
+        0,
         0,
         0,
         0,
@@ -189279,6 +190463,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-dont-git-epic": [
@@ -189573,6 +190758,7 @@
         0,
         0,
         45,
+        0,
         0,
         0,
         0,
@@ -189949,6 +191135,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-testaruda-git-epic": [
@@ -190243,6 +191430,7 @@
         0,
         0,
         41,
+        0,
         0,
         0,
         0,
@@ -190619,6 +191807,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "ak-catitas-catitas": [
@@ -190954,6 +192143,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-crua": [
@@ -191254,6 +192444,7 @@
         0,
         0,
         28,
+        0,
         0,
         0,
         0,
@@ -191624,6 +192815,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "ak-borradores": [
@@ -191714,6 +192906,7 @@
         0,
         0,
         1,
+        0,
         0,
         0,
         0,
@@ -192294,6 +193487,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-sunset-hitl": [
@@ -192606,6 +193800,7 @@
         0,
         0,
         7,
+        0,
         0,
         0,
         0,
@@ -192964,10 +194159,12 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "ak-la-vida-privada-de-los-pensamientos": [
         1,
+        0,
         0,
         0,
         0,
@@ -261196,6 +262393,363 @@
         "cache_read": 69848512,
         "cache_write": 0
       }
+    },
+    {
+      "session_id": "2026-11-21T14-59-31-330Z_01a1fe9e-a182-709e-a506-ca5f84238615",
+      "session_id_fallback": false,
+      "project": "ak-catitas",
+      "day": "2026-11-21",
+      "start": "2026-11-21T14:59:38.160000+00:00",
+      "end": "2026-11-21T15:00:01.396000+00:00",
+      "crosses_midnight": false,
+      "source": "omp",
+      "model": "glm-5.3-flash",
+      "n_interactions": 4,
+      "cost_effective": 0.00628629,
+      "cost_real": 0.00628629,
+      "cost_reason": null,
+      "tokens": {
+        "in": 32063,
+        "out": 1026,
+        "cache_read": 32128,
+        "cache_write": 0
+      }
+    },
+    {
+      "session_id": "2026-11-21T15-40-41-735Z_01a1fec4-5386-7129-a7e6-ba869ae4d4c5",
+      "session_id_fallback": false,
+      "project": "charly-dulce-de-leche",
+      "day": "2026-11-21",
+      "start": "2026-11-21T15:40:46.953000+00:00",
+      "end": "2026-11-21T17:22:57.101000+00:00",
+      "crosses_midnight": false,
+      "source": "zai",
+      "model": "glm-5.3-flash",
+      "n_interactions": 140,
+      "cost_effective": 0.3928398,
+      "cost_real": 0.3928398,
+      "cost_reason": null,
+      "tokens": {
+        "in": 153536,
+        "out": 74934,
+        "cache_read": 11078080,
+        "cache_write": 0
+      }
+    },
+    {
+      "session_id": "2026-11-21T16-27-59-745Z_01a1feef-a17f-767d-8baa-1efe818845e7",
+      "session_id_fallback": false,
+      "project": "charly-kaya",
+      "day": "2026-11-21",
+      "start": "2026-11-21T16:28:21.564000+00:00",
+      "end": "2026-11-21T17:24:01.132000+00:00",
+      "crosses_midnight": false,
+      "source": "zai",
+      "model": "glm-5.3-flash",
+      "n_interactions": 75,
+      "cost_effective": 0.15126036,
+      "cost_real": 0.15126036,
+      "cost_reason": null,
+      "tokens": {
+        "in": 97298,
+        "out": 44859,
+        "cache_read": 3807872,
+        "cache_write": 0
+      }
+    },
+    {
+      "session_id": "2026-11-21T17-34-54-975Z_01a1ff2c-e5ff-7358-9dfc-56234a6e3504",
+      "session_id_fallback": false,
+      "project": "charly-kaya",
+      "day": "2026-11-21",
+      "start": "2026-11-21T17:35:21.933000+00:00",
+      "end": "2026-11-22T00:15:39.355000+00:00",
+      "crosses_midnight": false,
+      "source": "omp",
+      "model": "mixed",
+      "n_interactions": 231,
+      "cost_effective": 0.61277307,
+      "cost_real": 0.61277307,
+      "cost_reason": null,
+      "tokens": {
+        "in": 437813,
+        "out": 119304,
+        "cache_read": 24673216,
+        "cache_write": 0
+      }
+    },
+    {
+      "session_id": "2026-11-20T11-22-08-109Z_01a1f8b1-3f6d-70ff-a5b6-8e7d58b9c45a",
+      "session_id_fallback": false,
+      "project": "charly-pretender",
+      "day": "2026-11-21",
+      "start": "2026-11-21T12:08:21.346000+00:00",
+      "end": "2026-11-21T13:00:46.168000+00:00",
+      "crosses_midnight": false,
+      "source": "omp",
+      "model": "glm-5.3-flash",
+      "n_interactions": 171,
+      "cost_effective": 0.4935792,
+      "cost_real": 0.4935792,
+      "cost_reason": null,
+      "tokens": {
+        "in": 238258,
+        "out": 93825,
+        "cache_read": 13697600,
+        "cache_write": 0
+      }
+    },
+    {
+      "session_id": "2026-11-21T16-05-44-895Z_01a1fedb-433e-772b-92fc-a56d1482e218",
+      "session_id_fallback": false,
+      "project": "charly-sad",
+      "day": "2026-11-21",
+      "start": "2026-11-21T16:06:21.710000+00:00",
+      "end": "2026-11-21T17:15:26.518000+00:00",
+      "crosses_midnight": false,
+      "source": "zai",
+      "model": "glm-5.3-flash",
+      "n_interactions": 100,
+      "cost_effective": 0.23268123,
+      "cost_real": 0.23268123,
+      "cost_reason": null,
+      "tokens": {
+        "in": 109887,
+        "out": 58173,
+        "cache_read": 6237056,
+        "cache_write": 0
+      }
+    },
+    {
+      "session_id": "2026-11-21T17-15-49-739Z_01a1ff1b-6c6b-754c-9297-e89053a5246c",
+      "session_id_fallback": false,
+      "project": "charly-sad",
+      "day": "2026-11-21",
+      "start": "2026-11-21T17:15:56.690000+00:00",
+      "end": "2026-11-21T18:01:22.436000+00:00",
+      "crosses_midnight": false,
+      "source": "omp",
+      "model": "mixed",
+      "n_interactions": 169,
+      "cost_effective": 0.59485178,
+      "cost_real": 0.59485178,
+      "cost_reason": null,
+      "tokens": {
+        "in": 278244,
+        "out": 98516,
+        "cache_read": 17099584,
+        "cache_write": 0
+      }
+    },
+    {
+      "session_id": "2026-11-21T18-01-29-213Z_01a1ff45-397d-77e1-8c67-7ea3dbd3aa2b",
+      "session_id_fallback": false,
+      "project": "charly-sad",
+      "day": "2026-11-21",
+      "start": "2026-11-21T18:01:35.523000+00:00",
+      "end": "2026-11-21T18:44:36.456000+00:00",
+      "crosses_midnight": false,
+      "source": "omp",
+      "model": "mixed",
+      "n_interactions": 149,
+      "cost_effective": 0.43923949,
+      "cost_real": 0.43923949,
+      "cost_reason": null,
+      "tokens": {
+        "in": 337069,
+        "out": 104942,
+        "cache_read": 16243584,
+        "cache_write": 0
+      }
+    },
+    {
+      "session_id": "2026-11-21T18-45-08-847Z_01a1ff6d-326f-75d6-91f4-9dd5b3789a35",
+      "session_id_fallback": false,
+      "project": "charly-sad",
+      "day": "2026-11-21",
+      "start": "2026-11-21T18:45:13.890000+00:00",
+      "end": "2026-11-21T23:59:46.377000+00:00",
+      "crosses_midnight": false,
+      "source": "omp",
+      "model": "MiniMax-M3.1-Flash",
+      "n_interactions": 188,
+      "cost_effective": 0.53579559,
+      "cost_real": 0.53579559,
+      "cost_reason": null,
+      "tokens": {
+        "in": 273420,
+        "out": 171801,
+        "cache_read": 26113466,
+        "cache_write": 0
+      }
+    },
+    {
+      "session_id": "2026-11-21T17-23-26-062Z_01a1ff22-62ed-75d2-935a-005eb6c328fd",
+      "session_id_fallback": false,
+      "project": "charly-specodelic",
+      "day": "2026-11-21",
+      "start": "2026-11-21T17:23:31.974000+00:00",
+      "end": "2026-11-21T18:14:10.858000+00:00",
+      "crosses_midnight": false,
+      "source": "zai",
+      "model": "glm-5.3-flash",
+      "n_interactions": 90,
+      "cost_effective": 0.19173605,
+      "cost_real": 0.19173605,
+      "cost_reason": null,
+      "tokens": {
+        "in": 101467,
+        "out": 37000,
+        "cache_read": 5267200,
+        "cache_write": 0
+      }
+    },
+    {
+      "session_id": "2026-11-21T17-54-55-382Z_01a1ff3f-370b-7449-9aa1-73383dba6441",
+      "session_id_fallback": false,
+      "project": "charly-specodelic",
+      "day": "2026-11-21",
+      "start": "2026-11-21T17:55:20.282000+00:00",
+      "end": "2026-11-21T18:24:49.005000+00:00",
+      "crosses_midnight": false,
+      "source": "zai",
+      "model": "glm-5.3-flash",
+      "n_interactions": 45,
+      "cost_effective": 0.08848195,
+      "cost_real": 0.08848195,
+      "cost_reason": null,
+      "tokens": {
+        "in": 92077,
+        "out": 30992,
+        "cache_read": 1972480,
+        "cache_write": 0
+      }
+    },
+    {
+      "session_id": "2026-11-21T17-54-55-382Z_01a1ff3f-370b-7449-9aa1-73383dba6441",
+      "session_id_fallback": false,
+      "project": "charly-specodelic",
+      "day": "2026-11-21",
+      "start": "2026-11-21T18:33:46.518000+00:00",
+      "end": "2026-11-21T23:40:20.325000+00:00",
+      "crosses_midnight": false,
+      "source": "minimax",
+      "model": "MiniMax-M3.1-Flash",
+      "n_interactions": 66,
+      "cost_effective": 0.26854095,
+      "cost_real": 0.26854095,
+      "cost_reason": null,
+      "tokens": {
+        "in": 417989,
+        "out": 102591,
+        "cache_read": 9619200,
+        "cache_write": 0
+      }
+    },
+    {
+      "session_id": "2026-11-21T19-04-25-540Z_01a1ff7e-d8c3-75bc-911d-6e4c3719cf40",
+      "session_id_fallback": false,
+      "project": "charly-specodelic",
+      "day": "2026-11-21",
+      "start": "2026-11-21T19:05:27.014000+00:00",
+      "end": "2026-11-22T00:06:59.227000+00:00",
+      "crosses_midnight": false,
+      "source": "minimax",
+      "model": "MiniMax-M3.1-Flash",
+      "n_interactions": 97,
+      "cost_effective": 0.21443397,
+      "cost_real": 0.21443397,
+      "cost_reason": null,
+      "tokens": {
+        "in": 179347,
+        "out": 79030,
+        "cache_read": 9340928,
+        "cache_write": 0
+      }
+    },
+    {
+      "session_id": "2026-11-21T12-17-17-733Z_01a1fe0a-1ba3-764f-afbb-63d5ccce9a23",
+      "session_id_fallback": false,
+      "project": "charly-tambor",
+      "day": "2026-11-21",
+      "start": "2026-11-21T12:17:52.302000+00:00",
+      "end": "2026-11-21T13:38:41.559000+00:00",
+      "crosses_midnight": false,
+      "source": "zai",
+      "model": "glm-5.3-flash",
+      "n_interactions": 109,
+      "cost_effective": 0.25656385,
+      "cost_real": 0.25656385,
+      "cost_reason": null,
+      "tokens": {
+        "in": 137947,
+        "out": 66566,
+        "cache_read": 6752960,
+        "cache_write": 0
+      }
+    },
+    {
+      "session_id": "2026-11-21T13-38-41-675Z_01a1fe54-a18b-7237-8dd2-b0498f867241",
+      "session_id_fallback": false,
+      "project": "charly-tambor",
+      "day": "2026-11-21",
+      "start": "2026-11-21T13:38:48.888000+00:00",
+      "end": "2026-11-22T01:10:53.831000+00:00",
+      "crosses_midnight": false,
+      "source": "omp",
+      "model": "mixed",
+      "n_interactions": 458,
+      "cost_effective": 2.0535781,
+      "cost_real": 2.0535781,
+      "cost_reason": null,
+      "tokens": {
+        "in": 1410434,
+        "out": 194671,
+        "cache_read": 58759936,
+        "cache_write": 0
+      }
+    },
+    {
+      "session_id": "2026-11-21T16-07-25-821Z_01a1fedc-cd7c-713c-b971-ca7664830565",
+      "session_id_fallback": false,
+      "project": "charly-wai",
+      "day": "2026-11-21",
+      "start": "2026-11-21T16:08:51.458000+00:00",
+      "end": "2026-11-21T16:52:08.862000+00:00",
+      "crosses_midnight": false,
+      "source": "zai",
+      "model": "glm-5.3-flash",
+      "n_interactions": 105,
+      "cost_effective": 0.19182146,
+      "cost_real": 0.19182146,
+      "cost_reason": null,
+      "tokens": {
+        "in": 74770,
+        "out": 32170,
+        "cache_read": 5484032,
+        "cache_write": 0
+      }
+    },
+    {
+      "session_id": "2026-11-21T16-56-11-263Z_01a1ff09-70fe-713c-b971-ca78376d5c92",
+      "session_id_fallback": false,
+      "project": "charly-wai",
+      "day": "2026-11-21",
+      "start": "2026-11-21T16:56:16.997000+00:00",
+      "end": "2026-11-21T17:29:57.191000+00:00",
+      "crosses_midnight": false,
+      "source": "zai",
+      "model": "glm-5.3-flash",
+      "n_interactions": 92,
+      "cost_effective": 0.2069938,
+      "cost_real": 0.2069938,
+      "cost_reason": null,
+      "tokens": {
+        "in": 112126,
+        "out": 42641,
+        "cache_read": 5628480,
+        "cache_write": 0
+      }
     }
   ],
   "project_daily_spend": {
@@ -261660,6 +263214,17 @@
           "in": 179852,
           "out": 47407,
           "cache_read": 3651136,
+          "cache_write": 0
+        }
+      },
+      "2026-11-21": {
+        "interactions": 4,
+        "cost_effective": 0.00628629,
+        "cost_real": 0.00628629,
+        "tokens": {
+          "in": 32063,
+          "out": 1026,
+          "cache_read": 32128,
           "cache_write": 0
         }
       }
@@ -265023,6 +266588,17 @@
           "cache_read": 30490240,
           "cache_write": 0
         }
+      },
+      "2026-11-21": {
+        "interactions": 140,
+        "cost_effective": 0.3928398,
+        "cost_real": 0.3928398,
+        "tokens": {
+          "in": 153536,
+          "out": 74934,
+          "cache_read": 11078080,
+          "cache_write": 0
+        }
       }
     },
     "charly-dulce-git-epic": {
@@ -266908,6 +268484,17 @@
           "cache_read": 116553536,
           "cache_write": 0
         }
+      },
+      "2026-11-21": {
+        "interactions": 306,
+        "cost_effective": 0.76403343,
+        "cost_real": 0.76403343,
+        "tokens": {
+          "in": 535111,
+          "out": 164163,
+          "cache_read": 28481088,
+          "cache_write": 0
+        }
       }
     },
     "charly-livin": {
@@ -268015,6 +269602,17 @@
           "cache_read": 783296,
           "cache_write": 0
         }
+      },
+      "2026-11-21": {
+        "interactions": 171,
+        "cost_effective": 0.4935792,
+        "cost_real": 0.4935792,
+        "tokens": {
+          "in": 238258,
+          "out": 93825,
+          "cache_read": 13697600,
+          "cache_write": 0
+        }
       }
     },
     "charly-pretender-git-epic": {
@@ -268219,6 +269817,17 @@
           "in": 1162373,
           "out": 309745,
           "cache_read": 78803584,
+          "cache_write": 0
+        }
+      },
+      "2026-11-21": {
+        "interactions": 606,
+        "cost_effective": 1.80256809,
+        "cost_real": 1.80256809,
+        "tokens": {
+          "in": 998620,
+          "out": 433432,
+          "cache_read": 65693690,
           "cache_write": 0
         }
       }
@@ -268562,6 +270171,17 @@
           "in": 2696843,
           "out": 766776,
           "cache_read": 144081728,
+          "cache_write": 0
+        }
+      },
+      "2026-11-21": {
+        "interactions": 298,
+        "cost_effective": 0.76319292,
+        "cost_real": 0.76319292,
+        "tokens": {
+          "in": 790880,
+          "out": 249613,
+          "cache_read": 26199808,
           "cache_write": 0
         }
       }
@@ -269225,6 +270845,17 @@
           "in": 1642610,
           "out": 259959,
           "cache_read": 150191936,
+          "cache_write": 0
+        }
+      },
+      "2026-11-21": {
+        "interactions": 567,
+        "cost_effective": 2.31014195,
+        "cost_real": 2.31014195,
+        "tokens": {
+          "in": 1548381,
+          "out": 261237,
+          "cache_read": 65512896,
           "cache_write": 0
         }
       }
@@ -270585,6 +272216,17 @@
           "in": 164854,
           "out": 66657,
           "cache_read": 6706240,
+          "cache_write": 0
+        }
+      },
+      "2026-11-21": {
+        "interactions": 197,
+        "cost_effective": 0.39881526,
+        "cost_real": 0.39881526,
+        "tokens": {
+          "in": 186896,
+          "out": 74811,
+          "cache_read": 11112512,
           "cache_write": 0
         }
       }
@@ -273470,13 +275112,13 @@
         }
       },
       "2026-11": {
-        "interactions": 893,
-        "cost_effective": 2.2611652662999977,
-        "cost_real": 2.2611652662999977,
+        "interactions": 1090,
+        "cost_effective": 2.6599805263000014,
+        "cost_real": 2.6599805263000014,
         "tokens": {
-          "in": 796250,
-          "out": 338540,
-          "cache_read": 77060096,
+          "in": 983146,
+          "out": 413351,
+          "cache_read": 88172608,
           "cache_write": 0
         }
       }
@@ -274236,13 +275878,13 @@
         }
       },
       "2026-11": {
-        "interactions": 790,
-        "cost_effective": 2.5918921832999984,
-        "cost_real": 2.5918921832999984,
+        "interactions": 961,
+        "cost_effective": 3.085471383299995,
+        "cost_real": 3.085471383299995,
         "tokens": {
-          "in": 1857229,
-          "out": 417753,
-          "cache_read": 76853760,
+          "in": 2095487,
+          "out": 511578,
+          "cache_read": 90551360,
           "cache_write": 0
         }
       }
@@ -274935,13 +276577,13 @@
         }
       },
       "2026-11": {
-        "interactions": 386,
-        "cost_effective": 0.8916587001000004,
-        "cost_real": 0.8916587001000004,
+        "interactions": 526,
+        "cost_effective": 1.2844985001000002,
+        "cost_real": 1.2844985001000002,
         "tokens": {
-          "in": 406291,
-          "out": 120342,
-          "cache_read": 30490240,
+          "in": 559827,
+          "out": 195276,
+          "cache_read": 41568320,
           "cache_write": 0
         }
       }
@@ -275199,13 +276841,13 @@
         }
       },
       "2026-11": {
-        "interactions": 9913,
-        "cost_effective": 73.0032271372999,
-        "cost_real": 73.0032271372999,
+        "interactions": 10211,
+        "cost_effective": 73.76642005729988,
+        "cost_real": 73.76642005729988,
         "tokens": {
-          "in": 19598036,
-          "out": 5713458,
-          "cache_read": 1494013108,
+          "in": 20388916,
+          "out": 5963071,
+          "cache_read": 1520212916,
           "cache_write": 242548
         }
       }
@@ -275306,13 +276948,13 @@
         }
       },
       "2026-11": {
-        "interactions": 3305,
-        "cost_effective": 44.48645378330002,
-        "cost_real": 44.48645378330002,
+        "interactions": 3872,
+        "cost_effective": 46.79659573330002,
+        "cost_real": 46.79659573330002,
         "tokens": {
-          "in": 7904767,
-          "out": 1772095,
-          "cache_read": 472777280,
+          "in": 9453148,
+          "out": 2033332,
+          "cache_read": 538290176,
           "cache_write": 0
         }
       }
@@ -275766,13 +277408,13 @@
         }
       },
       "2026-11": {
-        "interactions": 3046,
-        "cost_effective": 14.273291251599984,
-        "cost_real": 14.273291251599984,
+        "interactions": 3050,
+        "cost_effective": 14.279577541599984,
+        "cost_real": 14.279577541599984,
         "tokens": {
-          "in": 5326248,
-          "out": 1476335,
-          "cache_read": 297403216,
+          "in": 5358311,
+          "out": 1477361,
+          "cache_read": 297435344,
           "cache_write": 3372
         }
       }
@@ -276163,13 +277805,13 @@
     },
     "charly-kaya": {
       "2026-11": {
-        "interactions": 3320,
-        "cost_effective": 23.41393416,
-        "cost_real": 23.41393416,
+        "interactions": 3626,
+        "cost_effective": 24.177967590000005,
+        "cost_real": 24.177967590000005,
         "tokens": {
-          "in": 6139611,
-          "out": 1569428,
-          "cache_read": 675529792,
+          "in": 6674722,
+          "out": 1733591,
+          "cache_read": 704010880,
           "cache_write": 0
         }
       }
@@ -276189,13 +277831,13 @@
     },
     "charly-sad": {
       "2026-11": {
-        "interactions": 2563,
-        "cost_effective": 13.468954030000003,
-        "cost_real": 13.468954030000003,
+        "interactions": 3169,
+        "cost_effective": 15.271522124000013,
+        "cost_real": 15.271522124000013,
         "tokens": {
-          "in": 5156027,
-          "out": 1333763,
-          "cache_read": 368486336,
+          "in": 6154647,
+          "out": 1767195,
+          "cache_read": 434180026,
           "cache_write": 0
         }
       }
@@ -276443,6 +278085,10 @@
       "gemini-3-flash-preview": {
         "interactions": 64,
         "cost_effective": 1.16077529
+      },
+      "glm-5.3-flash": {
+        "interactions": 197,
+        "cost_effective": 0.39881526
       },
       "gpt-5.4": {
         "interactions": 679,
@@ -276925,8 +278571,8 @@
         "cost_effective": 11.89154071
       },
       "glm-5.3-flash": {
-        "interactions": 372,
-        "cost_effective": 1.5513408
+        "interactions": 543,
+        "cost_effective": 2.04492
       },
       "gpt-5.4": {
         "interactions": 491,
@@ -277288,6 +278934,10 @@
         "interactions": 835,
         "cost_effective": 2.85372867
       },
+      "glm-5.3-flash": {
+        "interactions": 140,
+        "cost_effective": 0.3928398
+      },
       "z-ai/glm-5.3-flash": {
         "interactions": 4702,
         "cost_effective": 13.63209488
@@ -277382,6 +279032,10 @@
         "interactions": 2826,
         "cost_effective": 22.03809087
       },
+      "MiniMax-M3.1-Flash": {
+        "interactions": 163,
+        "cost_effective": 0.48297492
+      },
       "anthropic/claude-haiku-5.5": {
         "interactions": 48,
         "cost_effective": 0.00010459
@@ -277395,8 +279049,8 @@
         "cost_effective": 2.8531332
       },
       "glm-5.3-flash": {
-        "interactions": 213,
-        "cost_effective": 1.1515454
+        "interactions": 348,
+        "cost_effective": 1.4317634
       },
       "gpt-6-astra": {
         "interactions": 105,
@@ -277483,8 +279137,24 @@
     },
     "charly-tambor": {
       "MiniMax-M3.1-Flash": {
-        "interactions": 192,
-        "cost_effective": 0.53176827
+        "interactions": 204,
+        "cost_effective": 0.64687545
+      },
+      "aion-labs/aion-3.0-mini": {
+        "interactions": 1,
+        "cost_effective": 0.0
+      },
+      "anthropic/claude-3-haiku": {
+        "interactions": 1,
+        "cost_effective": 0.0
+      },
+      "anthropic/claude-haiku-4.5": {
+        "interactions": 1,
+        "cost_effective": 0.0
+      },
+      "anthropic/claude-haiku-5.5": {
+        "interactions": 1,
+        "cost_effective": 0.0
       },
       "deepseek-v4-flash-0731": {
         "interactions": 140,
@@ -277495,16 +279165,56 @@
         "cost_effective": 7.27537164
       },
       "glm-5.3-flash": {
-        "interactions": 128,
-        "cost_effective": 1.22466201
+        "interactions": 669,
+        "cost_effective": 3.41969678
+      },
+      "google/gemini-2.0-flash-lite-001": {
+        "interactions": 1,
+        "cost_effective": 0.0
+      },
+      "google/gemini-3.1-flash-lite": {
+        "interactions": 1,
+        "cost_effective": 0.0
+      },
+      "google/gemini-3.5-flash": {
+        "interactions": 1,
+        "cost_effective": 0.0
+      },
+      "google/gemini-3.6-flash": {
+        "interactions": 1,
+        "cost_effective": 0.0
+      },
+      "google/gemini-3.7-flash": {
+        "interactions": 1,
+        "cost_effective": 0.0
+      },
+      "google/gemini-3.8-flash": {
+        "interactions": 1,
+        "cost_effective": 0.0
       },
       "kimi-for-coding": {
         "interactions": 154,
         "cost_effective": 2.94054922
       },
+      "meta/muse-spark-1.1": {
+        "interactions": 1,
+        "cost_effective": 0.0
+      },
       "minimax/minimax-m3.1-flash": {
         "interactions": 137,
         "cost_effective": 0.07958094
+      },
+      "openai/gpt-5.4-mini": {
+        "interactions": 1,
+        "cost_effective": 0.0
+      },
+      "openai/gpt-5.6-luna": {
+        "interactions": 1,
+        "cost_effective": 0.0
+      },
+      "openai/gpt-oss-120b": {
+        "interactions": 1,
+        "cost_effective": 0.0
       },
       "openrouter/free": {
         "interactions": 16,
@@ -277777,6 +279487,10 @@
       "deepseek-v4.1-flash-1017": {
         "interactions": 291,
         "cost_effective": 1.16839386
+      },
+      "glm-5.3-flash": {
+        "interactions": 4,
+        "cost_effective": 0.00628629
       },
       "google/gemini-2.5-flash": {
         "interactions": 28,
@@ -278102,13 +279816,17 @@
       }
     },
     "charly-kaya": {
+      "MiniMax-M3.1-Flash": {
+        "interactions": 124,
+        "cost_effective": 0.34655781
+      },
       "deepseek-v4.1-flash-1017": {
         "interactions": 2384,
         "cost_effective": 18.15540162
       },
       "glm-5.3-flash": {
-        "interactions": 584,
-        "cost_effective": 4.12427032
+        "interactions": 766,
+        "cost_effective": 4.54174594
       },
       "z-ai/glm-5.3-flash": {
         "interactions": 352,
@@ -278130,13 +279848,21 @@
       }
     },
     "charly-sad": {
+      "MiniMax-M3.1-Flash": {
+        "interactions": 254,
+        "cost_effective": 0.75564012
+      },
       "deepseek-v4.1-flash-1017": {
         "interactions": 1617,
         "cost_effective": 9.54316032
       },
       "glm-5.3-flash": {
-        "interactions": 604,
-        "cost_effective": 2.85952916
+        "interactions": 944,
+        "cost_effective": 3.90410967
+      },
+      "jev-1.14.0": {
+        "interactions": 12,
+        "cost_effective": 0.00234746
       },
       "z-ai/glm-5.3-flash": {
         "interactions": 342,
@@ -278175,18 +279901,18 @@
     },
     "project_switches_per_active_hour": {
       "measure": "human-context-switching",
-      "value": 102.97
+      "value": 102.76
     }
   },
   "filtered_out": {
-    "interactions": 15677,
+    "interactions": 17021,
     "cost_effective": 0.0,
     "by_tool": {
       "claude-cli": 16,
-      "pi": 4,
-      "omp": 63
+      "pi": 8,
+      "omp": 155
     },
-    "share": 0.0502
+    "share": 0.0538
   },
   "sessions_monthly": {
     "2025-12": {
@@ -278234,7 +279960,7 @@
       "with_agent": 0
     },
     "2026-11": {
-      "total": 358,
+      "total": 373,
       "with_agent": 0
     }
   },
@@ -279492,7 +281218,7 @@
         "charges_real": 0.0,
         "charges_provenance": "reported",
         "subscription_fee_implicit": 0.0,
-        "cost_effective": 22.56985914,
+        "cost_effective": 23.05283406,
         "fee_month_total": 0.0
       },
       "mistral": {
@@ -279506,7 +281232,7 @@
         "charges_real": 0.0,
         "charges_provenance": "reported",
         "subscription_fee_implicit": 0.0,
-        "cost_effective": 118.6497848,
+        "cost_effective": 123.38588832,
         "fee_month_total": 0.0
       },
       "openai": {
@@ -279534,7 +281260,7 @@
         "charges_real": 0.0,
         "charges_provenance": "reported",
         "subscription_fee_implicit": 0.0,
-        "cost_effective": 0.99777406,
+        "cost_effective": 2.71015256,
         "fee_month_total": 0.0
       }
     }
