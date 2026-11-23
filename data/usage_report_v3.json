@@ -5,14 +5,14 @@
       "end": "2026-11-22"
     },
     "filter": "in-scope",
-    "total_interactions": 299091,
-    "total_input_tokens": 2265334959,
-    "total_output_tokens": 138648218,
-    "total_cache_read_tokens": 29226960665,
+    "total_interactions": 299300,
+    "total_input_tokens": 2266079874,
+    "total_output_tokens": 138823828,
+    "total_cache_read_tokens": 29263700377,
     "total_cache_write_tokens": 73562968,
-    "cost_total_effective": 3860.86,
-    "cost_total_real": 1912.74,
-    "cost_real_total_tracker": 1712.76,
+    "cost_total_effective": 3861.63,
+    "cost_total_real": 1913.51,
+    "cost_real_total_tracker": 1713.52,
     "subscription_fees": 199.98,
     "charges_total_real": 1716.72,
     "charges_source": "data/charges.json",
@@ -30,8 +30,8 @@
     "pay_per_token_note": "pay_per_token_charges es *reported* cuando el ledger tiene cargas pay-per-token reales del mes (cr\u00e9ditos/reembolsos, FPA-013); *assumed* (estimado tokens \u00d7 pricing) si no",
     "outcomes": "unavailable: no hay GITHUB_TOKEN \u2014 commits/releases no emisionados",
     "token_accounting": "cache_read/cache_write se reportan aparte de input/output. cache_read no se factura a input rate (10x mas barato); total tokens = input + output + cache_read + cache_write",
-    "total_hours": 1537,
-    "total_days": 235,
+    "total_hours": 1540,
+    "total_days": 236,
     "total_months": 12,
     "total_projects": 123,
     "config_source": "config/fpa.json"
@@ -40782,6 +40782,78 @@
         "MiniMax-M3.1-Flash": 2
       },
       "projects_active": 1
+    },
+    "2026-11-22 13:00": {
+      "interactions": 47,
+      "input_tokens": 224459,
+      "output_tokens": 35979,
+      "cache_read_tokens": 10045440,
+      "cache_write_tokens": 0,
+      "cost_effective": 0.21,
+      "cost_real": 0.21,
+      "tools": {
+        "omp": {
+          "req": 47,
+          "in": 224459,
+          "out": 35979,
+          "cache_read": 10045440,
+          "cache_write": 0,
+          "cost_eff": 0.20593785,
+          "cost_real": 0.20593785
+        }
+      },
+      "models": {
+        "MiniMax-M3.1-Flash": 47
+      },
+      "projects_active": 1
+    },
+    "2026-11-22 14:00": {
+      "interactions": 78,
+      "input_tokens": 381176,
+      "output_tokens": 63741,
+      "cache_read_tokens": 11195776,
+      "cache_write_tokens": 0,
+      "cost_effective": 0.26,
+      "cost_real": 0.26,
+      "tools": {
+        "omp": {
+          "req": 78,
+          "in": 381176,
+          "out": 63741,
+          "cache_read": 11195776,
+          "cache_write": 0,
+          "cost_eff": 0.26335764,
+          "cost_real": 0.26335764
+        }
+      },
+      "models": {
+        "MiniMax-M3.1-Flash": 78
+      },
+      "projects_active": 1
+    },
+    "2026-11-22 15:00": {
+      "interactions": 84,
+      "input_tokens": 139280,
+      "output_tokens": 75890,
+      "cache_read_tokens": 15498496,
+      "cache_write_tokens": 0,
+      "cost_effective": 0.3,
+      "cost_real": 0.3,
+      "tools": {
+        "omp": {
+          "req": 84,
+          "in": 139280,
+          "out": 75890,
+          "cache_read": 15498496,
+          "cache_write": 0,
+          "cost_eff": 0.29890344,
+          "cost_real": 0.29890344
+        }
+      },
+      "models": {
+        "MiniMax-M3.1-Flash": 84
+      },
+      "projects_active": 1
     }
   },
   "daily": {
@@ -44668,6 +44740,21 @@
         "openai/gpt-5.4-mini": 1,
         "aion-labs/aion-3.0-mini": 1
       }
+    },
+    "2026-11-22": {
+      "interactions": 209,
+      "input_tokens": 744915,
+      "output_tokens": 175610,
+      "cache_read_tokens": 36739712,
+      "cache_write_tokens": 0,
+      "cost_effective": 0.77,
+      "cost_real": 0.77,
+      "tools": {
+        "omp": 209
+      },
+      "models": {
+        "MiniMax-M3.1-Flash": 209
+      }
     }
   },
   "monthly": {
@@ -46589,13 +46676,13 @@
       }
     },
     "2026-11": {
-      "interactions": 47064,
-      "input_tokens": 97793762,
-      "output_tokens": 26211419,
-      "cache_read_tokens": 6290509390,
+      "interactions": 47273,
+      "input_tokens": 98538677,
+      "output_tokens": 26387029,
+      "cache_read_tokens": 6327249102,
       "cache_write_tokens": 247050,
-      "cost_effective": 348.12,
-      "cost_real": 348.12,
+      "cost_effective": 348.89,
+      "cost_real": 348.89,
       "tools": {
         "codex": {
           "interactions": 127,
@@ -46654,13 +46741,13 @@
           }
         },
         "omp": {
-          "interactions": 18447,
-          "cost_effective": 123.38588832,
-          "cost_real": 123.38588832,
+          "interactions": 18656,
+          "cost_effective": 124.15408725,
+          "cost_real": 124.15408725,
           "models": {
             "MiniMax-M3.1-Flash": {
-              "interactions": 390,
-              "cost_effective": 1.21730511
+              "interactions": 599,
+              "cost_effective": 1.98550404
             },
             "aion-labs/aion-3.0-mini": {
               "interactions": 1,
@@ -46835,8 +46922,8 @@
           "cost_effective": 22.03809087
         },
         "MiniMax-M3.1-Flash": {
-          "interactions": 745,
-          "cost_effective": 2.2320483
+          "interactions": 954,
+          "cost_effective": 3.00024723
         },
         "aion-labs/aion-3.0-mini": {
           "interactions": 1,
@@ -46976,7 +47063,7 @@
         }
       },
       "subscription_fees": 0.0,
-      "cost_real_tracker": 348.12,
+      "cost_real_tracker": 348.89,
       "pay_per_token_provenance": "assumed",
       "tokens_by_model": {
         "MiniMax-M2.7": {
@@ -46986,9 +47073,9 @@
           "cache_write": 241846
         },
         "MiniMax-M3.1-Flash": {
-          "in": 2344285,
-          "out": 598267,
-          "cache_read": 101429690,
+          "in": 3089200,
+          "out": 773877,
+          "cache_read": 138169402,
           "cache_write": 0
         },
         "aion-labs/aion-3.0-mini": {
@@ -47196,12 +47283,12 @@
           "cache_write": 0
         }
       },
-      "pay_per_token_charges": 348.12,
+      "pay_per_token_charges": 348.89,
       "interaction_kinds": {
         "assistant_turn": 1664,
         "tool_call": 26827,
-        "aux_model_call": 1631,
-        "user_prompt": 1638
+        "aux_model_call": 1638,
+        "user_prompt": 1639
       },
       "outcomes_by_project": {},
       "energy_kwh_by_model": {
@@ -47210,7 +47297,7 @@
           "tier": "mid"
         },
         "MiniMax-M3.1-Flash": {
-          "kwh": 0.363,
+          "kwh": 0.491,
           "tier": "mid"
         },
         "aion-labs/aion-3.0-mini": {
@@ -47350,10 +47437,10 @@
           "reason": "sin telemetr\u00eda de tokens"
         }
       },
-      "energy_kwh": 15.651,
+      "energy_kwh": 15.779,
       "energy_kwh_band": {
-        "low": 2.438,
-        "high": 134.532
+        "low": 2.463,
+        "high": 135.578
       }
     }
   },
@@ -48354,15 +48441,15 @@
       "skills": {}
     },
     "charly-kaya": {
-      "interactions": 3626,
-      "input_tokens": 6674722,
-      "output_tokens": 1733591,
-      "cache_read_tokens": 704010880,
+      "interactions": 3835,
+      "input_tokens": 7419637,
+      "output_tokens": 1909201,
+      "cache_read_tokens": 740750592,
       "cache_write_tokens": 0,
-      "cost_effective": 24.18,
-      "cost_real": 24.18,
+      "cost_effective": 24.95,
+      "cost_real": 24.95,
       "tools": {
-        "omp": 3348,
+        "omp": 3557,
         "openrouter": 203,
         "zai": 75
       },
@@ -48370,7 +48457,7 @@
         "deepseek-v4.1-flash-1017": 2384,
         "glm-5.3-flash": 766,
         "z-ai/glm-5.3-flash": 352,
-        "MiniMax-M3.1-Flash": 124
+        "MiniMax-M3.1-Flash": 333
       },
       "first_seen": "2026-11-16",
       "last_seen": "2026-11-22",
@@ -50095,9 +50182,9 @@
     "/permissions": 2
   },
   "sessions": {
-    "total_sessions": 3165,
+    "total_sessions": 3166,
     "length_distribution": {
-      "101-300": 993,
+      "101-300": 994,
       "51-100": 731,
       "1-10": 594,
       "11-50": 721,
@@ -50105,10 +50192,10 @@
       "301-500": 106
     },
     "with_agent": 265,
-    "total_api_errors": 89,
+    "total_api_errors": 92,
     "total_compactions": 397,
-    "avg_turns": 94.08783570300157,
-    "avg_tools": 2.947551342812006,
+    "avg_turns": 94.12192040429564,
+    "avg_tools": 2.9485154769425144,
     "avg_skills": 0.5274725274725275,
     "agent_semantics": "claude-cli: sesi\u00f3n con herramienta Agent (subagentes); amp: aut\u00f3nomo por definici\u00f3n (has_agent=True); pi: sin se\u00f1al de subagentes (has_agent=False); omp: sin se\u00f1al de subagentes (has_agent=False)",
     "by_tool": {
@@ -50145,11 +50232,11 @@
         }
       },
       "omp": {
-        "total": 76,
+        "total": 77,
         "with_agent": 0,
         "resets": {
           "signal": "archivos de sesi\u00f3n omp (1 archivo = 1 sesi\u00f3n)",
-          "count": 76
+          "count": 77
         }
       }
     },
@@ -152350,12 +152437,12 @@
   "multitasking": {
     "description": "Proyectos distintos con actividad en la misma ventana. 'context_switches' cuenta cambios de proyecto entre requests consecutivos (puede inflarse por agentes paralelos en el mismo minuto).",
     "hourly": {
-      "total_active_hours": 1537,
+      "total_active_hours": 1540,
       "hours_with_multiple_projects": 959,
-      "pct_hours_multitasking": 62.4,
-      "avg_projects_per_active_hour": 2.88,
+      "pct_hours_multitasking": 62.3,
+      "avg_projects_per_active_hour": 2.87,
       "distribution": {
-        "1": 578,
+        "1": 581,
         "4+": 463,
         "2": 271,
         "3": 225
@@ -152563,10 +152650,10 @@
       ]
     },
     "daily": {
-      "total_active_days": 235,
+      "total_active_days": 236,
       "days_with_multiple_projects": 160,
-      "pct_days_multitasking": 68.1,
-      "avg_projects_per_active_day": 4.46,
+      "pct_days_multitasking": 67.8,
+      "avg_projects_per_active_day": 4.44,
       "top_10_days": [
         {
           "date": "2026-10-07",
@@ -152815,8 +152902,8 @@
       ]
     },
     "context_switches": {
-      "total": 157939,
-      "avg_per_active_day": 672.1,
+      "total": 157940,
+      "avg_per_active_day": 669.2,
       "max_in_one_day": 11161,
       "top_10_days": {
         "2026-07-28": 11161,
@@ -153167,7 +153254,8 @@
       "2026-11-18",
       "2026-11-19",
       "2026-11-20",
-      "2026-11-21"
+      "2026-11-21",
+      "2026-11-22"
     ],
     "matrix": {
       "charly-specodelic": [
@@ -153504,7 +153592,8 @@
         1157,
         0,
         0,
-        298
+        298,
+        0
       ],
       "ak-catitas": [
         0,
@@ -153840,7 +153929,8 @@
         117,
         0,
         0,
-        4
+        4,
+        0
       ],
       "charly-testaruda": [
         0,
@@ -154160,6 +154250,7 @@
         0,
         0,
         214,
+        0,
         0,
         0,
         0,
@@ -154512,6 +154603,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-gently": [
@@ -154833,6 +154925,7 @@
         0,
         824,
         415,
+        0,
         0,
         0,
         0,
@@ -155184,7 +155277,8 @@
         758,
         0,
         0,
-        567
+        567,
+        0
       ],
       "charly-wai": [
         0,
@@ -155520,7 +155614,8 @@
         0,
         0,
         0,
-        197
+        197,
+        0
       ],
       "charly-espectacular": [
         0,
@@ -155852,6 +155947,7 @@
         0,
         293,
         8,
+        0,
         0,
         0,
         0,
@@ -156192,6 +156288,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "sk-Testimonial-jl": [
@@ -156467,6 +156564,7 @@
         0,
         0,
         108,
+        0,
         0,
         0,
         0,
@@ -156864,6 +156962,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-wild": [
@@ -157196,6 +157295,7 @@
         0,
         0,
         47,
+        0,
         0,
         0,
         0,
@@ -157536,7 +157636,8 @@
         132,
         346,
         4,
-        171
+        171,
+        0
       ],
       "charly": [
         0,
@@ -157872,6 +157973,7 @@
         4,
         0,
         0,
+        0,
         0
       ],
       "charly-coffee": [
@@ -158199,6 +158301,7 @@
         0,
         0,
         98,
+        0,
         0,
         0,
         0,
@@ -158544,6 +158647,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-genesis": [
@@ -158880,6 +158984,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "sk-REPLy-jl": [
@@ -159171,6 +159276,7 @@
         0,
         0,
         246,
+        0,
         0,
         0,
         0,
@@ -159552,6 +159658,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-dulce-de-leche": [
@@ -159888,7 +159995,8 @@
         0,
         0,
         0,
-        140
+        140,
+        0
       ],
       "sk-Tray-jl": [
         0,
@@ -160113,6 +160221,7 @@
         0,
         0,
         152,
+        0,
         0,
         0,
         0,
@@ -160560,6 +160669,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "sk-titi": [
@@ -160851,6 +160961,7 @@
         0,
         0,
         172,
+        0,
         0,
         0,
         0,
@@ -161232,6 +161343,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "ak-el-mundo-ha-vivido-equivocado": [
@@ -161568,6 +161680,7 @@
         0,
         87,
         0,
+        0,
         0
       ],
       "charly-incitaciones": [
@@ -161902,6 +162015,7 @@
         0,
         0,
         529,
+        0,
         0,
         0,
         0
@@ -162240,7 +162354,8 @@
         931,
         515,
         0,
-        306
+        306,
+        209
       ],
       "charly-jams": [
         0,
@@ -162558,6 +162673,7 @@
         428,
         64,
         675,
+        0,
         0,
         0,
         0,
@@ -162912,6 +163028,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-sad": [
@@ -163248,7 +163365,8 @@
         1245,
         582,
         0,
-        606
+        606,
+        0
       ],
       "charly-evallerina": [
         0,
@@ -163559,6 +163677,7 @@
         0,
         0,
         558,
+        0,
         0,
         0,
         0,
@@ -163920,6 +164039,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "sk-cositos": [
@@ -164210,6 +164330,7 @@
         0,
         0,
         214,
+        0,
         0,
         0,
         0,
@@ -164592,6 +164713,7 @@
         1070,
         0,
         0,
+        0,
         0
       ],
       "ak-suipacha": [
@@ -164928,6 +165050,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-miblioteca": [
@@ -165096,6 +165219,7 @@
         0,
         0,
         227,
+        0,
         0,
         0,
         0,
@@ -165600,6 +165724,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "ak-presentations": [
@@ -165929,6 +166054,7 @@
         557,
         285,
         81,
+        0,
         0,
         0,
         0,
@@ -166272,6 +166398,7 @@
         1025,
         495,
         0,
+        0,
         0
       ],
       "charly-canticos": [
@@ -166607,6 +166734,7 @@
         0,
         0,
         63,
+        0,
         0,
         0
       ],
@@ -166944,6 +167072,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-fabbro": [
@@ -167063,6 +167192,7 @@
         0,
         38,
         60,
+        0,
         0,
         0,
         0,
@@ -167616,6 +167746,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-atril": [
@@ -167761,6 +167892,7 @@
         0,
         0,
         4,
+        0,
         0,
         0,
         0,
@@ -168288,6 +168420,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-specodelic-gre-wt": [
@@ -168581,6 +168714,7 @@
         0,
         673,
         162,
+        0,
         0,
         0,
         0,
@@ -168960,6 +169094,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-ruta": [
@@ -169085,6 +169220,7 @@
         195,
         519,
         8,
+        0,
         0,
         0,
         0,
@@ -169632,6 +169768,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "sk-poco": [
@@ -169931,6 +170068,7 @@
         0,
         0,
         75,
+        0,
         0,
         0,
         0,
@@ -170304,6 +170442,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-superficies": [
@@ -170443,6 +170582,7 @@
         102,
         6,
         2,
+        0,
         0,
         0,
         0,
@@ -170976,6 +171116,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-microdancing": [
@@ -171248,6 +171389,7 @@
         96,
         0,
         54,
+        0,
         0,
         0,
         0,
@@ -171648,6 +171790,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-nayra": [
@@ -171761,6 +171904,7 @@
         59,
         0,
         128,
+        0,
         0,
         0,
         0,
@@ -172320,6 +172464,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-michael": [
@@ -172579,6 +172724,7 @@
         0,
         226,
         209,
+        0,
         0,
         0,
         0,
@@ -172992,6 +173138,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-fck": [
@@ -173328,6 +173475,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-rizomas": [
@@ -173391,6 +173539,7 @@
         12,
         8,
         5,
+        0,
         0,
         0,
         0,
@@ -174000,6 +174149,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-tambor-wt-y9d4": [
@@ -174301,6 +174451,7 @@
         0,
         0,
         199,
+        0,
         0,
         0,
         0,
@@ -174672,6 +174823,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-genesis-git-epic": [
@@ -175008,6 +175160,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "sk-clojure-tutor": [
@@ -175147,6 +175300,7 @@
         0,
         154,
         22,
+        0,
         0,
         0,
         0,
@@ -175680,6 +175834,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-tambor-.worktrees-x1": [
@@ -175973,6 +176128,7 @@
         0,
         0,
         165,
+        0,
         0,
         0,
         0,
@@ -176352,6 +176508,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "ak-hipervinculos": [
@@ -176688,6 +176845,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-tambor-.worktrees-c0": [
@@ -176980,6 +177138,7 @@
         0,
         0,
         149,
+        0,
         0,
         0,
         0,
@@ -177360,6 +177519,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-tambor-.worktrees-epi": [
@@ -177696,6 +177856,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-tambor-.worktrees-k5": [
@@ -177988,6 +178149,7 @@
         0,
         0,
         138,
+        0,
         0,
         0,
         0,
@@ -178368,6 +178530,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-tambor-.worktrees-r2": [
@@ -178704,6 +178867,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-tambor-.worktrees-t3": [
@@ -178996,6 +179160,7 @@
         0,
         0,
         121,
+        0,
         0,
         0,
         0,
@@ -179376,6 +179541,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "sk-cosito": [
@@ -179470,6 +179636,7 @@
         0,
         0,
         44,
+        0,
         0,
         0,
         0,
@@ -180048,6 +180215,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-tambor-.worktrees-k1": [
@@ -180340,6 +180508,7 @@
         0,
         0,
         106,
+        0,
         0,
         0,
         0,
@@ -180720,6 +180889,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-tambor-wt-y9d10": [
@@ -181056,6 +181226,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-tRAGar": [
@@ -181199,6 +181370,7 @@
         0,
         0,
         7,
+        0,
         0,
         0,
         0,
@@ -181728,6 +181900,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-bichos": [
@@ -181843,6 +182016,7 @@
         45,
         0,
         18,
+        0,
         0,
         0,
         0,
@@ -182400,6 +182574,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-wt-bz4": [
@@ -182702,6 +182877,7 @@
         0,
         0,
         89,
+        0,
         0,
         0,
         0,
@@ -183072,6 +183248,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-tambor-.worktrees-c5": [
@@ -183364,6 +183541,7 @@
         0,
         0,
         88,
+        0,
         0,
         0,
         0,
@@ -183744,6 +183922,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-tambor-.worktrees-r3": [
@@ -184037,6 +184216,7 @@
         0,
         0,
         82,
+        0,
         0,
         0,
         0,
@@ -184416,6 +184596,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-tambor-.worktrees-x3": [
@@ -184709,6 +184890,7 @@
         0,
         0,
         80,
+        0,
         0,
         0,
         0,
@@ -185088,6 +185270,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-tambor-.worktrees-k4": [
@@ -185380,6 +185563,7 @@
         0,
         0,
         77,
+        0,
         0,
         0,
         0,
@@ -185760,6 +185944,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "ak-arm-b-types-machine": [
@@ -186096,6 +186281,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-espectacular-git-epic": [
@@ -186390,6 +186576,7 @@
         0,
         0,
         73,
+        0,
         0,
         0,
         0,
@@ -186768,6 +186955,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-wt-bz2": [
@@ -187104,6 +187292,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-tambor-wt-y9d6": [
@@ -187405,6 +187594,7 @@
         0,
         0,
         61,
+        0,
         0,
         0,
         0,
@@ -187776,6 +187966,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-tambor-.worktrees-k6": [
@@ -188068,6 +188259,7 @@
         0,
         0,
         54,
+        0,
         0,
         0,
         0,
@@ -188448,6 +188640,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "ak-matadero-series-ct-catlab-runs-2026-11-02-kata09-local-attempt001": [
@@ -188766,6 +188959,7 @@
         0,
         0,
         51,
+        0,
         0,
         0,
         0,
@@ -189120,6 +189314,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-paseos": [
@@ -189376,6 +189571,7 @@
         0,
         0,
         47,
+        0,
         0,
         0,
         0,
@@ -189792,6 +189988,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-tambor-wt-y9d9": [
@@ -190093,6 +190290,7 @@
         0,
         0,
         47,
+        0,
         0,
         0,
         0,
@@ -190464,6 +190662,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-dont-git-epic": [
@@ -190758,6 +190957,7 @@
         0,
         0,
         45,
+        0,
         0,
         0,
         0,
@@ -191136,6 +191336,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-testaruda-git-epic": [
@@ -191430,6 +191631,7 @@
         0,
         0,
         41,
+        0,
         0,
         0,
         0,
@@ -191808,6 +192010,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "ak-catitas-catitas": [
@@ -192144,6 +192347,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-crua": [
@@ -192444,6 +192648,7 @@
         0,
         0,
         28,
+        0,
         0,
         0,
         0,
@@ -192816,6 +193021,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "ak-borradores": [
@@ -192906,6 +193112,7 @@
         0,
         0,
         1,
+        0,
         0,
         0,
         0,
@@ -193488,6 +193695,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-sunset-hitl": [
@@ -193800,6 +194008,7 @@
         0,
         0,
         7,
+        0,
         0,
         0,
         0,
@@ -194160,10 +194369,12 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "ak-la-vida-privada-de-los-pensamientos": [
         1,
+        0,
         0,
         0,
         0,
@@ -262463,18 +262674,18 @@
       "project": "charly-kaya",
       "day": "2026-11-21",
       "start": "2026-11-21T17:35:21.933000+00:00",
-      "end": "2026-11-22T00:15:39.355000+00:00",
-      "crosses_midnight": false,
+      "end": "2026-11-22T17:44:20.977000+00:00",
+      "crosses_midnight": true,
       "source": "omp",
       "model": "mixed",
-      "n_interactions": 231,
-      "cost_effective": 0.61277307,
-      "cost_real": 0.61277307,
+      "n_interactions": 312,
+      "cost_effective": 0.99416226,
+      "cost_real": 0.99416226,
       "cost_reason": null,
       "tokens": {
-        "in": 437813,
-        "out": 119304,
-        "cache_read": 24673216,
+        "in": 927590,
+        "out": 170342,
+        "cache_read": 43159872,
         "cache_write": 0
       }
     },
@@ -262748,6 +262959,27 @@
         "in": 112126,
         "out": 42641,
         "cache_read": 5628480,
+        "cache_write": 0
+      }
+    },
+    {
+      "session_id": "2026-11-22T17-48-17-487Z_01a2045f-80cf-77be-8a27-3d9d24d91fac",
+      "session_id_fallback": false,
+      "project": "charly-kaya",
+      "day": "2026-11-22",
+      "start": "2026-11-22T17:48:28.263000+00:00",
+      "end": "2026-11-22T18:17:24.437000+00:00",
+      "crosses_midnight": false,
+      "source": "omp",
+      "model": "MiniMax-M3.1-Flash",
+      "n_interactions": 128,
+      "cost_effective": 0.38680974,
+      "cost_real": 0.38680974,
+      "cost_reason": null,
+      "tokens": {
+        "in": 255138,
+        "out": 124572,
+        "cache_read": 18253056,
         "cache_write": 0
       }
     }
@@ -268493,6 +268725,17 @@
           "in": 535111,
           "out": 164163,
           "cache_read": 28481088,
+          "cache_write": 0
+        }
+      },
+      "2026-11-22": {
+        "interactions": 209,
+        "cost_effective": 0.76819893,
+        "cost_real": 0.76819893,
+        "tokens": {
+          "in": 744915,
+          "out": 175610,
+          "cache_read": 36739712,
           "cache_write": 0
         }
       }
@@ -277805,13 +278048,13 @@
     },
     "charly-kaya": {
       "2026-11": {
-        "interactions": 3626,
-        "cost_effective": 24.177967590000005,
-        "cost_real": 24.177967590000005,
+        "interactions": 3835,
+        "cost_effective": 24.946166520000006,
+        "cost_real": 24.946166520000006,
         "tokens": {
-          "in": 6674722,
-          "out": 1733591,
-          "cache_read": 704010880,
+          "in": 7419637,
+          "out": 1909201,
+          "cache_read": 740750592,
           "cache_write": 0
         }
       }
@@ -279817,8 +280060,8 @@
     },
     "charly-kaya": {
       "MiniMax-M3.1-Flash": {
-        "interactions": 124,
-        "cost_effective": 0.34655781
+        "interactions": 333,
+        "cost_effective": 1.11475674
       },
       "deepseek-v4.1-flash-1017": {
         "interactions": 2384,
@@ -279892,7 +280135,7 @@
     "distinct_projects_per_hour": {
       "measure": "parallel-agent",
       "peak": 14,
-      "avg": 2.88
+      "avg": 2.87
     },
     "peak_simultaneous_sessions": {
       "measure": "parallel-agent",
@@ -279901,18 +280144,18 @@
     },
     "project_switches_per_active_hour": {
       "measure": "human-context-switching",
-      "value": 102.76
+      "value": 102.56
     }
   },
   "filtered_out": {
-    "interactions": 17021,
+    "interactions": 17317,
     "cost_effective": 0.0,
     "by_tool": {
       "claude-cli": 16,
-      "pi": 8,
+      "pi": 10,
       "omp": 155
     },
-    "share": 0.0538
+    "share": 0.0547
   },
   "sessions_monthly": {
     "2025-12": {
@@ -279960,7 +280203,7 @@
       "with_agent": 0
     },
     "2026-11": {
-      "total": 373,
+      "total": 374,
       "with_agent": 0
     }
   },
@@ -281232,7 +281475,7 @@
         "charges_real": 0.0,
         "charges_provenance": "reported",
         "subscription_fee_implicit": 0.0,
-        "cost_effective": 123.38588832,
+        "cost_effective": 124.15408725,
         "fee_month_total": 0.0
       },
       "openai": {
