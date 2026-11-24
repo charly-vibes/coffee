@@ -2,17 +2,17 @@
   "metadata": {
     "date_range": {
       "start": "2025-12-23",
-      "end": "2026-11-22"
+      "end": "2026-11-24"
     },
     "filter": "in-scope",
-    "total_interactions": 299300,
-    "total_input_tokens": 2266079874,
-    "total_output_tokens": 138823828,
-    "total_cache_read_tokens": 29263700377,
+    "total_interactions": 300514,
+    "total_input_tokens": 2272833035,
+    "total_output_tokens": 139731518,
+    "total_cache_read_tokens": 29643473043,
     "total_cache_write_tokens": 73562968,
-    "cost_total_effective": 3861.63,
-    "cost_total_real": 1913.51,
-    "cost_real_total_tracker": 1713.52,
+    "cost_total_effective": 3872.46,
+    "cost_total_real": 1924.34,
+    "cost_real_total_tracker": 1724.35,
     "subscription_fees": 199.98,
     "charges_total_real": 1716.72,
     "charges_source": "data/charges.json",
@@ -30,8 +30,8 @@
     "pay_per_token_note": "pay_per_token_charges es *reported* cuando el ledger tiene cargas pay-per-token reales del mes (cr\u00e9ditos/reembolsos, FPA-013); *assumed* (estimado tokens \u00d7 pricing) si no",
     "outcomes": "unavailable: no hay GITHUB_TOKEN \u2014 commits/releases no emisionados",
     "token_accounting": "cache_read/cache_write se reportan aparte de input/output. cache_read no se factura a input rate (10x mas barato); total tokens = input + output + cache_read + cache_write",
-    "total_hours": 1540,
-    "total_days": 236,
+    "total_hours": 1551,
+    "total_days": 237,
     "total_months": 12,
     "total_projects": 123,
     "config_source": "config/fpa.json"
@@ -40854,6 +40854,299 @@
         "MiniMax-M3.1-Flash": 84
       },
       "projects_active": 1
+    },
+    "2026-11-23 10:00": {
+      "interactions": 68,
+      "input_tokens": 439532,
+      "output_tokens": 69435,
+      "cache_read_tokens": 20784122,
+      "cache_write_tokens": 0,
+      "cost_effective": 0.42,
+      "cost_real": 0.42,
+      "tools": {
+        "omp": {
+          "req": 68,
+          "in": 439532,
+          "out": 69435,
+          "cache_read": 20784122,
+          "cache_write": 0,
+          "cost_eff": 0.41935263,
+          "cost_real": 0.41935263
+        }
+      },
+      "models": {
+        "MiniMax-M3.1-Flash": 68
+      },
+      "projects_active": 1
+    },
+    "2026-11-23 11:00": {
+      "interactions": 74,
+      "input_tokens": 1243995,
+      "output_tokens": 182475,
+      "cache_read_tokens": 38042240,
+      "cache_write_tokens": 0,
+      "cost_effective": 0.87,
+      "cost_real": 0.87,
+      "tools": {
+        "omp": {
+          "req": 74,
+          "in": 1243995,
+          "out": 182475,
+          "cache_read": 38042240,
+          "cache_write": 0,
+          "cost_eff": 0.86671785,
+          "cost_real": 0.86671785
+        }
+      },
+      "models": {
+        "MiniMax-M3.1-Flash": 74
+      },
+      "projects_active": 1
+    },
+    "2026-11-23 12:00": {
+      "interactions": 99,
+      "input_tokens": 236665,
+      "output_tokens": 93606,
+      "cache_read_tokens": 68804608,
+      "cache_write_tokens": 0,
+      "cost_effective": 1.12,
+      "cost_real": 1.12,
+      "tools": {
+        "omp": {
+          "req": 99,
+          "in": 236665,
+          "out": 93606,
+          "cache_read": 68804608,
+          "cache_write": 0,
+          "cost_eff": 1.12373247,
+          "cost_real": 1.12373247
+        }
+      },
+      "models": {
+        "MiniMax-M3.1-Flash": 99
+      },
+      "projects_active": 1
+    },
+    "2026-11-23 13:00": {
+      "interactions": 75,
+      "input_tokens": 840410,
+      "output_tokens": 22651,
+      "cache_read_tokens": 58701184,
+      "cache_write_tokens": 0,
+      "cost_effective": 1.9,
+      "cost_real": 1.9,
+      "tools": {
+        "omp": {
+          "req": 75,
+          "in": 840410,
+          "out": 22651,
+          "cache_read": 58701184,
+          "cache_write": 0,
+          "cost_eff": 1.89842252,
+          "cost_real": 1.89842252
+        }
+      },
+      "models": {
+        "glm-5.3-flash": 75
+      },
+      "projects_active": 1
+    },
+    "2026-11-23 15:00": {
+      "interactions": 266,
+      "input_tokens": 2329043,
+      "output_tokens": 173969,
+      "cache_read_tokens": 56708288,
+      "cache_write_tokens": 0,
+      "cost_effective": 2.14,
+      "cost_real": 2.14,
+      "tools": {
+        "omp": {
+          "req": 266,
+          "in": 2329043,
+          "out": 173969,
+          "cache_read": 56708288,
+          "cache_write": 0,
+          "cost_eff": 2.13758959,
+          "cost_real": 2.13758959
+        }
+      },
+      "models": {
+        "glm-5.3-flash": 266
+      },
+      "projects_active": 2
+    },
+    "2026-11-23 16:00": {
+      "interactions": 79,
+      "input_tokens": 83612,
+      "output_tokens": 51204,
+      "cache_read_tokens": 30574464,
+      "cache_write_tokens": 0,
+      "cost_effective": 0.96,
+      "cost_real": 0.96,
+      "tools": {
+        "omp": {
+          "req": 79,
+          "in": 83612,
+          "out": 51204,
+          "cache_read": 30574464,
+          "cache_write": 0,
+          "cost_eff": 0.95537772,
+          "cost_real": 0.95537772
+        }
+      },
+      "models": {
+        "glm-5.3-flash": 79
+      },
+      "projects_active": 1
+    },
+    "2026-11-23 17:00": {
+      "interactions": 57,
+      "input_tokens": 89899,
+      "output_tokens": 26545,
+      "cache_read_tokens": 19562944,
+      "cache_write_tokens": 0,
+      "cost_effective": 0.61,
+      "cost_real": 0.61,
+      "tools": {
+        "omp": {
+          "req": 57,
+          "in": 89899,
+          "out": 26545,
+          "cache_read": 19562944,
+          "cache_write": 0,
+          "cost_eff": 0.61364567,
+          "cost_real": 0.61364567
+        }
+      },
+      "models": {
+        "glm-5.3-flash": 57
+      },
+      "projects_active": 1
+    },
+    "2026-11-23 18:00": {
+      "interactions": 35,
+      "input_tokens": 300050,
+      "output_tokens": 16863,
+      "cache_read_tokens": 3381952,
+      "cache_write_tokens": 0,
+      "cost_effective": 0.15,
+      "cost_real": 0.15,
+      "tools": {
+        "omp": {
+          "req": 35,
+          "in": 300050,
+          "out": 16863,
+          "cache_read": 3381952,
+          "cache_write": 0,
+          "cost_eff": 0.15489756,
+          "cost_real": 0.15489756
+        }
+      },
+      "models": {
+        "glm-5.3-flash": 35
+      },
+      "projects_active": 2
+    },
+    "2026-11-23 19:00": {
+      "interactions": 266,
+      "input_tokens": 502578,
+      "output_tokens": 191266,
+      "cache_read_tokens": 31329408,
+      "cache_write_tokens": 0,
+      "cost_effective": 0.99,
+      "cost_real": 0.99,
+      "tools": {
+        "omp": {
+          "req": 144,
+          "in": 213479,
+          "out": 121817,
+          "cache_read": 20768000,
+          "cache_write": 0,
+          "cost_eff": 0.71597035,
+          "cost_real": 0.71597035
+        },
+        "zai": {
+          "req": 18,
+          "in": 138808,
+          "out": 4713,
+          "cache_read": 2158976,
+          "cache_write": 0,
+          "cost_eff": 0.08794698,
+          "cost_real": 0.08794698
+        },
+        "minimax": {
+          "req": 104,
+          "in": 150291,
+          "out": 64736,
+          "cache_read": 8402432,
+          "cache_write": 0,
+          "cost_eff": 0.18742173,
+          "cost_real": 0.18742173
+        }
+      },
+      "models": {
+        "glm-5.3-flash": 162,
+        "MiniMax-M3.1-Flash": 104
+      },
+      "projects_active": 2
+    },
+    "2026-11-23 20:00": {
+      "interactions": 118,
+      "input_tokens": 617242,
+      "output_tokens": 56789,
+      "cache_read_tokens": 28781632,
+      "cache_write_tokens": 0,
+      "cost_effective": 0.95,
+      "cost_real": 0.95,
+      "tools": {
+        "omp": {
+          "req": 103,
+          "in": 604388,
+          "out": 50857,
+          "cache_read": 26644288,
+          "cache_write": 0,
+          "cost_eff": 0.91541534,
+          "cost_real": 0.91541534
+        },
+        "minimax": {
+          "req": 15,
+          "in": 12854,
+          "out": 5932,
+          "cache_read": 2137344,
+          "cache_write": 0,
+          "cost_eff": 0.03754746,
+          "cost_real": 0.03754746
+        }
+      },
+      "models": {
+        "glm-5.3-flash": 103,
+        "MiniMax-M3.1-Flash": 15
+      },
+      "projects_active": 3
+    },
+    "2026-11-23 21:00": {
+      "interactions": 77,
+      "input_tokens": 70135,
+      "output_tokens": 22887,
+      "cache_read_tokens": 23101824,
+      "cache_write_tokens": 0,
+      "cost_effective": 0.72,
+      "cost_real": 0.72,
+      "tools": {
+        "omp": {
+          "req": 77,
+          "in": 70135,
+          "out": 22887,
+          "cache_read": 23101824,
+          "cache_write": 0,
+          "cost_eff": 0.71501847,
+          "cost_real": 0.71501847
+        }
+      },
+      "models": {
+        "glm-5.3-flash": 77
+      },
+      "projects_active": 1
     }
   },
   "daily": {
@@ -44755,6 +45048,24 @@
       "models": {
         "MiniMax-M3.1-Flash": 209
       }
+    },
+    "2026-11-23": {
+      "interactions": 1214,
+      "input_tokens": 6753161,
+      "output_tokens": 907690,
+      "cache_read_tokens": 379772666,
+      "cache_write_tokens": 0,
+      "cost_effective": 10.83,
+      "cost_real": 10.83,
+      "tools": {
+        "omp": 1077,
+        "minimax": 119,
+        "zai": 18
+      },
+      "models": {
+        "glm-5.3-flash": 854,
+        "MiniMax-M3.1-Flash": 360
+      }
     }
   },
   "monthly": {
@@ -46676,13 +46987,13 @@
       }
     },
     "2026-11": {
-      "interactions": 47273,
-      "input_tokens": 98538677,
-      "output_tokens": 26387029,
-      "cache_read_tokens": 6327249102,
+      "interactions": 48487,
+      "input_tokens": 105291838,
+      "output_tokens": 27294719,
+      "cache_read_tokens": 6707021768,
       "cache_write_tokens": 247050,
-      "cost_effective": 348.89,
-      "cost_real": 348.89,
+      "cost_effective": 359.72,
+      "cost_real": 359.72,
       "tools": {
         "codex": {
           "interactions": 127,
@@ -46711,17 +47022,17 @@
           }
         },
         "minimax": {
-          "interactions": 3181,
-          "cost_effective": 23.05283406,
-          "cost_real": 23.05283406,
+          "interactions": 3300,
+          "cost_effective": 23.27780325,
+          "cost_real": 23.27780325,
           "models": {
             "MiniMax-M2.7": {
               "interactions": 2826,
               "cost_effective": 22.03809087
             },
             "MiniMax-M3.1-Flash": {
-              "interactions": 355,
-              "cost_effective": 1.01474319
+              "interactions": 474,
+              "cost_effective": 1.23971238
             }
           }
         },
@@ -46741,13 +47052,13 @@
           }
         },
         "omp": {
-          "interactions": 18656,
-          "cost_effective": 124.15408725,
-          "cost_real": 124.15408725,
+          "interactions": 19733,
+          "cost_effective": 134.67022742,
+          "cost_real": 134.67022742,
           "models": {
             "MiniMax-M3.1-Flash": {
-              "interactions": 599,
-              "cost_effective": 1.98550404
+              "interactions": 840,
+              "cost_effective": 4.39530699
             },
             "aion-labs/aion-3.0-mini": {
               "interactions": 1,
@@ -46774,8 +47085,8 @@
               "cost_effective": 97.56927048
             },
             "glm-5.3-flash": {
-              "interactions": 3242,
-              "cost_effective": 17.3030653
+              "interactions": 4078,
+              "cost_effective": 25.40940252
             },
             "google/gemini-2.0-flash-lite-001": {
               "interactions": 1,
@@ -46905,13 +47216,13 @@
           }
         },
         "zai": {
-          "interactions": 1224,
-          "cost_effective": 2.71015256,
-          "cost_real": 2.71015256,
+          "interactions": 1242,
+          "cost_effective": 2.79809954,
+          "cost_real": 2.79809954,
           "models": {
             "glm-5.3-flash": {
-              "interactions": 1224,
-              "cost_effective": 2.71015256
+              "interactions": 1242,
+              "cost_effective": 2.79809954
             }
           }
         }
@@ -46922,8 +47233,8 @@
           "cost_effective": 22.03809087
         },
         "MiniMax-M3.1-Flash": {
-          "interactions": 954,
-          "cost_effective": 3.00024723
+          "interactions": 1314,
+          "cost_effective": 5.63501937
         },
         "aion-labs/aion-3.0-mini": {
           "interactions": 1,
@@ -46962,8 +47273,8 @@
           "cost_effective": 2.8531332
         },
         "glm-5.3-flash": {
-          "interactions": 4466,
-          "cost_effective": 20.01321786
+          "interactions": 5320,
+          "cost_effective": 28.20750206
         },
         "google/gemini-2.0-flash-lite-001": {
           "interactions": 1,
@@ -47063,7 +47374,7 @@
         }
       },
       "subscription_fees": 0.0,
-      "cost_real_tracker": 348.89,
+      "cost_real_tracker": 359.72,
       "pay_per_token_provenance": "assumed",
       "tokens_by_model": {
         "MiniMax-M2.7": {
@@ -47073,9 +47384,9 @@
           "cache_write": 241846
         },
         "MiniMax-M3.1-Flash": {
-          "in": 3089200,
-          "out": 773877,
-          "cache_read": 138169402,
+          "in": 5172537,
+          "out": 1190061,
+          "cache_read": 276340148,
           "cache_write": 0
         },
         "aion-labs/aion-3.0-mini": {
@@ -47133,9 +47444,9 @@
           "cache_write": 0
         },
         "glm-5.3-flash": {
-          "in": 9742634,
-          "out": 2364306,
-          "cache_read": 578988992,
+          "in": 14412458,
+          "out": 2855812,
+          "cache_read": 820590912,
           "cache_write": 0
         },
         "google/gemini-2.0-flash-lite-001": {
@@ -47283,12 +47594,12 @@
           "cache_write": 0
         }
       },
-      "pay_per_token_charges": 348.89,
+      "pay_per_token_charges": 359.72,
       "interaction_kinds": {
-        "assistant_turn": 1664,
-        "tool_call": 26827,
-        "aux_model_call": 1638,
-        "user_prompt": 1639
+        "assistant_turn": 1672,
+        "tool_call": 26956,
+        "aux_model_call": 1759,
+        "user_prompt": 1657
       },
       "outcomes_by_project": {},
       "energy_kwh_by_model": {
@@ -47297,7 +47608,7 @@
           "tier": "mid"
         },
         "MiniMax-M3.1-Flash": {
-          "kwh": 0.491,
+          "kwh": 0.944,
           "tier": "mid"
         },
         "aion-labs/aion-3.0-mini": {
@@ -47337,7 +47648,7 @@
           "tier": "mid"
         },
         "glm-5.3-flash": {
-          "kwh": 1.945,
+          "kwh": 2.759,
           "tier": "mid"
         },
         "google/gemini-2.0-flash-lite-001": {
@@ -47437,10 +47748,10 @@
           "reason": "sin telemetr\u00eda de tokens"
         }
       },
-      "energy_kwh": 15.779,
+      "energy_kwh": 17.046,
       "energy_kwh_band": {
-        "low": 2.463,
-        "high": 135.578
+        "low": 2.677,
+        "high": 146.341
       }
     }
   },
@@ -47547,19 +47858,19 @@
       }
     },
     "charly-specodelic": {
-      "interactions": 37664,
-      "input_tokens": 165688690,
-      "output_tokens": 16264760,
-      "cache_read_tokens": 4294807923,
+      "interactions": 37801,
+      "input_tokens": 165990643,
+      "output_tokens": 16340141,
+      "cache_read_tokens": 4307506675,
       "cache_write_tokens": 242548,
-      "cost_effective": 186.97,
-      "cost_real": 186.97,
+      "cost_effective": 187.28,
+      "cost_real": 187.28,
       "tools": {
         "openrouter": 29741,
         "omp": 4278,
-        "minimax": 2989,
+        "minimax": 3108,
         "kimi-coding": 386,
-        "zai": 135,
+        "zai": 153,
         "codex": 106,
         "qwen-token-plan-individual": 29
       },
@@ -47568,15 +47879,15 @@
         "deepseek-v4.1-flash-1017": 3853,
         "MiniMax-M2.7": 2826,
         "kimi-for-coding": 386,
-        "glm-5.3-flash": 348,
-        "MiniMax-M3.1-Flash": 163,
+        "glm-5.3-flash": 366,
+        "MiniMax-M3.1-Flash": 282,
         "gpt-6-astra": 105,
         "anthropic/claude-haiku-5.5": 48,
         "glm-5.3": 29,
         "gpt-6-luna": 1
       },
       "first_seen": "2026-09-28",
-      "last_seen": "2026-11-22",
+      "last_seen": "2026-11-23",
       "skills": {}
     },
     "charly-pretender": {
@@ -47750,6 +48061,53 @@
       "last_seen": "2026-11-21",
       "skills": {}
     },
+    "charly-tambor": {
+      "interactions": 13192,
+      "input_tokens": 63098080,
+      "output_tokens": 5606530,
+      "cache_read_tokens": 1346613152,
+      "cache_write_tokens": 0,
+      "cost_effective": 114.73,
+      "cost_real": 114.73,
+      "tools": {
+        "openrouter": 9957,
+        "omp": 2184,
+        "qwen-token-plan-individual": 596,
+        "minimax": 192,
+        "kimi-coding": 154,
+        "zai": 109
+      },
+      "models": {
+        "z-ai/glm-5.3-flash": 9345,
+        "deepseek-v4.1-flash-1017": 1132,
+        "glm-5.3-flash": 1036,
+        "recursive/flint-v1.0:free": 539,
+        "qwen3.8-flash": 456,
+        "MiniMax-M3.1-Flash": 204,
+        "kimi-for-coding": 154,
+        "deepseek-v4-flash-0731": 140,
+        "minimax/minimax-m3.1-flash": 137,
+        "poolside/laguna-s-2.1:free": 19,
+        "openrouter/free": 16,
+        "anthropic/claude-haiku-5.5": 1,
+        "google/gemini-3.8-flash": 1,
+        "google/gemini-3.7-flash": 1,
+        "google/gemini-3.6-flash": 1,
+        "google/gemini-3.5-flash": 1,
+        "meta/muse-spark-1.1": 1,
+        "google/gemini-3.1-flash-lite": 1,
+        "google/gemini-2.0-flash-lite-001": 1,
+        "openai/gpt-oss-120b": 1,
+        "anthropic/claude-haiku-4.5": 1,
+        "anthropic/claude-3-haiku": 1,
+        "openai/gpt-5.6-luna": 1,
+        "openai/gpt-5.4-mini": 1,
+        "aion-labs/aion-3.0-mini": 1
+      },
+      "first_seen": "2026-10-06",
+      "last_seen": "2026-11-24",
+      "skills": {}
+    },
     "sk-XAct-jl": {
       "interactions": 2606,
       "input_tokens": 30606978,
@@ -47780,53 +48138,6 @@
       },
       "first_seen": "2026-01-22",
       "last_seen": "2026-10-14",
-      "skills": {}
-    },
-    "charly-tambor": {
-      "interactions": 12825,
-      "input_tokens": 61902496,
-      "output_tokens": 5434448,
-      "cache_read_tokens": 1228532768,
-      "cache_write_tokens": 0,
-      "cost_effective": 110.92,
-      "cost_real": 110.92,
-      "tools": {
-        "openrouter": 9957,
-        "omp": 1817,
-        "qwen-token-plan-individual": 596,
-        "minimax": 192,
-        "kimi-coding": 154,
-        "zai": 109
-      },
-      "models": {
-        "z-ai/glm-5.3-flash": 9345,
-        "deepseek-v4.1-flash-1017": 1132,
-        "glm-5.3-flash": 669,
-        "recursive/flint-v1.0:free": 539,
-        "qwen3.8-flash": 456,
-        "MiniMax-M3.1-Flash": 204,
-        "kimi-for-coding": 154,
-        "deepseek-v4-flash-0731": 140,
-        "minimax/minimax-m3.1-flash": 137,
-        "poolside/laguna-s-2.1:free": 19,
-        "openrouter/free": 16,
-        "anthropic/claude-haiku-5.5": 1,
-        "google/gemini-3.8-flash": 1,
-        "google/gemini-3.7-flash": 1,
-        "google/gemini-3.6-flash": 1,
-        "google/gemini-3.5-flash": 1,
-        "meta/muse-spark-1.1": 1,
-        "google/gemini-3.1-flash-lite": 1,
-        "google/gemini-2.0-flash-lite-001": 1,
-        "openai/gpt-oss-120b": 1,
-        "anthropic/claude-haiku-4.5": 1,
-        "anthropic/claude-3-haiku": 1,
-        "openai/gpt-5.6-luna": 1,
-        "openai/gpt-5.4-mini": 1,
-        "aion-labs/aion-3.0-mini": 1
-      },
-      "first_seen": "2026-10-06",
-      "last_seen": "2026-11-22",
       "skills": {}
     },
     "charly-incitaciones": {
@@ -48277,6 +48588,29 @@
       "last_seen": "2026-10-06",
       "skills": {}
     },
+    "charly-kaya": {
+      "interactions": 4545,
+      "input_tokens": 12675261,
+      "output_tokens": 2569428,
+      "cache_read_tokens": 989744122,
+      "cache_write_tokens": 0,
+      "cost_effective": 31.65,
+      "cost_real": 31.65,
+      "tools": {
+        "omp": 4267,
+        "openrouter": 203,
+        "zai": 75
+      },
+      "models": {
+        "deepseek-v4.1-flash-1017": 2384,
+        "glm-5.3-flash": 1235,
+        "MiniMax-M3.1-Flash": 574,
+        "z-ai/glm-5.3-flash": 352
+      },
+      "first_seen": "2026-11-16",
+      "last_seen": "2026-11-23",
+      "skills": {}
+    },
     "charly-canticos": {
       "interactions": 1518,
       "input_tokens": 4386033,
@@ -48438,29 +48772,6 @@
       },
       "first_seen": "2026-07-17",
       "last_seen": "2026-08-01",
-      "skills": {}
-    },
-    "charly-kaya": {
-      "interactions": 3835,
-      "input_tokens": 7419637,
-      "output_tokens": 1909201,
-      "cache_read_tokens": 740750592,
-      "cache_write_tokens": 0,
-      "cost_effective": 24.95,
-      "cost_real": 24.95,
-      "tools": {
-        "omp": 3557,
-        "openrouter": 203,
-        "zai": 75
-      },
-      "models": {
-        "deepseek-v4.1-flash-1017": 2384,
-        "glm-5.3-flash": 766,
-        "z-ai/glm-5.3-flash": 352,
-        "MiniMax-M3.1-Flash": 333
-      },
-      "first_seen": "2026-11-16",
-      "last_seen": "2026-11-22",
       "skills": {}
     },
     "ak-el-mundo-ha-vivido-equivocado": {
@@ -50182,20 +50493,20 @@
     "/permissions": 2
   },
   "sessions": {
-    "total_sessions": 3166,
+    "total_sessions": 3169,
     "length_distribution": {
-      "101-300": 994,
-      "51-100": 731,
-      "1-10": 594,
+      "101-300": 996,
+      "51-100": 730,
+      "1-10": 595,
       "11-50": 721,
-      "500+": 20,
-      "301-500": 106
+      "500+": 22,
+      "301-500": 105
     },
     "with_agent": 265,
-    "total_api_errors": 92,
+    "total_api_errors": 94,
     "total_compactions": 397,
-    "avg_turns": 94.12192040429564,
-    "avg_tools": 2.9485154769425144,
+    "avg_turns": 94.37772167876302,
+    "avg_tools": 2.9507731145471756,
     "avg_skills": 0.5274725274725275,
     "agent_semantics": "claude-cli: sesi\u00f3n con herramienta Agent (subagentes); amp: aut\u00f3nomo por definici\u00f3n (has_agent=True); pi: sin se\u00f1al de subagentes (has_agent=False); omp: sin se\u00f1al de subagentes (has_agent=False)",
     "by_tool": {
@@ -50208,11 +50519,11 @@
         }
       },
       "pi": {
-        "total": 2640,
+        "total": 2641,
         "with_agent": 0,
         "resets": {
           "signal": "archivos de sesi\u00f3n pi (1 archivo = 1 /new)",
-          "count": 2640
+          "count": 2641
         }
       },
       "amp": {
@@ -50232,11 +50543,11 @@
         }
       },
       "omp": {
-        "total": 77,
+        "total": 79,
         "with_agent": 0,
         "resets": {
           "signal": "archivos de sesi\u00f3n omp (1 archivo = 1 sesi\u00f3n)",
-          "count": 77
+          "count": 79
         }
       }
     },
@@ -51426,24 +51737,24 @@
       {
         "month": "2026-11",
         "model": "MiniMax-M3.1-Flash",
-        "sessions": 3,
-        "peak_p50": 194524.0,
-        "peak_p90": 211009.6,
+        "sessions": 4,
+        "peak_p50": 179360.5,
+        "peak_p90": 208948.9,
         "pct_big_session": 100.0,
         "tokens_per_turn_by_source": {
-          "asst_args": 192.93,
-          "asst_text": 52.16,
-          "asst_thinking": 590.75,
-          "tool:ah_check": 13.41,
-          "tool:bash": 411.96,
-          "tool:edit": 2.36,
-          "tool:read": 151.5,
-          "tool:write": 1.05,
-          "user_text": 1.32
+          "asst_args": 203.73,
+          "asst_text": 56.14,
+          "asst_thinking": 496.2,
+          "tool:ah_check": 15.67,
+          "tool:bash": 388.5,
+          "tool:edit": 2.7,
+          "tool:read": 136.87,
+          "tool:write": 0.92,
+          "user_text": 1.33
         },
-        "spend_in": 0.15,
-        "spend_out": 0.19,
-        "spend_cr": 0.75,
+        "spend_in": 0.2,
+        "spend_out": 0.24,
+        "spend_cr": 0.98,
         "spend_cw": 0.0,
         "partial": true
       },
@@ -51746,7 +52057,7 @@
       "chars_per_token": 4,
       "chars_per_token_tag": "assumed",
       "chars_per_token_bias": "subestima el contexto real (~40%): espa\u00f1ol/c\u00f3digo ~3 chars/token y overhead de serializaci\u00f3n; consistente entre eras \u2014 ver ratio de validaci\u00f3n",
-      "validation_ratio_median": 1.277095571307863,
+      "validation_ratio_median": 1.277061351696068,
       "thresholds": {
         "big_result_chars": 100000,
         "big_session_tokens": 100000,
@@ -117121,40 +117432,81 @@
         "project": "--var-home-sasha-para-areas-dev-gh-charly-specodelic--"
       },
       {
-        "turns": 97,
+        "turns": 115,
         "turns_no_usage": 0,
         "chars_by_source": {
-          "user_text": 811,
-          "asst_thinking": 182534,
-          "asst_text": 24105,
-          "asst_args": 110316,
-          "tool:bash": 226037,
-          "tool:read": 83531,
+          "user_text": 1004,
+          "asst_thinking": 182926,
+          "asst_text": 27273,
+          "asst_args": 124257,
+          "tool:bash": 230989,
+          "tool:read": 87530,
           "tool:write": 668,
-          "tool:edit": 1279
+          "tool:edit": 2143
         },
         "big_results": 0,
         "big_results_by_tool": {},
         "compactions": 0,
         "segment_count": 1,
-        "peak_ctx_chars": 629281,
-        "final_ctx_chars": 629281,
-        "peak_ctx_est": 157320,
-        "final_ctx_est": 157320,
+        "peak_ctx_chars": 656790,
+        "final_ctx_chars": 656790,
+        "peak_ctx_est": 164197,
+        "final_ctx_est": 164197,
         "max_assistant_block_chars": 32100,
         "chars_per_token": 4,
         "model": "MiniMax-M3.1-Flash",
         "models_turns": {
-          "MiniMax-M3.1-Flash": 97
+          "MiniMax-M3.1-Flash": 97,
+          "glm-5.3-flash": 18
         },
-        "provider": "minimax",
-        "tokens_reported": 9599305,
-        "final_turn_tokens": 175355,
+        "provider": "zai",
+        "tokens_reported": 11901802,
+        "final_turn_tokens": 138714,
         "pathological": false,
         "month": "2026-11",
-        "cost_in": 0.026902,
-        "cost_out": 0.047418,
-        "cost_cr": 0.140114,
+        "cost_in": 0.047723,
+        "cost_out": 0.049775,
+        "cost_cr": 0.204883,
+        "cost_cw": 0.0,
+        "context_source": "pi",
+        "project": "--var-home-sasha-para-areas-dev-gh-charly-specodelic--"
+      },
+      {
+        "turns": 119,
+        "turns_no_usage": 0,
+        "chars_by_source": {
+          "user_text": 553,
+          "asst_text": 33976,
+          "asst_args": 114975,
+          "tool:read": 47601,
+          "asst_thinking": 120243,
+          "tool:bash": 170420,
+          "tool:write": 282,
+          "tool:edit": 1155,
+          "tool:ah_check": 12189
+        },
+        "big_results": 0,
+        "big_results_by_tool": {},
+        "compactions": 0,
+        "segment_count": 1,
+        "peak_ctx_chars": 501394,
+        "final_ctx_chars": 501394,
+        "peak_ctx_est": 125348,
+        "final_ctx_est": 125348,
+        "max_assistant_block_chars": 25434,
+        "chars_per_token": 4,
+        "model": "MiniMax-M3.1-Flash",
+        "models_turns": {
+          "MiniMax-M3.1-Flash": 119
+        },
+        "provider": "minimax",
+        "tokens_reported": 10773589,
+        "final_turn_tokens": 148253,
+        "pathological": false,
+        "month": "2026-11",
+        "cost_in": 0.024472,
+        "cost_out": 0.042401,
+        "cost_cr": 0.158097,
         "cost_cw": 0.0,
         "context_source": "pi",
         "project": "--var-home-sasha-para-areas-dev-gh-charly-specodelic--"
@@ -152437,15 +152789,15 @@
   "multitasking": {
     "description": "Proyectos distintos con actividad en la misma ventana. 'context_switches' cuenta cambios de proyecto entre requests consecutivos (puede inflarse por agentes paralelos en el mismo minuto).",
     "hourly": {
-      "total_active_hours": 1540,
-      "hours_with_multiple_projects": 959,
-      "pct_hours_multitasking": 62.3,
-      "avg_projects_per_active_hour": 2.87,
+      "total_active_hours": 1551,
+      "hours_with_multiple_projects": 963,
+      "pct_hours_multitasking": 62.1,
+      "avg_projects_per_active_hour": 2.86,
       "distribution": {
-        "1": 581,
+        "1": 588,
         "4+": 463,
-        "2": 271,
-        "3": 225
+        "2": 274,
+        "3": 226
       },
       "max_projects_in_one_hour": {
         "count": 14,
@@ -152650,10 +153002,10 @@
       ]
     },
     "daily": {
-      "total_active_days": 236,
-      "days_with_multiple_projects": 160,
-      "pct_days_multitasking": 67.8,
-      "avg_projects_per_active_day": 4.44,
+      "total_active_days": 237,
+      "days_with_multiple_projects": 161,
+      "pct_days_multitasking": 67.9,
+      "avg_projects_per_active_day": 4.43,
       "top_10_days": [
         {
           "date": "2026-10-07",
@@ -152902,8 +153254,8 @@
       ]
     },
     "context_switches": {
-      "total": 157940,
-      "avg_per_active_day": 669.2,
+      "total": 158135,
+      "avg_per_active_day": 667.2,
       "max_in_one_day": 11161,
       "top_10_days": {
         "2026-07-28": 11161,
@@ -153255,7 +153607,8 @@
       "2026-11-19",
       "2026-11-20",
       "2026-11-21",
-      "2026-11-22"
+      "2026-11-22",
+      "2026-11-23"
     ],
     "matrix": {
       "charly-specodelic": [
@@ -153593,7 +153946,8 @@
         0,
         0,
         298,
-        0
+        0,
+        137
       ],
       "ak-catitas": [
         0,
@@ -153930,6 +154284,7 @@
         0,
         0,
         4,
+        0,
         0
       ],
       "charly-testaruda": [
@@ -154250,6 +154605,7 @@
         0,
         0,
         214,
+        0,
         0,
         0,
         0,
@@ -154604,6 +154960,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-gently": [
@@ -154925,6 +155282,7 @@
         0,
         824,
         415,
+        0,
         0,
         0,
         0,
@@ -155278,7 +155636,8 @@
         0,
         0,
         567,
-        0
+        0,
+        367
       ],
       "charly-wai": [
         0,
@@ -155615,6 +155974,7 @@
         0,
         0,
         197,
+        0,
         0
       ],
       "charly-espectacular": [
@@ -155947,6 +156307,7 @@
         0,
         293,
         8,
+        0,
         0,
         0,
         0,
@@ -156289,6 +156650,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "sk-Testimonial-jl": [
@@ -156564,6 +156926,7 @@
         0,
         0,
         108,
+        0,
         0,
         0,
         0,
@@ -156963,6 +157326,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-wild": [
@@ -157295,6 +157659,7 @@
         0,
         0,
         47,
+        0,
         0,
         0,
         0,
@@ -157637,6 +158002,7 @@
         346,
         4,
         171,
+        0,
         0
       ],
       "charly": [
@@ -157974,6 +158340,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-coffee": [
@@ -158301,6 +158668,7 @@
         0,
         0,
         98,
+        0,
         0,
         0,
         0,
@@ -158648,6 +159016,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-genesis": [
@@ -158985,6 +159354,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "sk-REPLy-jl": [
@@ -159276,6 +159646,7 @@
         0,
         0,
         246,
+        0,
         0,
         0,
         0,
@@ -159659,6 +160030,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-dulce-de-leche": [
@@ -159996,6 +160368,7 @@
         0,
         0,
         140,
+        0,
         0
       ],
       "sk-Tray-jl": [
@@ -160221,6 +160594,7 @@
         0,
         0,
         152,
+        0,
         0,
         0,
         0,
@@ -160670,6 +161044,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "sk-titi": [
@@ -160961,6 +161336,7 @@
         0,
         0,
         172,
+        0,
         0,
         0,
         0,
@@ -161344,7 +161720,346 @@
         0,
         0,
         0,
+        0,
         0
+      ],
+      "charly-kaya": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        779,
+        1095,
+        931,
+        515,
+        0,
+        306,
+        209,
+        710
       ],
       "ak-el-mundo-ha-vivido-equivocado": [
         0,
@@ -161679,6 +162394,7 @@
         0,
         0,
         87,
+        0,
         0,
         0,
         0
@@ -162018,344 +162734,8 @@
         0,
         0,
         0,
+        0,
         0
-      ],
-      "charly-kaya": [
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        779,
-        1095,
-        931,
-        515,
-        0,
-        306,
-        209
       ],
       "charly-jams": [
         0,
@@ -162673,6 +163053,7 @@
         428,
         64,
         675,
+        0,
         0,
         0,
         0,
@@ -163029,6 +163410,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-sad": [
@@ -163366,6 +163748,7 @@
         582,
         0,
         606,
+        0,
         0
       ],
       "charly-evallerina": [
@@ -163677,6 +164060,7 @@
         0,
         0,
         558,
+        0,
         0,
         0,
         0,
@@ -164040,6 +164424,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "sk-cositos": [
@@ -164330,6 +164715,7 @@
         0,
         0,
         214,
+        0,
         0,
         0,
         0,
@@ -164714,6 +165100,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "ak-suipacha": [
@@ -165051,6 +165438,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-miblioteca": [
@@ -165219,6 +165607,7 @@
         0,
         0,
         227,
+        0,
         0,
         0,
         0,
@@ -165725,6 +166114,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "ak-presentations": [
@@ -166054,6 +166444,7 @@
         557,
         285,
         81,
+        0,
         0,
         0,
         0,
@@ -166399,6 +166790,7 @@
         495,
         0,
         0,
+        0,
         0
       ],
       "charly-canticos": [
@@ -166734,6 +167126,7 @@
         0,
         0,
         63,
+        0,
         0,
         0,
         0
@@ -167073,6 +167466,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-fabbro": [
@@ -167192,6 +167586,7 @@
         0,
         38,
         60,
+        0,
         0,
         0,
         0,
@@ -167747,6 +168142,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-atril": [
@@ -167892,6 +168288,7 @@
         0,
         0,
         4,
+        0,
         0,
         0,
         0,
@@ -168421,6 +168818,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-specodelic-gre-wt": [
@@ -168714,6 +169112,7 @@
         0,
         673,
         162,
+        0,
         0,
         0,
         0,
@@ -169095,6 +169494,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-ruta": [
@@ -169220,6 +169620,7 @@
         195,
         519,
         8,
+        0,
         0,
         0,
         0,
@@ -169769,6 +170170,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "sk-poco": [
@@ -170068,6 +170470,7 @@
         0,
         0,
         75,
+        0,
         0,
         0,
         0,
@@ -170443,6 +170846,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-superficies": [
@@ -170582,6 +170986,7 @@
         102,
         6,
         2,
+        0,
         0,
         0,
         0,
@@ -171117,6 +171522,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-microdancing": [
@@ -171389,6 +171795,7 @@
         96,
         0,
         54,
+        0,
         0,
         0,
         0,
@@ -171791,6 +172198,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-nayra": [
@@ -171904,6 +172312,7 @@
         59,
         0,
         128,
+        0,
         0,
         0,
         0,
@@ -172465,6 +172874,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-michael": [
@@ -172724,6 +173134,7 @@
         0,
         226,
         209,
+        0,
         0,
         0,
         0,
@@ -173139,6 +173550,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-fck": [
@@ -173476,6 +173888,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-rizomas": [
@@ -173539,6 +173952,7 @@
         12,
         8,
         5,
+        0,
         0,
         0,
         0,
@@ -174150,6 +174564,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-tambor-wt-y9d4": [
@@ -174451,6 +174866,7 @@
         0,
         0,
         199,
+        0,
         0,
         0,
         0,
@@ -174824,6 +175240,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-genesis-git-epic": [
@@ -175161,6 +175578,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "sk-clojure-tutor": [
@@ -175300,6 +175718,7 @@
         0,
         154,
         22,
+        0,
         0,
         0,
         0,
@@ -175835,6 +176254,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-tambor-.worktrees-x1": [
@@ -176128,6 +176548,7 @@
         0,
         0,
         165,
+        0,
         0,
         0,
         0,
@@ -176509,6 +176930,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "ak-hipervinculos": [
@@ -176846,6 +177268,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-tambor-.worktrees-c0": [
@@ -177138,6 +177561,7 @@
         0,
         0,
         149,
+        0,
         0,
         0,
         0,
@@ -177520,6 +177944,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-tambor-.worktrees-epi": [
@@ -177857,6 +178282,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-tambor-.worktrees-k5": [
@@ -178149,6 +178575,7 @@
         0,
         0,
         138,
+        0,
         0,
         0,
         0,
@@ -178531,6 +178958,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-tambor-.worktrees-r2": [
@@ -178868,6 +179296,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-tambor-.worktrees-t3": [
@@ -179160,6 +179589,7 @@
         0,
         0,
         121,
+        0,
         0,
         0,
         0,
@@ -179542,6 +179972,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "sk-cosito": [
@@ -179636,6 +180067,7 @@
         0,
         0,
         44,
+        0,
         0,
         0,
         0,
@@ -180216,6 +180648,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-tambor-.worktrees-k1": [
@@ -180508,6 +180941,7 @@
         0,
         0,
         106,
+        0,
         0,
         0,
         0,
@@ -180890,6 +181324,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-tambor-wt-y9d10": [
@@ -181227,6 +181662,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-tRAGar": [
@@ -181370,6 +181806,7 @@
         0,
         0,
         7,
+        0,
         0,
         0,
         0,
@@ -181901,6 +182338,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-bichos": [
@@ -182016,6 +182454,7 @@
         45,
         0,
         18,
+        0,
         0,
         0,
         0,
@@ -182575,6 +183014,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-wt-bz4": [
@@ -182877,6 +183317,7 @@
         0,
         0,
         89,
+        0,
         0,
         0,
         0,
@@ -183249,6 +183690,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-tambor-.worktrees-c5": [
@@ -183541,6 +183983,7 @@
         0,
         0,
         88,
+        0,
         0,
         0,
         0,
@@ -183923,6 +184366,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-tambor-.worktrees-r3": [
@@ -184216,6 +184660,7 @@
         0,
         0,
         82,
+        0,
         0,
         0,
         0,
@@ -184597,6 +185042,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-tambor-.worktrees-x3": [
@@ -184890,6 +185336,7 @@
         0,
         0,
         80,
+        0,
         0,
         0,
         0,
@@ -185271,6 +185718,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-tambor-.worktrees-k4": [
@@ -185563,6 +186011,7 @@
         0,
         0,
         77,
+        0,
         0,
         0,
         0,
@@ -185945,6 +186394,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "ak-arm-b-types-machine": [
@@ -186282,6 +186732,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-espectacular-git-epic": [
@@ -186576,6 +187027,7 @@
         0,
         0,
         73,
+        0,
         0,
         0,
         0,
@@ -186956,6 +187408,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-wt-bz2": [
@@ -187293,6 +187746,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-tambor-wt-y9d6": [
@@ -187594,6 +188048,7 @@
         0,
         0,
         61,
+        0,
         0,
         0,
         0,
@@ -187967,6 +188422,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-tambor-.worktrees-k6": [
@@ -188259,6 +188715,7 @@
         0,
         0,
         54,
+        0,
         0,
         0,
         0,
@@ -188641,6 +189098,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "ak-matadero-series-ct-catlab-runs-2026-11-02-kata09-local-attempt001": [
@@ -188959,6 +189417,7 @@
         0,
         0,
         51,
+        0,
         0,
         0,
         0,
@@ -189315,6 +189774,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-paseos": [
@@ -189571,6 +190031,7 @@
         0,
         0,
         47,
+        0,
         0,
         0,
         0,
@@ -189989,6 +190450,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-tambor-wt-y9d9": [
@@ -190290,6 +190752,7 @@
         0,
         0,
         47,
+        0,
         0,
         0,
         0,
@@ -190663,6 +191126,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-dont-git-epic": [
@@ -190957,6 +191421,7 @@
         0,
         0,
         45,
+        0,
         0,
         0,
         0,
@@ -191337,6 +191802,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-testaruda-git-epic": [
@@ -191631,6 +192097,7 @@
         0,
         0,
         41,
+        0,
         0,
         0,
         0,
@@ -192011,6 +192478,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "ak-catitas-catitas": [
@@ -192348,6 +192816,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-crua": [
@@ -192648,6 +193117,7 @@
         0,
         0,
         28,
+        0,
         0,
         0,
         0,
@@ -193022,6 +193492,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "ak-borradores": [
@@ -193112,6 +193583,7 @@
         0,
         0,
         1,
+        0,
         0,
         0,
         0,
@@ -193696,6 +194168,7 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "charly-sunset-hitl": [
@@ -194008,6 +194481,7 @@
         0,
         0,
         7,
+        0,
         0,
         0,
         0,
@@ -194370,10 +194844,12 @@
         0,
         0,
         0,
+        0,
         0
       ],
       "ak-la-vida-privada-de-los-pensamientos": [
         1,
+        0,
         0,
         0,
         0,
@@ -262905,18 +263381,18 @@
       "project": "charly-tambor",
       "day": "2026-11-21",
       "start": "2026-11-21T13:38:48.888000+00:00",
-      "end": "2026-11-22T01:10:53.831000+00:00",
-      "crosses_midnight": false,
+      "end": "2026-11-24T00:48:39.763000+00:00",
+      "crosses_midnight": true,
       "source": "omp",
       "model": "mixed",
-      "n_interactions": 458,
-      "cost_effective": 2.0535781,
-      "cost_real": 2.0535781,
+      "n_interactions": 825,
+      "cost_effective": 5.86136822,
+      "cost_real": 5.86136822,
       "cost_reason": null,
       "tokens": {
-        "in": 1410434,
-        "out": 194671,
-        "cache_read": 58759936,
+        "in": 2606018,
+        "out": 366753,
+        "cache_read": 176840320,
         "cache_write": 0
       }
     },
@@ -262968,18 +263444,102 @@
       "project": "charly-kaya",
       "day": "2026-11-22",
       "start": "2026-11-22T17:48:28.263000+00:00",
-      "end": "2026-11-22T18:17:24.437000+00:00",
-      "crosses_midnight": false,
+      "end": "2026-11-23T21:47:20.176000+00:00",
+      "crosses_midnight": true,
       "source": "omp",
-      "model": "MiniMax-M3.1-Flash",
-      "n_interactions": 128,
-      "cost_effective": 0.38680974,
-      "cost_real": 0.38680974,
+      "model": "mixed",
+      "n_interactions": 619,
+      "cost_effective": 6.03448605,
+      "cost_real": 6.03448605,
       "cost_reason": null,
       "tokens": {
-        "in": 255138,
-        "out": 124572,
-        "cache_read": 18253056,
+        "in": 5184102,
+        "out": 622206,
+        "cache_read": 236233978,
+        "cache_write": 0
+      }
+    },
+    {
+      "session_id": "2026-11-23T21-47-32-707Z_01a20a60-e7e3-70c6-98f7-6da898b6f638",
+      "session_id_fallback": false,
+      "project": "charly-kaya",
+      "day": "2026-11-23",
+      "start": "2026-11-23T21:47:38.128000+00:00",
+      "end": "2026-11-23T23:35:02.437000+00:00",
+      "crosses_midnight": false,
+      "source": "omp",
+      "model": "glm-5.3-flash",
+      "n_interactions": 209,
+      "cost_effective": 1.04821514,
+      "cost_real": 1.04821514,
+      "cost_reason": null,
+      "tokens": {
+        "in": 298022,
+        "out": 155656,
+        "cache_read": 30856128,
+        "cache_write": 0
+      }
+    },
+    {
+      "session_id": "2026-11-23T23-38-02-958Z_01a20ac6-134e-71e5-ac53-f83d6246e897",
+      "session_id_fallback": false,
+      "project": "charly-kaya",
+      "day": "2026-11-23",
+      "start": "2026-11-23T23:38:12.171000+00:00",
+      "end": "2026-11-23T23:43:56.040000+00:00",
+      "crosses_midnight": false,
+      "source": "omp",
+      "model": "glm-5.3-flash",
+      "n_interactions": 10,
+      "cost_effective": 0.0124586,
+      "cost_real": 0.0124586,
+      "cost_reason": null,
+      "tokens": {
+        "in": 28638,
+        "out": 6937,
+        "cache_read": 156480,
+        "cache_write": 0
+      }
+    },
+    {
+      "session_id": "2026-11-21T19-04-25-540Z_01a1ff7e-d8c3-75bc-911d-6e4c3719cf40",
+      "session_id_fallback": false,
+      "project": "charly-specodelic",
+      "day": "2026-11-23",
+      "start": "2026-11-23T22:00:31.109000+00:00",
+      "end": "2026-11-23T22:06:40.293000+00:00",
+      "crosses_midnight": false,
+      "source": "zai",
+      "model": "glm-5.3-flash",
+      "n_interactions": 18,
+      "cost_effective": 0.08794698,
+      "cost_real": 0.08794698,
+      "cost_reason": null,
+      "tokens": {
+        "in": 138808,
+        "out": 4713,
+        "cache_read": 2158976,
+        "cache_write": 0
+      }
+    },
+    {
+      "session_id": "2026-11-23T22-09-34-688Z_01a20a75-13de-773a-a601-f2033a9acadb",
+      "session_id_fallback": false,
+      "project": "charly-specodelic",
+      "day": "2026-11-23",
+      "start": "2026-11-23T22:09:38.340000+00:00",
+      "end": "2026-11-23T23:04:10.122000+00:00",
+      "crosses_midnight": false,
+      "source": "minimax",
+      "model": "MiniMax-M3.1-Flash",
+      "n_interactions": 119,
+      "cost_effective": 0.22496919,
+      "cost_real": 0.22496919,
+      "cost_reason": null,
+      "tokens": {
+        "in": 163145,
+        "out": 70668,
+        "cache_read": 10539776,
         "cache_write": 0
       }
     }
@@ -268738,6 +269298,17 @@
           "cache_read": 36739712,
           "cache_write": 0
         }
+      },
+      "2026-11-23": {
+        "interactions": 710,
+        "cost_effective": 6.70835005,
+        "cost_real": 6.70835005,
+        "tokens": {
+          "in": 5255624,
+          "out": 660227,
+          "cache_read": 248993530,
+          "cache_write": 0
+        }
       }
     },
     "charly-livin": {
@@ -270427,6 +270998,17 @@
           "cache_read": 26199808,
           "cache_write": 0
         }
+      },
+      "2026-11-23": {
+        "interactions": 137,
+        "cost_effective": 0.31291617,
+        "cost_real": 0.31291617,
+        "tokens": {
+          "in": 301953,
+          "out": 75381,
+          "cache_read": 12698752,
+          "cache_write": 0
+        }
       }
     },
     "charly-specodelic-gre-wt": {
@@ -271099,6 +271681,17 @@
           "in": 1548381,
           "out": 261237,
           "cache_read": 65512896,
+          "cache_write": 0
+        }
+      },
+      "2026-11-23": {
+        "interactions": 367,
+        "cost_effective": 3.80779012,
+        "cost_real": 3.80779012,
+        "tokens": {
+          "in": 1195584,
+          "out": 172082,
+          "cache_read": 118080384,
           "cache_write": 0
         }
       }
@@ -277084,13 +277677,13 @@
         }
       },
       "2026-11": {
-        "interactions": 10211,
-        "cost_effective": 73.76642005729988,
-        "cost_real": 73.76642005729988,
+        "interactions": 10348,
+        "cost_effective": 74.07933622729989,
+        "cost_real": 74.07933622729989,
         "tokens": {
-          "in": 20388916,
-          "out": 5963071,
-          "cache_read": 1520212916,
+          "in": 20690869,
+          "out": 6038452,
+          "cache_read": 1532911668,
           "cache_write": 242548
         }
       }
@@ -277191,13 +277784,13 @@
         }
       },
       "2026-11": {
-        "interactions": 3872,
-        "cost_effective": 46.79659573330002,
-        "cost_real": 46.79659573330002,
+        "interactions": 4239,
+        "cost_effective": 50.604385853300045,
+        "cost_real": 50.604385853300045,
         "tokens": {
-          "in": 9453148,
-          "out": 2033332,
-          "cache_read": 538290176,
+          "in": 10648732,
+          "out": 2205414,
+          "cache_read": 656370560,
           "cache_write": 0
         }
       }
@@ -278048,13 +278641,13 @@
     },
     "charly-kaya": {
       "2026-11": {
-        "interactions": 3835,
-        "cost_effective": 24.946166520000006,
-        "cost_real": 24.946166520000006,
+        "interactions": 4545,
+        "cost_effective": 31.65451657000004,
+        "cost_real": 31.65451657000004,
         "tokens": {
-          "in": 7419637,
-          "out": 1909201,
-          "cache_read": 740750592,
+          "in": 12675261,
+          "out": 2569428,
+          "cache_read": 989744122,
           "cache_write": 0
         }
       }
@@ -279276,8 +279869,8 @@
         "cost_effective": 22.03809087
       },
       "MiniMax-M3.1-Flash": {
-        "interactions": 163,
-        "cost_effective": 0.48297492
+        "interactions": 282,
+        "cost_effective": 0.70794411
       },
       "anthropic/claude-haiku-5.5": {
         "interactions": 48,
@@ -279292,8 +279885,8 @@
         "cost_effective": 2.8531332
       },
       "glm-5.3-flash": {
-        "interactions": 348,
-        "cost_effective": 1.4317634
+        "interactions": 366,
+        "cost_effective": 1.51971038
       },
       "gpt-6-astra": {
         "interactions": 105,
@@ -279408,8 +280001,8 @@
         "cost_effective": 7.27537164
       },
       "glm-5.3-flash": {
-        "interactions": 669,
-        "cost_effective": 3.41969678
+        "interactions": 1036,
+        "cost_effective": 7.2274869
       },
       "google/gemini-2.0-flash-lite-001": {
         "interactions": 1,
@@ -280060,16 +280653,16 @@
     },
     "charly-kaya": {
       "MiniMax-M3.1-Flash": {
-        "interactions": 333,
-        "cost_effective": 1.11475674
+        "interactions": 574,
+        "cost_effective": 3.52455969
       },
       "deepseek-v4.1-flash-1017": {
         "interactions": 2384,
         "cost_effective": 18.15540162
       },
       "glm-5.3-flash": {
-        "interactions": 766,
-        "cost_effective": 4.54174594
+        "interactions": 1235,
+        "cost_effective": 8.84029304
       },
       "z-ai/glm-5.3-flash": {
         "interactions": 352,
@@ -280135,7 +280728,7 @@
     "distinct_projects_per_hour": {
       "measure": "parallel-agent",
       "peak": 14,
-      "avg": 2.87
+      "avg": 2.86
     },
     "peak_simultaneous_sessions": {
       "measure": "parallel-agent",
@@ -280144,18 +280737,18 @@
     },
     "project_switches_per_active_hour": {
       "measure": "human-context-switching",
-      "value": 102.56
+      "value": 101.96
     }
   },
   "filtered_out": {
-    "interactions": 17317,
+    "interactions": 18694,
     "cost_effective": 0.0,
     "by_tool": {
       "claude-cli": 16,
-      "pi": 10,
+      "pi": 12,
       "omp": 155
     },
-    "share": 0.0547
+    "share": 0.0586
   },
   "sessions_monthly": {
     "2025-12": {
@@ -280203,7 +280796,7 @@
       "with_agent": 0
     },
     "2026-11": {
-      "total": 374,
+      "total": 377,
       "with_agent": 0
     }
   },
@@ -281461,7 +282054,7 @@
         "charges_real": 0.0,
         "charges_provenance": "reported",
         "subscription_fee_implicit": 0.0,
-        "cost_effective": 23.05283406,
+        "cost_effective": 23.27780325,
         "fee_month_total": 0.0
       },
       "mistral": {
@@ -281475,7 +282068,7 @@
         "charges_real": 0.0,
         "charges_provenance": "reported",
         "subscription_fee_implicit": 0.0,
-        "cost_effective": 124.15408725,
+        "cost_effective": 134.67022742,
         "fee_month_total": 0.0
       },
       "openai": {
@@ -281503,7 +282096,7 @@
         "charges_real": 0.0,
         "charges_provenance": "reported",
         "subscription_fee_implicit": 0.0,
-        "cost_effective": 2.71015256,
+        "cost_effective": 2.79809954,
         "fee_month_total": 0.0
       }
     }
