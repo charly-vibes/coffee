@@ -1,0 +1,47 @@
+[pretender]
+mode = "tiered"
+languages = ["auto"]
+exclude = ["vendor/**", "node_modules/**", "**/*_generated.*"]
+
+[roles.test]
+paths = ["tests/**", "**/*_test.*", "spec/**"]
+
+[roles.library]
+paths = ["pkg/**", "lib/**"]
+
+[roles.script]
+paths = ["scripts/**", "examples/**"]
+
+[roles.generated]
+paths = ["**/*.pb.go", "**/*_generated.*"]
+
+[roles.vendor]
+paths = ["vendor/**", "node_modules/**"]
+
+[thresholds]
+cyclomatic_max = 8
+cognitive_max = 12
+function_lines_max = 25
+file_lines_max = 300
+nesting_max = 2
+params_max = 3
+abc_max = 25
+duplication_pct_max = 4
+void_mutators_max = 3
+mut_ratio_max = 0.3
+unwrap_max = 5
+bool_cluster_max = 3
+primitive_param_check = false
+inheritance_depth_max = 2
+
+[thresholds.test]
+cyclomatic_max = 2
+cognitive_max = 3
+function_lines_max = 60
+nesting_max = 2
+params_max = 2
+duplication_pct_max = 30
+min_assertions = 1
+mock_count_max = 5
+unwrap_max = 5
+lazy_cluster_min = 3

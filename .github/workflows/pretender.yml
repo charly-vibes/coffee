@@ -1,0 +1,33 @@
+name: Pretender
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  pretender:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Install Pretender
+        run: cargo install --git https://github.com/charly-vibes/pretender --locked pretender
+      - name: Run Pretender
+        id: pretender
+        continue-on-error: true
+        run: pretender check . --format=sarif --output=pretender.sarif
+      - name: Upload SARIF
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: pretender.sarif
+      - name: Append markdown report
+        if: steps.pretender.outcome == 'failure'
+        run: pretender report --format=markdown >> $GITHUB_STEP_SUMMARY
+      - name: Fail on Pretender findings
+        if: steps.pretender.outcome == 'failure'
+        run: exit 1
