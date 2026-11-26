@@ -1,0 +1,347 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "agent_metrics — métricas de comportamiento del agente",
+  "description": "Dataset del dashboard 'Comportamiento del agente' (scripts/agent-metrics-tracker.py). Series compactas de tareas para recalcular percentiles por ventana en el viz; provenances y cobertura por fuente explícitas.",
+  "type": "object",
+  "required": [
+    "metadata",
+    "days",
+    "sources",
+    "models",
+    "daily",
+    "tasks",
+    "monthly_tasks",
+    "repos",
+    "months"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "metadata": {
+      "type": "object",
+      "required": [
+        "date_range",
+        "task_definition",
+        "gap_cap_minutes",
+        "retry_window_minutes",
+        "provenance",
+        "coverage",
+        "reasons"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "date_range": {
+          "type": "object",
+          "required": [
+            "start",
+            "end"
+          ],
+          "properties": {
+            "start": {
+              "type": "string",
+              "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+            },
+            "end": {
+              "type": "string",
+              "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+            }
+          }
+        },
+        "first_task": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "last_task": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "task_definition": {
+          "type": "string",
+          "minLength": 20
+        },
+        "gap_cap_minutes": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "retry_window_minutes": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "config_source": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "provenance": {
+          "type": "object",
+          "required": [
+            "tasks",
+            "aborts",
+            "tool_errors",
+            "repos"
+          ],
+          "additionalProperties": {
+            "enum": [
+              "reported",
+              "derived",
+              "cached",
+              "missing",
+              "assumed"
+            ]
+          }
+        },
+        "coverage": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": [
+              "source",
+              "turn_level",
+              "abort_signal",
+              "sessions"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "source": {
+                "type": "string"
+              },
+              "turn_level": {
+                "type": "boolean"
+              },
+              "abort_signal": {
+                "type": "boolean"
+              },
+              "sessions": {
+                "type": [
+                  "integer",
+                  "null"
+                ]
+              },
+              "note": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            }
+          }
+        },
+        "reasons": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "days": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+      }
+    },
+    "sources": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "models": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "daily": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": [
+          "prompts",
+          "tasks",
+          "turns",
+          "agent_s"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "prompts": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "tasks": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "turns": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "agent_s": {
+            "type": "number",
+            "minimum": 0
+          },
+          "aborted": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "errors": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "tool_errors": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "retry": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      }
+    },
+    "tasks": {
+      "type": "object",
+      "description": "Series paralelas: day=índice en days, s=segundos ocupados, sp=segundos de reloj de la tarea, src/model=índices, f=bitmask (1 aborted, 2 error, 4 tool_error, 8 retry).",
+      "required": [
+        "day",
+        "s",
+        "sp",
+        "src",
+        "model",
+        "f"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "day": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "s": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "src": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "model": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "f": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "sp": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      }
+    },
+    "monthly_tasks": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": [
+          "tasks",
+          "p50_s",
+          "p90_s",
+          "sum_s"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "tasks": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "p50_s": {
+            "type": "number",
+            "minimum": 0
+          },
+          "p90_s": {
+            "type": "number",
+            "minimum": 0
+          },
+          "p99_s": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "minimum": 0
+          },
+          "sum_s": {
+            "type": "number",
+            "minimum": 0
+          }
+        }
+      }
+    },
+    "repos": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "name",
+          "first_commit",
+          "days_by_month",
+          "commits_by_month"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "first_commit": {
+            "type": "string",
+            "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+          },
+          "days_by_month": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "commits_by_month": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        }
+      }
+    },
+    "months": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

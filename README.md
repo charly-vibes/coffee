@@ -26,6 +26,8 @@ de los últimos meses.
 | `scripts/viz-index.py` | Genera `index.html`: entrada del sitio en Pages (estética 90s-corporate). Enlaza TODOS los dashboards publicados (fpa, guía, Gantt, contexto, ddl — guard anti-huérfanos en `tests/test_site_nav.py`). Deriva las cifras del marquee y la fecha de actualización del reporte, así el índice nunca queda stale. Se regenera en el deploy de CI. |
 | `scripts/viz-ctx.py` | Genera `data/context-dashboard.html`: dashboard de contexto de sesiones Pi (epic add-context-dashboard). Vistas: Distribución (histograma del pico + banda p50-p99 sobre el set limpio), Composición (share por fuente global y en sesiones >100k), Tiempo (mes×modelo, meses parciales con días FPA-041), Coste (split in/out/cache; claude-cli aparte con provenance *subscription*, sin suma combinada), Ley de crecimiento (scatter pico vs turnos con pendiente OLS) y Patologías (outliers con razón, FPA-008). SVG inline sin librerías, tabs + deep-link por hash, export CSV/SVG; `--check-docs` verifica el bloque CTX-DOCS del README. |
 | `scripts/update-readme-docs.py` | Refresca el bloque CHECK-DOCS del README con las cifras del reporte actual. Reutiliza `expected_doc_figures()` de `viz-fpa.py` (FPA-143) vía importlib — misma fuente que `--check-docs`, así el bloque nunca diverge. Lo usa el nightly; también a mano tras regenerar el reporte. |
+| `scripts/agent-metrics-tracker.py` | **Tracker de comportamiento del agente.** Lee turnos con timestamp de `~/.pi/agent/sessions` y `~/.claude/projects`, reconstruye *tareas* (un prompt abre tarea, el siguiente la cierra) y emite `data/agent_metrics.json` (schema `specs/agent-metrics.schema.json`): serie diaria (prompts, turnos, segundos de agente, abortos, errores, reintentos), series compactas por tarea para percentiles exactos por ventana, y panel de repos git (primer commit + días/commits por mes). Escanea `agent_behavior.repo_roots` del config (local, sin GITHUB_TOKEN). `--validate` valida contra el schema. |
+| `scripts/viz-agent.py` | Genera `data/agent-dashboard.html`: **Comportamiento del agente**, las métricas del talk de Ronacher con el mismo selector de período del dashboard FPA (todo/YTD/año/trimestre/mes/rango contiguo pre-calculados en Python; el JS solo elige). Muestra prompts/día, duración de tarea P50/P90/P99, tiempo activo del agente (y horas de reloj), abortos/errores/reintentos, por modelo, repos creados/mantenidos y escala de automatización, con provenance por cifra y cobertura por fuente. |
 | `scripts/nightly-update.sh` | **Job nocturno**: regenera reporte + Gantt + dashboard de contexto + dashboard FPA + guía + índice, sincroniza el CHECK-DOCS del README y, si hay cambios, commitea y pushea (deploy a Pages sale del push vía CI). Corre vía systemd user timer `coffee-nightly.timer` (03:30, `Persistent=true`). `--no-push` para probar sin tocar git. |
 
 ### Datos generados
@@ -54,6 +56,8 @@ los cuida `tests/test_site_nav.py`.
 | `data/usage_hourly.json` | 399K | Datos hora a hora de v2 (sin filtrar). |
 | `data/daily_summary.json` | 33K | Resumen diario v2. |
 | `data/tool_timeline.json` | 1.6K | Timeline de herramientas (primera/última vez). |
+| `data/agent_metrics.json` | ~300K | **Dataset del comportamiento del agente.** `daily` (prompts/turnos/segundos/abortos/errores/reintentos), `tasks` (series paralelas `day`/`s`/`sp`/`src`/`model`/`f` para percentiles exactos), `monthly_tasks`, `repos` (días y commits por mes) y `metadata.coverage` por fuente (pi, claude-cli con y sin señal de aborto; amp/omp/codex fuera con razón). |
+| `data/agent-dashboard.html` | ~120K | **Dashboard Comportamiento del agente.** Métricas del talk de Ronacher por período (prompts/día, P90 de tarea, horas de agente, abortos/reintentos, repos creados/mantenidos, escala) + detalle mensual, tabla por modelo y cobertura de fuentes. En <https://charly-vibes.github.io/coffee/data/agent-dashboard.html>. |
 | `data/ddl_effect.json` | 92K | **Efecto del toolset ddl.** Panel repo × mes (adopción, dosis, recovery, latencia, CI, proxies git, ah findings) + ITS/DiD/dosis-respuesta con provenance por cifra (coffe-q9z). |
 | `data/ddl-dashboard.html` | 73K | **Dashboard ddl.** 6 vistas (adopción, dosis-respuesta, pre/post+DiD, lazo de feedback, errores, calidad) + disclosure de confusores (coffe-31l..46h). En <https://charly-vibes.github.io/coffee/data/ddl-dashboard.html>. |
 
@@ -164,6 +168,38 @@ el parámetro dominante: con 0% / 10% / 100% la banda total es
 mismo método recomputado con cache factor 0.0 y 1.0 — y el total del
 periodo con banda (33.5 kWh nominal, 17.7–175.2 en el dataset
 congelado).
+
+### Comportamiento del agente (add-agent-behavior-dashboard)
+
+Métricas del talk *Build the Workshop Before the Software Factory* (Armin
+Ronacher) sobre los logs locales, con selector de período pre-calculado:
+
+- **Tarea** = un prompt de usuario y los turnos que dispara hasta el prompt
+  siguiente. El tiempo del agente suma los turnos (`durationMs` del log, o el
+  gap desde el evento previo, con tope `gap_cap_minutes` = 30 para no contar
+  inactividad humana). Se emite además el tiempo de reloj de la tarea
+  (`sp`, tope `max_task_minutes`).
+- **Pushback**: abortos (`stopReason: aborted`) y errores (`stopReason:
+  error`) por cada 100 tareas, más **reintentos** (prompt que sigue a una
+  tarea que terminó en fallo dentro de `retry_window_minutes`) por cada 100
+  prompts. claude-cli no escribe stopReason: sus abortos son *missing* con
+  razón, nunca 0.
+- **Prompts/día**: prompts de usuario (no interacciones de API, que incluyen
+  tool calls) por día activo y por día calendario.
+- **Repos**: creados = primer commit dentro de la ventana; mantenidos = >5
+  días con commit en la ventana (`min_commit_days`); "vuelven" = además
+  commits en ≥2 meses distintos (`min_returning_months`). Fuente: `git log`
+  local de `agent_behavior.repo_roots` — no requiere GITHUB_TOKEN.
+- **Cobertura declarada**: pi (turnos + abortos, sesiones on-disk desde
+  2026-04), claude-cli (turnos, sin señal de aborto), amp/omp/codex fuera del
+  cálculo de tareas con la razón en `metadata.coverage`. Los forks de pi se
+  deduplican por id de sesión (se toma el archivo más largo).
+
+Las ventanas (todo, YTD, año, trimestre, mes y todo rango contiguo ≥2 meses)
+se calculan en Python con percentiles exactos sobre las tareas de la ventana
+— nunca promediando P90 mensuales. Esquema en
+`specs/agent-metrics.schema.json`; tests en `tests/test_agent_metrics.py` y
+`tests/test_viz_agent.py` (el JS se ejecuta en node con stub de DOM).
 
 ### Efecto del toolset ddl (add-ddl-effectiveness-analysis, coffe-zx5)
 

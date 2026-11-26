@@ -125,6 +125,10 @@ TEMPLATE = """<!DOCTYPE html>
           <span class="desc">Pico de contexto por sesión: histograma, percentiles, composición, costos, patologías</span></td>
     </tr>
     <tr>
+      <td><a href="data/agent-dashboard.html">Comportamiento del agente</a><br>
+          <span class="desc">Las métricas del talk de Ronacher por período: prompts/día, duración de tarea P90, tiempo activo, abortos, repos creados y mantenidos</span></td>
+    </tr>
+    <tr>
       <td><a href="data/ddl-dashboard.html">Efecto del toolset DDL</a><br>
           <span class="desc">Adopción, dosis-respuesta, pre/post con DiD e ITS, lazo de feedback y calidad</span></td>
     </tr>

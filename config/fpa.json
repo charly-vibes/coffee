@@ -377,5 +377,17 @@
       "turu": "charly-vibes/whisper",
       "ah": "charly-vibes/espectacular"
     }
+  },
+  "agent_behavior": {
+    "gap_cap_minutes": 30,
+    "retry_window_minutes": 5,
+    "max_task_minutes": 240,
+    "repo_roots": [
+      "~/para/areas/dev/gh"
+    ],
+    "repo_max_depth": 3,
+    "min_commit_days": 5,
+    "min_returning_months": 2,
+    "bulk_day_interactions": 5000
   }
 }

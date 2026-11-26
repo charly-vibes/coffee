@@ -39,6 +39,11 @@ fi
 FORCE_FLAG=""
 [ "${TRACKER_FORCE:-0}" = "1" ] && FORCE_FLAG="--force"
 python3 scripts/usage-tracker.py $FORCE_FLAG
+# agent-metrics: métricas del talk (tareas desde turnos con timestamp, repos
+# desde git local) tras el usage-tracker (usa su date_range y el volumen de
+# API del reporte). viz-agent es derivado, nunca fuente.
+python3 scripts/agent-metrics-tracker.py --validate
+python3 scripts/viz-agent.py
 # ddl-effect: tracker tras usage-tracker (consume usage_report_v3.json),
 # viz tras tracker (el dashboard es derivado, nunca fuente). Sin gh/terapia
 # cache degrada a provenance missing — el nightly no requiere red.
