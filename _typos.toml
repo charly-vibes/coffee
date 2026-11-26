@@ -119,6 +119,11 @@
 # coffe-a31.2
 "regenere" = "regenere"
 
+# spike model-cost-estimate-v0 (coffe-dnx.10)
+"proporcion" = "proporcion"
+"sesion" = "sesion"
+"barrer" = "barrer"
+
 # IDs del repo dentro de prosa (`coffe-nly1`): el token suelto `nly` solo
 # se permite en markdown; en código sigue detectándose el typo only→nly.
 [type.md.extend-words]
