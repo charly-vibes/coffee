@@ -22,7 +22,7 @@ spec = importlib.util.spec_from_file_location("viz_agent", REPO / "scripts" / "v
 va = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(va)
 
-MONTHS = ["2026-04", "2026-05", "2026-06", "2026-07"]
+MONTHS = ["2026-04", "2026-05", "2026-06", "2026-07", "2026-08"]
 
 
 def metrics_fixture():
@@ -42,6 +42,8 @@ def metrics_fixture():
                  "abort_signal": False, "sessions": 2, "note": None}],
             "reasons": {"abort_signal": "solo pi"},
             "min_commit_days": 5, "min_returning_months": 2,
+            "timezone": "-03", "orphan_turns": 3,
+            "preamble_prompts_skipped": 2, "repo_roots_missing": [],
         },
         "days": ["2026-04-02", "2026-05-10", "2026-06-15", "2026-07-20"],
         "sources": ["pi"],
@@ -60,7 +62,6 @@ def metrics_fixture():
         "tasks": {"day": [0, 1, 2, 2, 3], "s": [60, 120, 100, 200, 30],
                   "sp": [70, 150, 120, 400, 40], "src": [0, 0, 0, 0, 0],
                   "model": [0, 1, 0, 1, 0], "f": [0, 1, 0, 8, 0]},
-        "monthly_tasks": {},
         "repos": [
             {"name": "viejo", "first_commit": "2025-01-01",
              "days_by_month": {"2025-01": 1, "2026-05": 6},
@@ -125,14 +126,18 @@ class ModelTest(unittest.TestCase):
         self.assertEqual(v["p90_s"], va.pctl(secs, .9))
         self.assertEqual(v["prompts"], 2)
 
-    def test_ventana_sin_tareas_da_null_con_razon_implicita(self):
-        v = self.model["views"]["month:2026-04"]
-        self.assertEqual(v["tasks"], 1)
-        self.assertIsNotNone(v["p90_s"])
-        # mes sin tareas: el modelo expone None (el JS pinta n/a con razón)
-        v2 = va._by_model({"model": [], "s": [], "sp": [], "f": [], "day": []},
-                          [], ["m1"])
-        self.assertEqual(v2, [])
+    def test_ventana_sin_tareas_expone_null(self):
+        v = self.model["views"]["month:2026-08"]
+        self.assertEqual(v["tasks"], 0)
+        self.assertIsNone(v["p90_s"])
+        self.assertIsNone(v["prompts_per_active_day"])
+        self.assertEqual(v["by_model"], [])
+
+    def test_meta_declara_alcance_real_y_tz(self):
+        m = self.model["meta"]
+        self.assertEqual(m["first_task"], "2026-04-02")
+        self.assertEqual(m["last_task"], "2026-07-20")
+        self.assertEqual(m["timezone"], "-03")
 
     def test_horas_de_agente_por_dia_activo(self):
         v = self.model["views"]["all"]
@@ -177,6 +182,25 @@ class ModelTest(unittest.TestCase):
         self.assertEqual([r["tasks"] for r in rows], [3, 2])
 
 
+class DocsGuardTest(unittest.TestCase):
+    def test_update_y_check_docs_sobre_un_readme_temporal(self):
+        import tempfile
+        model = va.build_model(metrics_fixture(), report_fixture())
+        with tempfile.NamedTemporaryFile("w", suffix=".md", delete=False) as fh:
+            fh.write("# doc\n\n" + va.DOC_BEGIN + "\n- viejo: 1\n"
+                     + va.DOC_END + "\n")
+            path = fh.name
+        try:
+            va.update_docs(model, path)
+            self.assertEqual(va.check_docs(model, path), [])
+            drifted = Path(path).read_text().replace(
+                va.DOC_END, "- cifra inventada: 999\n" + va.DOC_END)
+            Path(path).write_text(drifted)
+            self.assertTrue(va.check_docs(model, path))
+        finally:
+            Path(path).unlink(missing_ok=True)
+
+
 class RenderTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -199,6 +223,57 @@ class RenderTest(unittest.TestCase):
         self.assertIn("claude-cli", self.html)
         self.assertIn("1:1", self.html)
         self.assertIn("talk:", self.html)
+        self.assertIn("Turnos sin prompt previo", self.html)
+
+    def _run_node(self, hashv):
+        import tempfile
+        raw = re.search(r'id="agent-model">(.*?)</script>', self.html, re.S).group(1)
+        js = self.html.rsplit("<script>", 1)[1].split("</script>", 1)[0]
+        shim = """
+const MODEL = %s;
+const els = {};
+function el(id) {
+  if (!els[id]) els[id] = {id: id, textContent: "", innerHTML: "",
+                           value: "", addEventListener: function () {}};
+  return els[id];
+}
+el("agent-model").textContent = JSON.stringify(MODEL);
+globalThis.document = {getElementById: el};
+globalThis.window = {location: {hash: "%s", href: "http://x/a.html"},
+                     addEventListener: function () {}};
+globalThis.history = {replaceState: function () {}};
+""" % (raw, hashv)
+        tail = """
+process.stdout.write(JSON.stringify({
+  sel: els["period-select"].value, kpis: els.kpis.innerHTML,
+  monthly: els.monthly.innerHTML, model: els["by-model"].innerHTML,
+  charts: els["chart-p90"].innerHTML
+}));
+"""
+        with tempfile.NamedTemporaryFile("w", suffix=".mjs", delete=False) as fh:
+            fh.write(shim + js + tail)
+            path = fh.name
+        try:
+            proc = subprocess.run(["node", path], capture_output=True, text=True,
+                                  timeout=60)
+        finally:
+            Path(path).unlink(missing_ok=True)
+        self.assertEqual(proc.returncode, 0, proc.stderr[-2000:])
+        return json.loads(proc.stdout)
+
+    @unittest.skipUnless(shutil.which("node"), "node no instalado")
+    def test_ventana_vacia_no_muestra_null(self):
+        out = self._run_node("#month:2026-08")
+        self.assertEqual(out["sel"], "month:2026-08")
+        self.assertNotIn("null", out["kpis"])
+        self.assertIn("sin tareas en la ventana", out["kpis"])
+        self.assertIn("sin datos en la ventana", out["charts"])
+
+    @unittest.skipUnless(shutil.which("node"), "node no instalado")
+    def test_deep_link_por_hash_selecciona_la_ventana(self):
+        out = self._run_node("#month:2026-06")
+        self.assertEqual(out["sel"], "month:2026-06")
+        self.assertIn("jun 26", out["monthly"])
 
     @unittest.skipUnless(shutil.which("node"), "node no instalado")
     def test_js_corre_en_node_con_dom_stub(self):
@@ -240,6 +315,9 @@ process.stdout.write(JSON.stringify({
         self.assertIn("P90", out["monthly"])
         self.assertIn("m1", out["model"])
         self.assertIn("<svg", out["charts"])
+        # EXCL-004: nombre accesible en el gráfico (emitido por el JS)
+        self.assertIn('aria-label="Duración de tarea P90 por mes', out["charts"])
+        self.assertIn('role="img"', out["charts"])
 
 
 if __name__ == "__main__":

@@ -35,9 +35,10 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import subprocess
 import sys
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -90,6 +91,31 @@ def _dt(value):
     except ValueError:
         return None
     return d if d.tzinfo else d.replace(tzinfo=timezone.utc)
+
+
+def tz_from_offset(value):
+    """Offset del reporte ('-03', '-03:00', 'UTC') → tzinfo; None si no parsea.
+
+    El sitio bucketiza por TZ local (metadata.timezone); el tracker convierte
+    los timestamps UTC de los logs para atribuir el día igual que el reporte.
+    """
+    if not value or not isinstance(value, str):
+        return None
+    s = value.strip()
+    if s.upper() in ("UTC", "Z", "GMT"):
+        return timezone.utc
+    m = re.match(r"^([+-])(\d{1,2})(?::?(\d{2}))?$", s)
+    if not m:
+        return None
+    sign = 1 if m.group(1) == "+" else -1
+    delta = timedelta(hours=int(m.group(2)), minutes=int(m.group(3) or 0))
+    return timezone(sign * delta)
+
+
+def task_day(task, tz=None):
+    """Día (ISO) de la tarea en la TZ del reporte; UTC si no hay tz."""
+    ts = task["_start"]
+    return (ts.astimezone(tz) if tz else ts).date().isoformat()
 
 
 def _pctl(sorted_vals, p):
@@ -148,7 +174,27 @@ def turns_from_pi(records):
     return turns
 
 
-def turns_from_claude(records):
+PREAMBLE_MARKERS = (
+    "You are resuming an existing conversation",
+    "This session is being continued from a previous conversation",
+)
+
+
+def _is_preamble(content):
+    """Mensaje `user` inyectado por el harness al reanudar una sesión: no es
+    un prompt humano (mismo criterio que usage-tracker.py, FPA-140)."""
+    if isinstance(content, str):
+        text = content
+    elif isinstance(content, list):
+        text = " ".join(b.get("text", "") for b in content
+                        if isinstance(b, dict) and isinstance(b.get("text"), str))
+    else:
+        return False
+    head = text.strip()[:160]
+    return any(head.startswith(marker) for marker in PREAMBLE_MARKERS)
+
+
+def turns_from_claude(records, stats=None):
     """Registros de una sesión Claude Code → turnos. Solo el hilo principal
     (`isSidechain` false): los subagentes duplicarían los conteos. Claude no
     escribe stopReason `aborted`, así que `stop` queda None (cobertura)."""
@@ -170,7 +216,11 @@ def turns_from_claude(records):
                     r.get("toolUseResult"), dict) else False
                 turns.append({"ts": ts, "role": "tool", "is_error": err})
             elif isinstance(content, str) or isinstance(content, list):
-                turns.append({"ts": ts, "role": "user_prompt"})
+                if _is_preamble(content):
+                    if stats is not None:
+                        stats["preambles_skipped"] = stats.get("preambles_skipped", 0) + 1
+                else:
+                    turns.append({"ts": ts, "role": "user_prompt"})
         elif typ == "assistant":
             turns.append({"ts": ts, "role": "assistant",
                           "model": msg.get("model"),
@@ -210,6 +260,7 @@ def load_claude_turns(claude_dir=None):
         return [], {"sessions": 0, "skipped_reason": "sin directorio de sesiones claude"}
     turns = []
     sessions = 0
+    stats = {"preambles_skipped": 0}
     for path in sorted(base.glob("**/*.jsonl")):
         if "subagents" in path.parts:
             continue
@@ -217,15 +268,16 @@ def load_claude_turns(claude_dir=None):
         if not records:
             continue
         sessions += 1
-        turns.extend(turns_from_claude(records))
-    return turns, {"sessions": sessions}
+        turns.extend(turns_from_claude(records, stats))
+    return turns, {"sessions": sessions, **stats}
 
 
 # ----------------------------------------------------------------------
 # Tareas (funciones puras: testeables sin disco)
 # ----------------------------------------------------------------------
 
-def build_tasks(turns, gap_cap_s=1800, retry_window_s=300, max_task_s=14400):
+def build_tasks(turns, gap_cap_s=1800, retry_window_s=300, max_task_s=14400,
+                stats=None):
     """Turnos → tareas. Un `user_prompt` abre tarea; el siguiente la cierra.
 
     Tiempo ocupado del agente: por turno, `dur_s` si el log lo trae, si no el
@@ -234,7 +286,9 @@ def build_tasks(turns, gap_cap_s=1800, retry_window_s=300, max_task_s=14400):
 
     Flags: aborted (stopReason aborted), error (stopReason error), tool_error
     (algún toolResult con isError), retry (el prompt que abrió la tarea llegó
-    ≤ retry_window_s después de un error de la tarea anterior).
+    ≤ retry_window_s después del ÚLTIMO turno de una tarea anterior que
+    terminó en fallo y tuvo actividad). `stats` acumula `orphan_turns`
+    (turnos previos al primer prompt de una sesión retomada).
     """
     ordered = sorted(turns, key=lambda t: t["ts"])
     tasks = []
@@ -263,8 +317,14 @@ def build_tasks(turns, gap_cap_s=1800, retry_window_s=300, max_task_s=14400):
             gap = 0
         if t["role"] == "user_prompt":
             if cur is not None:
-                prev_ended_error = bool(cur["aborted"] or cur["errors"])
-                prev_end_ts = t["ts"]
+                # la ventana se mide desde el último turno de la tarea
+                # anterior: usar el prompt nuevo daría 0 s siempre (dead knob)
+                prev_ended_error = bool(
+                    (cur["aborted"] or cur["errors"]) and cur["busy_s"] > 0)
+                prev_end_ts = cur.get("_last") or cur["_start"]
+            else:
+                prev_ended_error = False
+                prev_end_ts = None
             close(cur, t["ts"])
             cur = {"_start": t["ts"], "busy_s": 0.0, "turns": 0,
                    "aborted": 0, "errors": 0, "tool_errors": 0, "retry": 0,
@@ -275,6 +335,8 @@ def build_tasks(turns, gap_cap_s=1800, retry_window_s=300, max_task_s=14400):
             prev_ts = t["ts"]
             continue
         if cur is None:
+            if stats is not None:
+                stats["orphan_turns"] = stats.get("orphan_turns", 0) + 1
             prev_ts = t["ts"]
             continue
         busy = None
@@ -318,11 +380,11 @@ def task_flags(task):
 # Agregaciones puras
 # ----------------------------------------------------------------------
 
-def daily_from_tasks(tasks):
-    """Tareas → métricas por día (día local del inicio de la tarea)."""
+def daily_from_tasks(tasks, tz=None):
+    """Tareas → métricas por día (día de la TZ del reporte)."""
     daily = {}
     for t in tasks:
-        day = t["_start"].date().isoformat()
+        day = task_day(t, tz)
         d = daily.setdefault(day, {"prompts": 0, "tasks": 0, "turns": 0,
                                    "agent_s": 0.0, "aborted": 0, "errors": 0,
                                    "tool_errors": 0, "retry": 0})
@@ -339,7 +401,7 @@ def daily_from_tasks(tasks):
     return daily
 
 
-def series(tasks, days, sources, models):
+def series(tasks, days, sources, models, tz=None):
     """Series compactas para percentiles exactos por ventana en el viz.
 
     `day` = índice en `days` (día local), `s` = segundos ocupados (int),
@@ -351,7 +413,7 @@ def series(tasks, days, sources, models):
     model_ix = {m: i for i, m in enumerate(models)}
     out = {"day": [], "s": [], "sp": [], "src": [], "model": [], "f": []}
     for t in tasks:
-        day = t["_start"].date().isoformat()
+        day = task_day(t, tz)
         if day not in day_ix:
             continue
         out["day"].append(day_ix[day])
@@ -360,22 +422,6 @@ def series(tasks, days, sources, models):
         out["src"].append(src_ix.get(t.get("source"), 0))
         out["model"].append(model_ix.get(t.get("model") or "?", 0))
         out["f"].append(task_flags(t))
-    return out
-
-
-def monthly_tasks(tasks):
-    """Percentiles de duración por mes (para la tabla del dashboard)."""
-    by = {}
-    for t in tasks:
-        by.setdefault(t["_start"].strftime("%Y-%m"), []).append(t["busy_s"])
-    out = {}
-    for ym, vals in by.items():
-        vals.sort()
-        out[ym] = {"tasks": len(vals),
-                   "p50_s": round(_pctl(vals, .5), 1),
-                   "p90_s": round(_pctl(vals, .9), 1),
-                   "p99_s": round(_pctl(vals, .99), 1),
-                   "sum_s": round(sum(vals), 1)}
     return out
 
 
@@ -393,11 +439,17 @@ def _git(args, cwd):
 
 
 def find_git_repos(roots, max_depth=3):
-    """Repos git bajo cada raíz (profundidad acotada), sin duplicados."""
+    """Repos git bajo cada raíz (profundidad acotada), sin duplicados.
+
+    Devuelve (paths, raíces_inexistentes): una raíz configurada que no existe
+    se reporta en metadata, nunca se ignora en silencio.
+    """
     found = {}
+    missing = []
     for raw in roots:
         root = Path(os.path.expanduser(raw))
         if not root.exists():
+            missing.append(raw)
             continue
         root_depth = len(root.parts)
         for dirpath, dirnames, _files in os.walk(root):
@@ -407,18 +459,21 @@ def find_git_repos(roots, max_depth=3):
             if ".git" in dirnames:
                 dirnames[:] = [d for d in dirnames if d != ".git"]
                 found[str(p)] = p
-    return [found[k] for k in sorted(found)]
+    return [found[k] for k in sorted(found)], missing
 
 
-def repo_metrics(paths, run=_git, prefix="~/para/areas/dev/gh"):
-    """Repos → {name, first_commit, days_by_month, commits_by_month}.
+def repo_metrics(paths, run=_git, prefixes=None):
+    """Repos → {name, first_commit, days_by_month}.
 
-    Días con commit y commits por mes calendario: la ventana del dashboard
-    suma meses (los días no se solapan entre meses, así el conteo de días del
-    rango es exacto).
+    Días con commit por mes calendario: la ventana del dashboard suma meses
+    (los días no se solapan entre meses, así el conteo de días del rango es
+    exacto). `prefixes` = raíces configuradas; el nombre es relativo a la que
+    matchea (sin prefijos hardcodeados).
     """
     out = []
-    home_prefix = os.path.expanduser(prefix)
+    prefixes = [os.path.expanduser(x) for x in
+                (prefixes or ["~/para/areas/dev/gh"])]
+    prefixes.sort(key=len, reverse=True)
     for path in paths:
         log = run(["log", "--date=short", "--format=%ad"], path)
         if not log:
@@ -430,15 +485,13 @@ def repo_metrics(paths, run=_git, prefix="~/para/areas/dev/gh"):
         days_by_month = {}
         for d in days:
             days_by_month[d[:7]] = days_by_month.get(d[:7], 0) + 1
-        commits_by_month = {}
-        for d in dates:
-            commits_by_month[d[:7]] = commits_by_month.get(d[:7], 0) + 1
         name = str(path)
-        if name.startswith(home_prefix + os.sep):
-            name = name[len(home_prefix) + 1:]
+        for prefix in prefixes:
+            if name.startswith(prefix + os.sep):
+                name = name[len(prefix) + 1:]
+                break
         out.append({"name": name, "first_commit": days[0],
-                    "days_by_month": days_by_month,
-                    "commits_by_month": commits_by_month})
+                    "days_by_month": days_by_month})
     return out
 
 
@@ -446,14 +499,16 @@ def repo_metrics(paths, run=_git, prefix="~/para/areas/dev/gh"):
 # Ensamblado
 # ----------------------------------------------------------------------
 
-def build_report(tasks, cfg, coverage, repos, report_meta):
+def build_report(tasks, cfg, coverage, repos, report_meta, tz=None):
     """Tareas de todas las fuentes → dataset del dashboard."""
-    days = sorted({t["_start"].date().isoformat() for t in tasks})
+    days = sorted({task_day(t, tz) for t in tasks})
     sources = sorted({t["source"] for t in tasks}) or ["pi"]
     models = sorted({t["model"] for t in tasks if t.get("model")}) or ["?"]
     return {
         "metadata": {
-            "date_range": {"start": report_meta["start"], "end": report_meta["end"]},
+            "date_range": {"start": report_meta["date_range"]["start"],
+                           "end": report_meta["date_range"]["end"]},
+            "timezone": report_meta.get("timezone"),
             "first_task": days[0] if days else None,
             "last_task": days[-1] if days else None,
             "task_definition": (
@@ -477,9 +532,8 @@ def build_report(tasks, cfg, coverage, repos, report_meta):
         "days": days,
         "sources": sources,
         "models": models,
-        "daily": daily_from_tasks(tasks),
-        "tasks": series(tasks, days, sources, models),
-        "monthly_tasks": monthly_tasks(tasks),
+        "daily": daily_from_tasks(tasks, tz),
+        "tasks": series(tasks, days, sources, models, tz),
         "repos": repos,
         "months": sorted({t["_start"].strftime("%Y-%m") for t in tasks}),
     }
@@ -493,7 +547,9 @@ def summarize_coverage(pi_stats, claude_stats):
                  "solo sesiones on-disk (pi rota las viejas; arranca 2026-04)"},
         {"source": "claude-cli", "turn_level": True, "abort_signal": False,
          "sessions": claude_stats.get("sessions", 0),
-         "note": claude_stats.get("skipped_reason")},
+         "note": claude_stats.get("skipped_reason") or (
+             f"preámbulos de reanudación excluidos: "
+             f"{claude_stats.get('preambles_skipped', 0)}")},
         {"source": "amp", "turn_level": False, "abort_signal": False,
          "sessions": None,
          "note": "el log de amp no expone turnos con timestamp ni stopReason"},
@@ -507,52 +563,85 @@ def summarize_coverage(pi_stats, claude_stats):
     ]
 
 
+def _schema_errors(doc):
+    sys.path.insert(0, str(ROOT / "scripts"))
+    from schema_validate import validate_against_schema  # noqa: PLC0415
+    return validate_against_schema(doc, json.loads(SCHEMA.read_text(encoding="utf-8")))
+
+
+def _report_errors(errors):
+    for e in errors[:20]:
+        print(f"schema: {e}", file=sys.stderr)
+    return 1
+
+
 def main(argv=None):
     argv = list(sys.argv[1:] if argv is None else argv)
     out_path = OUT
     if "--output" in argv:
         out_path = Path(argv[argv.index("--output") + 1])
+    if "--validate-only" in argv:
+        # valida un dataset ya escrito (los tests usan esto para el caso
+        # negativo del spec, sin re-extraer logs)
+        target = Path(argv[argv.index("--validate-only") + 1])
+        return _report_errors(_schema_errors(json.loads(target.read_text(encoding="utf-8"))))
+
     cfg = load_config()
     report = json.loads(REPORT.read_text(encoding="utf-8"))
-    meta = report["metadata"]["date_range"]
+    meta = report["metadata"]
+    tz = tz_from_offset(meta.get("timezone"))
 
     pi_turns, pi_stats = load_pi_turns()
     cl_turns, cl_stats = load_claude_turns()
     coverage = summarize_coverage(pi_stats, cl_stats)
 
+    task_stats = {}
     tasks = []
     for turns, source in ((pi_turns, "pi"), (cl_turns, "claude-cli")):
         built = build_tasks(turns, gap_cap_s=cfg["gap_cap_minutes"] * 60,
                             retry_window_s=cfg["retry_window_minutes"] * 60,
-                            max_task_s=cfg["max_task_minutes"] * 60)
+                            max_task_s=cfg["max_task_minutes"] * 60,
+                            stats=task_stats)
         for t in built:
             t["source"] = source
         tasks.extend(built)
 
-    repos = repo_metrics(find_git_repos(cfg["repo_roots"], cfg["repo_max_depth"]))
-    merged = build_report(tasks, cfg, coverage, repos, meta)
+    repo_paths, missing_roots = find_git_repos(cfg["repo_roots"],
+                                               cfg["repo_max_depth"])
+    repos = repo_metrics(repo_paths, prefixes=cfg["repo_roots"])
+    merged = build_report(tasks, cfg, coverage, repos, meta, tz=tz)
     merged["metadata"]["repo_roots"] = cfg["repo_roots"]
+    merged["metadata"]["repo_roots_missing"] = missing_roots
     merged["metadata"]["min_commit_days"] = cfg["min_commit_days"]
     merged["metadata"]["min_returning_months"] = cfg["min_returning_months"]
+    merged["metadata"]["bulk_day_interactions"] = cfg["bulk_day_interactions"]
+    merged["metadata"]["orphan_turns"] = task_stats.get("orphan_turns", 0)
+    merged["metadata"]["preamble_prompts_skipped"] = cl_stats.get(
+        "preambles_skipped", 0)
+    if missing_roots:
+        merged["metadata"]["reasons"]["repo_roots_missing"] = (
+            "raíces de repos configuradas que no existen: "
+            + ", ".join(missing_roots))
+    if tz is None:
+        merged["metadata"]["reasons"]["timezone"] = (
+            "el reporte no declara timezone: días atribuidos en UTC")
+
+    # validar ANTES de escribir: un dataset inválido no debe quedar en disco
+    if "--validate" in argv:
+        errors = _schema_errors(merged)
+        if errors:
+            return _report_errors(errors)
 
     out_path.parent.mkdir(parents=True, exist_ok=True)
-    out_path.write_text(json.dumps(merged, ensure_ascii=False, separators=(",", ":")),
+    out_path.write_text(json.dumps(merged, ensure_ascii=False, indent=2) + "\n",
                         encoding="utf-8")
-
-    if "--validate" in argv:
-        sys.path.insert(0, str(ROOT / "scripts"))
-        from schema_validate import validate_against_schema  # noqa: PLC0415
-        errors = validate_against_schema(merged,
-                                         json.loads(SCHEMA.read_text(encoding="utf-8")))
-        if errors:
-            for e in errors[:20]:
-                print(f"schema: {e}", file=sys.stderr)
-            return 1
 
     m = merged["metadata"]
     print(f"tareas: {len(merged['tasks']['s'])} · días: {len(merged['days'])} "
           f"· fuentes: {', '.join(merged['sources'])} · modelos: {len(merged['models'])}")
     print(f"rango: {m['first_task']} → {m['last_task']} · repos: {len(merged['repos'])}")
+    if missing_roots:
+        print(f"aviso: raíces inexistentes: {', '.join(missing_roots)}", file=sys.stderr)
     print(f"escrito: {out_path.relative_to(ROOT) if out_path.is_absolute() else out_path}")
     return 0
 

@@ -53,3 +53,40 @@ declarar los límites (interacciones ≠ prompts) y estar enlazado desde
 - **WHEN** se regenera el sitio
 - **THEN** `data/agent-dashboard.html` aparece en `index.html` y tiene
   `href="../index.html"` (guard `tests/test_site_nav.py`).
+
+### Requirement: Las tareas se atribuyen en la TZ del reporte y la ventana de reintento es efectiva
+El tracker SHALL atribuir cada tarea al día calendario de `metadata.timezone`
+del reporte (TZ local del sitio, no UTC) y SHALL medir la ventana de
+reintento desde el último turno de la tarea anterior que terminó en fallo; una
+tarea sin actividad no genera reintento.
+
+#### Scenario: Prompt cerca de medianoche
+- **WHEN** un prompt ocurre a las 22:30 locales con `timezone` `-03`
+- **THEN** cuenta en el día local (no en el día UTC siguiente) y el dashboard
+  declara la TZ usada.
+
+#### Scenario: Prompt muy posterior a un fallo
+- **WHEN** el prompt llega más de `retry_window_minutes` después del último
+  turno de una tarea que terminó en error
+- **THEN** no se marca como reintento.
+
+### Requirement: Los prompts inyectados y los turnos huérfanos se declaran
+El tracker SHALL excluir los mensajes `user` inyectados por el harness al
+reanudar una sesión Claude y reportar cuántos excluyó, junto con los turnos
+previos al primer prompt (`orphan_turns`), en `metadata` y en la tabla de
+cobertura del dashboard.
+
+#### Scenario: Sesión de Claude reanudada
+- **WHEN** el primer mensaje `user` es el preámbulo "You are resuming an
+  existing conversation…"
+- **THEN** no cuenta como prompt y el número excluido aparece en la cobertura.
+
+### Requirement: Las cifras del README están guardadas por el generador
+`viz-agent.py --check-docs` SHALL fallar si el bloque `AGENT-DOCS` del README
+no coincide con las cifras y umbrales derivados del dataset; `--update-docs`
+SHALL refrescarlo.
+
+#### Scenario: Dataset regenerado con cifras nuevas
+- **WHEN** el dataset cambia y el README conserva el bloque anterior
+- **THEN** `--check-docs` sale con código distinto de 0 y nombra la línea
+  desincronizada.

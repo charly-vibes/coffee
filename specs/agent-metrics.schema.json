@@ -10,7 +10,6 @@
     "models",
     "daily",
     "tasks",
-    "monthly_tasks",
     "repos",
     "months"
   ],
@@ -136,6 +135,38 @@
           "additionalProperties": {
             "type": "string"
           }
+        },
+        "timezone": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "repo_roots_missing": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "orphan_turns": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "preamble_prompts_skipped": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "min_commit_days": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "min_returning_months": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "bulk_day_interactions": {
+          "type": "integer",
+          "minimum": 1
         }
       }
     },
@@ -262,44 +293,6 @@
         }
       }
     },
-    "monthly_tasks": {
-      "type": "object",
-      "additionalProperties": {
-        "type": "object",
-        "required": [
-          "tasks",
-          "p50_s",
-          "p90_s",
-          "sum_s"
-        ],
-        "additionalProperties": false,
-        "properties": {
-          "tasks": {
-            "type": "integer",
-            "minimum": 0
-          },
-          "p50_s": {
-            "type": "number",
-            "minimum": 0
-          },
-          "p90_s": {
-            "type": "number",
-            "minimum": 0
-          },
-          "p99_s": {
-            "type": [
-              "number",
-              "null"
-            ],
-            "minimum": 0
-          },
-          "sum_s": {
-            "type": "number",
-            "minimum": 0
-          }
-        }
-      }
-    },
     "repos": {
       "type": "array",
       "items": {
@@ -307,8 +300,7 @@
         "required": [
           "name",
           "first_commit",
-          "days_by_month",
-          "commits_by_month"
+          "days_by_month"
         ],
         "additionalProperties": false,
         "properties": {
@@ -321,13 +313,6 @@
             "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
           },
           "days_by_month": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "integer",
-              "minimum": 0
-            }
-          },
-          "commits_by_month": {
             "type": "object",
             "additionalProperties": {
               "type": "integer",

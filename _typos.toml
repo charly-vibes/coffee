@@ -23,7 +23,6 @@
 "exponencial" = "exponencial"
 "contiguos" = "contiguos"
 "contiguo" = "contiguo"
-"nly" = "nly"
 "dominantes" = "dominantes"
 "agéntico" = "agéntico"
 "reintento" = "reintento"
@@ -119,3 +118,8 @@
 "asume" = "asume"
 # coffe-a31.2
 "regenere" = "regenere"
+
+# IDs del repo dentro de prosa (`coffe-nly1`): el token suelto `nly` solo
+# se permite en markdown; en código sigue detectándose el typo only→nly.
+[type.md.extend-words]
+"nly" = "nly"

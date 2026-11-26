@@ -29,7 +29,6 @@ from __future__ import annotations
 import json
 import sys
 from bisect import bisect_left, bisect_right
-from datetime import date
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -156,7 +155,7 @@ def repo_window(repos, months_window, cfg_meta):
             "returning": returning}
 
 
-def window_metrics(metrics, monthly, tasks_arrays, day_ix, models, report,
+def window_metrics(metrics, monthly, tasks_arrays, models, report,
                    key, label, months_window, repo_meta):
     """Métricas exactas de una ventana: percentiles sobre las tareas."""
     # rango de índices de días de la ventana (las tareas pueden empezar
@@ -179,7 +178,6 @@ def window_metrics(metrics, monthly, tasks_arrays, day_ix, models, report,
     n_error = sum(1 for f in flags if f & 2)
     n_tool = sum(1 for f in flags if f & 4)
     n_retry = sum(1 for f in flags if f & 8)
-    cal_days = _calendar_days(months_window, metrics)
     rw = repo_window(metrics["repos"], months_window, repo_meta)
     interactions = sum((report["monthly"].get(m) or {}).get("interactions", 0)
                        for m in months_window)
@@ -195,9 +193,7 @@ def window_metrics(metrics, monthly, tasks_arrays, day_ix, models, report,
         "prompts": prompts,
         "tasks": n_tasks,
         "active_days": active_days,
-        "calendar_days": cal_days,
         "prompts_per_active_day": round(prompts / active_days, 1) if active_days else None,
-        "prompts_per_calendar_day": round(prompts / cal_days, 1) if cal_days else None,
         "p50_s": round(pctl(secs, .5), 1) if secs else None,
         "p90_s": round(pctl(secs, .9), 1) if secs else None,
         "p99_s": round(pctl(secs, .99), 1) if secs else None,
@@ -224,17 +220,6 @@ def window_metrics(metrics, monthly, tasks_arrays, day_ix, models, report,
         "by_model": _by_model(tasks_arrays, idx, models),
         "monthly": [monthly[m] for m in months_window if m in monthly],
     }
-
-
-def _calendar_days(months_window, metrics):
-    start = metrics["metadata"]["date_range"]["start"]
-    end = metrics["metadata"]["date_range"]["end"]
-    lo = max(start, f"{months_window[0]}-01")
-    y, m = months_window[-1].split("-")
-    month_end = date(int(y) + (int(m) == 12), int(m) % 12 + 1, 1).toordinal() - 1
-    hi = min(end, date.fromordinal(month_end).isoformat())
-    return max(0, date.fromisoformat(hi).toordinal()
-               - date.fromisoformat(lo).toordinal() + 1)
 
 
 def _by_model(tasks_arrays, idx, models, top=8):
@@ -273,22 +258,23 @@ def build_model(metrics, report):
         cfg = load_json(CONFIG).get("agent_behavior") or {}
     repo_meta = {**cfg, "min_commit_days": meta.get("min_commit_days"),
                  "min_returning_months": meta.get("min_returning_months")}
-    day_ix = {"first": {}, "last": {}}
-    for i, d in enumerate(metrics["days"]):
-        day_ix["first"].setdefault(d[:7], i)
-        day_ix["last"][d[:7]] = i
     arr = metrics["tasks"]
     monthly = month_aggregates(metrics, report, arr)
     months = sorted(report["monthly"].keys())
     views = {}
     for key, label, mwin in windows(months):
-        views[key] = window_metrics(metrics, monthly, arr, day_ix,
-                                    metrics["models"], report, key, label,
-                                    mwin, repo_meta)
+        views[key] = window_metrics(metrics, monthly, arr, metrics["models"],
+                                    report, key, label, mwin, repo_meta)
     return {
         "meta": {
             "generated": meta.get("last_task"),
             "period": meta["date_range"],
+            "first_task": meta.get("first_task"),
+            "last_task": meta.get("last_task"),
+            "timezone": meta.get("timezone"),
+            "orphan_turns": meta.get("orphan_turns", 0),
+            "preamble_prompts_skipped": meta.get("preamble_prompts_skipped", 0),
+            "repo_roots_missing": meta.get("repo_roots_missing") or [],
             "task_definition": meta["task_definition"],
             "gap_cap_minutes": meta["gap_cap_minutes"],
             "retry_window_minutes": meta["retry_window_minutes"],
@@ -369,15 +355,25 @@ JS = """
     });
   }
   function fmtMin(secs) {
-    if (secs === null || secs === undefined) return null;
+    if (secs === null || secs === undefined) return "\u2014";
     var m = secs / 60;
     if (m < 1) return Math.round(secs) + " s";
     if (m < 90) return m.toFixed(1).replace(".", ",") + " min";
     return (m / 60).toFixed(1).replace(".", ",") + " h";
   }
   function fmtNum(n) {
-    if (n === null || n === undefined) return null;
+    if (n === null || n === undefined) return "\u2014";
     return n.toLocaleString("es-AR");
+  }
+  function fmtDec(n, digits) {
+    if (n === null || n === undefined) return "\u2014";
+    return Number(n).toLocaleString("es-AR", {minimumFractionDigits: digits,
+                                              maximumFractionDigits: digits});
+  }
+  function joinDot(parts) {
+    return parts.filter(function (x) {
+      return x !== null && x !== undefined && x !== "";
+    }).join(" \u00b7 ");
   }
   function card(cfg) {
     var val = cfg.value === null || cfg.value === undefined
@@ -392,52 +388,66 @@ JS = """
   }
   function renderKpis(v) {
     var m = MODEL.meta;
+    var vacia = v.tasks === 0 ? "sin tareas en la ventana" : null;
     return [
       card({label: "Prompts por día activo", value: v.prompts_per_active_day,
-            sub: fmtNum(v.prompts) + " prompts · " + v.active_days + " días con actividad",
-            ref: m.talk.prompts_day}),
-      card({label: "Duración de tarea P90", value: fmtMin(v.p90_s),
-            sub: "P50 " + fmtMin(v.p50_s) + " · P99 " + fmtMin(v.p99_s)
-                 + " · " + fmtNum(v.tasks) + " tareas",
-            ref: m.talk.p90_task}),
-      card({label: "Tiempo activo del agente", value: v.agent_h,
-            sub: (v.agent_h_per_active_day === null ? "n/a" : v.agent_h_per_active_day + " h por día activo")
-                 + (v.workdays_per_active_day === null ? "" : " · " + v.workdays_per_active_day + " jornadas de 8 h")
-                 + " · " + v.span_h + " h de reloj en tarea (incluye esperas)",
-            ref: m.talk.agent_time}),
-      card({label: "Abortos / errores", value: (v.aborts_per_100_tasks === null ? null : v.aborts_per_100_tasks),
-            sub: v.aborted + " abortos · " + v.errors + " errores · " + v.tool_errors + " tool errors",
-            ref: m.talk.pushback, prov: "reported"}),
-      card({label: "Reintentos tras fallo", value: v.retries_per_100_prompts,
-            sub: fmtNum(v.retries) + " de " + fmtNum(v.prompts) + " prompts",
-            ref: m.talk.pushback, prov: "derived"}),
+            sub: joinDot([fmtNum(v.prompts) + " prompts",
+                          v.active_days + " días con actividad"]),
+            reason: vacia, ref: m.talk.prompts_day}),
+      card({label: "Duración de tarea P90",
+            value: v.p90_s === null ? null : fmtMin(v.p90_s),
+            sub: joinDot(["P50 " + fmtMin(v.p50_s), "P99 " + fmtMin(v.p99_s),
+                          fmtNum(v.tasks) + " tareas"]),
+            reason: vacia, ref: m.talk.p90_task}),
+      card({label: "Tiempo activo del agente", value: fmtDec(v.agent_h, 1),
+            sub: joinDot([
+              v.agent_h_per_active_day === null ? null
+                : fmtDec(v.agent_h_per_active_day, 2) + " h por día activo",
+              v.workdays_per_active_day === null ? null
+                : fmtDec(v.workdays_per_active_day, 2) + " jornadas de 8 h",
+              fmtDec(v.span_h, 1) + " h de reloj en tarea (incluye esperas)"]),
+            reason: vacia, ref: m.talk.agent_time}),
+      card({label: "Abortos por 100 tareas", value: v.aborts_per_100_tasks,
+            sub: joinDot([v.aborted + " abortos", v.errors + " errores",
+                          v.tool_errors + " tool errors",
+                          v.aborts_per_100_tasks === null ? null
+                            : "solo pi registra abortos (claude-cli no)"]),
+            reason: vacia, ref: m.talk.pushback, prov: "reported"}),
+      card({label: "Reintentos tras fallo por 100", value: v.retries_per_100_prompts,
+            sub: joinDot([fmtNum(v.retries) + " de " + fmtNum(v.prompts) + " prompts",
+                          "ventana " + m.retry_window_minutes + " min"]),
+            reason: vacia, ref: m.talk.pushback, prov: "derived"}),
       card({label: "Repos creados en la ventana", value: fmtNum(v.repos_created),
-            sub: fmtNum(v.repos_total) + " repos en el workspace",
+            sub: fmtNum(v.repos_total) + " repos en las raíces configuradas",
             ref: m.talk.repos_created, prov: "reported"}),
       card({label: "Repos mantenidos", value: fmtNum(v.repos_maintained),
-            sub: ">" + m.min_commit_days + " días con commit · "
-                 + fmtNum(v.repos_returning) + " vuelven en ≥" + m.min_returning_months + " meses",
+            sub: joinDot([
+              ">" + m.min_commit_days + " días con commit en la ventana",
+              fmtNum(v.repos_returning) + " vuelven en \u2265" + m.min_returning_months + " meses",
+              "definición propia: no es la cadencia personal del talk"]),
             ref: m.talk.repos_maintained, prov: "reported"}),
       card({label: "Escala de automatización", value: fmtNum(v.peak_day_interactions),
-            sub: "peak del día " + esc(v.peak_day || "—") + " · "
-                 + v.bulk_days + " días ≥" + fmtNum(m.bulk_day_interactions) + " interacciones",
+            sub: joinDot(["peak del día " + (v.peak_day || "\u2014"),
+                          v.bulk_days + " días \u2265" + fmtNum(m.bulk_day_interactions) + " interacciones"]),
             ref: "miles de issues por noche", prov: "reported"})
     ].join("");
   }
   function renderMonthly(v) {
     var rows = v.monthly.map(function (r) {
       return "<tr><td>" + esc(r.label) + "</td><td>" + fmtNum(r.prompts) + "</td>"
-        + "<td>" + (r.prompts_per_day === null ? "—" : r.prompts_per_day) + "</td>"
-        + "<td>" + (r.p50_s === null ? "—" : (r.p50_s / 60).toFixed(1)) + "</td>"
-        + "<td>" + (r.p90_s === null ? "—" : (r.p90_s / 60).toFixed(1)) + "</td>"
-        + "<td>" + r.agent_h + "</td><td>" + r.span_h + "</td><td>" + fmtNum(r.tasks) + "</td>"
+        + "<td>" + fmtDec(r.prompts_per_day, 1) + "</td>"
+        + "<td>" + fmtDec(r.p50_s === null ? null : r.p50_s / 60, 1) + "</td>"
+        + "<td>" + fmtDec(r.p90_s === null ? null : r.p90_s / 60, 1) + "</td>"
+        + "<td>" + fmtDec(r.agent_h, 1) + "</td><td>" + fmtDec(r.span_h, 1) + "</td>"
+        + "<td>" + fmtNum(r.tasks) + "</td>"
         + "<td>" + fmtNum(r.interactions) + "</td></tr>";
     }).join("");
     var tot = "<tr><td>total</td><td>" + fmtNum(v.prompts) + "</td><td>"
-      + (v.prompts_per_active_day === null ? "—" : v.prompts_per_active_day)
-      + "</td><td>" + (v.p50_s === null ? "—" : (v.p50_s / 60).toFixed(1))
-      + "</td><td>" + (v.p90_s === null ? "—" : (v.p90_s / 60).toFixed(1))
-      + "</td><td>" + v.agent_h + "</td><td>" + v.span_h + "</td><td>" + fmtNum(v.tasks) + "</td><td>"
+      + fmtDec(v.prompts_per_active_day, 1)
+      + "</td><td>" + fmtDec(v.p50_s === null ? null : v.p50_s / 60, 1)
+      + "</td><td>" + fmtDec(v.p90_s === null ? null : v.p90_s / 60, 1)
+      + "</td><td>" + fmtDec(v.agent_h, 1) + "</td><td>" + fmtDec(v.span_h, 1)
+      + "</td><td>" + fmtNum(v.tasks) + "</td><td>"
       + fmtNum(v.interactions) + "</td></tr>";
     return '<table><thead><tr><th>Mes</th><th>Prompts</th><th>Prompts/día</th>'
       + "<th>P50 (min)</th><th>P90 (min)</th><th>Horas agente</th><th>Horas reloj</th><th>Tareas</th>"
@@ -448,7 +458,7 @@ JS = """
     if (!v.by_model.length) return '<p class="reason">sin tareas en la ventana</p>';
     var rows = v.by_model.map(function (r) {
       return "<tr><td>" + esc(r.model) + "</td><td>" + fmtNum(r.tasks) + "</td><td>"
-        + (r.p90_s === null ? "—" : (r.p90_s / 60).toFixed(1)) + "</td><td>"
+        + fmtDec(r.p90_s === null ? null : r.p90_s / 60, 1) + "</td><td>"
         + r.aborts_per_100 + "</td><td>" + r.errors_per_100 + "</td><td>"
         + r.retries_per_100 + "</td></tr>";
     }).join("");
@@ -458,7 +468,7 @@ JS = """
       + '<p class="reason">Solo tareas con turnos atribuibles a un modelo. '
       + "Comparar generaciones: mismo harness, distintas columnas.</p>";
   }
-  function barChart(series, valueOf, color, unit) {
+  function barChart(series, valueOf, color, unit, label) {
     var vals = series.map(valueOf).filter(function (x) { return x !== null; });
     if (!vals.length) return '<p class="reason">sin datos en la ventana</p>';
     var hi = Math.max.apply(null, vals) || 1;
@@ -476,7 +486,8 @@ JS = """
         + '" font-size="9" text-anchor="middle" fill="#404040">'
         + esc(r.label) + "</text>";
     }).join("");
-    return '<svg viewBox="0 0 ' + w + " " + h + '" role="img">'
+    return '<svg viewBox="0 0 ' + w + " " + h + '" role="img" aria-label="'
+      + esc(label + " · " + series[0].label + " a " + series[series.length - 1].label) + '">'
       + '<line x1="' + pad + '" y1="' + (h - pad) + '" x2="' + (w - pad)
       + '" y2="' + (h - pad) + '" stroke="#c0c0c0"/>'
       + '<text x="' + pad + '" y="14" font-size="10" fill="#404040">máx '
@@ -490,12 +501,13 @@ JS = """
     document.getElementById("by-model").innerHTML = renderModels(v);
     document.getElementById("chart-p90").innerHTML =
       barChart(v.monthly, function (r) { return r.p90_s === null ? null : r.p90_s / 60; },
-               "#800000", "min");
+               "#800000", "min", "Duración de tarea P90 por mes");
     document.getElementById("chart-prompts").innerHTML =
       barChart(v.monthly, function (r) { return r.prompts_per_day; }, "#000080",
-               "prompts/día");
+               "prompts/día", "Prompts por día activo por mes");
     document.getElementById("chart-hours").innerHTML =
-      barChart(v.monthly, function (r) { return r.agent_h; }, "#008080", "h");
+      barChart(v.monthly, function (r) { return r.agent_h; }, "#008080", "h",
+               "Horas de agente por mes");
     var url = new URL(window.location.href);
     url.hash = key;
     history.replaceState(null, "", url.toString());
@@ -557,9 +569,10 @@ def render(model):
 <header class="site">
   <h1>Comportamiento del agente</h1>
   <p class="meta">Métricas del talk de Armin Ronacher sobre datos locales ·
-  tareas {m["period"]["start"]} → {m["period"]["end"]} ·
-  tope de gap {m["gap_cap_minutes"]} min · ventana de reintento
-  {m["retry_window_minutes"]} min</p>
+  tareas {m["first_task"] or "—"} → {m["last_task"] or "—"} (log con turnos) ·
+  reporte {m["period"]["start"]} → {m["period"]["end"]} ·
+  TZ {m["timezone"] or "UTC"} · tope de gap {m["gap_cap_minutes"]} min ·
+  ventana de reintento {m["retry_window_minutes"]} min</p>
 </header>
 <main>
 <nav class="topbar" aria-label="Período">
@@ -616,6 +629,12 @@ def render(model):
   <h3>Límites declarados</h3>
   <ul class="notes">
 {reasons}
+    <li><strong>Turnos sin prompt previo:</strong> {m["orphan_turns"]} (sesiones
+    retomadas: no abren tarea, no se cuentan como prompt).</li>
+    <li><strong>Prompts inyectados excluidos (claude-cli):</strong>
+    {m["preamble_prompts_skipped"]} preámbulos de reanudación.</li>
+    <li><strong>Raíces de repos ausentes:</strong>
+    {", ".join(m["repo_roots_missing"]) if m["repo_roots_missing"] else "ninguna"}.</li>
     <li><strong>Volumen del reporte:</strong> “interacciones” son llamadas de
     API (incluye tool calls); no se comparan 1:1 con los prompts del talk.</li>
   </ul>
@@ -632,6 +651,68 @@ def render(model):
 """
 
 
+README = ROOT / "README.md"
+DOC_BEGIN = "<!-- AGENT-DOCS:BEGIN -->"
+DOC_END = "<!-- AGENT-DOCS:END -->"
+
+
+def _num_es(value, digits=1):
+    if value is None:
+        return "n/a"
+    return f"{value:.{digits}f}".replace(".", ",")
+
+
+def doc_figures(model):
+    """Cifras headline del README, derivadas del modelo (no escritas a mano)."""
+    v = model["views"]["all"]
+    m = model["meta"]
+    return [
+        ("Prompts por día activo", _num_es(v["prompts_per_active_day"], 1)),
+        ("Duración de tarea P90",
+         f"{_num_es((v['p90_s'] or 0) / 60, 1)} min"),
+        ("Horas de agente por día activo", _num_es(v["agent_h_per_active_day"], 2)),
+        ("Repos creados en el período", str(v["repos_created"])),
+        ("Repos mantenidos", str(v["repos_maintained"])),
+        ("Ventanas de período", str(len(model["views"]))),
+        ("Tope de gap (min)", str(m["gap_cap_minutes"])),
+        ("Ventana de reintento (min)", str(m["retry_window_minutes"])),
+        ("Días con commit para mantenido", str(m["min_commit_days"])),
+    ]
+
+
+def docs_block(model):
+    lines = [f"- {label}: {value}" for label, value in doc_figures(model)]
+    return DOC_BEGIN + "\n" + "\n".join(lines) + "\n" + DOC_END
+
+
+def update_docs(model, path=README):
+    """Refresca el bloque AGENT-DOCS del README con las cifras del modelo."""
+    text = Path(path).read_text(encoding="utf-8")
+    block = docs_block(model)
+    if DOC_BEGIN in text and DOC_END in text:
+        head = text.split(DOC_BEGIN)[0]
+        tail = text.split(DOC_END, 1)[1]
+        Path(path).write_text(head + block + tail, encoding="utf-8")
+    else:
+        Path(path).write_text(text.rstrip() + "\n\n" + block + "\n",
+                              encoding="utf-8")
+
+
+def check_docs(model, path=README):
+    """Verifica que el bloque AGENT-DOCS exista y coincida con el modelo."""
+    text = Path(path).read_text(encoding="utf-8")
+    if DOC_BEGIN not in text or DOC_END not in text:
+        return [f"README sin bloque AGENT-DOCS ({DOC_BEGIN} … {DOC_END})"]
+    current = text.split(DOC_BEGIN, 1)[1].split(DOC_END, 1)[0].strip()
+    expected = docs_block(model).split(DOC_BEGIN, 1)[1].split(DOC_END, 1)[0].strip()
+    if current == expected:
+        return []
+    got = [l for l in current.splitlines() if l.strip()]
+    want = [l for l in expected.splitlines() if l.strip()]
+    return [f"AGENT-DOCS desincronizado: README={g!r} modelo={w!r}"
+            for g, w in zip(got, want) if g != w] or ["AGENT-DOCS desincronizado"]
+
+
 def main(argv=None):
     argv = list(sys.argv[1:] if argv is None else argv)
     out = OUT
@@ -642,6 +723,16 @@ def main(argv=None):
     model = build_model(metrics, report)
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(render(model), encoding="utf-8")
+    if "--update-docs" in argv:
+        update_docs(model)
+        print("AGENT-DOCS actualizado en README.md")
+    if "--check-docs" in argv:
+        errors = check_docs(model)
+        if errors:
+            for e in errors[:10]:
+                print(f"docs: {e}", file=sys.stderr)
+            return 1
+        print("AGENT-DOCS sincronizado")
     print(f"escrito: {out.relative_to(ROOT) if out.is_absolute() else out} "
           f"· ventanas: {len(model['views'])}")
     return 0

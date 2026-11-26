@@ -83,6 +83,28 @@ class BuildTasksTest(unittest.TestCase):
         self.assertFalse(am.task_flags(tasks[2]) & am.FLAG_RETRY)
         self.assertFalse(am.task_flags(tasks[3]) & am.FLAG_RETRY)
 
+    def test_retry_fuera_de_ventana_no_se_marca(self):
+        # la tarea falla a los 5 s; el prompt llega 10 min después
+        tasks = am.build_tasks([
+            at(0, "user_prompt"), at(5, stop="error"),
+            at(600, "user_prompt"), at(605),
+        ], retry_window_s=300)
+        self.assertEqual(am.task_flags(tasks[1]), 0)
+
+    def test_retry_no_se_marca_si_la_tarea_previa_no_tuvo_actividad(self):
+        # tarea con error pero sin turnos con tiempo (busy 0) → no es reintento
+        tasks = am.build_tasks([
+            at(0, "user_prompt"), at(0, stop="error"),
+            at(10, "user_prompt"), at(15),
+        ], retry_window_s=300)
+        self.assertEqual(len(tasks), 1)
+        self.assertEqual(am.task_flags(tasks[0]), 0)
+
+    def test_orphan_turns_se_cuentan(self):
+        stats = {}
+        am.build_tasks([at(0), at(5), at(10, "user_prompt"), at(15)], stats=stats)
+        self.assertEqual(stats["orphan_turns"], 2)
+
     def test_span_mide_hasta_el_ultimo_turno_de_la_tarea(self):
         tasks = am.build_tasks([at(0, "user_prompt"), at(5),
                                 at(10 * 3600, "user_prompt"), at(10 * 3600 + 5)])
@@ -107,6 +129,36 @@ class BuildTasksTest(unittest.TestCase):
         # ordenado: prompt 0 → assistant 10 → prompt 60 (sin turnos = sin tarea)
         self.assertEqual(len(tasks), 1)
         self.assertAlmostEqual(tasks[0]["busy_s"], 10.0)
+
+
+class ClaudePreambleTest(unittest.TestCase):
+    def test_preambulo_de_reanudacion_no_es_prompt(self):
+        stats = {}
+        turns = am.turns_from_claude([
+            {"type": "user", "timestamp": "2026-05-01T12:00:00Z",
+             "message": {"role": "user", "content":
+                         "You are resuming an existing conversation from a "
+                         "serialized transcript.\nTreat everything as context."}},
+            {"type": "user", "timestamp": "2026-05-01T12:01:00Z",
+             "message": {"role": "user", "content": "arreglá el test"}},
+        ], stats)
+        self.assertEqual([t["role"] for t in turns], ["user_prompt"])
+        self.assertEqual(stats["preambles_skipped"], 1)
+
+    def test_subagentes_se_ignoran(self):
+        turns = am.turns_from_claude([
+            {"type": "user", "isSidechain": True,
+             "timestamp": "2026-05-01T12:00:00Z",
+             "message": {"role": "user", "content": "sub"}},
+        ])
+        self.assertEqual(turns, [])
+
+
+class ReposScanTest(unittest.TestCase):
+    def test_raiz_inexistente_se_reporta(self):
+        paths, missing = am.find_git_repos(["/no/existe", str(REPO)])
+        self.assertEqual(missing, ["/no/existe"])
+        self.assertIsInstance(paths, list)
 
 
 class SeriesTest(unittest.TestCase):
@@ -135,10 +187,22 @@ class SeriesTest(unittest.TestCase):
         self.assertEqual(daily["2026-05-01"]["aborted"], 1)
         self.assertEqual(daily["2026-05-02"]["aborted"], 0)
 
-    def test_monthly_tasks_percentiles(self):
-        mt = am.monthly_tasks(self.tasks)
-        self.assertEqual(mt["2026-05"]["tasks"], 2)
-        self.assertIn("p90_s", mt["2026-05"])
+    def test_dia_local_usa_la_tz_del_reporte(self):
+        tz = am.tz_from_offset("-03")
+        # 01:00Z = 22:00 del día anterior en -03: cambia de día
+        late = {"_start": T0.replace(hour=1, minute=0)}
+        self.assertEqual(am.task_day(late), "2026-05-01")
+        self.assertEqual(am.task_day(late, tz), "2026-04-30")
+        # 12:00Z = 09:00 local: mismo día
+        self.assertEqual(am.task_day({"_start": T0}, tz), "2026-05-01")
+
+    def test_tz_from_offset_formatos(self):
+        self.assertEqual(am.tz_from_offset("-03").utcoffset(None),
+                         timedelta(hours=-3))
+        self.assertEqual(am.tz_from_offset("+05:30").utcoffset(None),
+                         timedelta(hours=5, minutes=30))
+        self.assertIsNone(am.tz_from_offset(""))
+        self.assertIsNone(am.tz_from_offset("no-tz"))
 
 
 class ReposTest(unittest.TestCase):
@@ -147,22 +211,21 @@ class ReposTest(unittest.TestCase):
             self.assertEqual(args[0], "log")
             return "2026-01-05\n2026-01-05\n2026-02-10\n"
 
-        out = am.repo_metrics([Path("/tmp/x/uno")], run=run, prefix="/tmp/x")
+        out = am.repo_metrics([Path("/tmp/x/uno")], run=run, prefixes=["/tmp/x"])
         self.assertEqual(len(out), 1)
         self.assertEqual(out[0]["name"], "uno")
         self.assertEqual(out[0]["first_commit"], "2026-01-05")
         self.assertEqual(out[0]["days_by_month"], {"2026-01": 1, "2026-02": 1})
-        self.assertEqual(out[0]["commits_by_month"], {"2026-01": 2, "2026-02": 1})
 
     def test_repo_sin_commits_se_omite(self):
         out = am.repo_metrics([Path("/tmp/x/vacio")], run=lambda a, c: "",
-                              prefix="/tmp/x")
+                              prefixes=["/tmp/x"])
         self.assertEqual(out, [])
 
     def test_git_roto_se_omite(self):
         self.assertEqual(am.repo_metrics([Path("/tmp/x/y")],
-                                        run=lambda a, c: None, prefix="/tmp/x"),
-                         [])
+                                        run=lambda a, c: None,
+                                        prefixes=["/tmp/x"]), [])
 
 
 class ConfigTest(unittest.TestCase):
@@ -183,8 +246,9 @@ class SchemaTest(unittest.TestCase):
     def test_schema_declara_las_claves_del_dataset(self):
         schema = json.loads(SCHEMA.read_text(encoding="utf-8"))
         for key in ("metadata", "days", "sources", "models", "daily", "tasks",
-                    "monthly_tasks", "repos", "months"):
+                    "repos", "months"):
             self.assertIn(key, schema["required"])
+        self.assertNotIn("monthly_tasks", schema["required"])
         self.assertIn("sp", schema["properties"]["tasks"]["required"])
 
     def test_dataset_real_valida_contra_schema(self):
@@ -198,6 +262,28 @@ class SchemaTest(unittest.TestCase):
             json.loads(data.read_text(encoding="utf-8")),
             json.loads(SCHEMA.read_text(encoding="utf-8")))
         self.assertEqual(errors, [])
+
+
+class ValidateCliTest(unittest.TestCase):
+    """Escenario del spec: dataset inválido → --validate sale ≠ 0 (EDGE-003)."""
+
+    def test_dataset_invalido_sale_con_error(self):
+        import subprocess
+        import tempfile
+        data = json.loads((REPO / "data" / "agent_metrics.json").read_text(
+            encoding="utf-8"))
+        del data["daily"]
+        with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False) as fh:
+            json.dump(data, fh)
+            path = fh.name
+        try:
+            proc = subprocess.run(
+                ["python3", str(SCRIPT), "--validate-only", path],
+                capture_output=True, text=True, timeout=120)
+        finally:
+            Path(path).unlink(missing_ok=True)
+        self.assertNotEqual(proc.returncode, 0)
+        self.assertIn("schema:", proc.stderr)
 
 
 class CoverageTest(unittest.TestCase):
