@@ -1,0 +1,96 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "task_beads — atribución tarea↔bead con método y confianza",
+  "description": "Dataset coffe-dnx.5 (scripts/agent-metrics-tracker.py): atribuye tareas del tracker a beads del ledger (.beads/issues.jsonl) con orden de resolución explicit > git > temporal y confianza declarada. El ledger es beads: no hay task ledger propio. Fórmula CLRT-005: S(b) = sesiones atribuidas a b con method ∈ {explicit, git}; las filas temporal NO suman coste (solo n_temporal). Sesión atribuida a k beads: c(s)/k con split: true.",
+  "type": "object",
+  "required": [
+    "metadata",
+    "task_beads",
+    "beads",
+    "cost_per_bead_p50",
+    "n_beads_sin_coste"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "metadata": {
+      "type": "object",
+      "required": [
+        "generated_at",
+        "repo_roots",
+        "confidence",
+        "n_beads",
+        "resolution",
+        "temporal_window",
+        "formula",
+        "task_index"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "generated_at": { "type": ["string", "null"] },
+        "repo_roots": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "confidence": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["explicit", "git", "temporal"],
+          "properties": {
+            "explicit": { "type": "number", "const": 1.0 },
+            "git": { "type": "number" },
+            "temporal": { "type": "number", "maximum": 0.5 }
+          }
+        },
+        "n_beads": { "type": "integer", "minimum": 0 },
+        "resolution": { "type": "string" },
+        "temporal_window": { "type": "string" },
+        "formula": { "type": "string" },
+        "task_index": { "type": "string" }
+      }
+    },
+    "task_beads": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["task", "session", "bead", "method", "confidence"],
+        "additionalProperties": false,
+        "properties": {
+          "task": { "type": "integer", "minimum": 0 },
+          "session": { "type": ["integer", "null"], "minimum": 0 },
+          "bead": { "type": "string" },
+          "method": {
+            "type": "string",
+            "enum": ["explicit", "git", "temporal", "manual"]
+          },
+          "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+          "split": { "type": "boolean" },
+          "window": {
+            "type": "object",
+            "required": ["started_at", "closed_at"],
+            "additionalProperties": false,
+            "properties": {
+              "started_at": { "type": ["string", "null"] },
+              "closed_at": { "type": ["string", "null"] }
+            }
+          }
+        }
+      }
+    },
+    "beads": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["bead", "cost_per_bead", "n_sessions", "n_temporal"],
+        "additionalProperties": false,
+        "properties": {
+          "bead": { "type": "string" },
+          "cost_per_bead": { "type": "number", "minimum": 0 },
+          "n_sessions": { "type": "integer", "minimum": 0 },
+          "n_temporal": { "type": "integer", "minimum": 0 }
+        }
+      }
+    },
+    "cost_per_bead_p50": { "type": ["number", "null"], "minimum": 0 },
+    "n_beads_sin_coste": { "type": "integer", "minimum": 0 }
+  }
+}

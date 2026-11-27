@@ -38,6 +38,7 @@ import os
 import re
 import subprocess
 import sys
+from collections import defaultdict
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
@@ -205,7 +206,10 @@ def turns_from_pi(records, session=None):
         if ts is None:
             continue
         if role == "user":
+            # coffe-dnx.5: el texto del prompt viaja en el turno para la
+            # atribución explícita tarea↔bead (ids en el prompt)
             turns.append({"ts": ts, "role": "user_prompt", "model": model,
+                          "text": _prompt_text(msg.get("content"))[:2000],
                           "ses": session})
         elif role == "assistant":
             dur_ms = msg.get("durationMs")
@@ -230,6 +234,17 @@ PREAMBLE_MARKERS = (
     "You are resuming an existing conversation",
     "This session is being continued from a previous conversation",
 )
+
+
+def _prompt_text(content):
+    """Contenido de un mensaje user → texto plano (string o bloques con
+    `text`). coffe-dnx.5: materia prima de la atribución explícita."""
+    if isinstance(content, str):
+        return content
+    if isinstance(content, list):
+        return " ".join(b.get("text", "") for b in content
+                        if isinstance(b, dict) and isinstance(b.get("text"), str))
+    return ""
 
 
 def _is_preamble(content):
@@ -277,6 +292,7 @@ def turns_from_claude(records, stats=None, session=None):
                         stats["preambles_skipped"] = stats.get("preambles_skipped", 0) + 1
                 else:
                     turns.append({"ts": ts, "role": "user_prompt",
+                                  "text": _prompt_text(content)[:2000],
                                   "ses": session})
         elif typ == "assistant":
             usage = msg.get("usage")
@@ -412,6 +428,7 @@ def build_tasks(turns, gap_cap_s=1800, retry_window_s=300, max_task_s=14400,
                    "cost": 0.0,
                    "tokens": {"in": 0, "out": 0, "cache_read": 0,
                               "cache_write": 0},
+                   "prompt": t.get("text"),
                    "_ses": t.get("ses")}
             if (prev_ended_error and prev_end_ts is not None
                     and (t["ts"] - prev_end_ts).total_seconds() <= retry_window_s):
@@ -625,6 +642,8 @@ def repo_metrics(paths, run=_git, prefixes=None):
 
 BEAD_OUT = ROOT / "data" / "bead_index.json"
 BEAD_SCHEMA = ROOT / "specs" / "bead-index.schema.json"
+TASK_BEADS_OUT = ROOT / "data" / "task_beads.json"
+TASK_BEADS_SCHEMA = ROOT / "specs" / "task-beads.schema.json"
 BEAD_TEXT_KEYS = {"title", "description", "notes", "design"}
 # FPA-141: los mismos tres orgs del filtro charly del reporte de uso
 # (usage_tracker.in_scope). Copia local para no acoplar el import: los nombres
@@ -761,6 +780,227 @@ def _bead_schema_errors(doc):
 
 
 # ----------------------------------------------------------------------
+# Atribución tarea↔bead (coffe-dnx.5) — el ledger es beads, no un task
+# ledger propio. Resolución: explicit (id en el prompt de la tarea) > git
+# (rama o mensaje de commit del repo menciona el id) > temporal (la sesión
+# de la tarea arranca dentro de [started_at, closed_at] del bead, mismo
+# repo). Confianza: explicit 1.0, git 0.8, temporal 0.5 (techo; la ventana
+# queda documentada en cada fila). Las filas temporal NO suman coste.
+# ----------------------------------------------------------------------
+
+TASK_BEAD_CONFIDENCE = {"explicit": 1.0, "git": 0.8, "temporal": 0.5}
+# tokens con guión (coffe-abc, coffe-dnx.5); case-insensitive. Sin NLP: el
+# matcheo es literal y solo atribuye si el token existe en el índice de
+# beads (by_id), así que el patrón amplio no inventa atribuciones.
+BEAD_ID_RE = re.compile(r"\b([a-z][a-z0-9]*(?:-[a-z0-9]+)+(?:\.\d+)?)\b",
+                        re.IGNORECASE)
+
+
+def load_bead_records(repo_paths, prefixes=None):
+    """Repos → registros de bead {id, repo, path, started_at, closed_at}
+    desde .beads/issues.jsonl (misma fuente y mismo filtro de scope que
+    build_bead_index). started_at/closed_at parseados a datetime UTC."""
+    beads = []
+    for path in repo_paths:
+        name = _bead_rel_name(path, prefixes)
+        jsonl = Path(path) / ".beads" / "issues.jsonl"
+        if not jsonl.exists() or not _bead_in_scope(name):
+            continue
+        for it in _iter_jsonl(jsonl):
+            if not isinstance(it, dict) or not it.get("id"):
+                continue
+            beads.append({"id": str(it["id"]), "repo": name, "path": Path(path),
+                          "started_at": _dt(it.get("started_at")),
+                          "closed_at": _dt(it.get("closed_at"))})
+    return beads
+
+
+def _git_mentioned_beads(repo_path, run=_git):
+    """Ids de beads mencionados en el git del repo: subjects de commits
+    (--all, último año) y nombres de rama. Un solo par de llamadas por repo."""
+    ids = set()
+    for args in (["log", "--all", "--since=1.year", "--format=%s"],
+                 ["branch", "--all", "--format=%(refname:short)"]):
+        out = run(args, repo_path)
+        for line in (out or "").splitlines():
+            for m in BEAD_ID_RE.finditer(line):
+                ids.add(m.group(1).lower())
+    return ids
+
+
+def _session_repo(session, beads):
+    """Repo de la sesión: proyecto (última componente del cwd) matcheado
+    contra `<org>/<repo>` de los beads. None si no hay match único."""
+    project = (session or {}).get("project")
+    if not project:
+        return None
+    repos = {b["repo"] for b in beads
+             if b["repo"] == project or b["repo"].endswith("/" + project)}
+    return next(iter(repos)) if len(repos) == 1 else None
+
+
+def attribute_task_beads(tasks, beads, run=_git):
+    """Tareas × beads → filas de atribución [{task, session, bead, method,
+    confidence, ...}] en orden de resolución explicit > git > temporal.
+
+    - explicit: el prompt de la tarea contiene el id del bead (conf 1.0).
+    - git: el git del repo de la sesión menciona el id (rama o commit) y la
+      tarea cae dentro de la ventana del bead (conf 0.8).
+    - temporal: sin id, mismo repo, y el inicio de la tarea cae dentro de
+      [started_at, closed_at] del bead (closed_at null = abierto); conf 0.5
+      y ventana declarada en la fila.
+    """
+    by_id = {b["id"].lower(): b for b in beads}
+    git_cache = {}
+    rows = []
+    sessions = _sessions_from_tasks(tasks)
+    for i, t in enumerate(tasks):
+        end = t["_start"] + timedelta(seconds=t.get("span_s") or 0.0)
+        ses = sessions[t["_sid"]] if t.get("_sid") is not None else None
+        repo = _session_repo(ses, beads)
+        found = []
+        # explicit: ids del prompt presentes en el índice de beads
+        for m in BEAD_ID_RE.finditer(t.get("prompt") or ""):
+            b = by_id.get(m.group(1).lower())
+            if b:
+                found.append((b, "explicit"))
+        if not found and repo:
+            start = t["_start"]
+            if repo not in git_cache:
+                git_cache[repo] = _git_mentioned_beads(
+                    next(b["path"] for b in beads if b["repo"] == repo), run=run)
+            for b in beads:
+                if b["repo"] != repo or b["id"].lower() not in git_cache[repo]:
+                    continue
+                # la ventana acota qué tareas del repo toca el bead: sin
+                # ella, cada tarea heredaría todos los ids del git (ruido)
+                if b["started_at"] and b["started_at"] <= end \
+                        and (not b["closed_at"] or start <= b["closed_at"]):
+                    found.append((b, "git"))
+        if not found and repo and ses:
+            start = t["_start"]
+            for b in beads:
+                if b["repo"] != repo or not b["started_at"] or b["started_at"] > start:
+                    continue
+                if b["closed_at"] and start > b["closed_at"]:
+                    continue
+                found.append((b, "temporal"))
+        seen = {}
+        for b, method in found:
+            seen.setdefault((b["id"], method), (b, method))
+        for (_bid, method), (b, _) in seen.items():
+            row = {"task": i, "session": t.get("_sid"), "bead": b["id"],
+                   "method": method, "confidence": TASK_BEAD_CONFIDENCE[method]}
+            if method == "temporal":
+                row["window"] = {"started_at": b["started_at"].isoformat(),
+                                 "closed_at": (b["closed_at"].isoformat()
+                                               if b["closed_at"] else None)}
+            rows.append(row)
+    return rows, sessions
+
+
+def compute_bead_costs(rows, sessions, session_spend):
+    """Fórmula CLRT-005. S(b) = sesiones atribuidas a b con method ∈
+    {explicit, git} (temporal solo cuenta); c(s) = session_spend[s]
+    .cost_effective (0.0 si no hay fila o es null). Sesión en k beads:
+    c(s)/k con split: true en las filas afectadas. Devuelve
+    {bead: {cost_per_bead, n_sessions, n_temporal}} y el mapa sesión→beads
+    con coste."""
+    spend = {}
+    spend_uuid = {}
+    for r in session_spend or []:
+        if isinstance(r, dict) and r.get("session_id"):
+            spend.setdefault(r["session_id"], r)
+            # pi: el tracker usa el uuid desnudo; el reporte lo trae embutido
+            # en el nombre de archivo de la sesión (`..._uuid`)
+            for m in re.finditer(
+                    r"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}",
+                    str(r["session_id"])):
+                spend_uuid.setdefault(m.group(0), r)
+
+    def cost_of(sid):
+        s = sessions[sid] if isinstance(sid, int) and 0 <= sid < len(sessions) else {}
+        row = spend.get(s.get("session_id")) or spend_uuid.get(s.get("session_id"))
+        c = (row or {}).get("cost_effective")
+        return float(c) if isinstance(c, (int, float)) else 0.0
+
+    s_beads = defaultdict(set)   # sid → beads con coste (explicit/git)
+    s_temporal = defaultdict(set)
+    for row in rows:
+        if row["method"] in ("explicit", "git"):
+            s_beads[row["session"]].add(row["bead"])
+        else:
+            s_temporal[row["session"]].add(row["bead"])
+    cost = {sid: cost_of(sid) for sid in set(s_beads) | set(s_temporal)}
+    bead_cost = defaultdict(float)
+    for sid, blist in s_beads.items():
+        share = cost[sid] / len(blist) if blist else 0.0
+        for b in blist:
+            bead_cost[b] += share
+    for row in rows:
+        if row["method"] in ("explicit", "git"):
+            k = len(s_beads.get(row["session"]) or ())
+            if k > 1:
+                row["split"] = True
+    per_bead = {}
+    for b in {r["bead"] for r in rows}:
+        per_bead[b] = {
+            "cost_per_bead": round(bead_cost.get(b, 0.0), 8),
+            "n_sessions": sum(1 for s in s_beads if b in s_beads[s]),
+            "n_temporal": sum(1 for s in s_temporal if b in s_temporal[s]),
+        }
+    return per_bead, s_beads
+
+
+def build_task_beads_doc(tasks, repo_paths, prefixes=None, session_spend=None,
+                         run=_git, now=None):
+    """Dataset data/task_beads.json: filas de atribución + coste por bead."""
+    beads = load_bead_records(repo_paths, prefixes)
+    rows, sessions = attribute_task_beads(tasks, beads, run=run)
+    per_bead, s_beads = compute_bead_costs(rows, sessions, session_spend)
+    with_cost = sorted(v["cost_per_bead"] for v in per_bead.values()
+                       if v["n_sessions"] >= 1)
+    return {
+        "metadata": {
+            "generated_at": (now or datetime.now(timezone.utc)).isoformat(),
+            "repo_roots": prefixes or ["~/para/areas/dev/gh"],
+            "confidence": dict(TASK_BEAD_CONFIDENCE),
+            "n_beads": len(beads),
+            "resolution": (
+                "explicit (id en el prompt de la tarea) > git (rama o commit "
+                "del repo menciona el id, tarea dentro de la ventana del "
+                "bead) > temporal (inicio de la tarea dentro de "
+                "[started_at, closed_at] del bead, closed_at null = abierto, "
+                "mismo repo)."),
+            "temporal_window": (
+                "[started_at, closed_at] del bead; techo de confianza 0.5 y "
+                "ventana declarada en cada fila temporal"),
+            "formula": (
+                "S(b) = sesiones atribuidas a b con method ∈ {explicit, "
+                "git}; cost_per_bead(b) = Σ c(s) con c(s) = "
+                "session_spend[s].cost_effective; las filas temporal NO "
+                "suman coste (solo n_temporal). Sesión en k beads: c(s)/k "
+                "con split: true. cost_per_bead_p50 = p50 sobre beads con "
+                "|S(b)| >= 1; n_beads_sin_coste = beads con S(b) = ∅."),
+            "task_index": (
+                "índice en la lista de tareas del tracker (mismo orden que "
+                "agent_metrics tasks); session = índice en sessions[]"),
+        },
+        "task_beads": rows,
+        "beads": [{"bead": k, **v} for k, v in sorted(per_bead.items())],
+        "cost_per_bead_p50": round(_pctl(with_cost, 0.5), 8) if with_cost else None,
+        "n_beads_sin_coste": len(beads) - len(with_cost),
+    }
+
+
+def _task_beads_schema_errors(doc):
+    sys.path.insert(0, str(ROOT / "scripts"))
+    from schema_validate import validate_against_schema  # noqa: PLC0415
+    return validate_against_schema(
+        doc, json.loads(TASK_BEADS_SCHEMA.read_text(encoding="utf-8")))
+
+
+# ----------------------------------------------------------------------
 # Ensamblado
 # ----------------------------------------------------------------------
 
@@ -871,6 +1111,12 @@ def main(argv=None):
         doc = json.loads(target.read_text(encoding="utf-8"))
         errors = _bead_schema_errors(doc) + bead_privacy_errors(doc)
         return _report_errors(errors) if errors else 0
+    if "--validate-task-beads" in argv:
+        # coffe-dnx.5: valida data/task_beads.json contra su schema
+        target = Path(argv[argv.index("--validate-task-beads") + 1])
+        errors = _task_beads_schema_errors(
+            json.loads(target.read_text(encoding="utf-8")))
+        return _report_errors(errors) if errors else 0
 
     cfg = load_config()
     report = json.loads(REPORT.read_text(encoding="utf-8"))
@@ -911,6 +1157,22 @@ def main(argv=None):
             json.dumps(bead, ensure_ascii=False, indent=2) + "\n",
             encoding="utf-8")
     merged = build_report(tasks, cfg, coverage, repos, meta, tz=tz)
+    # coffe-dnx.5: atribución tarea↔bead + coste por bead. Schema drift no
+    # aborta (mismo criterio que bead_index).
+    try:
+        spend = json.loads(REPORT.read_text(encoding="utf-8")).get("session_spend")
+    except (OSError, json.JSONDecodeError):
+        spend = []
+    tb = build_task_beads_doc(tasks, repo_paths, prefixes=cfg["repo_roots"],
+                              session_spend=spend)
+    tb_errors = _task_beads_schema_errors(tb)
+    for e in tb_errors[:10]:
+        print(f"task_beads schema: {e}", file=sys.stderr)
+    if not tb_errors:
+        TASK_BEADS_OUT.parent.mkdir(parents=True, exist_ok=True)
+        TASK_BEADS_OUT.write_text(
+            json.dumps(tb, ensure_ascii=False, indent=2) + "\n",
+            encoding="utf-8")
     merged["metadata"]["repo_roots"] = cfg["repo_roots"]
     merged["metadata"]["repo_roots_missing"] = missing_roots
     merged["metadata"]["min_commit_days"] = cfg["min_commit_days"]
