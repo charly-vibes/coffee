@@ -45,58 +45,71 @@ DDL_SCHEMA = (Path(__file__).resolve().parent.parent / "specs"
 # Reducers puros
 # ---------------------------------------------------------------------------
 
-def extract_adoption(commits, uses, registry=MANAGED_TOOLS, repos=FLEET_REPOS,
-                     repo_aliases=None):
-    """Línea de adopción por repo: primer commit de `.ddl/` + primer uso por tool.
-
-    commits: [{repo, date, files}]; uses: [{repo, tool, date}] — `repo` de uses
-    puede ser un cwd crudo; solo matchea vía repo_aliases explícito (sin fuzzy).
-    Devuelve {repo: {first_ddl_commit, tools_first_use, provenance}}; sin señal →
-    None con provenance "missing" (nunca fecha imputada).
-    """
-    repo_aliases = repo_aliases or {}
-    alias_to_repo = {}
-    for repo, aliases in repo_aliases.items():
+def _alias_to_repo(repo_aliases):
+    """{repo: [alias]} → {alias: repo} — matching explícito, sin fuzzy."""
+    out = {}
+    for repo, aliases in (repo_aliases or {}).items():
         for alias in aliases:
-            alias_to_repo[alias] = repo
+            out[alias] = repo
+    return out
 
-    def _repo_of(key):
-        return alias_to_repo.get(key, key)
 
-    out = {
-        repo: {
-            "first_ddl_commit": None,
-            "tools_first_use": {tool: None for tool in registry},
-            "provenance": {"first_ddl_commit": "missing",
-                           "tools_first_use": "missing"},
-        }
-        for repo in repos
-    }
-    first_ddl = {}
-    first_use = {}
+def _first_ddl_by_repo(commits):
+    """Primer commit que toca `.ddl/` por repo (fecha mínima)."""
+    first = {}
     for c in commits:
         if not any(".ddl/" in f for f in c["files"]):
             continue
         repo = c["repo"]
-        if repo not in first_ddl or c["date"] < first_ddl[repo]:
-            first_ddl[repo] = c["date"]
+        if repo not in first or c["date"] < first[repo]:
+            first[repo] = c["date"]
+    return first
+
+
+def _first_use_by_key(uses, registry, alias_to_repo):
+    """Primer uso por (repo, tool); usos de binarios no gestionados se ignoran."""
+    first = {}
     for u in uses:
         tool = _repo_of_tool(u["tool"], registry)
         if tool is None:
             continue
-        repo = _repo_of(u["repo"])
+        repo = alias_to_repo.get(u["repo"], u["repo"])
         key = (repo, tool)
-        if key not in first_use or u["date"] < first_use[key]:
-            first_use[key] = u["date"]
-    for repo in repos:
-        if repo in first_ddl:
-            out[repo]["first_ddl_commit"] = first_ddl[repo]
-            out[repo]["provenance"]["first_ddl_commit"] = "reported"
-        for tool in registry:
-            if (repo, tool) in first_use:
-                out[repo]["tools_first_use"][tool] = first_use[(repo, tool)]
-                out[repo]["provenance"]["tools_first_use"] = "reported"
-    return out
+        if key not in first or u["date"] < first[key]:
+            first[key] = u["date"]
+    return first
+
+
+def _adoption_row(first_ddl, first_use, repo, registry):
+    """Fila de adopción de un repo; sin señal → None con provenance missing."""
+    row = {
+        "first_ddl_commit": first_ddl.get(repo),
+        "tools_first_use": {tool: first_use.get((repo, tool))
+                            for tool in registry},
+        "provenance": {"first_ddl_commit": "missing",
+                       "tools_first_use": "missing"},
+    }
+    if repo in first_ddl:
+        row["provenance"]["first_ddl_commit"] = "reported"
+    if any((repo, tool) in first_use for tool in registry):
+        row["provenance"]["tools_first_use"] = "reported"
+    return row
+
+
+def extract_adoption(commits, uses, registry=MANAGED_TOOLS, **opts):
+    """Línea de adopción por repo: primer commit de `.ddl/` + primer uso por tool.
+
+    commits: [{repo, date, files}]; uses: [{repo, tool, date}] — `repo` de uses
+    puede ser un cwd crudo; solo matchea vía repo_aliases explícito (sin fuzzy).
+    opts: repos=FLEET_REPOS, repo_aliases=None. Devuelve {repo:
+    {first_ddl_commit, tools_first_use, provenance}}; sin señal → None con
+    provenance "missing" (nunca fecha imputada).
+    """
+    alias_to_repo = _alias_to_repo(opts.get("repo_aliases"))
+    first_ddl = _first_ddl_by_repo(commits)
+    first_use = _first_use_by_key(uses, registry, alias_to_repo)
+    return {repo: _adoption_row(first_ddl, first_use, repo, registry)
+            for repo in opts.get("repos", FLEET_REPOS)}
 
 
 def _repo_of_tool(tool, registry):
@@ -104,42 +117,94 @@ def _repo_of_tool(tool, registry):
     return tool if tool in registry else None
 
 
-def compute_dose(ddl_status, canaries, session_uses, registry=MANAGED_TOOLS,
-                 repos=FLEET_REPOS):
+def _dose_from_status(status, registry):
+    """Dosis reported desde `ddl status`: sanas / registry."""
+    healthy = [t for t in registry if t in set(status.get("healthy", []))]
+    present = [t for t in registry
+               if t in set(status.get("present", [])) | set(healthy)]
+    detail = {"present": present, "healthy": healthy,
+              "missing": [t for t in registry if t not in set(present)]}
+    return len(healthy) / len(registry), detail, "reported"
+
+
+def _dose_from_derived(canary_paths, session_tools, registry):
+    """Dosis derived: canarios git, luego usos de sesión; sin señal → missing."""
+    detail = {"present": [], "healthy": [], "missing": list(registry)}
+    via_canary = sorted({p.split("/")[1] for p in canary_paths
+                         if p.startswith(".ddl/") and p.split("/")[1] in registry})
+    found = via_canary or sorted(session_tools)
+    if not found:
+        return 0.0, detail, "missing"
+    detail = {"present": found, "healthy": [],
+              "missing": [t for t in registry if t not in set(found)]}
+    return len(found) / len(registry), detail, "derived"
+
+
+def _bind_args(args, opts, names, defaults):
+    """Liga argumentos posicionales + kwargs a `names` (forma estable con
+    ≤4 parámetros formales). Extra posicional → TypeError."""
+    if len(args) > len(names):
+        raise TypeError(
+            f"se esperaban a lo sumo {len(names)} argumentos posicionales")
+    bound = dict(zip(names, args))
+    for name in names[len(args):]:
+        bound[name] = opts.get(name, defaults.get(name))
+    return bound
+
+
+def compute_dose(*args, **opts):
     """Dosis por repo: fracción de `registry` presentes y sanas.
 
-    Jerarquía: ddl_status (reported) → canarios git (derived) → usos de sesión
-    (derived) → 0.0 con provenance "missing". ddl_status: {repo: {present,
-    healthy}} (o None); canaries: {repo: [paths bajo .ddl/]}; session_uses:
-    {repo: set(tools)}.
+    Posicionales: ddl_status, canaries, session_uses; kwargs: registry
+    (MANAGED_TOOLS), repos (FLEET_REPOS). Jerarquía: ddl_status (reported) →
+    canarios git (derived) → usos de sesión (derived) → 0.0 con provenance
+    "missing". ddl_status: {repo: {present, healthy}} (o None); canaries:
+    {repo: [paths bajo .ddl/]}; session_uses: {repo: set(tools)}.
     """
+    b = _bind_args(args, opts,
+                   ("ddl_status", "canaries", "session_uses", "registry",
+                    "repos"),
+                   {"registry": MANAGED_TOOLS, "repos": FLEET_REPOS})
     out = {}
-    for repo in repos:
-        detail = {"present": [], "healthy": [], "missing": list(registry)}
-        prov = "missing"
-        dose = 0.0
-        status = (ddl_status or {}).get(repo)
+    for repo in b["repos"]:
+        status = (b["ddl_status"] or {}).get(repo)
         if status:
-            healthy = [t for t in registry if t in set(status.get("healthy", []))]
-            present = [t for t in registry if t in set(status.get("present", [])) | set(healthy)]
-            detail = {"present": present, "healthy": healthy,
-                      "missing": [t for t in registry if t not in set(present)]}
-            dose = len(healthy) / len(registry)
-            prov = "reported"
+            dose, detail, prov = _dose_from_status(status, b["registry"])
         else:
-            canary_paths = (canaries or {}).get(repo) or []
-            via_canary = sorted({p.split("/")[1] for p in canary_paths
-                                 if p.startswith(".ddl/") and p.split("/")[1] in registry})
-            via_session = sorted((session_uses or {}).get(repo) or set())
-            found = via_canary or via_session
-            if found:
-                detail = {"present": found, "healthy": [],
-                          "missing": [t for t in registry if t not in set(found)]}
-                dose = len(found) / len(registry)
-                prov = "derived"
+            dose, detail, prov = _dose_from_derived(
+                (b["canaries"] or {}).get(repo) or [],
+                (b["session_uses"] or {}).get(repo) or set(), b["registry"])
         out[repo] = {"dose": dose, "dose_detail": detail,
                      "provenance": {"dose": prov}}
     return out
+
+
+def _tick_pending(pending):
+    """Avanza 1 assistant los contadores de cada tool con error pendiente."""
+    for tool in pending:
+        pending[tool] = [c + 1 for c in pending[tool]]
+
+
+def _result_values(ev, pending):
+    """toolResult ok → valores de recuperación cerrados; error → abre contador."""
+    _, tool, ok = ev
+    if ok:
+        return pending.pop(tool, [])
+    pending.setdefault(tool, []).append(0)
+    return []
+
+
+def _session_recovery(events):
+    """1 sesión → (valores de recuperación, censurados por fin de sesión)."""
+    values = []
+    pending = {}  # tool -> [assistants_since_error, ...]
+    for ev in events:
+        if ev[0] == "assistant":
+            _tick_pending(pending)
+        elif ev[0] == "result":
+            values.extend(_result_values(ev, pending))
+    censored = sum(len(counts) for counts in pending.values())
+    return values, censored
 
 
 def recovery_metrics(sessions):
@@ -152,22 +217,11 @@ def recovery_metrics(sessions):
     asistentes entre error y éxito cuenta como recuperación 0 (retry inmediato).
     """
     import statistics
-    values = []
-    n_errors = censored = 0
+    values, censored = [], 0
     for events in sessions:
-        pending = {}  # tool -> [assistants_since_error, ...]
-        for ev in events:
-            if ev[0] == "assistant":
-              for tool in pending:
-                pending[tool] = [c + 1 for c in pending[tool]]
-            elif ev[0] == "result":
-              _, tool, ok = ev
-              if ok:
-                values.extend(pending.pop(tool, []))
-              else:
-                pending.setdefault(tool, []).append(0)
-        for counts in pending.values():
-            censored += len(counts)
+        vals, cens = _session_recovery(events)
+        values.extend(vals)
+        censored += cens
     n_errors = len(values) + censored
     return {
         "recovery_p50_interactions": (statistics.median(values)
@@ -308,27 +362,50 @@ def gh_token(env=None, gh_auth=None):
                                   text=True, timeout=10).stdout.strip() or None
     try:
         tok_cli = gh_auth()
-    except Exception:  # noqa: BLE001 — gh ausente/fallando: (None, None)
+    except Exception as _err:  # noqa: BLE001 — gh ausente/fallando: (None, None)
         return None, None
     return (tok_cli, "gh auth token") if tok_cli else (None, None)
 
 
-def gh_runs_incremental(repo, fetch_fn, cache, ttl_days=7, now=None):
+def _runs_cache_fresh(cache, now, ttl_days):
+    """Cache dentro del TTL → copia con provenance 'cached'; si no, None."""
+    if not (cache and now):
+        return None
+    fetched = _parse_ts(cache.get("fetched_until"))
+    current = _parse_ts(now)
+    if fetched and current and (current - fetched).days < ttl_days:
+        out = dict(cache)
+        out["provenance"] = "cached"
+        return out
+    return None
+
+
+def _merge_runs(cache, fresh, since):
+    """Merge dedupe por id del cache stale con los runs frescos."""
+    by_id = {r["id"]: r for r in (cache or {}).get("runs", [])}
+    for r in fresh:
+        by_id[r["id"]] = r
+    runs = sorted(by_id.values(), key=lambda r: r["created_at"])
+    return {
+        "runs": runs,
+        "fetched_until": runs[-1]["created_at"] if runs else since,
+        "provenance": "reported",
+    }
+
+
+def gh_runs_incremental(repo, fetch_fn, cache=None, **opts):
     """Runs de GitHub Actions por repo con cache incremental (design D4/D8).
 
     fetch_fn(repo, since_iso|None) -> [run] — inyectable: tests no tocan red.
-    cache: {runs, fetched_until} o None. Dentro del TTL no hay red
-    (provenance 'cached'); stale → refetch solo runs posteriores a
-    fetched_until, merge dedupe por id. Red muerta → cache stale conservado
-    con provenance 'missing'+reason; 404 → reason 'repo_gone'.
+    cache: {runs, fetched_until} o None; opts: ttl_days=7, now=None. Dentro
+    del TTL no hay red (provenance 'cached'); stale → refetch solo runs
+    posteriores a fetched_until, merge dedupe por id. Red muerta → cache
+    stale conservado con provenance 'missing'+reason; 404 → 'repo_gone'.
     """
-    if cache and now:
-        fetched = _parse_ts(cache.get("fetched_until"))
-        current = _parse_ts(now)
-        if fetched and current and (current - fetched).days < ttl_days:
-            out = dict(cache)
-            out["provenance"] = "cached"
-            return out
+    ttl_days = opts.get("ttl_days", 7)
+    cached = _runs_cache_fresh(cache, opts.get("now"), ttl_days)
+    if cached:
+        return cached
     since = cache.get("fetched_until") if cache else None
     try:
         fresh = fetch_fn(repo, since)
@@ -339,15 +416,7 @@ def gh_runs_incremental(repo, fetch_fn, cache, ttl_days=7, now=None):
         msg = str(e)
         out["reason"] = "repo_gone" if "404" in msg else msg[:120]
         return out
-    by_id = {r["id"]: r for r in (cache or {}).get("runs", [])}
-    for r in fresh:
-        by_id[r["id"]] = r
-    runs = sorted(by_id.values(), key=lambda r: r["created_at"])
-    return {
-        "runs": runs,
-        "fetched_until": runs[-1]["created_at"] if runs else since,
-        "provenance": "reported",
-    }
+    return _merge_runs(cache, fresh, since)
 
 
 def ci_fail_rate(runs, month):
@@ -411,6 +480,46 @@ _PANEL_META_KEYS = frozenset(
 _PANEL_TAGS = frozenset({"reported", "derived", "cached", "missing"})
 
 
+def _field_tag(prov, field):
+    """Tag de provenance: {campo: tag} o tag escalar del emisor."""
+    return prov.get(field) if isinstance(prov, dict) else prov
+
+
+def _collect_reason(reason, field, reasons):
+    """Reason: {campo: texto} (si el campo tiene razón) o texto del emisor."""
+    if reason is None:
+        return
+    if isinstance(reason, dict):
+        if field in reason:
+            reasons[field] = reason[field]
+    else:
+        reasons[field] = reason
+
+
+def _merge_emitter(name, em, acc):
+    """Valida y mezcla un emisor en la celda; duplicados/campos unknown fallan.
+
+    acc: {"repo", "month", "metrics", "src", "reasons"} acumuladores de celda.
+    """
+    repo, month = acc["repo"], acc["month"]
+    metrics, src, reasons = acc["metrics"], acc["src"], acc["reasons"]
+    prov = em.get("provenance")
+    reason = em.get("reason")
+    for field in (k for k in em if k not in _PANEL_META_KEYS):
+        if field not in PANEL_METRICS:
+            raise ValueError(
+                f"{repo} {month}: campo '{field}' del emisor '{name}' no "
+                "está en PANEL_METRICS")
+        if field in metrics:
+            raise ValueError(
+                f"{repo} {month}: campo '{field}' emitido por más de un "
+                "emisor")
+        tag = _field_tag(prov, field)
+        metrics[field] = None if tag == "missing" else em[field]
+        src[field] = tag
+        _collect_reason(reason, field, reasons)
+
+
 def cell_from_emitters(repo, month, emitters):
     """Normaliza los emisores de un (repo, mes) a una celda del panel.
 
@@ -422,36 +531,30 @@ def cell_from_emitters(repo, month, emitters):
     loud: el schema (coffe-nea) no puede derivar de un panel que mintió.
     """
     metrics, src, reasons = {}, {}, {}
+    acc = {"repo": repo, "month": month, "metrics": metrics,
+           "src": src, "reasons": reasons}
     for name, em in (emitters or {}).items():
-        prov = em.get("provenance")
-        reason = em.get("reason")
-        for field in (k for k in em if k not in _PANEL_META_KEYS):
-            if field not in PANEL_METRICS:
-                raise ValueError(
-                    f"{repo} {month}: campo '{field}' del emisor '{name}' no "
-                    "está en PANEL_METRICS")
-            if field in metrics:
-                raise ValueError(
-                    f"{repo} {month}: campo '{field}' emitido por más de un "
-                    "emisor")
-            tag = prov.get(field) if isinstance(prov, dict) else prov
-            if tag == "missing":
-                metrics[field] = None
-            else:
-                metrics[field] = em[field]
-            src[field] = tag
-            if reason is not None:
-                if isinstance(reason, dict):
-                    if field in reason:
-                        reasons[field] = reason[field]
-                else:
-                    reasons[field] = reason
+        _merge_emitter(name, em, acc)
     out = {"repo": repo, "month": month}
     out.update(metrics)
     out["src"] = src
     if reasons:
         out["reasons"] = reasons
     return out
+
+
+def _validate_cell_metrics(cell, metrics, src):
+    """Invariantes loud de provenance: tag válido y None ⇔ 'missing'."""
+    for field, value in metrics.items():
+        tag = src.get(field)
+        if tag not in _PANEL_TAGS:
+            raise ValueError(
+                f"{cell['repo']} {cell['month']}: '{field}' sin tag de "
+                f"provenance válido (tiene {tag!r})")
+        if (value is None) != (tag == "missing"):
+            raise ValueError(
+                f"{cell['repo']} {cell['month']}: '{field}' valor {value!r} "
+                f"inconsistente con tag {tag!r} (None ⇔ missing)")
 
 
 def build_panel(cells):
@@ -465,16 +568,7 @@ def build_panel(cells):
     for cell in cells:
         metrics = {k: cell[k] for k in PANEL_METRICS if k in cell}
         src = cell.get("src", {})
-        for field, value in metrics.items():
-            tag = src.get(field)
-            if tag not in _PANEL_TAGS:
-                raise ValueError(
-                    f"{cell['repo']} {cell['month']}: '{field}' sin tag de "
-                    f"provenance válido (tiene {tag!r})")
-            if (value is None) != (tag == "missing"):
-                raise ValueError(
-                    f"{cell['repo']} {cell['month']}: '{field}' valor {value!r} "
-                    f"inconsistente con tag {tag!r} (None ⇔ missing)")
+        _validate_cell_metrics(cell, metrics, src)
         if all(v is None for v in metrics.values()):
             continue  # mes sin señal: afuera del array
         key = (cell["repo"], cell["month"])
@@ -493,39 +587,10 @@ def build_panel(cells):
     return rows
 
 
-def its_pre_post(rows, metric, adoption_month, seed=42, min_pre=3,
-                 n_boot=10_000):
-    """ITS simple (design D5, 'honestos antes que elegantes'): media móvil
-    trimestral pre/post del corte de adopción, delta post−pre e IC 95% por
-    bootstrap (10k resamples, seed fija para reproducibilidad).
-
-    rows: filas del panel de UN repo, orden libre (se ordenan por month).
-    Ventana pre mínima: min_pre meses — menos que eso omite el ITS con
-    'reason' explícita y delta None, nunca delta 0 disfrazado (spec). Meses
-    con la métrica None (missing) no cuentan en ninguna ventana.
-    """
+def _boot_mean_deltas(pre_ma, post_ma, seed, n_boot):
+    """IC bootstrap de la diferencia de medias móviles (seed fija)."""
     import random
     import statistics
-    series = sorted((r for r in rows if r.get(metric) is not None),
-                    key=lambda r: r["month"])
-    pre = [r[metric] for r in series if r["month"] < adoption_month]
-    post = [r[metric] for r in series if r["month"] >= adoption_month]
-    if len(pre) < min_pre:
-        return {"delta": None, "n_pre": len(pre), "n_post": len(post),
-                "reason": "ventana_pre_insuficiente"}
-    if not post:
-        return {"delta": None, "n_pre": len(pre), "n_post": 0,
-                "reason": "sin_meses_post"}
-
-    def _ma3(values):
-        return [statistics.fmean(values[i:i + 3])
-                for i in range(len(values) - 2)]
-
-    pre_ma, post_ma = _ma3(pre), _ma3(post)
-    if not pre_ma or not post_ma:
-        return {"delta": None, "n_pre": len(pre), "n_post": len(post),
-                "reason": "ventana_ma_trimestral_insuficiente"}
-    delta = statistics.fmean(post_ma) - statistics.fmean(pre_ma)
     rng = random.Random(seed)
     deltas = []
     for _ in range(n_boot):
@@ -533,15 +598,59 @@ def its_pre_post(rows, metric, adoption_month, seed=42, min_pre=3,
         bq = [post_ma[rng.randrange(len(post_ma))] for _ in post_ma]
         deltas.append(statistics.fmean(bq) - statistics.fmean(bp))
     deltas.sort()
-    lo = deltas[int(0.025 * (n_boot - 1))]
-    hi = deltas[int(0.975 * (n_boot - 1))]
+    return deltas[int(0.025 * (n_boot - 1))], deltas[int(0.975 * (n_boot - 1))]
+
+
+def _moving_avg3(values):
+    """Media móvil trimestral (ventana 3)."""
+    import statistics
+    return [statistics.fmean(values[i:i + 3])
+            for i in range(len(values) - 2)]
+
+
+def its_pre_post(rows, metric, adoption_month, **opts):
+    """ITS simple (design D5, 'honestos antes que elegantes'): media móvil
+    trimestral pre/post del corte de adopción, delta post−pre e IC 95% por
+    bootstrap (10k resamples, seed fija para reproducibilidad).
+
+    rows: filas del panel de UN repo, orden libre (se ordenan por month).
+    opts: seed=42, min_pre=3, n_boot=10_000. Ventana pre mínima: min_pre
+    meses — menos que eso omite el ITS con 'reason' explícita y delta None,
+    nunca delta 0 disfrazado (spec). Meses con la métrica None (missing) no
+    cuentan en ninguna ventana.
+    """
+    import statistics
+    min_pre = opts.get("min_pre", 3)
+    n_boot = opts.get("n_boot", 10_000)
+    seed = opts.get("seed", 42)
+    pre, post = _pre_post_series(rows, metric, adoption_month)
+    if len(pre) < min_pre:
+        return {"delta": None, "n_pre": len(pre), "n_post": len(post),
+                "reason": "ventana_pre_insuficiente"}
+    if not post:
+        return {"delta": None, "n_pre": len(pre), "n_post": 0,
+                "reason": "sin_meses_post"}
+    pre_ma, post_ma = _moving_avg3(pre), _moving_avg3(post)
+    if not pre_ma or not post_ma:
+        return {"delta": None, "n_pre": len(pre), "n_post": len(post),
+                "reason": "ventana_ma_trimestral_insuficiente"}
+    lo, hi = _boot_mean_deltas(pre_ma, post_ma, seed, n_boot)
     return {
-        "delta": delta,
+        "delta": statistics.fmean(post_ma) - statistics.fmean(pre_ma),
         "pre_mean": statistics.fmean(pre_ma),
         "post_mean": statistics.fmean(post_ma),
         "ci_low": lo, "ci_high": hi,
         "n_pre": len(pre), "n_post": len(post),
     }
+
+
+def _pre_post_series(rows, metric, adoption_month):
+    """Valores de la métrica separados en ventanas pre/post (None excluido)."""
+    series = sorted((r for r in rows if r.get(metric) is not None),
+                    key=lambda r: r["month"])
+    pre = [r[metric] for r in series if r["month"] < adoption_month]
+    post = [r[metric] for r in series if r["month"] >= adoption_month]
+    return pre, post
 
 
 def repo_deltas(rows_by_repo, metric, adoption_month):
@@ -554,10 +663,7 @@ def repo_deltas(rows_by_repo, metric, adoption_month):
     import statistics
     out = {}
     for repo, rows in rows_by_repo.items():
-        series = sorted((r for r in rows if r.get(metric) is not None),
-                        key=lambda r: r["month"])
-        pre = [r[metric] for r in series if r["month"] < adoption_month]
-        post = [r[metric] for r in series if r["month"] >= adoption_month]
+        pre, post = _pre_post_series(rows, metric, adoption_month)
         out[repo] = {
             "pre_mean": statistics.fmean(pre) if pre else None,
             "post_mean": statistics.fmean(post) if post else None,
@@ -565,6 +671,16 @@ def repo_deltas(rows_by_repo, metric, adoption_month):
                       if pre and post else None),
         }
     return out
+
+
+def _group_deltas(deltas, control_repos):
+    """Deltas pre→post por grupo: (tratamiento, control); None excluido."""
+    ctrl = set(control_repos)
+    dt = [d["delta"] for r, d in deltas.items()
+          if r not in ctrl and d["delta"] is not None]
+    dc = [d["delta"] for r, d in deltas.items()
+          if r in ctrl and d["delta"] is not None]
+    return dt, dc
 
 
 def did_2x2(deltas, control_repos, min_n=3):
@@ -575,11 +691,7 @@ def did_2x2(deltas, control_repos, min_n=3):
     lo marca (anti-anécdota).
     """
     import statistics
-    ctrl = set(control_repos)
-    dt = [d["delta"] for r, d in deltas.items()
-          if r not in ctrl and d["delta"] is not None]
-    dc = [d["delta"] for r, d in deltas.items()
-          if r in ctrl and d["delta"] is not None]
+    dt, dc = _group_deltas(deltas, control_repos)
     out = {
         "n_treatment": len(dt),
         "n_control": len(dc),
@@ -610,6 +722,18 @@ def _avg_ranks(values):
     return ranks
 
 
+def _pearson_on_ranks(doses, outcomes):
+    """Correlación de Pearson sobre rangos (= Spearman); None sin varianza."""
+    import statistics
+    mean_x, mean_y = statistics.fmean(doses), statistics.fmean(outcomes)
+    cov = sum((x - mean_x) * (y - mean_y) for x, y in zip(doses, outcomes))
+    var_x = sum((x - mean_x) ** 2 for x in doses)
+    var_y = sum((y - mean_y) ** 2 for y in outcomes)
+    if var_x == 0 or var_y == 0:
+        return None
+    return cov / (var_x * var_y) ** 0.5
+
+
 def dose_response(points, metric, min_n=3):
     """Spearman dosis × outcome (design D5): correlación de rangos por métrica,
     con n de la celda visible. Pares con dosis u outcome None no cuentan.
@@ -617,7 +741,6 @@ def dose_response(points, metric, min_n=3):
     varianza (toda la flota ~1, design Riesgos) → rho None con reason
     'sin_varianza' — degenerada declarada, nunca correlación fake.
     """
-    import statistics
     pairs = [(p["dose"], p[metric]) for p in points
              if p.get("dose") is not None and p.get(metric) is not None]
     n = len(pairs)
@@ -625,13 +748,10 @@ def dose_response(points, metric, min_n=3):
         return {"spearman_rho": None, "n": n, "reason": "n_insuficiente"}
     doses = _avg_ranks([d for d, _ in pairs])
     outcomes = _avg_ranks([v for _, v in pairs])
-    mean_x, mean_y = statistics.fmean(doses), statistics.fmean(outcomes)
-    cov = sum((x - mean_x) * (y - mean_y) for x, y in zip(doses, outcomes))
-    var_x = sum((x - mean_x) ** 2 for x in doses)
-    var_y = sum((y - mean_y) ** 2 for y in outcomes)
-    if var_x == 0 or var_y == 0:
+    rho = _pearson_on_ranks(doses, outcomes)
+    if rho is None:
         return {"spearman_rho": None, "n": n, "reason": "sin_varianza"}
-    return {"spearman_rho": cov / (var_x * var_y) ** 0.5, "n": n}
+    return {"spearman_rho": rho, "n": n}
 
 
 def validate_report(report):
@@ -646,26 +766,10 @@ def validate_report(report):
 validate_against_schema = schema_validate.validate_against_schema
 
 
-def did_bootstrap(deltas, control_repos, seed=42, min_n=3, n_boot=10_000):
-    """DiD 2×2 con IC 95% bootstrap (ticket coffe-470): punto idéntico a
-    did_2x2; el IC re-muestrea los deltas por repo con reemplazo dentro de
-cada grupo (10k resamples, seed fija). Con n ~3 por grupo el IC es grueso —
-es la honestidad del diseño (D5), no un bug. Regla dura n < min_n → None con
-    reason 'n_insuficiente', nunca IC inventado.
-    """
+def _boot_group_deltas(dt, dc, seed, n_boot):
+    """Distribución bootstrap de la diferencia de deltas por grupo."""
     import random
     import statistics
-    ctrl = set(control_repos)
-    dt = [d["delta"] for r, d in deltas.items()
-          if r not in ctrl and d["delta"] is not None]
-    dc = [d["delta"] for r, d in deltas.items()
-          if r in ctrl and d["delta"] is not None]
-    if len(dt) < min_n or len(dc) < min_n:
-        return {"did": None, "ci_low": None, "ci_high": None,
-                "delta_treatment": (statistics.fmean(dt) if dt else None),
-                "delta_control": (statistics.fmean(dc) if dc else None),
-                "n_treatment": len(dt), "n_control": len(dc),
-                "reason": "n_insuficiente"}
     rng = random.Random(seed)
     boots = []
     for _ in range(n_boot):
@@ -673,6 +777,29 @@ es la honestidad del diseño (D5), no un bug. Regla dura n < min_n → None con
         bc = [dc[rng.randrange(len(dc))] for _ in dc]
         boots.append(statistics.fmean(bt) - statistics.fmean(bc))
     boots.sort()
+    return boots
+
+
+def did_bootstrap(deltas, control_repos, **opts):
+    """DiD 2×2 con IC 95% bootstrap (ticket coffe-470): punto idéntico a
+    did_2x2; el IC re-muestrea los deltas por repo con reemplazo dentro de
+cada grupo (10k resamples, seed fija). Con n ~3 por grupo el IC es grueso —
+es la honestidad del diseño (D5), no un bug. Regla dura n < min_n → None con
+    reason 'n_insuficiente', nunca IC inventado. opts: seed=42, min_n=3,
+    n_boot=10_000.
+    """
+    import statistics
+    seed = opts.get("seed", 42)
+    min_n = opts.get("min_n", 3)
+    n_boot = opts.get("n_boot", 10_000)
+    dt, dc = _group_deltas(deltas, control_repos)
+    if len(dt) < min_n or len(dc) < min_n:
+        return {"did": None, "ci_low": None, "ci_high": None,
+                "delta_treatment": (statistics.fmean(dt) if dt else None),
+                "delta_control": (statistics.fmean(dc) if dc else None),
+                "n_treatment": len(dt), "n_control": len(dc),
+                "reason": "n_insuficiente"}
+    boots = _boot_group_deltas(dt, dc, seed, n_boot)
     return {
         "did": statistics.fmean(dt) - statistics.fmean(dc),
         "ci_low": boots[int(0.025 * (n_boot - 1))],
@@ -707,6 +834,22 @@ def build_alias_map(repo_aliases):
     return out
 
 
+def _cwd_path_key(cwd):
+    """cwd → clave de mapeo según la convención /para/areas/dev/gh/<org>/<dir>.
+
+    'org/dir' si hay ≥2 segmentos, dir suelto si hay 1; None fuera de la
+    convención.
+    """
+    if PATH_MARKER not in cwd:
+        return None
+    rest = cwd.split(PATH_MARKER, 1)[1].strip("/").split("/")
+    if len(rest) >= 2 and rest[1]:
+        return f"{rest[0]}/{rest[1]}"
+    if rest and rest[0]:
+        return rest[0]
+    return None
+
+
 def cwd_to_repo(cwd, alias_map=None):
     """cwd de sesión → repo canónico de la flota, o None.
 
@@ -716,17 +859,11 @@ def cwd_to_repo(cwd, alias_map=None):
     """
     if not cwd:
         return None
-    am = dict(DEFAULT_REPO_DIRS)
-    am.update(alias_map or {})
-    key = None
-    if PATH_MARKER in cwd:
-        rest = cwd.split(PATH_MARKER, 1)[1].strip("/").split("/")
-        if len(rest) >= 2 and rest[1]:
-            key = f"{rest[0]}/{rest[1]}"
-        elif rest and rest[0]:
-            key = rest[0]
+    key = _cwd_path_key(cwd)
     if key is None:
         return None
+    am = dict(DEFAULT_REPO_DIRS)
+    am.update(alias_map or {})
     if key in am:
         return am[key]
     dir_name = key.split("/", 1)[1] if "/" in key else key
@@ -746,6 +883,60 @@ def _bash_tokens(command):
     return tokens
 
 
+def _collect_uses_from_call(part, ts, state, registry):
+    """1 toolCall → uso directo del binario + usos via bash (primer token)."""
+    name = part.get("name") or part.get("toolName")
+    if name in registry and name not in state["uses"]:
+        state["uses"][name] = ts
+    if name == "bash":
+        for tok in _bash_tokens((part.get("arguments") or {}).get("command")):
+            if tok in registry and tok not in state["uses"]:
+                state["uses"][tok] = ts
+
+
+def _handle_assistant_message(msg, ts, state, registry):
+    """Mensaje assistant: marcador de recovery + usos de toolCalls."""
+    state["events"].append(("assistant", None, None, ts))
+    for part in (msg.get("content") or msg.get("parts") or []):
+        if not (isinstance(part, dict)
+                and str(part.get("type")) == "toolCall"):
+            continue
+        _collect_uses_from_call(part, ts, state, registry)
+
+
+def _handle_message_entry(msg, ts, state, registry):
+    """1 mensaje pi → eventos de recovery y usos de binarios gestionados."""
+    role = msg.get("role")
+    if role == "assistant":
+        _handle_assistant_message(msg, ts, state, registry)
+    elif role == "toolResult":
+        tool = str(msg.get("toolName") or "tool")
+        ok = not bool(msg.get("isError"))
+        state["events"].append(("result", tool, ok, ts))
+
+
+def _feed_entry(entry, state, registry):
+    """1 entrada JSONL → cwd de sesión o manejo del mensaje."""
+    if entry.get("type") == "session":
+        if state["cwd"] is None:
+            state["cwd"] = entry.get("cwd") or None
+        return
+    if entry.get("type") != "message":
+        return
+    _handle_message_entry(entry.get("message", {}) or {},
+                          entry.get("timestamp"), state, registry)
+
+
+def _iter_session_entries(path):
+    """JSONL → entradas parseadas; líneas corruptas se omiten."""
+    with open(path, encoding="utf-8", errors="replace") as fh:
+        for line in fh:
+            try:
+                yield json.loads(line)
+            except json.JSONDecodeError:
+                continue
+
+
 def parse_pi_session(path, registry=MANAGED_TOOLS):
     """1 archivo JSONL de pi → {cwd, events, uses} o None sin señal.
 
@@ -754,45 +945,16 @@ def parse_pi_session(path, registry=MANAGED_TOOLS):
     del PRIMER uso de cada binario gestionado (via bash, token inicial del
     comando; design D3 fuente 3).
     """
-    cwd, events, uses = None, [], {}
+    state = {"cwd": None, "events": [], "uses": {}}
     try:
-        with open(path, encoding="utf-8", errors="replace") as fh:
-            for line in fh:
-                try:
-                    entry = json.loads(line)
-                except json.JSONDecodeError:
-                    continue
-                ts = entry.get("timestamp")
-                if entry.get("type") == "session":
-                    cwd = (entry.get("cwd") or None) if cwd is None else cwd
-                    continue
-                if entry.get("type") != "message":
-                    continue
-                msg = entry.get("message", {}) or {}
-                role = msg.get("role")
-                if role == "assistant":
-                    events.append(("assistant", None, None, ts))
-                    for part in (msg.get("content") or msg.get("parts") or []):
-                        if not (isinstance(part, dict)
-                                and str(part.get("type")) == "toolCall"):
-                            continue
-                        name = part.get("name") or part.get("toolName")
-                        if name in registry and name not in uses:
-                            uses[name] = ts
-                        if name == "bash":
-                            for tok in _bash_tokens(
-                                    (part.get("arguments") or {}).get("command")):
-                                if tok in registry and tok not in uses:
-                                    uses[tok] = ts
-                elif role == "toolResult":
-                    tool = str(msg.get("toolName") or "tool")
-                    ok = not bool(msg.get("isError"))
-                    events.append(("result", tool, ok, ts))
+        for entry in _iter_session_entries(path):
+            _feed_entry(entry, state, registry)
     except OSError:
         return None
-    if not events and not uses:
+    if not state["events"] and not state["uses"]:
         return None
-    return {"cwd": cwd, "events": events, "uses": uses}
+    return {"cwd": state["cwd"], "events": state["events"],
+            "uses": state["uses"]}
 
 
 def walk_pi_sessions(sessions_dir=None, alias_map=None, fleet=FLEET_REPOS):
@@ -919,6 +1081,30 @@ def repo_local_path(repo, repo_paths=None, root=None):
     return cand
 
 
+def _ddl_item_status(item, present, healthy):
+    """1 item de `ddl status`: label presente salvo level error; healthy aparte."""
+    label = item.get("label")
+    if not label:
+        return
+    level = item.get("level")
+    if level != "error":
+        present.append(label)
+    if level == "healthy":
+        healthy.append(label)
+
+
+def _ddl_status_items(envelope):
+    """Secciones del envelope `ddl status --json` → (present, healthy).
+
+    'not installed' (level error) no es presente; 'healthy' también es presente.
+    """
+    present, healthy = [], []
+    for section in (envelope.get("data") or {}).get("sections") or []:
+        for item in section.get("items") or []:
+            _ddl_item_status(item, present, healthy)
+    return present, healthy
+
+
 def ddl_status_global(run=None):
     """`ddl status --json` → {present, healthy} por herramienta (D3 fuente 1).
     'not installed' (level error) no es presente. Binario ausente → None."""
@@ -933,17 +1119,7 @@ def ddl_status_global(run=None):
         envelope = json.loads(run(["ddl", "status", "--json"]))
     except Exception:  # noqa: BLE001
         return None
-    present, healthy = [], []
-    for section in (envelope.get("data") or {}).get("sections") or []:
-        for item in section.get("items") or []:
-            label = item.get("label")
-            level = item.get("level")
-            if not label:
-                continue
-            if level != "error":
-                present.append(label)
-            if level == "healthy":
-                healthy.append(label)
+    present, healthy = _ddl_status_items(envelope)
     return {"present": present, "healthy": healthy}
 
 
@@ -1004,12 +1180,7 @@ def terapia_errors_global(cache_path, ttl_days=7, now=None, run=None):
     como contexto, no en filas por repo-mes (atribución imposible sin
     inventar). Sin binario → missing con razón, cache stale conservado."""
     cache_path = Path(cache_path)
-    cache = None
-    if cache_path.exists():
-        try:
-            cache = json.loads(cache_path.read_text())
-        except (json.JSONDecodeError, OSError):
-            cache = None
+    cache = _load_json_cache(cache_path, None)
     if _cache_fresh(cache, now, ttl_days):
         return {"data": cache["data"], "provenance": "cached",
                 "fetched_until": cache["fetched_until"]}
@@ -1026,27 +1197,54 @@ def terapia_errors_global(cache_path, ttl_days=7, now=None, run=None):
     except Exception as e:  # noqa: BLE001
         return {"data": None, "provenance": "missing", "reason": str(e)}
     fetched = now or datetime_now_iso()
-    try:
-        cache_path.parent.mkdir(parents=True, exist_ok=True)
-        cache_path.write_text(json.dumps({"data": data,
-                                          "fetched_until": fetched},
-                                         indent=2) + "\n")
-    except OSError:
-        pass
+    _write_json(cache_path, {"data": data, "fetched_until": fetched})
     return {"data": data, "provenance": "reported", "fetched_until": fetched}
 
 
-def ah_findings_cached(repos, cache_path, ttl_days=7, now=None, runner=None):
+def _load_json_cache(cache_path, default):
+    """Cache JSON en disco → objeto; corrupto/ilegible → default."""
+    if not cache_path.exists():
+        return default
+    try:
+        return json.loads(cache_path.read_text())
+    except (json.JSONDecodeError, OSError):
+        return default
+
+
+def _write_json(path, data):
+    """Escritura best-effort de cache JSON (mkdir -p; OSError se ignora)."""
+    try:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(json.dumps(data, indent=2) + "\n")
+    except OSError:
+        pass
+
+
+def _fresh_ah_entry(runner, repo, now):
+    """Entrada de un repo recién corrido: findings o missing con razón."""
+    try:
+        _exit, stdout = runner(repo)
+        env = json.loads(stdout)
+        findings = (env.get("data") or {}).get("findings")
+    except Exception as _err:  # noqa: BLE001 — sin setup / stdout no-JSON
+        findings = None
+    entry = {"fetched_until": now or datetime_now_iso()}
+    if findings is not None:
+        entry.update({"findings": len(findings), "provenance": "reported"})
+    else:
+        entry.update({"findings": None, "provenance": "missing",
+                      "reason": "sin setup espectacular o salida no-JSON"})
+    return entry
+
+
+def ah_findings_cached(repos, cache_path, ttl_days=7, **opts):
     """findings de `ah check` por repo (D6: findings por corrida, serie desde
     cache data/cache/ah_findings.json). Repos sin setup espectacular →
     missing con razón. runner(repo) → (exit, stdout) inyectable."""
+    now = opts.get("now")
+    runner = opts.get("runner")
     cache_path = Path(cache_path)
-    cache = {}
-    if cache_path.exists():
-        try:
-            cache = json.loads(cache_path.read_text())
-        except (json.JSONDecodeError, OSError):
-            cache = {}
+    cache = _load_json_cache(cache_path, {})
     if runner is None:
         import subprocess
         def runner(repo):
@@ -1061,25 +1259,8 @@ def ah_findings_cached(repos, cache_path, ttl_days=7, now=None, runner=None):
             out[repo] = dict(entry)
             out[repo]["provenance"] = "cached"
             continue
-        try:
-            _exit, stdout = runner(repo)
-            env = json.loads(stdout)
-            findings = (env.get("data") or {}).get("findings")
-        except Exception:  # noqa: BLE001 — sin setup / stdout no-JSON
-            findings = None
-        entry = {"fetched_until": now or datetime_now_iso()}
-        if findings is not None:
-            entry.update({"findings": len(findings), "provenance": "reported"})
-        else:
-            entry.update({"findings": None, "provenance": "missing",
-                          "reason": "sin setup espectacular o salida no-JSON"})
-        out[repo] = entry
-        cache[repo] = entry
-    try:
-        cache_path.parent.mkdir(parents=True, exist_ok=True)
-        cache_path.write_text(json.dumps(cache, indent=2) + "\n")
-    except OSError:
-        pass
+        out[repo] = cache[repo] = _fresh_ah_entry(runner, repo, now)
+    _write_json(cache_path, cache)
     return out
 
 
@@ -1172,47 +1353,50 @@ def _latency_emitter(anchor_ts, commits):
     }
 
 
-def assemble_report(insumos):
-    """Ensambla el reporte completo (D2) desde insumos extraídos — puro,
-    testeable con sintéticos. Insumos: usage_report, sessions (walk), git
-    {repo: {commits, releases, has_ddl_now}}, gh {repo: {runs, provenance}},
-    topics {repo: {topic_ddl}}, ddl_status, terapia, ah {repo: entry}, now."""
-    fleet = FLEET_REPOS
-    sessions = insumos.get("sessions") or []
-    git = insumos.get("git") or {}
-    gh = insumos.get("gh") or {}
-    topics = insumos.get("topics") or {}
-    now = insumos.get("now")
+def _canary_paths(git, fleet):
+    """Paths bajo `.ddl/` conocidos por git, por repo (fuente derived de dosis)."""
+    return {repo: sorted({f for c in (git.get(repo) or {}).get("commits") or []
+                          for f in c.get("files") or []
+                          if f.startswith(".ddl/")})
+            for repo in fleet}
 
-    # --- repos[]: adopción + dosis corriente + control (D3, D6) ---
-    commit_rows = [dict(c, repo=repo)
-                   for repo, g in git.items()
-                   for c in (g.get("commits") or [])]
-    use_rows = uses_rows(sessions)
-    adoption = extract_adoption(commit_rows, use_rows, repos=fleet)
-    canaries = {repo: sorted({f for c in (git.get(repo) or {}).get("commits") or []
-                              for f in c.get("files") or []
-                              if f.startswith(".ddl/")})
-                for repo in fleet}
-    session_uses = {}
+
+def _session_uses(use_rows):
+    """Filas de uso → {repo: set(tools)}."""
+    uses = {}
     for row in use_rows:
-        session_uses.setdefault(row["repo"], set()).add(row["tool"])
+        uses.setdefault(row["repo"], set()).add(row["tool"])
+    return uses
+
+
+def _current_dose(insumos, git, use_rows, fleet):
+    """Dosis corriente: ddl status reported sólo en repos con `.ddl/` hoy;
+    si no, canarios git y usos de sesión (derived)."""
+    canaries = _canary_paths(git, fleet)
+    session_uses = _session_uses(use_rows)
     status = insumos.get("ddl_status")
     ddl_status_per_repo = {}
     if status:
         ddl_status_per_repo = {repo: status for repo in fleet
                                if (git.get(repo) or {}).get("has_ddl_now")}
-    dose_current = compute_dose(ddl_status_per_repo, canaries, session_uses,
-                                repos=fleet)
+    return compute_dose(ddl_status_per_repo, canaries, session_uses,
+                        repos=fleet)
+
+
+def _control_flags(git, topics, fleet):
+    """Control estructural por repo (sin `.ddl/` y sin topic ddl GitHub)."""
     repos_info = {repo: {"has_ddl": bool((git.get(repo) or {}).get("has_ddl_now")),
                          "topic_ddl": bool((topics.get(repo) or {}).get("topic_ddl"))}
                   for repo in fleet}
-    control = classify_control(repos_info)
+    return classify_control(repos_info)
 
-    repos_out = []
+
+def _repos_out(fleet, adoption, control, dose_current):
+    """repos[] del reporte: adopción + dosis corriente + flags control."""
+    repos = []
     for repo in fleet:
         adv = adoption[repo]
-        repos_out.append({
+        repos.append({
             "repo": repo,
             "is_control": control[repo]["is_control"],
             "is_outlier": control[repo]["is_outlier"],
@@ -1225,15 +1409,21 @@ def assemble_report(insumos):
             "dose_detail": dose_current[repo]["dose_detail"],
             "dose_provenance": dose_current[repo]["provenance"]["dose"],
         })
+    return repos
 
-    # --- monthly[]: panel repo × mes (D2) ---
-    buckets = events_by_repo_month(sessions)
-    sessions_per_month = {}
+
+def _sessions_per_month(sessions):
+    """Sesiones pi activas por (repo, mes): cuenta 1 por sesión-mes."""
+    per_month = {}
     for s in sessions:
         months = {str(ev[3])[:7] for ev in (s.get("events") or []) if ev[3]}
         for m in months:
-            sessions_per_month[(s["repo"], m)] = \
-                sessions_per_month.get((s["repo"], m), 0) + 1
+            per_month[(s["repo"], m)] = per_month.get((s["repo"], m), 0) + 1
+    return per_month
+
+
+def _first_use_index(repos_out, use_rows):
+    """Índice first_use para monthly_dose: sesiones + tools_first_use."""
     first_use = {r["repo"]: {} for r in repos_out}
     for row in use_rows:
         first_use[row["repo"]][row["tool"]] = row["date"]
@@ -1243,57 +1433,84 @@ def assemble_report(insumos):
         for t, d in (r["adoption"]["tools_first_use"] or {}).items():
             if d:
                 first_use.setdefault(r["repo"], {}).setdefault(t, d)
+    return first_use
 
-    activity_months = set(buckets) | set(sessions_per_month)
-    usage = insumos.get("usage_report") or {}
-    proj_rows = usage.get("project_monthly") or {}
-    for project, months in proj_rows.items():
+
+def _activity_months(buckets, sessions_per_month, usage, fleet):
+    """Todo (repo, mes) con señal en buckets, sesiones pi o project_monthly."""
+    months = set(buckets) | set(sessions_per_month)
+    proj_rows = (usage or {}).get("project_monthly") or {}
+    for project, ms in proj_rows.items():
         repo = project.split("-", 1)[-1]
         if repo in fleet:
-            for m in months:
-                activity_months.add((repo, m))
+            for m in ms:
+                months.add((repo, m))
+    return months
 
-    cells, clamped_total = [], 0
-    ah = insumos.get("ah") or {}
-    for repo, month in sorted(activity_months):
-        emitters = {"usage": _usage_emitter(
-            usage, repo, month, sessions_per_month.get((repo, month), 0))}
-        if (repo, month) in buckets and buckets[(repo, month)]:
-            emitters["recovery"] = _recovery_emitter(buckets[(repo, month)])
-        anchor = max((ev[3] for s in sessions if s["repo"] == repo
-                      for ev in (s.get("events") or [])
-                      if ev[3] and str(ev[3])[:7] == month), default=None)
-        if anchor and git.get(repo):
-            emitters["latency"] = _latency_emitter(
-                anchor, git[repo].get("commits") or [])
-            clamped_total += emitters["latency"]["clamped_negative"]
-        if git.get(repo):
-            month_commits = [c for c in git[repo].get("commits") or []
-                             if str(c["date"])[:7] == month]
-            month_releases = [d for d in git[repo].get("releases") or []
-                              if str(d)[:7] == month]
-            emitters["git"] = git_proxies(month_commits, month_releases)
-        if repo in gh and gh[repo].get("runs") is not None:
-            emitters["ci"] = ci_fail_rate(gh[repo]["runs"], month)
-            # D7: los runs vienen del cache gh → tag cached, no reported
-            # (el reducer no sabe de dónde salieron los runs).
-            if gh[repo].get("provenance") == "cached" \
-                    and emitters["ci"]["provenance"] == "reported":
-                emitters["ci"]["provenance"] = "cached"
-        entry = ah.get(repo) or {}
-        if entry.get("findings") is not None \
-                and str(entry.get("fetched_until") or "")[:7] == month:
-            emitters["ah"] = {"ah_check_findings": entry["findings"],
-                              "provenance": {"ah_check_findings":
-                                             entry["provenance"]}}
-        emitters["dose"] = monthly_dose(repo, month, first_use)
-        cells.append(cell_from_emitters(repo, month, emitters))
-    panel = build_panel(cells)
 
-    # --- analysis: ITS / DiD / dosis-respuesta (D5) ---
-    rows_by_repo = {}
-    for r in panel:
-        rows_by_repo.setdefault(r["repo"], []).append(r)
+def _anchor_ts(sessions, repo, month):
+    """Último timestamp de evento del repo en el mes (ancla de latencia)."""
+    return max((ev[3] for s in sessions if s["repo"] == repo
+                for ev in (s.get("events") or [])
+                if ev[3] and str(ev[3])[:7] == month), default=None)
+
+
+def _month_git_emitter(git_repo, month):
+    """git_proxies limitado al mes (commits y releases)."""
+    month_commits = [c for c in git_repo.get("commits") or []
+                     if str(c["date"])[:7] == month]
+    month_releases = [d for d in git_repo.get("releases") or []
+                      if str(d)[:7] == month]
+    return git_proxies(month_commits, month_releases)
+
+
+def _month_ci_emitter(gh_repo, month):
+    """ci_fail_rate del mes; runs de cache gh → tag cached (D7)."""
+    ci = ci_fail_rate(gh_repo["runs"], month)
+    # D7: los runs vienen del cache gh → tag cached, no reported
+    # (el reducer no sabe de dónde salieron los runs).
+    if gh_repo.get("provenance") == "cached" \
+            and ci["provenance"] == "reported":
+        ci["provenance"] = "cached"
+    return ci
+
+
+def _month_ah_emitter(entry, month):
+    """findings `ah check` si la entrada es del mes; None si no aplica."""
+    if entry.get("findings") is None \
+            or str(entry.get("fetched_until") or "")[:7] != month:
+        return None
+    return {"ah_check_findings": entry["findings"],
+            "provenance": {"ah_check_findings": entry["provenance"]}}
+
+
+def _month_cell(repo, month, ctx):
+    """1 celda del panel: emisores usage/recovery/latency/git/ci/ah/dose."""
+    emitters = {"usage": _usage_emitter(
+        ctx["usage"], repo, month,
+        ctx["sessions_per_month"].get((repo, month), 0))}
+    if ctx["buckets"].get((repo, month)):
+        emitters["recovery"] = _recovery_emitter(ctx["buckets"][(repo, month)])
+    anchor = _anchor_ts(ctx["sessions"], repo, month)
+    git_repo = ctx["git"].get(repo)
+    if anchor and git_repo:
+        emitters["latency"] = _latency_emitter(
+            anchor, git_repo.get("commits") or [])
+        ctx["clamped_total"] += emitters["latency"]["clamped_negative"]
+    if git_repo:
+        emitters["git"] = _month_git_emitter(git_repo, month)
+    gh_repo = ctx["gh"].get(repo)
+    if gh_repo is not None and gh_repo.get("runs") is not None:
+        emitters["ci"] = _month_ci_emitter(gh_repo, month)
+    ah_emitter = _month_ah_emitter(ctx["ah"].get(repo) or {}, month)
+    if ah_emitter:
+        emitters["ah"] = ah_emitter
+    emitters["dose"] = monthly_dose(repo, month, ctx["first_use"])
+    return cell_from_emitters(repo, month, emitters)
+
+
+def _its_section(repos_out, rows_by_repo):
+    """ITS pre/post por repo-métrica con mes de adopción propio."""
     its = []
     for entry in repos_out:
         adm = entry["adoption"]["first_ddl_commit"]
@@ -1304,75 +1521,182 @@ def assemble_report(insumos):
                                str(adm)[:7])
             its.append({"repo": entry["repo"], "metric": metric,
                         "adoption_month": str(adm)[:7], **res})
+    return its
+
+
+def _did_section(repos_out, rows_by_repo):
+    """DiD 2×2 por métrica contra la frontera de adopción más temprana."""
     frontiers = sorted(str(e["adoption"]["first_ddl_commit"])[:7]
                        for e in repos_out
                        if e["adoption"]["first_ddl_commit"])
     did = []
-    if frontiers:
-        frontier = frontiers[0]
-        control_repos = {e["repo"] for e in repos_out if e["is_control"]}
-        for metric in ANALYSIS_METRICS:
-            deltas = repo_deltas(rows_by_repo, metric, frontier)
-            res = did_2x2(deltas, control_repos)
-            did.append({"metric": metric, "adoption_frontier": frontier,
-                        **res})
-    dose_response_out = []
+    if not frontiers:
+        return did
+    frontier = frontiers[0]
+    control_repos = {e["repo"] for e in repos_out if e["is_control"]}
     for metric in ANALYSIS_METRICS:
-        points = []
-        scatter = []
-        for entry in repos_out:
-            vals = [r[metric] for r in rows_by_repo.get(entry["repo"], [])
-                    if r.get(metric) is not None]
-            if vals:
-                import statistics
-                mean = statistics.fmean(vals)
-                points.append({"repo": entry["repo"],
-                               "dose": entry["dose"],
-                               metric: mean})
-                scatter.append({"repo": entry["repo"],
-                                "dose": entry["dose"], "outcome": mean})
-        dose_response_out.append({"metric": metric,
-                                  **dose_response(points, metric),
-                                  "points": scatter})
+        deltas = repo_deltas(rows_by_repo, metric, frontier)
+        res = did_2x2(deltas, control_repos)
+        did.append({"metric": metric, "adoption_frontier": frontier,
+                    **res})
+    return did
 
-    fleet_prov = {}
+
+def _dose_points(repos_out, rows_by_repo, metric):
+    """Pares (dosis, outcome medio) por repo para dosis-respuesta."""
+    import statistics
+    points, scatter = [], []
+    for entry in repos_out:
+        vals = [r[metric] for r in rows_by_repo.get(entry["repo"], [])
+                if r.get(metric) is not None]
+        if not vals:
+            continue
+        mean = statistics.fmean(vals)
+        points.append({"repo": entry["repo"],
+                       "dose": entry["dose"],
+                       metric: mean})
+        scatter.append({"repo": entry["repo"],
+                        "dose": entry["dose"], "outcome": mean})
+    return points, scatter
+
+
+def _dose_response_section(repos_out, rows_by_repo):
+    """Spearman dosis × outcome por métrica, con scatter visible."""
+    out = []
+    for metric in ANALYSIS_METRICS:
+        points, scatter = _dose_points(repos_out, rows_by_repo, metric)
+        out.append({"metric": metric,
+                    **dose_response(points, metric),
+                    "points": scatter})
+    return out
+
+
+def _fleet_provenance(fleet, git, gh, sessions_per_month):
+    """Presencia de insumos por repo + conteo total de sesiones pi."""
+    prov = {}
     for repo in fleet:
-        fleet_prov[repo] = {
+        prov[repo] = {
             "git": repo in git,
             "gh": repo in gh,
             "sessions": sessions_per_month.get((repo, ""), 0)
             or sum(n for (r, _m), n in sessions_per_month.items()
                    if r == repo),
         }
-    report = {
-        "metadata": {
-            "generated_at": now,
-            "seed_bootstrap": 42,
-            "managed_tools": list(MANAGED_TOOLS),
-            "fleet_definition": "repos charly-vibes con actividad en "
-                                "sesiones in-scope (walk pi) o interacciones "
-                                "en project_monthly",
-            "provenance": {
-                "fleet": fleet_prov,
-                "gh": {repo: (gh.get(repo) or {}).get("provenance", "missing")
-                       for repo in fleet},
-                "terapia": insumos.get("terapia") or {
-                    "data": None, "provenance": "missing",
-                    "reason": "sin insumo terapia"},
-                "ah": {repo: (ah.get(repo) or {}).get("provenance", "missing")
-                       for repo in fleet},
-                "sessions_bias": "sessions cuenta sólo sesiones pi (las "
-                                 "otras fuentes no exponen cwd por sesión; "
-                                 "coffe-i31)",
-            },
-            "clamped_negative_latencies": clamped_total,
+    return prov
+
+
+def _metadata(now, fleet, insumos, ctx):
+    """metadata del reporte: seeds, flota, provenance por fuente, bias.
+
+    ctx: acumuladores del panel (sessions_per_month, clamped_total).
+    """
+    git = insumos.get("git") or {}
+    gh = insumos.get("gh") or {}
+    ah = insumos.get("ah") or {}
+    sessions_per_month = ctx["sessions_per_month"]
+    return {
+        "generated_at": now,
+        "seed_bootstrap": 42,
+        "managed_tools": list(MANAGED_TOOLS),
+        "fleet_definition": "repos charly-vibes con actividad en "
+                            "sesiones in-scope (walk pi) o interacciones "
+                            "en project_monthly",
+        "provenance": {
+            "fleet": _fleet_provenance(fleet, git, gh, sessions_per_month),
+            "gh": {repo: (gh.get(repo) or {}).get("provenance", "missing")
+                   for repo in fleet},
+            "terapia": insumos.get("terapia") or {
+                "data": None, "provenance": "missing",
+                "reason": "sin insumo terapia"},
+            "ah": {repo: (ah.get(repo) or {}).get("provenance", "missing")
+                   for repo in fleet},
+            "sessions_bias": "sessions cuenta sólo sesiones pi (las "
+                             "otras fuentes no exponen cwd por sesión; "
+                             "coffe-i31)",
         },
+        "clamped_negative_latencies": ctx["clamped_total"],
+    }
+
+
+def _insumo(insumos, key, default):
+    """insumos.get(key) con default explícito (None → default)."""
+    val = insumos.get(key)
+    return default if val is None else val
+
+
+def _commit_rows(git):
+    """git {repo: {commits}} → filas planas [{repo, date, message, files}]."""
+    return [dict(c, repo=repo)
+            for repo, g in git.items()
+            for c in (g.get("commits") or [])]
+
+
+def _rows_by_repo(panel):
+    """panel → {repo: filas ordenadas} (insumo de ITS/DiD/dosis-respuesta)."""
+    rows = {}
+    for r in panel:
+        rows.setdefault(r["repo"], []).append(r)
+    return rows
+
+
+def _panel_cells(activity, ctx):
+    """1 celda por (repo, mes) con actividad, en orden reproducible."""
+    return [_month_cell(repo, month, ctx)
+            for repo, month in sorted(activity)]
+
+
+def _repos_section(insumos, fleet):
+    """Sección repos[]: adopción + dosis corriente + control (D3, D6).
+    Devuelve (repos_out, use_rows, git)."""
+    git = _insumo(insumos, "git", {})
+    use_rows = uses_rows(_insumo(insumos, "sessions", []))
+    adoption = extract_adoption(_commit_rows(git), use_rows, repos=fleet)
+    dose_current = _current_dose(insumos, git, use_rows, fleet)
+    control = _control_flags(git, _insumo(insumos, "topics", {}), fleet)
+    return _repos_out(fleet, adoption, control, dose_current), use_rows, git
+
+
+def _monthly_panel(insumos, fleet, repos_section):
+    """Sección monthly[]: panel repo × mes (D2).
+
+    repos_section: (repos_out, use_rows, git) de _repos_section.
+    Devuelve (panel, ctx).
+    """
+    repos_out, use_rows, git = repos_section
+    sessions = _insumo(insumos, "sessions", [])
+    buckets = events_by_repo_month(sessions)
+    sessions_per_month = _sessions_per_month(sessions)
+    usage = _insumo(insumos, "usage_report", {})
+    first_use = _first_use_index(repos_out, use_rows)
+    activity = _activity_months(buckets, sessions_per_month, usage, fleet)
+    ctx = {"usage": usage, "sessions": sessions,
+           "buckets": buckets, "sessions_per_month": sessions_per_month,
+           "first_use": first_use, "git": git,
+           "gh": _insumo(insumos, "gh", {}), "ah": _insumo(insumos, "ah", {}),
+           "clamped_total": 0}
+    return build_panel(_panel_cells(activity, ctx)), ctx
+
+
+def assemble_report(insumos):
+    """Ensambla el reporte completo (D2) desde insumos extraídos — puro,
+    testeable con sintéticos. Insumos: usage_report, sessions (walk), git
+    {repo: {commits, releases, has_ddl_now}}, gh {repo: {runs, provenance}},
+    topics {repo: {topic_ddl}}, ddl_status, terapia, ah {repo: entry}, now."""
+    fleet = FLEET_REPOS
+    repos_section = _repos_section(insumos, fleet)
+    panel, ctx = _monthly_panel(insumos, fleet, repos_section)
+    repos_out = repos_section[0]
+    rows_by_repo = _rows_by_repo(panel)
+    return {
+        "metadata": _metadata(insumos.get("now"), fleet, insumos, ctx),
         "repos": repos_out,
         "monthly": panel,
-        "analysis": {"its": its, "did": did,
-                     "dose_response": dose_response_out},
+        "analysis": {
+            "its": _its_section(repos_out, rows_by_repo),
+            "did": _did_section(repos_out, rows_by_repo),
+            "dose_response": _dose_response_section(repos_out, rows_by_repo),
+        },
     }
-    return report
 
 
 # ---------------------------------------------------------------------------
@@ -1380,7 +1704,7 @@ def assemble_report(insumos):
 # ---------------------------------------------------------------------------
 
 
-def main(argv=None):
+def _build_arg_parser():
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--output", default="data/ddl_effect.json")
     ap.add_argument("--usage-report", default="data/usage_report_v3.json")
@@ -1391,41 +1715,33 @@ def main(argv=None):
     ap.add_argument("--validate", metavar="ARCHIVO", default=None,
                     help="valida el JSON dado contra specs/ddl-effect.schema.json "
                          "y sale (0 válido / 1 inválido) sin regenerar")
-    args = ap.parse_args(argv)
+    return ap
 
-    if args.validate:
-        errors = validate_report(json.loads(Path(args.validate).read_text()))
-        if errors:
-            print("ddl-effect: schema inválido:", file=sys.stderr)
-            for e in errors:
-                print(f"  {e}", file=sys.stderr)
-            return 1
-        print(f"ddl-effect: {args.validate} válido contra {DDL_SCHEMA.name}")
-        return 0
 
-    out_path = Path(args.output)
+def _validate_file(args):
+    """Modo --validate: 0 válido / 1 inválido, sin regenerar."""
+    errors = validate_report(json.loads(Path(args.validate).read_text()))
+    if errors:
+        print("ddl-effect: schema inválido:", file=sys.stderr)
+        for e in errors:
+            print(f"  {e}", file=sys.stderr)
+        return 1
+    print(f"ddl-effect: {args.validate} válido contra {DDL_SCHEMA.name}")
+    return 0
 
-    # Guard (patrón usage-tracker): sin insumos locales no hay datos reales.
-    if not Path(args.usage_report).exists():
-        ap.error(
-            f"sin insumo {args.usage_report} — el tracker requiere el reporte de "
-            "usage; los logs fuente (~/.pi/agent/sessions, git, gh api) no están "
-            "versionados (ver README 'Los JSON en data/ son derivados')"
-        )
-    report_path = Path(args.usage_report)
-    usage_report = json.loads(report_path.read_text())
-    config = {}
-    if Path(args.config).exists():
-        config = json.loads(Path(args.config).read_text())
-    ddl_cfg = config.get("ddl_effect") or {}
-    alias_map = build_alias_map(ddl_cfg.get("repo_aliases"))
-    repo_paths = ddl_cfg.get("repo_paths") or {}
-    owners = ddl_cfg.get("repo_owners") or {"*": "charly-vibes"}
-    cache_dir = Path(args.cache_dir)
 
-    sessions = walk_pi_sessions(args.sessions_dir, alias_map)
-    print(f"ddl-effect: {len(sessions)} sesiones pi de la flota")
+def _owner_fn(owners):
+    """Slug de GitHub por repo: repo_owners trae owner suelto ('charly-vibes')
+    o slug completo ('charly-vibes/whisper' cuando el repo canónico y el de
+    GitHub no comparten nombre)."""
+    def _owner(repo):
+        val = owners.get(repo) or owners.get("*")
+        return val if "/" in val else f"{val}/{repo}"
+    return _owner
 
+
+def _git_insumos(repo_paths):
+    """git de la flota local: commits, releases y presencia de `.ddl/` hoy."""
     git_insumos = {}
     for repo in FLEET_REPOS:
         path = repo_local_path(repo, repo_paths)
@@ -1439,27 +1755,18 @@ def main(argv=None):
             "releases": git_releases(path) or [],
             "has_ddl_now": (path / ".ddl").is_dir(),
         }
+    return git_insumos
 
-    def _owner(repo):
-        """Slug de GitHub del repo: repo_owners puede traer owner suelto
-        ('charly-vibes') o slug completo ('charly-vibes/whisper' cuando el
-        repo canónico y el de GitHub no comparten nombre)."""
-        val = owners.get(repo) or owners.get("*")
-        return val if "/" in val else f"{val}/{repo}"
 
-    token, token_src = gh_token()
+def _gh_insumos(git_insumos, cache_dir, owner):
+    """Runs de gh api por repo local, con cache incremental y write-through."""
     gh_insumos = {}
     for repo in FLEET_REPOS:
         if repo not in git_insumos:  # gh sólo para repos locales (charly-vibes)
             continue
-        cache = None
         cache_file = cache_dir / "gh_runs" / f"{repo}.json"
-        if cache_file.exists():
-            try:
-                cache = json.loads(cache_file.read_text())
-            except (json.JSONDecodeError, OSError):
-                cache = None
-        owner_repo = _owner(repo)
+        cache = _load_json_cache(cache_file, None)
+        owner_repo = owner(repo)
 
         def _fetch(_repo, _since, owner_repo=owner_repo):
             runs = gh_runs_fetch(owner_repo)
@@ -1471,25 +1778,18 @@ def main(argv=None):
                                      now=datetime_now_iso())
         if merged is None:
             continue
-        prov = merged.get("provenance", "reported")
         gh_insumos[repo] = {"runs": merged.get("runs") or [],
-                            "provenance": prov}
-        try:
-            cache_file.parent.mkdir(parents=True, exist_ok=True)
-            cache_file.write_text(json.dumps(
-                {"runs": merged.get("runs") or [],
-                 "fetched_until": merged.get("fetched_until")}, indent=2) + "\n")
-        except OSError:
-            pass
+                            "provenance": merged.get("provenance", "reported")}
+        _write_json(cache_file, {"runs": merged.get("runs") or [],
+                                 "fetched_until": merged.get("fetched_until")})
+    return gh_insumos
 
+
+def _topics_insumos(git_insumos, cache_dir, owner):
+    """Topics ddl por repo local con cache semanal (insumo classify_control)."""
     topics = {}
     topics_cache = cache_dir / "gh_topics.json"
-    topics_cache_data = {}
-    if topics_cache.exists():
-        try:
-            topics_cache_data = json.loads(topics_cache.read_text())
-        except (json.JSONDecodeError, OSError):
-            topics_cache_data = {}
+    topics_cache_data = _load_json_cache(topics_cache, {})
     for repo in FLEET_REPOS:
         if repo not in git_insumos:
             continue
@@ -1498,7 +1798,7 @@ def main(argv=None):
                         datetime_now_iso(), 7):
             topics[repo] = entry
             continue
-        res = gh_topics(_owner(repo))
+        res = gh_topics(owner(repo))
         if res is None:
             if entry:
                 topics[repo] = {**entry, "provenance": "cached"}
@@ -1509,44 +1809,63 @@ def main(argv=None):
                  "fetched_until": datetime_now_iso()}
         topics[repo] = entry
         topics_cache_data[repo] = entry
-    try:
-        topics_cache.parent.mkdir(parents=True, exist_ok=True)
-        topics_cache.write_text(json.dumps(topics_cache_data, indent=2) + "\n")
-    except OSError:
-        pass
+    _write_json(topics_cache, topics_cache_data)
+    return topics
 
-    terapia = terapia_errors_global(cache_dir / "terapia_errors.json",
-                                    ttl_days=7, now=datetime_now_iso())
 
+def _ah_runner(repo_paths):
+    """runner(repo) → (exit, stdout) de `ah check` en el checkout local."""
     import subprocess
 
-    def _ah_runner(repo):
+    def runner(repo):
         cwd = repo_local_path(repo, repo_paths)
         r = subprocess.run(["ah", "check"], cwd=str(cwd),
                            capture_output=True, text=True, timeout=120)
         return r.returncode, r.stdout
 
-    ah = ah_findings_cached([r for r in FLEET_REPOS if r in git_insumos],
-                            cache_dir / "ah_findings.json", ttl_days=7,
-                            now=datetime_now_iso(), runner=_ah_runner)
+    return runner
 
-    insumos = {
-        "usage_report": usage_report,
+
+def _load_config(args):
+    """Config opcional (config/fpa.json) → sección ddl_effect."""
+    if not Path(args.config).exists():
+        return {}
+    config = json.loads(Path(args.config).read_text())
+    return config.get("ddl_effect") or {}
+
+
+def _fleet_insumos(args, ddl_cfg, cache_dir):
+    """Sesiones, git, gh, topics, ddl status, terapia y ah → insumos del
+    reporte (toda la capa de extracción I/O)."""
+    alias_map = build_alias_map(ddl_cfg.get("repo_aliases"))
+    repo_paths = ddl_cfg.get("repo_paths") or {}
+    sessions = walk_pi_sessions(args.sessions_dir, alias_map)
+    print(f"ddl-effect: {len(sessions)} sesiones pi de la flota")
+    git_insumos = _git_insumos(repo_paths)
+    owner = _owner_fn(ddl_cfg.get("repo_owners") or {"*": "charly-vibes"})
+    return {
         "sessions": sessions,
         "git": git_insumos,
-        "gh": gh_insumos,
-        "topics": topics,
+        "gh": _gh_insumos(git_insumos, cache_dir, owner),
+        "topics": _topics_insumos(git_insumos, cache_dir, owner),
         "ddl_status": ddl_status_global(),
-        "terapia": terapia,
-        "ah": ah,
+        "terapia": terapia_errors_global(cache_dir / "terapia_errors.json",
+                                         ttl_days=7,
+                                         now=datetime_now_iso()),
+        "ah": ah_findings_cached(
+            [r for r in FLEET_REPOS if r in git_insumos],
+            cache_dir / "ah_findings.json", ttl_days=7,
+            now=datetime_now_iso(), runner=_ah_runner(repo_paths)),
         "now": datetime_now_iso(),
     }
-    report = assemble_report(insumos)
+
+
+def _write_report(out_path, report, ap):
+    """Valida (fail loud), escribe y resume el reporte."""
     errors = validate_report(report)
     if errors:  # fail loud: el tracker no escribe un reporte inválido
         ap.error("reporte inválido contra " + DDL_SCHEMA.name + ": "
                  + "; ".join(errors))
-
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text(json.dumps(report, indent=2, sort_keys=False) + "\n")
     repos_n = len(report["repos"])
@@ -1555,8 +1874,33 @@ def main(argv=None):
           "panel, "
           f"{len(report['analysis']['its'])} ITS, "
           f"{len(report['analysis']['did'])} DiD")
+
+
+def main(argv=None):
+    ap = _build_arg_parser()
+    args = ap.parse_args(argv)
+
+    if args.validate:
+        return _validate_file(args)
+
+    out_path = Path(args.output)
+
+    # Guard (patrón usage-tracker): sin insumos locales no hay datos reales.
+    if not Path(args.usage_report).exists():
+        ap.error(
+            f"sin insumo {args.usage_report} — el tracker requiere el reporte de "
+            "usage; los logs fuente (~/.pi/agent/sessions, git, gh api) no están "
+            "versionados (ver README 'Los JSON en data/ son derivados')"
+        )
+    usage_report = json.loads(Path(args.usage_report).read_text())
+    ddl_cfg = _load_config(args)
+    cache_dir = Path(args.cache_dir)
+
+    insumos = _fleet_insumos(args, ddl_cfg, cache_dir)
+    insumos["usage_report"] = usage_report
+    report = assemble_report(insumos)
+    _write_report(out_path, report, ap)
     return 0
 
-    sys.exit(main())
 if __name__ == "__main__":
     sys.exit(main())
