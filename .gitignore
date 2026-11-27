@@ -15,3 +15,6 @@ __pycache__/
 # Claude Code local settings
 .claude/
 data/cache/
+
+# Pretender local state (baseline pretender-baseline.json IS tracked)
+.pretender/

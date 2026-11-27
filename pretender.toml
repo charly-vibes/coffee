@@ -1,0 +1,44 @@
+# pretender — static quality gate (https://crates.io/crates/pretender)
+# Gate mode fails only on NEW findings vs pretender-baseline.json.
+# Refresh the baseline after burning down debt: `pretender check --adopt`.
+[pretender]
+mode = "gate"
+languages = ["auto"]
+exclude = ["vendor/**", "node_modules/**", "data/**", "**/*_generated.*"]
+
+[roles.test]
+paths = ["tests/**"]
+
+[roles.script]
+paths = ["scripts/**"]
+
+# Application thresholds (defaults, kept strict)
+[thresholds]
+cyclomatic_max = 10
+cognitive_max = 15
+function_lines_max = 30
+file_lines_max = 400
+nesting_max = 3
+params_max = 4
+abc_max = 30
+duplication_pct_max = 5
+void_mutators_max = 3
+mut_ratio_max = 0.3
+unwrap_max = 5
+bool_cluster_max = 3
+primitive_param_check = false
+inheritance_depth_max = 2
+
+# Tests: relax path-count metrics (parametrized fixtures and table-driven
+# tests inflate cyclomatic/params by design); keep assertion coverage.
+[thresholds.test]
+cyclomatic_max = 10
+cognitive_max = 15
+function_lines_max = 80
+nesting_max = 3
+params_max = 4
+duplication_pct_max = 30
+min_assertions = 1
+mock_count_max = 5
+unwrap_max = 5
+lazy_cluster_min = 3
