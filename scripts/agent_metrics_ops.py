@@ -178,8 +178,8 @@ def main(argv=None):
         for e in errors[:10]:
             print(f"schema: {e}", file=sys.stderr)
         return 1
-    out.write_text(json.dumps(doc, ensure_ascii=False, separators=(",", ":"),
-                              sort_keys=True), encoding="utf-8")
+    out.write_text(json.dumps(doc, ensure_ascii=False, indent=2) + "\n",
+                   encoding="utf-8")
     lat = doc["ops"]["latency"]
     print(f"ops.latency: fuentes={len(lat['sources'])} proveedores={len(lat['providers'])} "
           f"· cobertura: " + ", ".join(f"{c['source']}={c['coverage_pct']}%"
