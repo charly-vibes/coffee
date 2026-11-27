@@ -55,6 +55,18 @@ if [ -f data/bead_index.json ]; then
         log "AVISO: bead_index no valida — se sigue con el resto"
     fi
 fi
+# coffe-a5v/izd: bloque ops (continuidad operativa) tras el tracker — cada
+# slice mergea su clave en data/agent_metrics.json validando contra el
+# schema (latency, fallback, quota, completion+intervention, subscription,
+# concurrency+stall+queue_wait). Igual que el tracker: un slice que falla
+# avisa loud pero no congela el resto del sitio.
+for ops_slice in agent_metrics_ops agent_metrics_ops_fallback \
+                 agent_metrics_ops_quota agent_metrics_ops_completion \
+                 agent_metrics_ops_subscription agent_metrics_ops_concurrency; do
+    if ! python3 "scripts/$ops_slice.py"; then
+        log "AVISO: ops slice $ops_slice falló — dashboard ops incompleto"
+    fi
+done
 python3 scripts/viz-agent.py
 python3 scripts/viz-agent.py --update-docs
 python3 scripts/viz-agent.py --check-docs

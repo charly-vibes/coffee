@@ -134,13 +134,13 @@ El deploy es vía **GitHub Actions** (no hay branch `gh-pages`): `.github/workfl
 ## Estado de los datos
 
 <!-- CHECK-DOCS:BEGIN -->
-- Interacciones: 313,756
+- Interacciones: 319,335
 - Proyectos: 123
-- Costo efectivo: $3,913.89
-- Costo real: $1,965.77
+- Costo efectivo: $3,934.43
+- Costo real: $1,986.31
 - Cash real (ledger): $1,516.72
-- Sesiones: 3,217
-- Periodo: 2025-12-23 → 2026-11-26
+- Sesiones: 3,236
+- Periodo: 2025-12-23 → 2026-11-27
 <!-- CHECK-DOCS:END -->
 
 Nota: `Costo real` es la suma mensual del tracker (fees implícitos del
@@ -221,7 +221,7 @@ Cifras headline (guard `--check-docs`; bloque generado por `viz-agent.py
 <!-- AGENT-DOCS:BEGIN -->
 - Prompts por día activo: 41,0
 - Duración de tarea P90: 2,5 min
-- Horas de agente por día activo: 0,79
+- Horas de agente por día activo: 0,80
 - Repos creados en el período: 94
 - Repos mantenidos: 79
 - Ventanas de período: 86
@@ -401,7 +401,7 @@ Con los datos actuales podemos generar:
 5. [ ] Interpretar el Gantt: los gaps sin actividad (vacaciones?) y los bloques densos de julio-agosto (¿migración masiva? ¿agentes paralelos?)
 
 <!-- CTX-DOCS:BEGIN -->
-- Sesiones con contexto: 2629
+- Sesiones con contexto: 2631
 - Excluidas (patológicas): 34
 - Stubs: 0
 - Pico p50 (tok): 72172

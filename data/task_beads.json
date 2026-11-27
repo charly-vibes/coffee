@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "generated_at": "2026-11-27T06:31:41.612113+00:00",
+    "generated_at": "2026-11-27T17:54:18.802794+00:00",
     "repo_roots": [
       "~/para/areas/dev/gh"
     ],
@@ -9,7 +9,7 @@
       "git": 0.8,
       "temporal": 0.5
     },
-    "n_beads": 8319,
+    "n_beads": 8388,
     "resolution": "explicit (id en el prompt de la tarea) > git (rama o commit del repo menciona el id, tarea dentro de la ventana del bead) > temporal (inicio de la tarea dentro de [started_at, closed_at] del bead, closed_at null = abierto, mismo repo).",
     "temporal_window": "[started_at, closed_at] del bead; techo de confianza 0.5 y ventana declarada en cada fila temporal",
     "formula": "S(b) = sesiones atribuidas a b con method ∈ {explicit, git}; cost_per_bead(b) = Σ c(s) con c(s) = session_spend[s].cost_effective; las filas temporal NO suman coste (solo n_temporal). Sesión en k beads: c(s)/k con split: true. cost_per_bead_p50 = p50 sobre beads con |S(b)| >= 1; n_beads_sin_coste = beads con S(b) = ∅.",
@@ -28328,27 +28328,6 @@
       "split": true
     },
     {
-      "task": 6745,
-      "session": 2137,
-      "bead": "pretender-uwz",
-      "method": "git",
-      "confidence": 0.8
-    },
-    {
-      "task": 6746,
-      "session": 2137,
-      "bead": "pretender-uwz",
-      "method": "git",
-      "confidence": 0.8
-    },
-    {
-      "task": 6748,
-      "session": 2137,
-      "bead": "pretender-uwz",
-      "method": "git",
-      "confidence": 0.8
-    },
-    {
       "task": 6749,
       "session": 2135,
       "bead": "specodelic-an79",
@@ -28363,34 +28342,6 @@
       "method": "git",
       "confidence": 0.8,
       "split": true
-    },
-    {
-      "task": 6751,
-      "session": 2137,
-      "bead": "pretender-uwz",
-      "method": "git",
-      "confidence": 0.8
-    },
-    {
-      "task": 6752,
-      "session": 2137,
-      "bead": "pretender-uwz",
-      "method": "git",
-      "confidence": 0.8
-    },
-    {
-      "task": 6753,
-      "session": 2137,
-      "bead": "pretender-uwz",
-      "method": "git",
-      "confidence": 0.8
-    },
-    {
-      "task": 6794,
-      "session": 2142,
-      "bead": "pretender-uwz",
-      "method": "git",
-      "confidence": 0.8
     },
     {
       "task": 6800,
@@ -28481,13 +28432,6 @@
       "method": "git",
       "confidence": 0.8,
       "split": true
-    },
-    {
-      "task": 6844,
-      "session": 2155,
-      "bead": "pretender-uwz",
-      "method": "git",
-      "confidence": 0.8
     },
     {
       "task": 6859,
@@ -28658,289 +28602,440 @@
       "confidence": 0.8
     },
     {
+      "task": 6937,
+      "session": 2170,
+      "bead": "catitas-8n5",
+      "method": "git",
+      "confidence": 0.8,
+      "split": true
+    },
+    {
+      "task": 6937,
+      "session": 2170,
+      "bead": "catitas-jb6",
+      "method": "git",
+      "confidence": 0.8,
+      "split": true
+    },
+    {
+      "task": 6937,
+      "session": 2170,
+      "bead": "catitas-leb",
+      "method": "git",
+      "confidence": 0.8,
+      "split": true
+    },
+    {
+      "task": 6937,
+      "session": 2170,
+      "bead": "catitas-14j",
+      "method": "git",
+      "confidence": 0.8,
+      "split": true
+    },
+    {
+      "task": 6937,
+      "session": 2170,
+      "bead": "catitas-4d6",
+      "method": "git",
+      "confidence": 0.8,
+      "split": true
+    },
+    {
       "task": 6938,
-      "session": 2175,
-      "bead": "elegua-6igp",
+      "session": 2170,
+      "bead": "catitas-8n5",
+      "method": "git",
+      "confidence": 0.8,
+      "split": true
+    },
+    {
+      "task": 6938,
+      "session": 2170,
+      "bead": "catitas-jb6",
+      "method": "git",
+      "confidence": 0.8,
+      "split": true
+    },
+    {
+      "task": 6938,
+      "session": 2170,
+      "bead": "catitas-leb",
+      "method": "git",
+      "confidence": 0.8,
+      "split": true
+    },
+    {
+      "task": 6938,
+      "session": 2170,
+      "bead": "catitas-14j",
+      "method": "git",
+      "confidence": 0.8,
+      "split": true
+    },
+    {
+      "task": 6938,
+      "session": 2170,
+      "bead": "catitas-4d6",
       "method": "git",
       "confidence": 0.8,
       "split": true
     },
     {
       "task": 6939,
-      "session": 2175,
-      "bead": "elegua-kaqt",
+      "session": 2170,
+      "bead": "catitas-8n5",
       "method": "git",
       "confidence": 0.8,
       "split": true
     },
     {
       "task": 6939,
-      "session": 2175,
-      "bead": "elegua-6igp",
+      "session": 2170,
+      "bead": "catitas-jb6",
+      "method": "git",
+      "confidence": 0.8,
+      "split": true
+    },
+    {
+      "task": 6939,
+      "session": 2170,
+      "bead": "catitas-leb",
+      "method": "git",
+      "confidence": 0.8,
+      "split": true
+    },
+    {
+      "task": 6939,
+      "session": 2170,
+      "bead": "catitas-14j",
+      "method": "git",
+      "confidence": 0.8,
+      "split": true
+    },
+    {
+      "task": 6939,
+      "session": 2170,
+      "bead": "catitas-4d6",
       "method": "git",
       "confidence": 0.8,
       "split": true
     },
     {
       "task": 6940,
-      "session": 2175,
-      "bead": "elegua-kaqt",
+      "session": 2171,
+      "bead": "matadero-z3h",
       "method": "git",
       "confidence": 0.8,
       "split": true
     },
     {
       "task": 6940,
-      "session": 2175,
-      "bead": "elegua-6yqy",
-      "method": "git",
-      "confidence": 0.8,
-      "split": true
-    },
-    {
-      "task": 6940,
-      "session": 2175,
-      "bead": "elegua-6igp",
+      "session": 2171,
+      "bead": "matadero-rjp",
       "method": "git",
       "confidence": 0.8,
       "split": true
     },
     {
       "task": 6941,
-      "session": 2175,
-      "bead": "elegua-6yqy",
+      "session": 2171,
+      "bead": "matadero-z3h",
       "method": "git",
       "confidence": 0.8,
       "split": true
     },
     {
       "task": 6941,
-      "session": 2175,
-      "bead": "elegua-6igp",
+      "session": 2171,
+      "bead": "matadero-rjp",
       "method": "git",
       "confidence": 0.8,
       "split": true
     },
     {
       "task": 6942,
-      "session": 2175,
-      "bead": "elegua-wp8s",
+      "session": 2171,
+      "bead": "matadero-z3h",
       "method": "git",
       "confidence": 0.8,
       "split": true
     },
     {
       "task": 6942,
-      "session": 2175,
-      "bead": "elegua-i67n",
+      "session": 2171,
+      "bead": "matadero-rjp",
       "method": "git",
       "confidence": 0.8,
       "split": true
     },
     {
-      "task": 6942,
-      "session": 2175,
-      "bead": "elegua-6igp",
+      "task": 6943,
+      "session": 2171,
+      "bead": "matadero-z3h",
       "method": "git",
       "confidence": 0.8,
       "split": true
     },
     {
-      "task": 6944,
-      "session": 2175,
-      "bead": "elegua-i67n",
+      "task": 6943,
+      "session": 2171,
+      "bead": "matadero-rjp",
       "method": "git",
       "confidence": 0.8,
       "split": true
     },
     {
-      "task": 6944,
-      "session": 2175,
-      "bead": "elegua-6igp",
+      "task": 6952,
+      "session": 2171,
+      "bead": "matadero-z3h",
       "method": "git",
       "confidence": 0.8,
       "split": true
     },
     {
-      "task": 6946,
-      "session": 2175,
-      "bead": "elegua-6igp",
-      "method": "git",
-      "confidence": 0.8,
-      "split": true
-    },
-    {
-      "task": 6946,
-      "session": 2175,
-      "bead": "elegua-exgo",
-      "method": "git",
-      "confidence": 0.8,
-      "split": true
-    },
-    {
-      "task": 6949,
-      "session": 2175,
-      "bead": "elegua-6igp",
-      "method": "git",
-      "confidence": 0.8,
-      "split": true
-    },
-    {
-      "task": 6949,
-      "session": 2175,
-      "bead": "elegua-2r8",
+      "task": 6952,
+      "session": 2171,
+      "bead": "matadero-rjp",
       "method": "git",
       "confidence": 0.8,
       "split": true
     },
     {
       "task": 6953,
-      "session": 2175,
-      "bead": "elegua-6igp",
+      "session": 2171,
+      "bead": "matadero-z3h",
       "method": "git",
       "confidence": 0.8,
       "split": true
     },
     {
       "task": 6953,
-      "session": 2175,
-      "bead": "elegua-779",
-      "method": "git",
-      "confidence": 0.8,
-      "split": true
-    },
-    {
-      "task": 6956,
-      "session": 2175,
-      "bead": "elegua-6igp",
-      "method": "git",
-      "confidence": 0.8,
-      "split": true
-    },
-    {
-      "task": 6956,
-      "session": 2175,
-      "bead": "elegua-bon",
+      "session": 2171,
+      "bead": "matadero-rjp",
       "method": "git",
       "confidence": 0.8,
       "split": true
     },
     {
       "task": 6957,
-      "session": 2179,
-      "bead": "pretender-ir7",
-      "method": "temporal",
-      "confidence": 0.5,
-      "window": {
-        "started_at": "2026-05-22T17:22:50+00:00",
-        "closed_at": "2026-06-17T18:42:22+00:00"
-      }
+      "session": 2171,
+      "bead": "matadero-z3h",
+      "method": "git",
+      "confidence": 0.8,
+      "split": true
+    },
+    {
+      "task": 6957,
+      "session": 2171,
+      "bead": "matadero-rjp",
+      "method": "git",
+      "confidence": 0.8,
+      "split": true
     },
     {
       "task": 6958,
-      "session": 2179,
-      "bead": "pretender-ir7",
-      "method": "temporal",
-      "confidence": 0.5,
-      "window": {
-        "started_at": "2026-05-22T17:22:50+00:00",
-        "closed_at": "2026-06-17T18:42:22+00:00"
-      }
-    },
-    {
-      "task": 6960,
-      "session": 2179,
-      "bead": "pretender-ir7",
-      "method": "temporal",
-      "confidence": 0.5,
-      "window": {
-        "started_at": "2026-05-22T17:22:50+00:00",
-        "closed_at": "2026-06-17T18:42:22+00:00"
-      }
-    },
-    {
-      "task": 6961,
-      "session": 2179,
-      "bead": "pretender-ir7",
-      "method": "temporal",
-      "confidence": 0.5,
-      "window": {
-        "started_at": "2026-05-22T17:22:50+00:00",
-        "closed_at": "2026-06-17T18:42:22+00:00"
-      }
-    },
-    {
-      "task": 6962,
-      "session": 2181,
-      "bead": "pretender-ir7",
-      "method": "temporal",
-      "confidence": 0.5,
-      "window": {
-        "started_at": "2026-05-22T17:22:50+00:00",
-        "closed_at": "2026-06-17T18:42:22+00:00"
-      }
-    },
-    {
-      "task": 6963,
-      "session": 2181,
-      "bead": "pretender-hay",
+      "session": 2171,
+      "bead": "matadero-z3h",
       "method": "git",
-      "confidence": 0.8
+      "confidence": 0.8,
+      "split": true
     },
     {
-      "task": 6964,
-      "session": 2182,
-      "bead": "espectacular-6nm.12",
-      "method": "temporal",
-      "confidence": 0.5,
-      "window": {
-        "started_at": "2026-06-11T17:05:37+00:00",
-        "closed_at": "2026-06-11T17:43:16+00:00"
-      }
-    },
-    {
-      "task": 6965,
-      "session": 2182,
-      "bead": "espectacular-6nm.12",
-      "method": "temporal",
-      "confidence": 0.5,
-      "window": {
-        "started_at": "2026-06-11T17:05:37+00:00",
-        "closed_at": "2026-06-11T17:43:16+00:00"
-      }
-    },
-    {
-      "task": 6966,
-      "session": 2181,
-      "bead": "pretender-hay",
+      "task": 6958,
+      "session": 2171,
+      "bead": "matadero-rjp",
       "method": "git",
-      "confidence": 0.8
+      "confidence": 0.8,
+      "split": true
+    },
+    {
+      "task": 6959,
+      "session": 2171,
+      "bead": "matadero-z3h",
+      "method": "git",
+      "confidence": 0.8,
+      "split": true
+    },
+    {
+      "task": 6959,
+      "session": 2171,
+      "bead": "matadero-rjp",
+      "method": "git",
+      "confidence": 0.8,
+      "split": true
     },
     {
       "task": 6976,
-      "session": 2187,
-      "bead": "pretender-ir7",
-      "method": "temporal",
-      "confidence": 0.5,
-      "window": {
-        "started_at": "2026-05-22T17:22:50+00:00",
-        "closed_at": "2026-06-17T18:42:22+00:00"
-      }
+      "session": 2191,
+      "bead": "elegua-6igp",
+      "method": "git",
+      "confidence": 0.8,
+      "split": true
+    },
+    {
+      "task": 6977,
+      "session": 2191,
+      "bead": "elegua-kaqt",
+      "method": "git",
+      "confidence": 0.8,
+      "split": true
+    },
+    {
+      "task": 6977,
+      "session": 2191,
+      "bead": "elegua-6igp",
+      "method": "git",
+      "confidence": 0.8,
+      "split": true
+    },
+    {
+      "task": 6978,
+      "session": 2191,
+      "bead": "elegua-kaqt",
+      "method": "git",
+      "confidence": 0.8,
+      "split": true
+    },
+    {
+      "task": 6978,
+      "session": 2191,
+      "bead": "elegua-6yqy",
+      "method": "git",
+      "confidence": 0.8,
+      "split": true
+    },
+    {
+      "task": 6978,
+      "session": 2191,
+      "bead": "elegua-6igp",
+      "method": "git",
+      "confidence": 0.8,
+      "split": true
     },
     {
       "task": 6979,
-      "session": 2189,
-      "bead": "pretender-ir7",
-      "method": "temporal",
-      "confidence": 0.5,
-      "window": {
-        "started_at": "2026-05-22T17:22:50+00:00",
-        "closed_at": "2026-06-17T18:42:22+00:00"
-      }
+      "session": 2191,
+      "bead": "elegua-6yqy",
+      "method": "git",
+      "confidence": 0.8,
+      "split": true
+    },
+    {
+      "task": 6979,
+      "session": 2191,
+      "bead": "elegua-6igp",
+      "method": "git",
+      "confidence": 0.8,
+      "split": true
     },
     {
       "task": 6980,
-      "session": 2189,
+      "session": 2191,
+      "bead": "elegua-wp8s",
+      "method": "git",
+      "confidence": 0.8,
+      "split": true
+    },
+    {
+      "task": 6980,
+      "session": 2191,
+      "bead": "elegua-i67n",
+      "method": "git",
+      "confidence": 0.8,
+      "split": true
+    },
+    {
+      "task": 6980,
+      "session": 2191,
+      "bead": "elegua-6igp",
+      "method": "git",
+      "confidence": 0.8,
+      "split": true
+    },
+    {
+      "task": 6982,
+      "session": 2191,
+      "bead": "elegua-i67n",
+      "method": "git",
+      "confidence": 0.8,
+      "split": true
+    },
+    {
+      "task": 6982,
+      "session": 2191,
+      "bead": "elegua-6igp",
+      "method": "git",
+      "confidence": 0.8,
+      "split": true
+    },
+    {
+      "task": 6984,
+      "session": 2191,
+      "bead": "elegua-6igp",
+      "method": "git",
+      "confidence": 0.8,
+      "split": true
+    },
+    {
+      "task": 6984,
+      "session": 2191,
+      "bead": "elegua-exgo",
+      "method": "git",
+      "confidence": 0.8,
+      "split": true
+    },
+    {
+      "task": 6987,
+      "session": 2191,
+      "bead": "elegua-6igp",
+      "method": "git",
+      "confidence": 0.8,
+      "split": true
+    },
+    {
+      "task": 6987,
+      "session": 2191,
+      "bead": "elegua-2r8",
+      "method": "git",
+      "confidence": 0.8,
+      "split": true
+    },
+    {
+      "task": 6991,
+      "session": 2191,
+      "bead": "elegua-6igp",
+      "method": "git",
+      "confidence": 0.8,
+      "split": true
+    },
+    {
+      "task": 6991,
+      "session": 2191,
+      "bead": "elegua-779",
+      "method": "git",
+      "confidence": 0.8,
+      "split": true
+    },
+    {
+      "task": 6994,
+      "session": 2191,
+      "bead": "elegua-6igp",
+      "method": "git",
+      "confidence": 0.8,
+      "split": true
+    },
+    {
+      "task": 6994,
+      "session": 2191,
+      "bead": "elegua-bon",
+      "method": "git",
+      "confidence": 0.8,
+      "split": true
+    },
+    {
+      "task": 6995,
+      "session": 2195,
       "bead": "pretender-ir7",
       "method": "temporal",
       "confidence": 0.5,
@@ -28950,8 +29045,8 @@
       }
     },
     {
-      "task": 6981,
-      "session": 2189,
+      "task": 6996,
+      "session": 2195,
       "bead": "pretender-ir7",
       "method": "temporal",
       "confidence": 0.5,
@@ -28961,72 +29056,185 @@
       }
     },
     {
-      "task": 7072,
-      "session": 2212,
+      "task": 6998,
+      "session": 2195,
+      "bead": "pretender-ir7",
+      "method": "temporal",
+      "confidence": 0.5,
+      "window": {
+        "started_at": "2026-05-22T17:22:50+00:00",
+        "closed_at": "2026-06-17T18:42:22+00:00"
+      }
+    },
+    {
+      "task": 6999,
+      "session": 2195,
+      "bead": "pretender-ir7",
+      "method": "temporal",
+      "confidence": 0.5,
+      "window": {
+        "started_at": "2026-05-22T17:22:50+00:00",
+        "closed_at": "2026-06-17T18:42:22+00:00"
+      }
+    },
+    {
+      "task": 7000,
+      "session": 2197,
+      "bead": "pretender-ir7",
+      "method": "temporal",
+      "confidence": 0.5,
+      "window": {
+        "started_at": "2026-05-22T17:22:50+00:00",
+        "closed_at": "2026-06-17T18:42:22+00:00"
+      }
+    },
+    {
+      "task": 7001,
+      "session": 2197,
+      "bead": "pretender-hay",
+      "method": "git",
+      "confidence": 0.8
+    },
+    {
+      "task": 7002,
+      "session": 2198,
+      "bead": "espectacular-6nm.12",
+      "method": "temporal",
+      "confidence": 0.5,
+      "window": {
+        "started_at": "2026-06-11T17:05:37+00:00",
+        "closed_at": "2026-06-11T17:43:16+00:00"
+      }
+    },
+    {
+      "task": 7003,
+      "session": 2198,
+      "bead": "espectacular-6nm.12",
+      "method": "temporal",
+      "confidence": 0.5,
+      "window": {
+        "started_at": "2026-06-11T17:05:37+00:00",
+        "closed_at": "2026-06-11T17:43:16+00:00"
+      }
+    },
+    {
+      "task": 7004,
+      "session": 2197,
+      "bead": "pretender-hay",
+      "method": "git",
+      "confidence": 0.8
+    },
+    {
+      "task": 7014,
+      "session": 2203,
+      "bead": "pretender-ir7",
+      "method": "temporal",
+      "confidence": 0.5,
+      "window": {
+        "started_at": "2026-05-22T17:22:50+00:00",
+        "closed_at": "2026-06-17T18:42:22+00:00"
+      }
+    },
+    {
+      "task": 7017,
+      "session": 2205,
+      "bead": "pretender-ir7",
+      "method": "temporal",
+      "confidence": 0.5,
+      "window": {
+        "started_at": "2026-05-22T17:22:50+00:00",
+        "closed_at": "2026-06-17T18:42:22+00:00"
+      }
+    },
+    {
+      "task": 7018,
+      "session": 2205,
+      "bead": "pretender-ir7",
+      "method": "temporal",
+      "confidence": 0.5,
+      "window": {
+        "started_at": "2026-05-22T17:22:50+00:00",
+        "closed_at": "2026-06-17T18:42:22+00:00"
+      }
+    },
+    {
+      "task": 7019,
+      "session": 2205,
+      "bead": "pretender-ir7",
+      "method": "temporal",
+      "confidence": 0.5,
+      "window": {
+        "started_at": "2026-05-22T17:22:50+00:00",
+        "closed_at": "2026-06-17T18:42:22+00:00"
+      }
+    },
+    {
+      "task": 7110,
+      "session": 2228,
       "bead": "pretender-2jf",
       "method": "explicit",
       "confidence": 1.0,
       "split": true
     },
     {
-      "task": 7073,
-      "session": 2212,
+      "task": 7111,
+      "session": 2228,
       "bead": "pretender-5qf",
       "method": "explicit",
       "confidence": 1.0,
       "split": true
     },
     {
-      "task": 7074,
-      "session": 2212,
+      "task": 7112,
+      "session": 2228,
       "bead": "pretender-zls",
       "method": "explicit",
       "confidence": 1.0,
       "split": true
     },
     {
-      "task": 7076,
-      "session": 2212,
+      "task": 7114,
+      "session": 2228,
       "bead": "pretender-5td",
       "method": "explicit",
       "confidence": 1.0,
       "split": true
     },
     {
-      "task": 7077,
-      "session": 2212,
+      "task": 7115,
+      "session": 2228,
       "bead": "pretender-bhn",
       "method": "explicit",
       "confidence": 1.0,
       "split": true
     },
     {
-      "task": 7078,
-      "session": 2212,
+      "task": 7116,
+      "session": 2228,
       "bead": "pretender-s4k",
       "method": "explicit",
       "confidence": 1.0,
       "split": true
     },
     {
-      "task": 7079,
-      "session": 2212,
+      "task": 7117,
+      "session": 2228,
       "bead": "pretender-6hu",
       "method": "explicit",
       "confidence": 1.0,
       "split": true
     },
     {
-      "task": 7079,
-      "session": 2212,
+      "task": 7117,
+      "session": 2228,
       "bead": "pretender-qs3",
       "method": "explicit",
       "confidence": 1.0,
       "split": true
     },
     {
-      "task": 7080,
-      "session": 2212,
+      "task": 7118,
+      "session": 2228,
       "bead": "pretender-597",
       "method": "explicit",
       "confidence": 1.0,
@@ -29390,8 +29598,8 @@
     },
     {
       "bead": "catitas-14j",
-      "cost_per_bead": 0.37443475,
-      "n_sessions": 11,
+      "cost_per_bead": 0.37712044,
+      "n_sessions": 12,
       "n_temporal": 0
     },
     {
@@ -29432,8 +29640,8 @@
     },
     {
       "bead": "catitas-4d6",
-      "cost_per_bead": 0.37443475,
-      "n_sessions": 11,
+      "cost_per_bead": 0.37712044,
+      "n_sessions": 12,
       "n_temporal": 0
     },
     {
@@ -29468,8 +29676,8 @@
     },
     {
       "bead": "catitas-8n5",
-      "cost_per_bead": 0.17396826,
-      "n_sessions": 5,
+      "cost_per_bead": 0.17665395,
+      "n_sessions": 6,
       "n_temporal": 0
     },
     {
@@ -29600,8 +29808,8 @@
     },
     {
       "bead": "catitas-jb6",
-      "cost_per_bead": 0.98875528,
-      "n_sessions": 12,
+      "cost_per_bead": 0.99144097,
+      "n_sessions": 13,
       "n_temporal": 0
     },
     {
@@ -29618,8 +29826,8 @@
     },
     {
       "bead": "catitas-leb",
-      "cost_per_bead": 0.98875528,
-      "n_sessions": 12,
+      "cost_per_bead": 0.99144097,
+      "n_sessions": 13,
       "n_temporal": 0
     },
     {
@@ -30908,14 +31116,14 @@
     },
     {
       "bead": "matadero-rjp",
-      "cost_per_bead": 0.51743833,
-      "n_sessions": 5,
+      "cost_per_bead": 1.51085083,
+      "n_sessions": 6,
       "n_temporal": 0
     },
     {
       "bead": "matadero-z3h",
-      "cost_per_bead": 10.54372843,
-      "n_sessions": 7,
+      "cost_per_bead": 11.53714093,
+      "n_sessions": 8,
       "n_temporal": 0
     },
     {
@@ -31228,12 +31436,6 @@
       "bead": "pretender-u8a",
       "cost_per_bead": 0.58271935,
       "n_sessions": 1,
-      "n_temporal": 0
-    },
-    {
-      "bead": "pretender-uwz",
-      "cost_per_bead": 0.60102919,
-      "n_sessions": 3,
       "n_temporal": 0
     },
     {
@@ -33266,5 +33468,5 @@
     }
   ],
   "cost_per_bead_p50": 0.20188773,
-  "n_beads_sin_coste": 7753
+  "n_beads_sin_coste": 7823
 }

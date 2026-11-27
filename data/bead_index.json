@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "generated_at": "2026-11-27T06:31:34.354078+00:00",
+    "generated_at": "2026-11-27T17:54:10.231489+00:00",
     "repo_roots": [
       "~/para/areas/dev/gh"
     ],
@@ -120,7 +120,7 @@
           "reopened": null
         },
         "2026-11": {
-          "created": 10,
+          "created": 12,
           "started": 10,
           "closed": 10,
           "lead_time_p50_min": 3.4,
@@ -271,7 +271,7 @@
           "reopened": null
         },
         "2026-11": {
-          "created": 29,
+          "created": 30,
           "started": 11,
           "closed": 16,
           "lead_time_p50_min": 11.7,
@@ -326,7 +326,7 @@
           "reopened": null
         },
         "2026-11": {
-          "created": 38,
+          "created": 39,
           "started": 11,
           "closed": 36,
           "lead_time_p50_min": 1.8,
@@ -386,12 +386,12 @@
           "reopened": null
         },
         "2026-11": {
-          "created": 29,
-          "started": 2,
-          "closed": 2,
-          "lead_time_p50_min": 0.1,
-          "lead_time_n": 2,
-          "completeness": 1.0,
+          "created": 46,
+          "started": 19,
+          "closed": 22,
+          "lead_time_p50_min": 67.4,
+          "lead_time_n": 19,
+          "completeness": 0.8636,
           "reopened": null
         }
       }
@@ -538,19 +538,19 @@
         "2026-10": {
           "created": 83,
           "started": 51,
-          "closed": 70,
+          "closed": 72,
           "lead_time_p50_min": 23.4,
           "lead_time_n": 51,
-          "completeness": 0.7286,
+          "completeness": 0.7083,
           "reopened": null
         },
         "2026-11": {
-          "created": 79,
-          "started": 9,
-          "closed": 33,
-          "lead_time_p50_min": 19.0,
-          "lead_time_n": 8,
-          "completeness": 0.2424,
+          "created": 90,
+          "started": 18,
+          "closed": 52,
+          "lead_time_p50_min": 16.8,
+          "lead_time_n": 16,
+          "completeness": 0.3077,
           "reopened": null
         }
       }
@@ -843,28 +843,28 @@
         "2026-09": {
           "created": 44,
           "started": 31,
-          "closed": 39,
+          "closed": 40,
           "lead_time_p50_min": 4.8,
           "lead_time_n": 30,
-          "completeness": 0.7692,
+          "completeness": 0.75,
           "reopened": null
         },
         "2026-10": {
           "created": 33,
-          "started": 23,
-          "closed": 21,
-          "lead_time_p50_min": 4.3,
-          "lead_time_n": 20,
-          "completeness": 0.9524,
+          "started": 24,
+          "closed": 25,
+          "lead_time_p50_min": 6.0,
+          "lead_time_n": 23,
+          "completeness": 0.92,
           "reopened": null
         },
         "2026-11": {
-          "created": 42,
-          "started": 19,
-          "closed": 31,
-          "lead_time_p50_min": 7.1,
-          "lead_time_n": 19,
-          "completeness": 0.6129,
+          "created": 63,
+          "started": 38,
+          "closed": 51,
+          "lead_time_p50_min": 10.4,
+          "lead_time_n": 37,
+          "completeness": 0.7255,
           "reopened": null
         }
       }
@@ -882,12 +882,12 @@
           "reopened": null
         },
         "2026-11": {
-          "created": 7,
-          "started": 0,
-          "closed": 0,
-          "lead_time_p50_min": null,
-          "lead_time_n": 0,
-          "completeness": null,
+          "created": 8,
+          "started": 4,
+          "closed": 5,
+          "lead_time_p50_min": 3.5,
+          "lead_time_n": 4,
+          "completeness": 0.8,
           "reopened": null
         }
       }
@@ -1239,12 +1239,12 @@
       "name": "charly/podras",
       "months": {
         "2026-11": {
-          "created": 46,
-          "started": 37,
-          "closed": 41,
+          "created": 48,
+          "started": 40,
+          "closed": 44,
           "lead_time_p50_min": 21.6,
-          "lead_time_n": 37,
-          "completeness": 0.9024,
+          "lead_time_n": 40,
+          "completeness": 0.9091,
           "reopened": null
         }
       }
@@ -1307,12 +1307,12 @@
           "reopened": null
         },
         "2026-11": {
-          "created": 133,
-          "started": 61,
-          "closed": 123,
-          "lead_time_p50_min": 37.1,
-          "lead_time_n": 60,
-          "completeness": 0.4878,
+          "created": 141,
+          "started": 63,
+          "closed": 127,
+          "lead_time_p50_min": 35.5,
+          "lead_time_n": 63,
+          "completeness": 0.4961,
           "reopened": null
         }
       }
@@ -1592,29 +1592,29 @@
         },
         "2026-09": {
           "created": 32,
-          "started": 24,
-          "closed": 30,
+          "started": 26,
+          "closed": 31,
           "lead_time_p50_min": 4.5,
-          "lead_time_n": 24,
-          "completeness": 0.8,
+          "lead_time_n": 25,
+          "completeness": 0.8065,
           "reopened": null
         },
         "2026-10": {
           "created": 44,
-          "started": 24,
-          "closed": 30,
-          "lead_time_p50_min": 13.0,
-          "lead_time_n": 24,
-          "completeness": 0.8,
+          "started": 30,
+          "closed": 35,
+          "lead_time_p50_min": 13.7,
+          "lead_time_n": 29,
+          "completeness": 0.8286,
           "reopened": null
         },
         "2026-11": {
-          "created": 13,
-          "started": 2,
-          "closed": 3,
+          "created": 16,
+          "started": 4,
+          "closed": 5,
           "lead_time_p50_min": 31.4,
-          "lead_time_n": 2,
-          "completeness": 0.6667,
+          "lead_time_n": 3,
+          "completeness": 0.6,
           "reopened": null
         }
       }
@@ -1682,8 +1682,8 @@
           "reopened": null
         },
         "2026-11": {
-          "created": 14,
-          "started": 1,
+          "created": 16,
+          "started": 2,
           "closed": 4,
           "lead_time_p50_min": 16.6,
           "lead_time_n": 1,
@@ -2315,7 +2315,7 @@
     },
     {
       "name": "at/bogart",
-      "issues": 447
+      "issues": 458
     },
     {
       "name": "at/catherine",
