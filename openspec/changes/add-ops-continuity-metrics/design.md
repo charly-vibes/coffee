@@ -35,6 +35,12 @@ excluye. Sesiones fork excluidas (convención de paridad de coste "sesiones no-f
 `durationMs`; turnos sin duración usan el fallback de gap con tope
 `gap_cap_minutes` (30). Toda cifra de `ops` lleva `coverage_pct` por fuente.
 
+Bucketing diario: los spans se cortan en la medianoche local (un span que cruza
+00:00 aporta minutos a ambos días); la concurrencia por minuto se atribuye al día
+que contiene el minuto. Los topes `gap_cap_minutes` y `retry_window_minutes` se
+leen del bloque `agent_behavior` existente (una sola fuente del constante);
+`ops_behavior` solo agrega claves nuevas (`quota_signatures`, umbrales de alerta).
+
 ### D3: Eventos de cuota desde turnos de error, no del archivo crudo (resuelve CORR-003)
 
 Grep crudo de "429|quota|rate limit" matchea 2,556 archivos dominados por
@@ -58,6 +64,11 @@ La atribución del estimador acredita 2,311/4,354 eventos (53%); unidades
 ambiguas 25-71% por modelo. `ops.completion` se calcula sobre la cohorte
 no-ambigua y publica `ambiguous_share` al lado. Sin eso la tasa es
 ininterpretable (mismo modo de fallo que hizo parecer a DeepSeek el doble de caro).
+
+Dependencia de frescura: `scripts/model-cost-estimate-v0.py` NO lo refresca el
+nightly (README, fila del estimador). Si `generated` del output del estimador es
+anterior a la regeneración del reporte, `ops.completion` emite `null` con razón
+`estimator_stale` en lugar de consumir atribución vieja.
 
 ### D6: Utilización de suscripción, `n/a` honesto (resuelve CLAR-001)
 

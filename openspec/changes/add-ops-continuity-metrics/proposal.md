@@ -15,9 +15,8 @@ eventos de cuota y completion autónoma. Hoy solo hay p50/p90 muestreados
 - Nueva capacidad spec `ops-metrics`.
 - Vista "Ops/Continuidad" en el dashboard de agente (`scripts/viz-agent.py`),
   reusando el selector de período y la tabla de cobertura existentes.
-- Regeneración por `scripts/nightly-update.sh` (sin job nuevo).
-- **BREAKING** (menor): `ops.stall` se calcula solo sobre turnos con `durationMs`
-  (o gap-cap); es un bloque nuevo, no hay valores previos que migren.
+- Regeneración por `scripts/nightly-update.sh` (sin job nuevo). Bloque nuevo:
+  no hay valores previos que migren.
 
 Fixes de review incorporados (Rule of 5, 2026-11-27):
 - Fallback es evento **reportado**: `model_change.resolvedModelIsFallback` en los
@@ -42,3 +41,6 @@ Fixes de review incorporados (Rule of 5, 2026-11-27):
   `agent_metrics_ops.py` reutilizando `agent_metrics_common/turns`), `scripts/viz-agent.py`,
   `scripts/nightly-update.sh`, `specs/agent-metrics.schema.json`, `config/fpa.json`
   (bloque `ops_behavior` con umbrales y firmas de cuota).
+- Co-modificación: `scripts/viz-agent.py` es propiedad del change
+  `add-agent-behavior-dashboard` (completo pero sin archivar al 2026-11-27).
+  Archivarlo antes de implementar esta vista, o coordinar el merge en esa vista.
