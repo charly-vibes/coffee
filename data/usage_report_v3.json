@@ -5,14 +5,14 @@
       "end": "2026-11-27"
     },
     "filter": "in-scope",
-    "total_interactions": 313685,
-    "total_input_tokens": 2294686530,
-    "total_output_tokens": 146195902,
-    "total_cache_read_tokens": 30895253027,
+    "total_interactions": 313756,
+    "total_input_tokens": 2294795781,
+    "total_output_tokens": 146212790,
+    "total_cache_read_tokens": 30898768479,
     "total_cache_write_tokens": 73562968,
-    "cost_total_effective": 3913.77,
-    "cost_total_real": 1965.64,
-    "cost_real_total_tracker": 1765.66,
+    "cost_total_effective": 3913.9,
+    "cost_total_real": 1965.77,
+    "cost_real_total_tracker": 1765.79,
     "subscription_fees": 199.98,
     "charges_total_real": 1716.72,
     "charges_source": "data/charges.json",
@@ -28,9 +28,9 @@
     "energy_method": "tokens (input+output+cache_write a peso completo; cache_read \u00d7 cache_read_energy_factor) \u00d7 J/token del tier (config energy_coefficients versionado) / 3.6e6 \u2014 coeficientes de laboratorio (Luccioni et al. / AI Energy Score), orden de magnitud, nunca medici\u00f3n",
     "timezone": "-03",
     "pay_per_token_note": "pay_per_token_charges es *reported* cuando el ledger tiene cargas pay-per-token reales del mes (cr\u00e9ditos/reembolsos, FPA-013); *assumed* (estimado tokens \u00d7 pricing) si no",
-    "outcomes": "unavailable: mapeo proyecto\u2192repo GitHub pendiente (ver README)",
+    "outcomes": "unavailable: no hay GITHUB_TOKEN \u2014 commits/releases no emisionados",
     "token_accounting": "cache_read/cache_write se reportan aparte de input/output. cache_read no se factura a input rate (10x mas barato); total tokens = input + output + cache_read + cache_write",
-    "total_hours": 1590,
+    "total_hours": 1591,
     "total_days": 240,
     "total_months": 12,
     "total_projects": 123,
@@ -58,8 +58,8 @@
           "rows": 1179
         },
         "glm": {
-          "tokens": 17314379306,
-          "rows": 191184
+          "tokens": 17318020897,
+          "rows": 191255
         },
         "kimi": {
           "tokens": 136485778,
@@ -86,10 +86,10 @@
           "rows": 1570
         }
       },
-      "tokens_total": 33409698427,
+      "tokens_total": 33413340018,
       "tokens_other": 440235714,
       "tokens_other_pct": 1.32,
-      "default_rates_fallbacks": 209635,
+      "default_rates_fallbacks": 209706,
       "mapping_source": "config/fpa.json"
     },
     "latency_coverage": {
@@ -42440,26 +42440,50 @@
       "projects_active": 2
     },
     "2026-11-26 22:00": {
-      "interactions": 55,
-      "input_tokens": 134921,
-      "output_tokens": 18282,
-      "cache_read_tokens": 1691456,
+      "interactions": 86,
+      "input_tokens": 188558,
+      "output_tokens": 25298,
+      "cache_read_tokens": 2877568,
+      "cache_write_tokens": 0,
+      "cost_effective": 0.13,
+      "cost_real": 0.13,
+      "tools": {
+        "omp": {
+          "req": 86,
+          "in": 188558,
+          "out": 25298,
+          "cache_read": 2877568,
+          "cache_write": 0,
+          "cost_eff": 0.12725974,
+          "cost_real": 0.12725974
+        }
+      },
+      "models": {
+        "glm-5.3-flash": 86
+      },
+      "projects_active": 1
+    },
+    "2026-11-26 23:00": {
+      "interactions": 40,
+      "input_tokens": 55614,
+      "output_tokens": 9872,
+      "cache_read_tokens": 2329340,
       "cache_write_tokens": 0,
       "cost_effective": 0.08,
       "cost_real": 0.08,
       "tools": {
         "omp": {
-          "req": 55,
-          "in": 134921,
-          "out": 18282,
-          "cache_read": 1691456,
+          "req": 40,
+          "in": 55614,
+          "out": 9872,
+          "cache_read": 2329340,
           "cache_write": 0,
-          "cost_eff": 0.08012283,
-          "cost_real": 0.08012283
+          "cost_eff": 0.0831583,
+          "cost_real": 0.0831583
         }
       },
       "models": {
-        "glm-5.3-flash": 55
+        "glm-5.3-flash": 40
       },
       "projects_active": 1
     }
@@ -46445,21 +46469,21 @@
       }
     },
     "2026-11-26": {
-      "interactions": 687,
-      "input_tokens": 1056396,
-      "output_tokens": 505287,
-      "cache_read_tokens": 66224576,
+      "interactions": 758,
+      "input_tokens": 1165647,
+      "output_tokens": 522175,
+      "cache_read_tokens": 69740028,
       "cache_write_tokens": 0,
-      "cost_effective": 2.26,
-      "cost_real": 2.26,
+      "cost_effective": 2.39,
+      "cost_real": 2.39,
       "tools": {
         "deepseek": 462,
-        "omp": 198,
+        "omp": 269,
         "openrouter": 27
       },
       "models": {
         "deepseek-flash": 584,
-        "glm-5.3-flash": 76,
+        "glm-5.3-flash": 147,
         "recursive/flint-v1.0:free": 27
       }
     }
@@ -48383,13 +48407,13 @@
       }
     },
     "2026-11": {
-      "interactions": 61658,
-      "input_tokens": 127145333,
-      "output_tokens": 33759103,
-      "cache_read_tokens": 7958801752,
+      "interactions": 61729,
+      "input_tokens": 127254584,
+      "output_tokens": 33775991,
+      "cache_read_tokens": 7962317204,
       "cache_write_tokens": 247050,
-      "cost_effective": 401.02,
-      "cost_real": 401.02,
+      "cost_effective": 401.15,
+      "cost_real": 401.15,
       "tools": {
         "codex": {
           "interactions": 127,
@@ -48459,9 +48483,9 @@
           }
         },
         "omp": {
-          "interactions": 29994,
-          "cost_effective": 167.59329293,
-          "cost_real": 167.59329293,
+          "interactions": 30065,
+          "cost_effective": 167.72358814,
+          "cost_real": 167.72358814,
           "models": {
             "MiniMax-M3.1-Flash": {
               "interactions": 840,
@@ -48496,8 +48520,8 @@
               "cost_effective": 97.56927048
             },
             "glm-5.3-flash": {
-              "interactions": 14178,
-              "cost_effective": 58.19950525
+              "interactions": 14249,
+              "cost_effective": 58.32980046
             },
             "google/gemini-2.0-flash-lite-001": {
               "interactions": 1,
@@ -48692,8 +48716,8 @@
           "cost_effective": 2.8531332
         },
         "glm-5.3-flash": {
-          "interactions": 16269,
-          "cost_effective": 63.51048997
+          "interactions": 16340,
+          "cost_effective": 63.64078518
         },
         "google/gemini-2.0-flash-lite-001": {
           "interactions": 1,
@@ -48797,7 +48821,7 @@
         }
       },
       "subscription_fees": 0.0,
-      "cost_real_tracker": 401.02,
+      "cost_real_tracker": 401.15,
       "pay_per_token_provenance": "assumed",
       "tokens_by_model": {
         "MiniMax-M2.7": {
@@ -48873,9 +48897,9 @@
           "cache_write": 0
         },
         "glm-5.3-flash": {
-          "in": 31969885,
-          "out": 7810721,
-          "cache_read": 1826988224,
+          "in": 32079136,
+          "out": 7827609,
+          "cache_read": 1830503676,
           "cache_write": 0
         },
         "google/gemini-2.0-flash-lite-001": {
@@ -49029,11 +49053,11 @@
           "cache_write": 0
         }
       },
-      "pay_per_token_charges": 401.02,
+      "pay_per_token_charges": 401.15,
       "interaction_kinds": {
         "assistant_turn": 1965,
         "tool_call": 29573,
-        "aux_model_call": 2894,
+        "aux_model_call": 2923,
         "user_prompt": 1936
       },
       "outcomes_by_project": {},
@@ -49087,7 +49111,7 @@
           "tier": "mid"
         },
         "glm-5.3-flash": {
-          "kwh": 6.18,
+          "kwh": 6.193,
           "tier": "mid"
         },
         "google/gemini-2.0-flash-lite-001": {
@@ -49191,10 +49215,10 @@
           "reason": "sin telemetr\u00eda de tokens"
         }
       },
-      "energy_kwh": 21.31,
+      "energy_kwh": 21.323,
       "energy_kwh_band": {
-        "low": 3.463,
-        "high": 181.899
+        "low": 3.467,
+        "high": 182.0
       }
     }
   },
@@ -50263,23 +50287,23 @@
       "skills": {}
     },
     "charly-coffee": {
-      "interactions": 7862,
-      "input_tokens": 40237491,
-      "output_tokens": 3380925,
-      "cache_read_tokens": 603704855,
+      "interactions": 7933,
+      "input_tokens": 40346742,
+      "output_tokens": 3397813,
+      "cache_read_tokens": 607220307,
       "cache_write_tokens": 0,
-      "cost_effective": 24.67,
-      "cost_real": 24.67,
+      "cost_effective": 24.8,
+      "cost_real": 24.8,
       "tools": {
         "openrouter": 7248,
         "deepseek": 379,
-        "omp": 174,
+        "omp": 245,
         "codex": 61
       },
       "models": {
         "z-ai/glm-5.3-flash": 7298,
         "deepseek-flash": 379,
-        "glm-5.3-flash": 76,
+        "glm-5.3-flash": 147,
         "gpt-6.1-sol": 61,
         "recursive/flint-v1.0:free": 27,
         "jev-1.14.0": 21
@@ -52003,17 +52027,17 @@
     "total_sessions": 3217,
     "length_distribution": {
       "101-300": 1020,
-      "51-100": 738,
+      "51-100": 739,
       "1-10": 599,
-      "11-50": 727,
+      "11-50": 726,
       "500+": 26,
       "301-500": 107
     },
     "with_agent": 265,
     "total_api_errors": 121,
     "total_compactions": 397,
-    "avg_turns": 96.710910786447,
-    "avg_tools": 2.981038234379857,
+    "avg_turns": 96.7239664283494,
+    "avg_tools": 2.9813490829965805,
     "avg_skills": 0.5274725274725275,
     "agent_semantics": "claude-cli: sesi\u00f3n con herramienta Agent (subagentes); amp: aut\u00f3nomo por definici\u00f3n (has_agent=True); pi: sin se\u00f1al de subagentes (has_agent=False); omp: sin se\u00f1al de subagentes (has_agent=False)",
     "by_tool": {
@@ -155191,12 +155215,12 @@
   "multitasking": {
     "description": "Proyectos distintos con actividad en la misma ventana. 'context_switches' cuenta cambios de proyecto entre requests consecutivos (puede inflarse por agentes paralelos en el mismo minuto).",
     "hourly": {
-      "total_active_hours": 1590,
+      "total_active_hours": 1591,
       "hours_with_multiple_projects": 989,
       "pct_hours_multitasking": 62.2,
       "avg_projects_per_active_hour": 2.86,
       "distribution": {
-        "1": 601,
+        "1": 602,
         "4+": 479,
         "2": 281,
         "3": 229
@@ -160788,7 +160812,7 @@
         0,
         0,
         0,
-        482
+        553
       ],
       "charly-kaya": [
         0,
@@ -324045,18 +324069,18 @@
       "project": "charly-coffee",
       "day": "2026-11-26",
       "start": "2026-11-26T23:40:41.476000+00:00",
-      "end": "2026-11-27T01:44:09.924000+00:00",
+      "end": "2026-11-27T02:16:44.104000+00:00",
       "crosses_midnight": false,
       "source": "omp",
       "model": "glm-5.3-flash",
-      "n_interactions": 76,
-      "cost_effective": 0.10767652,
-      "cost_real": 0.10767652,
+      "n_interactions": 147,
+      "cost_effective": 0.23797173,
+      "cost_real": 0.23797173,
       "cost_reason": null,
       "tokens": {
-        "in": 188544,
-        "out": 26882,
-        "cache_read": 2198464,
+        "in": 297795,
+        "out": 43770,
+        "cache_read": 5713916,
         "cache_write": 0
       },
       "duration_ms": null,
@@ -324071,7 +324095,7 @@
         "glm-5.3-flash"
       ],
       "model_switches": 0,
-      "cache_share": 0.9108,
+      "cache_share": 0.9436,
       "cost_provenance": "estimated"
     }
   ],
@@ -324082,16 +324106,16 @@
       "version": "glm-5.3-flash",
       "window": "todo",
       "data": {
-        "interactions": 191184,
-        "cost_effective": 598.16639422,
+        "interactions": 191255,
+        "cost_effective": 598.29668943,
         "cost_weighted_per_1m": 0.2322,
         "cost_per_1m_total_tokens": 0.0345,
         "cache_factor": 0.1,
         "cache_share": 0.9458,
         "tokens": {
-          "in": 857412385,
-          "out": 80690700,
-          "cache_read": 16376276221,
+          "in": 857521636,
+          "out": 80707588,
+          "cache_read": 16379791673,
           "cache_write": 0
         },
         "cost_per_task": 0.01222212,
@@ -324108,12 +324132,12 @@
           "aborted": 203,
           "length": 1
         },
-        "aborts_per_100_turns": 0.1062,
-        "tool_errors_per_100_turns": 3.9653,
+        "aborts_per_100_turns": 0.1061,
+        "tool_errors_per_100_turns": 3.9638,
         "model_switches": 121,
         "subscription_vs_api": {
           "subscription": 0.0,
-          "api": 753.61471683,
+          "api": 753.74501204,
           "provenance": "estimated"
         },
         "provenance": {
@@ -324144,16 +324168,16 @@
       "version": "glm-5.3-flash",
       "window": "ytd",
       "data": {
-        "interactions": 191184,
-        "cost_effective": 598.16639422,
+        "interactions": 191255,
+        "cost_effective": 598.29668943,
         "cost_weighted_per_1m": 0.2322,
         "cost_per_1m_total_tokens": 0.0345,
         "cache_factor": 0.1,
         "cache_share": 0.9458,
         "tokens": {
-          "in": 857412385,
-          "out": 80690700,
-          "cache_read": 16376276221,
+          "in": 857521636,
+          "out": 80707588,
+          "cache_read": 16379791673,
           "cache_write": 0
         },
         "cost_per_task": 0.01222212,
@@ -324170,12 +324194,12 @@
           "aborted": 203,
           "length": 1
         },
-        "aborts_per_100_turns": 0.1062,
-        "tool_errors_per_100_turns": 3.9653,
+        "aborts_per_100_turns": 0.1061,
+        "tool_errors_per_100_turns": 3.9638,
         "model_switches": 121,
         "subscription_vs_api": {
           "subscription": 0.0,
-          "api": 753.61471683,
+          "api": 753.74501204,
           "provenance": "estimated"
         },
         "provenance": {
@@ -324206,16 +324230,16 @@
       "version": "glm-5.3-flash",
       "window": "mes",
       "data": {
-        "interactions": 37959,
-        "cost_effective": 131.15566105,
+        "interactions": 38030,
+        "cost_effective": 131.28595626,
         "cost_weighted_per_1m": 0.2656,
         "cost_per_1m_total_tokens": 0.0319,
         "cache_factor": 0.1,
         "cache_share": 0.9777,
         "tokens": {
-          "in": 71976695,
-          "out": 19849104,
-          "cache_read": 4020029568,
+          "in": 72085946,
+          "out": 19865992,
+          "cache_read": 4023545020,
           "cache_write": 0
         },
         "cost_per_task": 0.01283919,
@@ -324223,7 +324247,7 @@
         "latency": {
           "p50_ms": 7367.0,
           "p90_ms": 26060.0,
-          "coverage_pct": 59.44
+          "coverage_pct": 59.32
         },
         "stop_reasons": {
           "stop": 905,
@@ -324232,11 +324256,11 @@
           "aborted": 13
         },
         "aborts_per_100_turns": 0.0342,
-        "tool_errors_per_100_turns": 2.5369,
+        "tool_errors_per_100_turns": 2.5322,
         "model_switches": 77,
         "subscription_vs_api": {
           "subscription": 0.0,
-          "api": 232.57362964,
+          "api": 232.70392485,
           "provenance": "estimated"
         },
         "provenance": {
@@ -327990,13 +328014,13 @@
         }
       },
       "2026-11-26": {
-        "interactions": 482,
-        "cost_effective": 2.02793162,
-        "cost_real": 2.02793162,
+        "interactions": 553,
+        "cost_effective": 2.15822683,
+        "cost_real": 2.15822683,
         "tokens": {
-          "in": 684131,
-          "out": 363928,
-          "cache_read": 52630848,
+          "in": 793382,
+          "out": 380816,
+          "cache_read": 56146300,
           "cache_write": 0
         }
       }
@@ -339182,13 +339206,13 @@
         }
       },
       "2026-11": {
-        "interactions": 580,
-        "cost_effective": 2.3119326263600013,
-        "cost_real": 2.3119326263600013,
+        "interactions": 651,
+        "cost_effective": 2.4422278363600007,
+        "cost_real": 2.4422278363600007,
         "tokens": {
-          "in": 1239005,
-          "out": 433188,
-          "cache_read": 58720704,
+          "in": 1348256,
+          "out": 450076,
+          "cache_read": 62236156,
           "cache_write": 0
         }
       }
@@ -341502,8 +341526,8 @@
         "cost_effective": 0.7716247
       },
       "glm-5.3-flash": {
-        "interactions": 76,
-        "cost_effective": 0.10767652
+        "interactions": 147,
+        "cost_effective": 0.23797173
       },
       "gpt-6.1-sol": {
         "interactions": 61,
@@ -342468,18 +342492,18 @@
     },
     "project_switches_per_active_hour": {
       "measure": "human-context-switching",
-      "value": 103.4
+      "value": 103.34
     }
   },
   "filtered_out": {
-    "interactions": 26763,
+    "interactions": 26932,
     "cost_effective": 0.0,
     "by_tool": {
       "claude-cli": 16,
       "pi": 13,
       "omp": 237
     },
-    "share": 0.0786
+    "share": 0.0791
   },
   "sessions_monthly": {
     "2025-12": {
@@ -343890,7 +343914,7 @@
         "charges_real": 0.0,
         "charges_provenance": "reported",
         "subscription_fee_implicit": 0.0,
-        "cost_effective": 167.59329293,
+        "cost_effective": 167.72358814,
         "fee_month_total": 0.0
       },
       "openai": {

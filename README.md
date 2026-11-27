@@ -134,10 +134,10 @@ El deploy es vía **GitHub Actions** (no hay branch `gh-pages`): `.github/workfl
 ## Estado de los datos
 
 <!-- CHECK-DOCS:BEGIN -->
-- Interacciones: 313,685
+- Interacciones: 313,756
 - Proyectos: 123
-- Costo efectivo: $3,913.76
-- Costo real: $1,965.64
+- Costo efectivo: $3,913.89
+- Costo real: $1,965.77
 - Cash real (ledger): $1,516.72
 - Sesiones: 3,217
 - Periodo: 2025-12-23 → 2026-11-26
@@ -219,9 +219,9 @@ Cifras headline (guard `--check-docs`; bloque generado por `viz-agent.py
 --update-docs`):
 
 <!-- AGENT-DOCS:BEGIN -->
-- Prompts por día activo: 96,3
-- Duración de tarea P90: 4,8 min
-- Horas de agente por día activo: 3,77
+- Prompts por día activo: 41,0
+- Duración de tarea P90: 2,5 min
+- Horas de agente por día activo: 0,79
 - Repos creados en el período: 94
 - Repos mantenidos: 79
 - Ventanas de período: 86
