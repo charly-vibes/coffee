@@ -14,18 +14,18 @@ import schema_validate  # noqa: F401,E402
 import site_theme  # noqa: F401,E402
 
 
-
+def _fc_end(report):
+    """(end_ym, end_date) del reporte; (None, None) sin fecha de fin."""
+    end = report["metadata"]["date_range"]["end"]
+    return (end[:7] if end else None, date.fromisoformat(end) if end else None)
 
 def build_forecast(report, cfg):
     """FPA-070…077: forecast desde run-rate base = media FME de los últimos
-    3 meses con datos (FPA-070); <3 meses → n/a con razón (FPA-008), nunca
-    un forecast inventado. Escenario default (g=0, r=0) pre-calculado;
-    apply_scenario() re-calcula en JS sin reload (FPA-077). Planes futuros
-    = calendario de suscripciones del config (FPA-071). Resto del mes
+    3 meses con datos (FPA-070); <3 meses → n/a con razón (FPA-008).
+    Escenario default pre-calculado; apply_scenario() re-calcula en JS
+    (FPA-077). Planes = calendario del config (FPA-071); resto del mes
     parcial como fila separada (FPA-075)."""
-    end = report["metadata"]["date_range"]["end"]
-    end_ym = end[:7] if end else None
-    end_date = date.fromisoformat(end) if end else None
+    end_ym, end_date = _fc_end(report)
     if not end_date or not end_ym:
         return _fc_n_a("el reporte no registra fecha de fin")
     months = [m for m in build_months(report) if m["has_data"]]
@@ -118,30 +118,40 @@ def _fallback_tool(cfg):
     return best_tool
 
 
+def _fallback_entries(cfg):
+    """(primary, entries, fallback_plan) vía la última suscripción vigente
+    (FPA-082); primary=None si el calendario no tiene fines."""
+    best_tool = _fallback_tool(cfg)
+    if best_tool is None:
+        primary = next(iter(cfg["subscriptions"]), None)
+        return primary, list(cfg["subscriptions"].get(primary, [])), None
+    return best_tool, list(cfg["subscriptions"][best_tool]), {
+        "key": f"{best_tool}:none", "tool": best_tool,
+        "label": "Sin suscripción (pay-per-token)", "fee": 0.0}
+
+def _active_plan_key(primary, entries, end_date):
+    """key del plan activo al cierre; None si ninguno lo está."""
+    for i, e in enumerate(entries):
+        s = date.fromisoformat(e["start"])
+        e_end = date.fromisoformat(e["end"]) if e.get("end") else None
+        if s <= end_date and (e_end is None or end_date < e_end):
+            return f"{primary}:{i}"
+    return None
+
 def _plan_entries(cfg, end_date):
     """(primary, plans, default_plan) del calendario de suscripciones."""
     primary = _primary_tool(cfg, end_date)
     fallback_plan = None
     if primary is None:
-        best_tool = _fallback_tool(cfg)
-        if best_tool is None:
-            primary = next(iter(cfg["subscriptions"]), None)
-            entries = list(cfg["subscriptions"].get(primary, []))
-        else:
-            primary, entries = best_tool, list(cfg["subscriptions"][best_tool])
-            fallback_plan = {"key": f"{primary}:none", "tool": primary,
-                             "label": "Sin suscripción (pay-per-token)", "fee": 0.0}
+        primary, entries, fallback_plan = _fallback_entries(cfg)
     else:
         entries = cfg["subscriptions"].get(primary, [])
     plans = [{"key": f"{primary}:{i}", "tool": primary, "label": e["label"],
               "fee": e["monthly_fee"]} for i, e in enumerate(entries)]
     default_plan = plans[0]["key"] if plans else None
-    for i, e in enumerate(entries):
-        s = date.fromisoformat(e["start"])
-        e_end = date.fromisoformat(e["end"]) if e.get("end") else None
-        if s <= end_date and (e_end is None or end_date < e_end):
-            default_plan = f"{primary}:{i}"
-            break
+    active = _active_plan_key(primary, entries, end_date)
+    if active:
+        default_plan = active
     if fallback_plan:
         plans.append(fallback_plan)
         default_plan = fallback_plan["key"]
@@ -153,10 +163,10 @@ def _plan_entries(cfg, end_date):
 
 
 def apply_scenario(fc, growth, rate_chg, plan_key):
-    """FPA-072/073: escenario sobre el run-rate base.
-    Efectivo: base×(1+g)ⁿ×(1+r) (FPA-072; equivale a Q×(1+g)ⁿ×rate×(1+r)).
-    Cash: cuota del plan + p2p base escalado por volumen (FPA-073).
-    Misma fórmula reproducida en JS para el recompute sin reload (FPA-077)."""
+    """FPA-072/073: escenario sobre el run-rate base. Efectivo:
+    base×(1+g)ⁿ×(1+r) (FPA-072; equivale a Q×(1+g)ⁿ×rate×(1+r)); cash:
+    cuota del plan + p2p base escalado por volumen (FPA-073). Misma fórmula
+    reproducida en JS para el recompute sin reload (FPA-077)."""
     if not fc or fc.get("n_a_reason"): return {"rows": []}
     base = fc["base"]
     fee = next((p["fee"] for p in fc["plans"] if p["key"] == plan_key), base["fee_base"])
@@ -249,13 +259,11 @@ def _plan_fee_for_month(cfg, ym, tool="claude-cli"):
 
 def _check_verify_plan(report, cfg, months, alerts):
     """FPA-081: efectivo de Claude ÷ precio del plan > 25× → alerta.
-    "Revisar fechas del plan u otras cuentas pagas".
-
-    coffe-a31.3 (calendario corregido a las facturas): un mes con uso de
-    Claude sin ningún plan que lo cubra (suscripción cancelada/expirada,
-    p.ej. jun-sep 2026) también dispara la alerta — el efectivo no está
-    respaldado por ninguna cuota. Solo con uso y sin calendario de claude
-    en el config no hay señal que fabricar."""
+    "Revisar fechas del plan u otras cuentas pagas". coffe-a31.3 (calendario
+    corregido a las facturas): un mes con uso de Claude sin ningún plan que
+    lo cubra (suscripción cancelada/expirada) también dispara la alerta —
+    el efectivo no está respaldado por ninguna cuota; sin calendario de
+    claude en el config no hay señal que fabricar."""
     th = _th(cfg, "plan_usage_multiple", 25.0)
     calendario = cfg.get("subscriptions", {}).get("claude-cli", [])
     tiene_calendario = any(e.get("monthly_fee", 0) > 0 for e in calendario)

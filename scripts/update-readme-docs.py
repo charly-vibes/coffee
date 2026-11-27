@@ -41,6 +41,24 @@ def load_viz_ctx():
     return mod
 
 
+def _update_ctx_block(text: str, report) -> tuple[str, bool]:
+    """Actualiza el bloque CTX-DOCS (coffe-v5f); devuelve (texto, cambió)."""
+    viz_ctx = load_viz_ctx()
+    ctx_expected = viz_ctx.expected_ctx_figures(report)
+    ctx_block = "\n" + "".join(f"- {k}: {v}\n" for k, v in ctx_expected.items())
+    if viz_ctx.CTX_DOC_BEGIN not in text or viz_ctx.CTX_DOC_END not in text:
+        return text, False
+    newer = re.sub(
+        re.escape(viz_ctx.CTX_DOC_BEGIN) + r".*?" + re.escape(viz_ctx.CTX_DOC_END),
+        lambda m: viz_ctx.CTX_DOC_BEGIN + ctx_block + viz_ctx.CTX_DOC_END,
+        text, flags=re.S)
+    if newer != text:
+        print("README: bloque CTX-DOCS actualizado")
+        return newer, True
+    print("README: bloque CTX-DOCS ya estaba en sync")
+    return text, False
+
+
 def main() -> int:
     report = json.loads(REPORT.read_text())
     viz_fpa = load_viz_fpa()
@@ -58,22 +76,8 @@ def main() -> int:
     changed = new_text != text
     # CTX-DOCS (coffe-v5f): cifras de contexto desde viz-ctx.py
     try:
-        viz_ctx = load_viz_ctx()
-        ctx_expected = viz_ctx.expected_ctx_figures(report)
-        ctx_block = "\n" + "".join(f"- {k}: {v}\n"
-                                   for k, v in ctx_expected.items())
-        if viz_ctx.CTX_DOC_BEGIN in new_text and viz_ctx.CTX_DOC_END in new_text:
-            newer = re.sub(
-                re.escape(viz_ctx.CTX_DOC_BEGIN) + r".*?"
-                + re.escape(viz_ctx.CTX_DOC_END),
-                lambda m: viz_ctx.CTX_DOC_BEGIN + ctx_block
-                          + viz_ctx.CTX_DOC_END,
-                new_text, flags=re.S)
-            if newer != new_text:
-                new_text, changed = newer, True
-                print("README: bloque CTX-DOCS actualizado")
-            else:
-                print("README: bloque CTX-DOCS ya estaba en sync")
+        new_text, ctx_changed = _update_ctx_block(new_text, report)
+        changed = changed or ctx_changed
     except (OSError, ValueError) as e:
         print(f"aviso: CTX-DOCS no actualizado: {e}", file=sys.stderr)
     if changed:

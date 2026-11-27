@@ -59,17 +59,20 @@ class _FpaRefMover(HTMLParser):
         return any(self.out[i]["marg"] for i in self.stack)
 
     @staticmethod
+    def _merge_title(attrs, extra_ids):
+        """Fusiona extra_ids en el atributo title (lo añade si no existe)."""
+        attrs = list(attrs)
+        for i, (k, v) in enumerate(attrs):
+            if k == "title":
+                attrs[i] = (k, (v + " · " if v else "") + " ".join(extra_ids))
+                return attrs
+        attrs.append(("title", " ".join(extra_ids)))
+        return attrs
+
+    @staticmethod
     def _serialize(tag, attrs, extra_ids, self_closing=False):
         if extra_ids:
-            attrs = list(attrs)
-            merged = None
-            for i, (k, v) in enumerate(attrs):
-                if k == "title":
-                    merged = (v + " · " if v else "") + " ".join(extra_ids)
-                    attrs[i] = (k, merged)
-                    break
-            if merged is None:
-                attrs.append(("title", " ".join(extra_ids)))
+            attrs = _FpaRefMover._merge_title(attrs, extra_ids)
         parts = [f"<{tag}"]
         for k, v in attrs:
             if v is None:

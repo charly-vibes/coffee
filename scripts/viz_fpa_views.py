@@ -10,9 +10,6 @@ import fpa_config  # noqa: F401,E402
 import schema_validate  # noqa: F401,E402
 import site_theme  # noqa: F401,E402
 
-
-
-
 # Vistas pre-calculadas por periodo (FPA-026): Python computa, JS re-escala
 
 def _year_windows(months, y, out):
@@ -49,9 +46,7 @@ def _custom_ranges(months, known, out):
 
 def _windows(months):
     """Ventanas predefinidas (FPA-090): periodo completo, YTD por año, cada
-    año, cada trimestre y cada mes con datos, más todo rango contiguo
-    custom de ≥2 meses — todas pre-calculadas; el selector JS solo elige
-    entre vistas ya calculadas."""
+    año, trimestre y mes con datos, más rangos custom de ≥2 meses."""
     out = [("all", "Todo el periodo", list(months), None)]
     for y in sorted({ym[:4] for ym in months}):
         _year_windows(months, y, out)
@@ -88,20 +83,22 @@ def _tree_base_row(node, ctx):
         "totals_only": bool(node.get("totals_only")), "children": [],
     }
 
+def _budget_variance(node, ctx):
+    """(budget, varianza) del tramo in-budget; solo meses con presupuesto
+    (coffe-9p4): la varianza compara el tramo in-budget, no ventanas mezcladas."""
+    bmonths = [m for m in ctx.window if m in node["by_month"]
+               and node["by_month"][m].get("budget")]
+    budget = sum(node["by_month"][m]["budget"] for m in bmonths)
+    variance = (sum(node["by_month"][m]["cost"] for m in bmonths)
+                if len(bmonths) < len(ctx.window)
+                else _cost_of(node, ctx.window)) - budget
+    return budget, variance
+
 def _tree_budget_fields(row, node, ctx):
     """Columnas de presupuesto/varianza (solo árbol de tiempo, FPA-023)."""
     if not ctx.is_time:
         return
-    # coffe-9p4: los presupuestos solo existen en meses in-budget; si la ventana
-    # mezcla meses fuera del periodo presupuestado (root, años), la varianza
-    # compara solo el tramo in-budget en vez de mezclar 10 meses de coste contra 6 de presupuesto.
-    bmonths = [m for m in ctx.window if m in node["by_month"]
-               and node["by_month"][m].get("budget")]
-    budget = sum(node["by_month"][m]["budget"] for m in bmonths)
-    if budget:
-        variance = (sum(node["by_month"][m]["cost"] for m in bmonths)
-                    if len(bmonths) < len(ctx.window)
-                    else _cost_of(node, ctx.window)) - budget
+    budget, variance = _budget_variance(node, ctx)
     row["budget_display"] = fmt_usd(budget) + " *" if budget else "n/a"
     row["variance_display"] = (f"{'+' if variance >= 0 else '-'}"
                                f"${abs(variance):,.2f}" if budget else "n/a")
@@ -173,6 +170,17 @@ def build_views(report, cfg):
 
 # F8 (coffe-5ng): vista de energía estimada con banda de caché
 
+def _energy_no_tel(mo):
+    """Razones por modelo sin telemetría de energía (loss visible, FPA-008)."""
+    return [f"{model}: {e['reason']}"
+            for model, e in (mo.get("energy_kwh_by_model") or {}).items()
+            if isinstance(e, dict) and e.get("kwh") is None]
+
+def _energy_partial(ym, end, total_days):
+    """FPA-004: mes parcial marcado (días transcurridos / total)."""
+    return bool(end) and end[:7] == ym and end[8:10] and \
+        int(end[8:10]) < total_days
+
 def _energy_month(ym, mo, end):
     """Registro mensual de energía + bandas; None si el fallback no trae
     campos mensuales de energía (7mj sin config)."""
@@ -180,13 +188,9 @@ def _energy_month(ym, mo, end):
         return None  # fallback sin config (7mj): sin campos mensuales
     kwh = mo.get("energy_kwh") or 0.0
     band = mo.get("energy_kwh_band") or {"low": 0.0, "high": 0.0}
-    no_tel = [f"{model}: {e['reason']}"
-              for model, e in (mo.get("energy_kwh_by_model") or {}).items()
-              if isinstance(e, dict) and e.get("kwh") is None]
-    # FPA-004: meses parciales marcados (días transcurridos / total)
+    no_tel = _energy_no_tel(mo)
     total_days = month_total_days(ym)
-    partial = bool(end) and end[:7] == ym and end[8:10] and \
-        int(end[8:10]) < total_days
+    partial = _energy_partial(ym, end, total_days)
     elapsed = int(end[8:10]) if partial else total_days
     return ({"ym": ym, "label": month_label(ym), "kwh": kwh, "low": band["low"],
              "high": band["high"], "no_telemetry": no_tel, "partial": partial,
@@ -194,12 +198,10 @@ def _energy_month(ym, mo, end):
             kwh, band["low"], band["high"])
 
 def build_energy(report):
-    """F8 (coffe-5ng): datos de la vista Energía — kWh mensuales del
-    reporte (7mj, nominal con factor del config) + banda de sensibilidad
-    de caché (coffe-5ng: low/high con factor 0.0/1.0). Los meses cuyo
-    energy_kwh es 0.0 por modelos sin telemetría se listan con las razones
-    por modelo (loss visible, FPA-008): nunca se muestran como medición.
-    """
+    """F8 (coffe-5ng): kWh mensuales (7mj, nominal con factor del config) +
+    banda de sensibilidad de caché (low/high con factor 0.0/1.0). Meses con
+    energy_kwh 0.0 por modelos sin telemetría se listan con razones por
+    modelo (loss visible, FPA-008): nunca se muestran como medición."""
     md = report["metadata"]
     factors = (md.get("energy_band_cache_factors")
                if md.get("energy_provenance") == "assumed" else None)

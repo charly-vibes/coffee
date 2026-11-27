@@ -59,9 +59,15 @@ HARNESS_VERSION = "1"
 
 CLASSES = ("bugfix", "feature", "docs", "tests")
 
-# Plantilla de cifra con provenance (todo número del reporte pasa por acá).
-def figure(value, provenance):
-    return {"value": value, "provenance": provenance}
+# Cargamos model_eval_report.py dinámicamente: scripts/ no es paquete y este
+# runner corre standalone (los tests también lo cargan vía spec_from_file_location).
+import importlib.util as _ilu
+_spec = _ilu.spec_from_file_location(
+    "model_eval_report", Path(__file__).resolve().parent / "model_eval_report.py")
+_report_mod = _ilu.module_from_spec(_spec)
+_spec.loader.exec_module(_report_mod)
+figure, _mean_cost = _report_mod.figure, _report_mod._mean_cost
+aggregate, validate_report = _report_mod.aggregate, _report_mod.validate_report
 
 
 def load_config():
@@ -116,30 +122,29 @@ def ensure_bead(slug, task_id, model, dry_run=False):
     return slug, True
 
 
-def cmd_run(args):
-    config = load_config()
-    tasks = {t["id"]: t for t in config["tasks"]}
-    if args.task not in tasks:
-        print(f"error: tarea {args.task} no está en {CONFIG_PATH}", file=sys.stderr)
-        return 2
-    task = tasks[args.task]
-    cohort = [c["name"] if isinstance(c, dict) else c for c in config.get("cohort", [])]
+def _cohort_names(config):
+    return [c["name"] if isinstance(c, dict) else c for c in config.get("cohort", [])]
+
+
+def _lookup_task(config, task_id):
+    return next((t for t in config["tasks"] if t["id"] == task_id), None)
+
+
+def _run_args_error(args, config):
+    """Mensaje de error si task/model no están en el protocolo; None si ok."""
+    if _lookup_task(config, args.task) is None:
+        return f"error: tarea {args.task} no está en {CONFIG_PATH}"
+    cohort = _cohort_names(config)
     if cohort and args.model not in cohort:
-        print(f"error: modelo {args.model} no está en la cohorte {cohort}", file=sys.stderr)
-        return 2
+        return f"error: modelo {args.model} no está en la cohorte {cohort}"
+    return None
 
-    data = load_data()
-    run_id = f"{args.task}/{args.model}"
-    existing = next((r for r in data["runs"] if r["run_id"] == run_id), None)
 
-    slug = bead_slug(args.task, args.model)
-    created = False
-    if existing is None or not existing.get("bead"):
-        slug, created = ensure_bead(slug, args.task, args.model, dry_run=args.dry_run_bd)
-
+def _run_dict(args, task, slug):
+    """Campos de una corrida según el protocolo (coffe-dnx.9)."""
     provenance = args.cost_provenance if args.cost_usd is not None else None
-    run = {
-        "run_id": run_id,
+    return {
+        "run_id": f"{args.task}/{args.model}",
         "task": args.task,
         "model": args.model,
         "task_class": task["class"],
@@ -161,129 +166,92 @@ def cmd_run(args):
         "bead": slug,
         "timestamp": dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds"),
     }
+
+
+def _upsert_run(data, run, existing, created):
+    """Reemplaza la corrida existente (conservando bead_created) o la agrega."""
     if existing:
         run["bead_created"] = existing.get("bead_created", False)
         data["runs"][data["runs"].index(existing)] = run
     else:
         run["bead_created"] = created
         data["runs"].append(run)
+
+
+def cmd_run(args):
+    config = load_config()
+    error = _run_args_error(args, config)
+    if error:
+        print(error, file=sys.stderr)
+        return 2
+    task = _lookup_task(config, args.task)
+
+    data = load_data()
+    run_id = f"{args.task}/{args.model}"
+    existing = next((r for r in data["runs"] if r["run_id"] == run_id), None)
+
+    slug = bead_slug(args.task, args.model)
+    created = False
+    if existing is None or not existing.get("bead"):
+        slug, created = ensure_bead(slug, args.task, args.model, dry_run=args.dry_run_bd)
+
+    run = _run_dict(args, task, slug)
+    _upsert_run(data, run, existing, created)
     save_data(data)
     print(json.dumps({"run_id": run_id, "bead": slug, "bead_created": run["bead_created"],
                       "verdict": run["verdict"]}, ensure_ascii=False))
     return 0
 
 
-def _mean_cost(runs):
-    """Promedio de coste con provenance agregada: cualquier estimated contamina."""
-    vals = [r["cost_usd"] for r in runs if r.get("cost_usd") is not None]
-    if not vals:
-        return None
-    prov = "estimated" if any(v["provenance"] != "measured" for v in vals) else "measured"
-    return figure(sum(v["value"] for v in vals) / len(vals), prov)
+def _model_report(model_runs, task_ids):
+    """Tareas de la cohorte sin veredicto para un modelo + agregación por clase."""
+    judged_tasks = {r["task"] for r in model_runs
+                    if r.get("verdict") in ("accepted", "rejected")}
+    return {
+        "incomplete": sorted(task_ids - judged_tasks),
+        "by_class": aggregate(model_runs, None),
+    }
 
 
-def aggregate(runs, tasks_by_class):
-    """Agrega corridas con veredicto por clase; las sin veredicto NO puntúan."""
-    by_class = {}
-    for cls in CLASSES:
-        cls_runs = [r for r in runs if r["task_class"] == cls]
-        judged = [r for r in cls_runs if r.get("verdict") in ("accepted", "rejected")]
-        accepted = [r for r in judged if r["verdict"] == "accepted"]
-        no_verdict = len(cls_runs) - len(judged)
-        entry = {
-            "runs_recorded": figure(len(cls_runs), "measured"),
-            "runs_without_verdict": figure(no_verdict, "measured"),
-            "judged": figure(len(judged), "measured"),
-            "accepted": figure(len(accepted), "measured"),
-            "rejected": figure(len(judged) - len(accepted), "measured"),
-        }
-        if judged:
-            entry["acceptance_rate"] = figure(len(accepted) / len(judged), "judged")
-        else:
-            entry["acceptance_rate"] = figure(None, "judged")
-        mc = _mean_cost(judged)
-        if mc:
-            entry["mean_cost_usd"] = mc
-        lat = [r["latency_s"]["value"] for r in judged if r.get("latency_s")]
-        if lat:
-            entry["mean_latency_s"] = figure(sum(lat) / len(lat), "measured")
-        blind_broken = [r["judged_by"] for r in cls_runs if r.get("judged_by")]
-        if blind_broken:
-            entry["judged_by"] = sorted(set(blind_broken))
-        by_class[cls] = entry
-    return by_class
+def _cohort_complete(cohort, task_ids, runs):
+    """Cohorte completa ⇔ cada modelo de la cohorte tiene veredicto en cada tarea."""
+    if not cohort:
+        return False
+    covered = {(r["model"], r["task"]) for r in runs
+               if r.get("verdict") in ("accepted", "rejected")}
+    return all((m, t) in covered for m in cohort for t in task_ids)
+
+
+def _cohort_average(runs):
+    """Solo con cohorte completa se promedia entre modelos."""
+    all_judged = [r for r in runs if r.get("verdict") in ("accepted", "rejected")]
+    accepted = [r for r in all_judged if r["verdict"] == "accepted"]
+    return {
+        "acceptance_rate": figure(len(accepted) / len(all_judged) if all_judged else None,
+                                  "judged"),
+    }
 
 
 def build_report():
     config = load_config()
     data = load_data()
-    cohort = [c["name"] if isinstance(c, dict) else c for c in config.get("cohort", [])]
+    cohort = _cohort_names(config)
     task_ids = {t["id"] for t in config["tasks"]}
     runs = [r for r in data["runs"] if r["task"] in task_ids]
-    models = sorted({r["model"] for r in runs})
-
-    models_report = {}
-    for model in models:
-        model_runs = [r for r in runs if r["model"] == model]
-        models_report[model] = {
-            "incomplete": sorted(task_ids - {r["task"] for r in model_runs
-                                             if r.get("verdict") in ("accepted", "rejected")}),
-            "by_class": aggregate(model_runs, None),
-        }
-
-    # Cohorte completa ⇔ cada modelo de la cohorte tiene veredicto en cada tarea.
-    covered = {(r["model"], r["task"]) for r in runs
-               if r.get("verdict") in ("accepted", "rejected")}
-    complete = bool(cohort) and all((m, t) in covered for m in cohort for t in task_ids)
-
+    models_report = {
+        model: _model_report([r for r in runs if r["model"] == model], task_ids)
+        for model in sorted({r["model"] for r in runs})
+    }
     report = {
         "schema": 1,
         "harness": {"name": HARNESS_NAME, "version": figure(HARNESS_VERSION, "measured")},
         "cohort": figure(sorted(cohort), "measured"),
-        "incomplete": figure(not complete, "measured"),
+        "incomplete": figure(not _cohort_complete(cohort, task_ids, runs), "measured"),
         "models": models_report,
     }
-    if complete:
-        # Solo con cohorte completa se promedia entre modelos.
-        all_judged = [r for r in runs if r.get("verdict") in ("accepted", "rejected")]
-        acc = [r for r in all_judged if r["verdict"] == "accepted"]
-        report["cohort_average"] = {
-            "acceptance_rate": figure(len(acc) / len(all_judged) if all_judged else None, "judged"),
-        }
+    if _cohort_complete(cohort, task_ids, runs):
+        report["cohort_average"] = _cohort_average(runs)
     return report
-
-
-def validate_report(report):
-    """Auto-chequeo: cada cifra lleva provenance válida; incomplete declarado."""
-    errors = []
-
-    def walk(node, path):
-        if isinstance(node, dict):
-            if "value" in node or "provenance" in node:
-                if "provenance" not in node or node["provenance"] not in ("measured", "estimated", "judged"):
-                    errors.append(f"{path}: cifra sin provenance válida")
-                if "value" not in node:
-                    errors.append(f"{path}: provenance sin value")
-                return
-            for k, v in node.items():
-                walk(v, f"{path}.{k}")
-        elif isinstance(node, list):
-            for i, v in enumerate(node):
-                walk(v, f"{path}[{i}]")
-
-    walk(report, "report")
-    if "incomplete" not in report:
-        errors.append("report.incomplete: falta la declaración de cohorte incompleta")
-    for model, mr in report.get("models", {}).items():
-        for cls, entry in mr["by_class"].items():
-            if entry["runs_without_verdict"]["value"] > 0 and "acceptance_rate" in entry:
-                rate = entry["acceptance_rate"]["value"]
-                judged = entry["judged"]["value"]
-                if judged and rate is not None and abs(rate - entry["accepted"]["value"] / judged) > 1e-9:
-                    pass  # rate calculado sobre judged: correcto
-        if mr["incomplete"] and "cohort_average" in report and report["cohort_average"]:
-            errors.append(f"{model}: cohorte incompleta pero se promedió")
-    return errors
 
 
 def cmd_report(args):

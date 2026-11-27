@@ -221,40 +221,37 @@ def _kpi_cost_cards(ing, window, prior):
     return [_kpi(KpiSpec(delta=KpiDelta(**d), **kw))
             for kw, d in _cost_card_rows_a(c) + _cost_card_rows_b(c)]
 
+_SHARE_ROWS = [
+    # (key, label, num-key | None→top3, den-key, spark-num-key, razón del n/a, provenance)
+    ("top3_concentration", "Concentración top-3", None, "proj_cost",
+     "top3_cost", "sin coste por proyecto en el periodo", None),
+    ("premium_share", "Share premium", "premium_cost", "cost_effective",
+     "premium_cost", "sin coste efectivo en el periodo", "assumed"),
+    ("autonomous_share", "Autonomous share", "sessions_agent", "sessions",
+     "sessions_agent", "sin sesiones en el periodo", None),
+    ("multitasking_share", "Multitasking", "mt_interactions", "interactions",
+     "mt_interactions", "sin interacciones en el periodo", None),
+]
+
+def _share_row(ing, window, prior, row):
+    """Card de share: ratio del periodo + delta vs prior (config → assumed)."""
+    key, label, nk, dk, spark_nk, reason, prov = row
+    num = _top3_of(ing, window) if nk is None else _sum_ing(ing, window, nk)
+    p_num = (_top3_of(ing, prior) if prior else 0) if nk is None \
+        else _psum(ing, prior, nk)
+    kw = {"provenance": prov} if prov else {}
+    return _kpi(KpiSpec(key, label,
+                        _ratio(num, _sum_ing(ing, window, dk)),
+                        lambda v: f"{v * 100:.1f}%",
+                        _den_reason(_sum_ing(ing, window, dk), reason),
+                        delta=KpiDelta(prev=_ratio(p_num, _psum(ing, prior, dk)),
+                                       spark=_spark_ratio(ing, spark_nk, dk)),
+                        **kw))
+
 def _kpi_share_cards(ing, window, prior):
     """Shares: top-3 (coffe-hn7), premium (config → assumed), autonomous,
     multitasking (FPA-045)."""
-    eff, inter = _sum_ing(ing, window, "cost_effective"), _sum_ing(ing, window, "interactions")
-    sessions, pcost = _sum_ing(ing, window, "sessions"), _sum_ing(ing, window, "proj_cost")
-    p_eff = _psum(ing, prior, "cost_effective")
-    p_inter, p_sessions = _psum(ing, prior, "interactions"), _psum(ing, prior, "sessions")
-    p_proj = _psum(ing, prior, "proj_cost")
-    return [
-        _kpi(KpiSpec("top3_concentration", "Concentración top-3",
-                     _ratio(_top3_of(ing, window), pcost), lambda v: f"{v * 100:.1f}%",
-                     _den_reason(pcost, "sin coste por proyecto en el periodo"),
-                     delta=KpiDelta(prev=_ratio(_top3_of(ing, prior) if prior else 0, p_proj),
-                                    spark=_spark_ratio(ing, "top3_cost", "proj_cost")))),
-        # share premium: la lista de modelos premium viene del config → assumed
-        _kpi(KpiSpec("premium_share", "Share premium",
-                     _ratio(_sum_ing(ing, window, "premium_cost"), eff),
-                     lambda v: f"{v * 100:.1f}%", provenance="assumed",
-                     reason=_den_reason(eff, "sin coste efectivo en el periodo"),
-                     delta=KpiDelta(prev=_ratio(_psum(ing, prior, "premium_cost"), p_eff),
-                                    spark=_spark_ratio(ing, "premium_cost", "cost_effective")))),
-        _kpi(KpiSpec("autonomous_share", "Autonomous share",
-                     _ratio(_sum_ing(ing, window, "sessions_agent"), sessions),
-                     lambda v: f"{v * 100:.1f}%",
-                     _den_reason(sessions, "sin sesiones en el periodo"),
-                     delta=KpiDelta(prev=_ratio(_psum(ing, prior, "sessions_agent"), p_sessions),
-                                    spark=_spark_ratio(ing, "sessions_agent", "sessions")))),
-        _kpi(KpiSpec("multitasking_share", "Multitasking",
-                     _ratio(_sum_ing(ing, window, "mt_interactions"), inter),
-                     lambda v: f"{v * 100:.1f}%",
-                     _den_reason(inter, "sin interacciones en el periodo"),
-                     delta=KpiDelta(prev=_ratio(_psum(ing, prior, "mt_interactions"), p_inter),
-                                    spark=_spark_ratio(ing, "mt_interactions", "interactions")))),
-    ]
+    return [_share_row(ing, window, prior, row) for row in _SHARE_ROWS]
 
 def _kpi_token_cards(ing, window, prior):
     """FPA-043/045: token KPIs con exclusión de tools sin tokens."""
