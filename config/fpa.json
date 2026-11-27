@@ -72,6 +72,42 @@
       }
     ]
   },
+  "model_mapping": {
+    "_comment": "coffe-dnx.1: modelo → familia/versión. Lista ordenada de {priority, pattern, family, version}; pattern es regex case-insensitive sobre el model_id en minúsculas y gana la PRIMERA entrada cuyo priority es menor (order = prioridad explícita). Sin match → (\"other\", model_id[:20]) (fallback conservado y contado en metadata.model_mapping_coverage). Las versiones sin tarifa en model_pricing usan default_rates (warn + contador default_rates_fallbacks).",
+    "entries": [
+      { "priority": 10, "pattern": ":free$", "family": "openrouter", "version": "free" },
+      { "priority": 20, "pattern": "claude-opus-4[.-]8", "family": "claude", "version": "opus-4.8" },
+      { "priority": 21, "pattern": "claude-opus-4[.-]7", "family": "claude", "version": "opus-4.7" },
+      { "priority": 22, "pattern": "claude-opus-4[.-]6", "family": "claude", "version": "opus-4.6" },
+      { "priority": 23, "pattern": "claude-opus-4[.-]5", "family": "claude", "version": "opus-4.5" },
+      { "priority": 24, "pattern": "claude-sonnet-4[.-]6", "family": "claude", "version": "sonnet-4.6" },
+      { "priority": 25, "pattern": "claude-haiku", "family": "claude", "version": "haiku" },
+      { "priority": 26, "pattern": "synthetic", "family": "claude", "version": "synthetic" },
+      { "priority": 30, "pattern": "gpt-6\\.1", "family": "codex", "version": "gpt-6.1" },
+      { "priority": 31, "pattern": "gpt-6", "family": "codex", "version": "gpt-6" },
+      { "priority": 32, "pattern": "gpt-5\\.5", "family": "codex", "version": "gpt-5.5" },
+      { "priority": 33, "pattern": "gpt-5\\.4", "family": "codex", "version": "gpt-5.4" },
+      { "priority": 34, "pattern": "gpt-5\\.3", "family": "codex", "version": "gpt-5.3" },
+      { "priority": 40, "pattern": "gemini-3\\.1", "family": "gemini", "version": "gemini-3.1" },
+      { "priority": 41, "pattern": "gemini-3[-.]", "family": "gemini", "version": "gemini-3-pro" },
+      { "priority": 42, "pattern": "gemini-2\\.5", "family": "gemini", "version": "gemini-2.5" },
+      { "priority": 50, "pattern": "deepseek-v4\\.1-pro", "family": "deepseek", "version": "v4.1-pro" },
+      { "priority": 51, "pattern": "deepseek-v4-pro", "family": "deepseek", "version": "v4-pro" },
+      { "priority": 52, "pattern": "deepseek-v4-flash", "family": "deepseek", "version": "v4-flash" },
+      { "priority": 53, "pattern": "deepseek", "family": "deepseek", "version": "v4-flash" },
+      { "priority": 60, "pattern": "kimi.*k2\\.5", "family": "kimi", "version": "k2.5" },
+      { "priority": 61, "pattern": "k2\\.5", "family": "kimi", "version": "k2.5" },
+      { "priority": 62, "pattern": "kimi", "family": "kimi", "version": "k2" },
+      { "priority": 70, "pattern": "z-ai/glm-5\\.3-flash", "family": "glm", "version": "glm-5.3-flash" },
+      { "priority": 71, "pattern": "glm-5\\.3-flash", "family": "glm", "version": "glm-5.3-flash" },
+      { "priority": 80, "pattern": "minimax-m3\\.1", "family": "minimax", "version": "m3.1-flash" },
+      { "priority": 81, "pattern": "minimax-m2\\.7", "family": "minimax", "version": "m2.7" },
+      { "priority": 90, "pattern": "qwen3\\.8-max", "family": "qwen", "version": "qwen3.8-max" },
+      { "priority": 91, "pattern": "qwen3\\.8-flash", "family": "qwen", "version": "qwen3.8-flash" },
+      { "priority": 100, "pattern": "devstral", "family": "mistral", "version": "devstral" },
+      { "priority": 101, "pattern": "mistral", "family": "mistral", "version": "mistral" }
+    ]
+  },
   "model_pricing": {
     "default_rates": {
       "input": 3e-06,

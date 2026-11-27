@@ -42,12 +42,25 @@ turno). Propósito: higiene de sesiones → presupuesto de contexto. Coste
 ausente → null con razón (nunca 0 fake). Patologías (bloque assistant >
 context_thresholds.pathological_chars de config) contadas, nunca
 silenciosas. Pi-only: Claude/Amp/Codex fuera del alcance.
+v4.8 (coffe-dnx.1): el mapeo modelo → (familia, versión) vive en
+config/fpa.json (bloque model_mapping: lista de {priority, pattern,
+family, version}; regex case-insensitive, gana el priority menor) y ya no
+en una cadena de `if "x" in m` hardcodeada que pisaba precios y colapsaba
+versiones (deepseek-v4-pro/v4.1-pro facturados a tarifa v4-flash, kimi k2.5
+a k2, claude-opus-4.8 al fallback other, z-ai/glm-5.3-flash → other). El
+fallback ("other", model_id[:20]) se conserva pero queda VISIBLE y CONTADO:
+estimate_cost() lleva un contador default_rates_fallbacks y emite warning
+a stderr (una vez por familia/versión) cuando una versión no tiene tarifa
+en model_pricing (usa DEFAULT_RATES — provenance *assumed*); el reporte
+emite metadata.model_mapping_coverage (tokens y filas por familia,
+tokens_other_pct, default_rates_fallbacks contados por fila sin tarifa).
 """
 
 import argparse
 import importlib.util
 import json
 import os
+import re
 import sys
 import time
 from collections import Counter, defaultdict
@@ -133,6 +146,64 @@ _FALLBACK_MODEL_PRICING = {
 }
 
 _FALLBACK_DEFAULT_RATES = {"input": 0.000003, "output": 0.000015, "cache_read": 0.0000003}
+
+# coffe-dnx.1: mapeo modelo → (familia, versión) — FALLBACK (máquinas sin
+# config). Misma cadena de patrones que model_details() tenía hardcodeada
+# antes de v4.8; en config/fpa.json (bloque model_mapping) vive la fuente
+# de verdad. Orden = prioridad (primera coincidencia gana); sin match →
+# ("other", model_id[:20]) — conservado y contado.
+_FALLBACK_MODEL_MAPPING = [
+    {"priority": 10, "pattern": ":free$", "family": "openrouter", "version": "free"},
+    {"priority": 20, "pattern": "claude-opus-4[.-]8", "family": "claude", "version": "opus-4.8"},
+    {"priority": 21, "pattern": "claude-opus-4[.-]7", "family": "claude", "version": "opus-4.7"},
+    {"priority": 22, "pattern": "claude-opus-4[.-]6", "family": "claude", "version": "opus-4.6"},
+    {"priority": 23, "pattern": "claude-opus-4[.-]5", "family": "claude", "version": "opus-4.5"},
+    {"priority": 24, "pattern": "claude-sonnet-4[.-]6", "family": "claude", "version": "sonnet-4.6"},
+    {"priority": 25, "pattern": "claude-haiku", "family": "claude", "version": "haiku"},
+    {"priority": 26, "pattern": "synthetic", "family": "claude", "version": "synthetic"},
+    {"priority": 30, "pattern": "gpt-6\\.1", "family": "codex", "version": "gpt-6.1"},
+    {"priority": 31, "pattern": "gpt-6", "family": "codex", "version": "gpt-6"},
+    {"priority": 32, "pattern": "gpt-5\\.5", "family": "codex", "version": "gpt-5.5"},
+    {"priority": 33, "pattern": "gpt-5\\.4", "family": "codex", "version": "gpt-5.4"},
+    {"priority": 34, "pattern": "gpt-5\\.3", "family": "codex", "version": "gpt-5.3"},
+    {"priority": 40, "pattern": "gemini-3\\.1", "family": "gemini", "version": "gemini-3.1"},
+    {"priority": 41, "pattern": "gemini-3[-.]", "family": "gemini", "version": "gemini-3-pro"},
+    {"priority": 42, "pattern": "gemini-2\\.5", "family": "gemini", "version": "gemini-2.5"},
+    {"priority": 50, "pattern": "deepseek-v4\\.1-pro", "family": "deepseek", "version": "v4.1-pro"},
+    {"priority": 51, "pattern": "deepseek-v4-pro", "family": "deepseek", "version": "v4-pro"},
+    {"priority": 52, "pattern": "deepseek-v4-flash", "family": "deepseek", "version": "v4-flash"},
+    {"priority": 53, "pattern": "deepseek", "family": "deepseek", "version": "v4-flash"},
+    {"priority": 60, "pattern": "kimi.*k2\\.5", "family": "kimi", "version": "k2.5"},
+    {"priority": 61, "pattern": "k2\\.5", "family": "kimi", "version": "k2.5"},
+    {"priority": 62, "pattern": "kimi", "family": "kimi", "version": "k2"},
+    {"priority": 70, "pattern": "z-ai/glm-5\\.3-flash", "family": "glm", "version": "glm-5.3-flash"},
+    {"priority": 71, "pattern": "glm-5\\.3-flash", "family": "glm", "version": "glm-5.3-flash"},
+    {"priority": 80, "pattern": "minimax-m3\\.1", "family": "minimax", "version": "m3.1-flash"},
+    {"priority": 81, "pattern": "minimax-m2\\.7", "family": "minimax", "version": "m2.7"},
+    {"priority": 90, "pattern": "qwen3\\.8-max", "family": "qwen", "version": "qwen3.8-max"},
+    {"priority": 91, "pattern": "qwen3\\.8-flash", "family": "qwen", "version": "qwen3.8-flash"},
+    {"priority": 100, "pattern": "devstral", "family": "mistral", "version": "devstral"},
+    {"priority": 101, "pattern": "mistral", "family": "mistral", "version": "mistral"},
+]
+
+# coffe-dnx.1: contador de usos de DEFAULT_RATES (versión sin tarifa en
+# model_pricing). Clave familia → {versión: n llamados a estimate_cost()}
+# (defaultdict(Counter), mismo shape anidado que devuelve
+# default_rates_fallbacks()). El reporte cuenta fallbacks POR FILA
+# (determinista, ver _model_mapping_coverage); este contador alimenta el
+# warning a stderr y los tests. Reset explícito con
+# reset_default_rates_fallbacks().
+_DEFAULT_RATES_FALLBACKS = defaultdict(Counter)
+
+
+def reset_default_rates_fallbacks():
+    """coffe-dnx.1: reinicia el contador de fallbacks a default_rates."""
+    _DEFAULT_RATES_FALLBACKS.clear()
+
+
+def default_rates_fallbacks():
+    """coffe-dnx.1: snapshot {familia: {versión: n}} del contador."""
+    return {fam: dict(vers) for fam, vers in _DEFAULT_RATES_FALLBACKS.items()}
 
 # Ledger de cargos reales (coffe-a31.2, CRG-F1): facturas transcriptas,
 # provenance *reported* (FPA-003). cash cost = estos cargos; los fees
@@ -267,6 +338,36 @@ def _import_fpa_config():
 fpa_config = _import_fpa_config()
 
 
+def _compile_model_mapping(entries):
+    """coffe-dnx.1: compila el bloque model_mapping de config → [(regex,
+    family, version)] ordenado por priority (menor = mayor precedencia).
+
+    Fail loud ante entradas malformadas (sin pattern/family/version) o
+    patterns que no compilan: un mapeo roto clasificaría todo a "other"
+    en silencio. Vía fallback (config ausente) usa la lista hardcodeada.
+    """
+    if not isinstance(entries, list) or not entries:
+        raise ValueError(
+            "model_mapping.entries debe ser una lista no vacía de "
+            "{priority, pattern, family, version}")
+    compiled = []
+    for i, e in enumerate(entries):
+        try:
+            pat, fam, ver = e["pattern"], e["family"], e["version"]
+            prio = e.get("priority", i)
+        except (TypeError, KeyError) as exc:
+            raise ValueError(
+                f"model_mapping.entries[{i}] malformada (requiere "
+                "pattern/family/version)") from exc
+        try:
+            compiled.append((re.compile(pat, re.IGNORECASE), fam, ver, prio))
+        except re.error as exc:
+            raise ValueError(
+                f"model_mapping.entries[{i}]: regex inválida {pat!r}: {exc}") from exc
+    compiled.sort(key=lambda t: t[3])
+    return [(rx, fam, ver) for rx, fam, ver, _ in compiled]
+
+
 def load_config(path=None):
     """coffe-mbz: cargar SUBSCRIPTIONS/MODEL_PRICING desde config/fpa.json.
 
@@ -282,6 +383,7 @@ def load_config(path=None):
     """
     global SUBSCRIPTIONS, MODEL_PRICING, DEFAULT_RATES, _CACHE_WRITE_FACTOR
     global _FPA_CONFIG, _PRICING_VERSIONS, CONFIG_SOURCE, _ENERGY_COEFFS
+    global _MODEL_MAPPING
 
     explicit = path or os.environ.get("TRACKER_CONFIG")
     cfg = None
@@ -306,6 +408,7 @@ def load_config(path=None):
         SUBSCRIPTIONS = _FALLBACK_SUBSCRIPTIONS
         MODEL_PRICING = _FALLBACK_MODEL_PRICING
         DEFAULT_RATES = _FALLBACK_DEFAULT_RATES
+        _MODEL_MAPPING = _compile_model_mapping(_FALLBACK_MODEL_MAPPING)
         _CACHE_WRITE_FACTOR = 1.25
         _PRICING_VERSIONS = [{"effective": None, "rates": MODEL_PRICING}]
         _FPA_CONFIG = None
@@ -322,6 +425,10 @@ def load_config(path=None):
     pricing = cfg["model_pricing"]
     SUBSCRIPTIONS = cfg["subscriptions"]
     DEFAULT_RATES = pricing["default_rates"]
+    # coffe-dnx.1: mapeo modelo → familia/versión desde config (orden =
+    # prioridad explícita; sin bloque o vacío → fallback hardcodeado).
+    _MODEL_MAPPING = _compile_model_mapping(
+        cfg.get("model_mapping", {}).get("entries") or _FALLBACK_MODEL_MAPPING)
     _CACHE_WRITE_FACTOR = pricing.get("cache_write_factor", 1.25)
     _PRICING_VERSIONS = pricing.get("versions", [])
     # coffe-7mj.1: coeficientes de energía (bloque requerido, validado arriba
@@ -361,7 +468,22 @@ def estimate_cost(family, version, input_tokens, output_tokens, cache_read=0,
     `when`: fecha de la interacción (date) para pricing versionado por
     fecha efectiva (FPA-016); None → última versión conocida.
     """
-    rates = _pricing_for(when).get(family, {}).get(version, DEFAULT_RATES)
+    rates = _pricing_for(when).get(family, {}).get(version)
+    if rates is None:
+        # coffe-dnx.1: versión sin tarifa → DEFAULT_RATES, pero ya no en
+        # silencio: contador + warning stderr (una vez por familia/versión,
+        # una corrida ruidosa con 15k llamadas no escupe 15k warnings).
+        _DEFAULT_RATES_FALLBACKS[family][version] += 1
+        if _DEFAULT_RATES_FALLBACKS[family][version] == 1:
+            cfg_src = CONFIG_SOURCE or "builtin-fallback"
+            print(
+                f"WARNING: default_rates fallback — {family}/{version} no "
+                f"tiene tarifa en model_pricing (config {cfg_src}); coste "
+                f"estimado a default_rates ({DEFAULT_RATES}) — "
+                "provenance *assumed*",
+                file=sys.stderr,
+            )
+        rates = DEFAULT_RATES
     # Anthropic cobra cache writes a _CACHE_WRITE_FACTOR x del input rate
     input_cost = (input_tokens + cache_write * _CACHE_WRITE_FACTOR) * rates["input"]
     cache_read_cost = cache_read * rates.get("cache_read", rates["input"] * 0.1)
@@ -543,23 +665,16 @@ def in_scope(proj):
 is_charly = in_scope
 
 def model_details(model_id):
+    """coffe-dnx.1: modelo → (familia, versión) desde config/fpa.json
+    (bloque model_mapping; orden por priority, primera coincidencia gana).
+
+    Sin match → ("other", model_id[:20]): fallback conservado (no se borra,
+    solo queda visible y contado en metadata.model_mapping_coverage).
+    """
     m = model_id.lower()
-    if "claude-opus-4-7" in m: return ("claude", "opus-4.7")
-    if "claude-opus-4-6" in m: return ("claude", "opus-4.6")
-    if "claude-opus-4-5" in m: return ("claude", "opus-4.5")
-    if "claude-sonnet-4-6" in m: return ("claude", "sonnet-4.6")
-    if "claude-haiku" in m: return ("claude", "haiku")
-    if "gpt-6.1" in m: return ("codex", "gpt-6.1")  # coffe-2sy: gpt-6.1-sol etc. (precio API desconocido → default_rates, *assumed*)
-    if "gpt-6" in m: return ("codex", "gpt-6")  # coffe-2sy: variantes (gpt-6-luna); familia codex, no "other"
-    if "gpt-5.5" in m: return ("codex", "gpt-5.5")
-    if "gpt-5.4" in m: return ("codex", "gpt-5.4")
-    if "gpt-5.3" in m: return ("codex", "gpt-5.3")
-    if "gemini-3.1" in m: return ("gemini", "gemini-3.1")
-    if "gemini-3-" in m: return ("gemini", "gemini-3-pro")
-    if "gemini-2.5" in m: return ("gemini", "gemini-2.5")
-    if "deepseek" in m: return ("deepseek", "v4-flash")
-    if "kimi" in m: return ("kimi", "k2")
-    if "synthetic" in m: return ("claude", "synthetic")
+    for rx, family, version in _MODEL_MAPPING:
+        if rx.search(m):
+            return (family, version)
     return ("other", model_id[:20])
 
 
@@ -2274,6 +2389,59 @@ def _session_spend(interactions):
     return out
 
 
+def _model_mapping_coverage(interactions):
+    """coffe-dnx.1: cobertura del mapeo modelo → familia en esta corrida.
+
+    Por familia: tokens (in+out+cache_read+cache_write, misma contabilidad
+    de metadata.token_accounting) y filas. tokens_other_pct = % de tokens
+    clasificados ("other", ...) — el KPI del ticket: antes del fix era
+    ~56,8% (z-ai/glm-5.3-flash caía al fallback). default_rates_fallbacks
+    se cuenta POR FILA (versión sin tarifa en model_pricing en la fecha de
+    la fila): determinista para tests/golden, independiente del orden en
+    que estimate_cost() fue llamada durante la extracción. Las filas
+    ("other", ...) — fallback del mapeo, sin match — no cuentan como
+    default_rates_fallbacks: no son una versión sin tarifa sino un modelo
+    sin mapear, visible y contado en tokens_other_pct. Las llamadas a
+    estimate_cost() que usaron default_rates quedan aparte en el contador
+    default_rates_fallbacks() (y en el warning stderr).
+    """
+    by_family = defaultdict(lambda: {"tokens": 0, "rows": 0})
+    tokens_total = tokens_other = fallback_rows = 0
+    priced_cache = {}
+    for r in interactions:
+        fam = r.get("model_family") or "other"
+        ver = r.get("model_version") or "unknown"
+        toks = (r.get("input_tokens") or 0) + (r.get("output_tokens") or 0) \
+            + (r.get("cache_read_tokens") or 0) + (r.get("cache_write_tokens") or 0)
+        by_family[fam]["tokens"] += toks
+        by_family[fam]["rows"] += 1
+        tokens_total += toks
+        if fam == "other":
+            tokens_other += toks
+        ts = r.get("timestamp") or ""
+        day = ts[:10]
+        key = (fam, ver, day)
+        if key not in priced_cache:
+            try:
+                when = date.fromisoformat(day) if len(day) == 10 else None
+            except ValueError:
+                when = None
+            priced_cache[key] = ver not in _pricing_for(when).get(fam, {})
+        # familia "other" = fallback del mapeo (sin match), no una versión
+        # sin tarifa — se cuenta en tokens_other, no aquí.
+        if priced_cache[key] and fam != "other":
+            fallback_rows += 1
+    return {
+        "by_family": {fam: dict(st) for fam, st in sorted(by_family.items())},
+        "tokens_total": tokens_total,
+        "tokens_other": tokens_other,
+        "tokens_other_pct": round(tokens_other / tokens_total * 100, 2)
+        if tokens_total else 0.0,
+        "default_rates_fallbacks": fallback_rows,
+        "mapping_source": CONFIG_SOURCE or "builtin-fallback",
+    }
+
+
 def aggregate(interactions, sessions, skills_total=None, skills_by_project=None,
               commands=None, excluded=None, interaction_kinds=None,
               outcomes=None, outcomes_reason=None, context_metrics=None):
@@ -2605,6 +2773,9 @@ def aggregate(interactions, sessions, skills_total=None, skills_by_project=None,
             "total_projects": len(by_project),
             # coffe-mbz: fuente de verdad de suscripciones/pricing
             "config_source": CONFIG_SOURCE or "builtin-fallback",
+            # coffe-dnx.1: cobertura del mapeo modelo → familia (visible y
+            # contado; el fallback "other" ya no es un agujero silencioso)
+            "model_mapping_coverage": _model_mapping_coverage(interactions),
         },
         "hourly": {h: b.to_dict() | {"projects_active": getattr(b, "projects_active", 0)}
                    for h, b in hourly.items()},

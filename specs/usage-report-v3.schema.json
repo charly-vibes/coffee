@@ -69,6 +69,52 @@
           "type": "string",
           "description": "coffe-mbz: fuente del config de suscripciones/pricing (ruta de config/fpa.json o 'builtin-fallback')"
         },
+        "model_mapping_coverage": {
+          "type": "object",
+          "description": "coffe-dnx.1: cobertura del mapeo modelo → familia (bloque model_mapping de config). El fallback ('other', model_id[:20]) se conserva pero queda contado: tokens_other_pct era ~56,8% antes del fix (z-ai/glm-5.3-flash caía a other).",
+          "required": [
+            "by_family",
+            "tokens_total",
+            "tokens_other",
+            "tokens_other_pct",
+            "default_rates_fallbacks",
+            "mapping_source"
+          ],
+          "properties": {
+            "by_family": {
+              "type": "object",
+              "description": "familia → {tokens (in+out+cache_read+cache_write), rows}",
+              "additionalProperties": {
+                "type": "object",
+                "required": ["tokens", "rows"],
+                "properties": {
+                  "tokens": { "type": "integer" },
+                  "rows": { "type": "integer" }
+                }
+              }
+            },
+            "tokens_total": {
+              "type": "integer",
+              "description": "tokens totales de las filas (misma contabilidad de metadata.token_accounting)"
+            },
+            "tokens_other": {
+              "type": "integer",
+              "description": "tokens clasificados ('other', ...) — sin match en model_mapping"
+            },
+            "tokens_other_pct": {
+              "type": "number",
+              "description": "% de tokens en familia other (KPI del ticket: < 10 en el reporte real)"
+            },
+            "default_rates_fallbacks": {
+              "type": "integer",
+              "description": "filas cuya versión no tiene tarifa en model_pricing en la fecha de la fila (usaron DEFAULT_RATES, provenance assumed)"
+            },
+            "mapping_source": {
+              "type": "string",
+              "description": "fuente del bloque model_mapping (ruta de config/fpa.json o 'builtin-fallback')"
+            }
+          }
+        },
         "charges_total_real": {
           "description": "coffe-a31.2: suma IA total del ledger data/charges.json (USD, provenance reported)",
           "type": "number"

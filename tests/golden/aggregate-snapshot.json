@@ -618,6 +618,17 @@
     "charges_source": "data/charges.json",
     "charges_total_real": 1716.72,
     "config_source": "config/fpa.json",
+    "model_mapping_coverage": {
+      "by_family": {
+        "claude": { "tokens": 3000, "rows": 2 },
+        "codex": { "tokens": 1500, "rows": 1 }
+      },
+      "tokens_total": 4500,
+      "tokens_other": 0,
+      "tokens_other_pct": 0.0,
+      "default_rates_fallbacks": 0,
+      "mapping_source": "config/fpa.json"
+    },
     "cost_real_total_tracker": 0.0,
     "cost_total_effective": 0.03,
     "cost_total_real": 40.0,
