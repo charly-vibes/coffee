@@ -666,6 +666,65 @@
     },
     "outcomes": "unavailable: no emisionado en esta corrida",
     "pay_per_token_note": "pay_per_token_charges es *reported* cuando el ledger tiene cargas pay-per-token reales del mes (cr\u00e9ditos/reembolsos, FPA-013); *assumed* (estimado tokens \u00d7 pricing) si no",
+    "scorecard": {
+      "cache_factor_note": "cost_weighted_per_1m = cost / (input_fresh + output + cache_read \u00d7 cache_factor) \u00d7 1e6; cache_factor = cache_read_rate / input_rate del pricing vigente en config \u2014 nunca un 1.0 silencioso",
+      "cohort_name": "cohorte-flash-2026",
+      "cohort_source": "config/fpa.json",
+      "models": [
+        "glm-5.3-flash",
+        "deepseek-v4-flash",
+        "qwen3.8-flash",
+        "qwen3.8-max",
+        "claude-opus-4.5"
+      ],
+      "reason": null,
+      "reference": "claude-opus-4.5",
+      "rule": {
+        "_comment": "coffe-dnx.8: regla de decisi\u00f3n mantener|cambiar|datos_insuficientes sobre cost_per_accepted_task (coffe-dnx.3: tareas de agent_metrics.json; aceptada = tarea no abortada y sin error \u2014 proxy, provenance estimated). ratio = cost_per_accepted_task(modelo) / cost_per_accepted_task(reference). EXCL-003: umbrales provisionales, sin calibraci\u00f3n; el veredicto es datos_insuficientes si falta cost_per_accepted_task en CUALQUIER modelo de la cohorte (la comparaci\u00f3n es solo tan buena como su eslab\u00f3n m\u00e1s d\u00e9bil).",
+        "actions": [
+          "mantener",
+          "cambiar",
+          "datos_insuficientes"
+        ],
+        "metric": "cost_per_accepted_task",
+        "provisional": true,
+        "thresholds": {
+          "cambiar_max_ratio_vs_reference": 0.8,
+          "mantener_max_ratio_vs_reference": 1.0
+        },
+        "windows": "todo"
+      },
+      "rule_verdict": "datos_insuficientes",
+      "rule_verdict_per_model": {
+        "claude-opus-4.5": {
+          "ratio_vs_reference": null,
+          "reason": "referencia claude-opus-4.5 sin cost_per_accepted_task (datos_insuficientes: la comparaci\u00f3n no puede calibrarse)",
+          "verdict": "datos_insuficientes"
+        },
+        "deepseek-v4-flash": {
+          "ratio_vs_reference": null,
+          "reason": "referencia claude-opus-4.5 sin cost_per_accepted_task (datos_insuficientes: la comparaci\u00f3n no puede calibrarse)",
+          "verdict": "datos_insuficientes"
+        },
+        "glm-5.3-flash": {
+          "ratio_vs_reference": null,
+          "reason": "referencia claude-opus-4.5 sin cost_per_accepted_task (datos_insuficientes: la comparaci\u00f3n no puede calibrarse)",
+          "verdict": "datos_insuficientes"
+        },
+        "qwen3.8-flash": {
+          "ratio_vs_reference": null,
+          "reason": "referencia claude-opus-4.5 sin cost_per_accepted_task (datos_insuficientes: la comparaci\u00f3n no puede calibrarse)",
+          "verdict": "datos_insuficientes"
+        },
+        "qwen3.8-max": {
+          "ratio_vs_reference": null,
+          "reason": "referencia claude-opus-4.5 sin cost_per_accepted_task (datos_insuficientes: la comparaci\u00f3n no puede calibrarse)",
+          "verdict": "datos_insuficientes"
+        }
+      },
+      "rule_verdict_reason": "referencia claude-opus-4.5 sin cost_per_accepted_task (datos_insuficientes: la comparaci\u00f3n no puede calibrarse)",
+      "task_costs_reason": null
+    },
     "subscription_fees": 40.0,
     "timezone": "-03",
     "token_accounting": "cache_read/cache_write se reportan aparte de input/output. cache_read no se factura a input rate (10x mas barato); total tokens = input + output + cache_read + cache_write",
@@ -774,6 +833,143 @@
       }
     ]
   },
+  "model_scorecard": [
+    {
+      "data": null,
+      "family": "glm",
+      "model": "glm-5.3-flash",
+      "nulls": [],
+      "reason": "sin interacciones de este modelo en la ventana (mapeo glm/glm-5.3-flash) \u2014 patr\u00f3n FPA-008: null con raz\u00f3n, nunca 0",
+      "version": "glm-5.3-flash",
+      "window": "todo"
+    },
+    {
+      "data": null,
+      "family": "glm",
+      "model": "glm-5.3-flash",
+      "nulls": [],
+      "reason": "sin interacciones de este modelo en la ventana (mapeo glm/glm-5.3-flash) \u2014 patr\u00f3n FPA-008: null con raz\u00f3n, nunca 0",
+      "version": "glm-5.3-flash",
+      "window": "ytd"
+    },
+    {
+      "data": null,
+      "family": "glm",
+      "model": "glm-5.3-flash",
+      "nulls": [],
+      "reason": "sin interacciones de este modelo en la ventana (mapeo glm/glm-5.3-flash) \u2014 patr\u00f3n FPA-008: null con raz\u00f3n, nunca 0",
+      "version": "glm-5.3-flash",
+      "window": "mes"
+    },
+    {
+      "data": null,
+      "family": "deepseek",
+      "model": "deepseek-v4-flash",
+      "nulls": [],
+      "reason": "sin interacciones de este modelo en la ventana (mapeo deepseek/v4-flash) \u2014 patr\u00f3n FPA-008: null con raz\u00f3n, nunca 0",
+      "version": "v4-flash",
+      "window": "todo"
+    },
+    {
+      "data": null,
+      "family": "deepseek",
+      "model": "deepseek-v4-flash",
+      "nulls": [],
+      "reason": "sin interacciones de este modelo en la ventana (mapeo deepseek/v4-flash) \u2014 patr\u00f3n FPA-008: null con raz\u00f3n, nunca 0",
+      "version": "v4-flash",
+      "window": "ytd"
+    },
+    {
+      "data": null,
+      "family": "deepseek",
+      "model": "deepseek-v4-flash",
+      "nulls": [],
+      "reason": "sin interacciones de este modelo en la ventana (mapeo deepseek/v4-flash) \u2014 patr\u00f3n FPA-008: null con raz\u00f3n, nunca 0",
+      "version": "v4-flash",
+      "window": "mes"
+    },
+    {
+      "data": null,
+      "family": "qwen",
+      "model": "qwen3.8-flash",
+      "nulls": [],
+      "reason": "sin interacciones de este modelo en la ventana (mapeo qwen/qwen3.8-flash) \u2014 patr\u00f3n FPA-008: null con raz\u00f3n, nunca 0",
+      "version": "qwen3.8-flash",
+      "window": "todo"
+    },
+    {
+      "data": null,
+      "family": "qwen",
+      "model": "qwen3.8-flash",
+      "nulls": [],
+      "reason": "sin interacciones de este modelo en la ventana (mapeo qwen/qwen3.8-flash) \u2014 patr\u00f3n FPA-008: null con raz\u00f3n, nunca 0",
+      "version": "qwen3.8-flash",
+      "window": "ytd"
+    },
+    {
+      "data": null,
+      "family": "qwen",
+      "model": "qwen3.8-flash",
+      "nulls": [],
+      "reason": "sin interacciones de este modelo en la ventana (mapeo qwen/qwen3.8-flash) \u2014 patr\u00f3n FPA-008: null con raz\u00f3n, nunca 0",
+      "version": "qwen3.8-flash",
+      "window": "mes"
+    },
+    {
+      "data": null,
+      "family": "qwen",
+      "model": "qwen3.8-max",
+      "nulls": [],
+      "reason": "sin interacciones de este modelo en la ventana (mapeo qwen/qwen3.8-max) \u2014 patr\u00f3n FPA-008: null con raz\u00f3n, nunca 0",
+      "version": "qwen3.8-max",
+      "window": "todo"
+    },
+    {
+      "data": null,
+      "family": "qwen",
+      "model": "qwen3.8-max",
+      "nulls": [],
+      "reason": "sin interacciones de este modelo en la ventana (mapeo qwen/qwen3.8-max) \u2014 patr\u00f3n FPA-008: null con raz\u00f3n, nunca 0",
+      "version": "qwen3.8-max",
+      "window": "ytd"
+    },
+    {
+      "data": null,
+      "family": "qwen",
+      "model": "qwen3.8-max",
+      "nulls": [],
+      "reason": "sin interacciones de este modelo en la ventana (mapeo qwen/qwen3.8-max) \u2014 patr\u00f3n FPA-008: null con raz\u00f3n, nunca 0",
+      "version": "qwen3.8-max",
+      "window": "mes"
+    },
+    {
+      "data": null,
+      "family": "claude",
+      "model": "claude-opus-4.5",
+      "nulls": [],
+      "reason": "sin interacciones de este modelo en la ventana (mapeo claude/opus-4.5) \u2014 patr\u00f3n FPA-008: null con raz\u00f3n, nunca 0",
+      "version": "opus-4.5",
+      "window": "todo"
+    },
+    {
+      "data": null,
+      "family": "claude",
+      "model": "claude-opus-4.5",
+      "nulls": [],
+      "reason": "sin interacciones de este modelo en la ventana (mapeo claude/opus-4.5) \u2014 patr\u00f3n FPA-008: null con raz\u00f3n, nunca 0",
+      "version": "opus-4.5",
+      "window": "ytd"
+    },
+    {
+      "data": null,
+      "family": "claude",
+      "model": "claude-opus-4.5",
+      "nulls": [],
+      "reason": "sin interacciones de este modelo en la ventana (mapeo claude/opus-4.5) \u2014 patr\u00f3n FPA-008: null con raz\u00f3n, nunca 0",
+      "version": "opus-4.5",
+      "window": "mes"
+    }
+  ],
   "monthly": {
     "2026-05": {
       "cache_read_tokens": 0,

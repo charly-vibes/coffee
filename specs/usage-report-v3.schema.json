@@ -128,6 +128,40 @@
             "method": { "type": "string" }
           }
         },
+        "scorecard": {
+          "type": "object",
+          "description": "coffe-dnx.8: regla de decisión del scorecard de cohorte (model_decision_rule en config/fpa.json). rule_verdict = mantener | cambiar | datos_insuficientes; es datos_insuficientes cuando falta cost_per_accepted_task en la cohorte.",
+          "required": ["cohort_name", "models", "reference", "rule", "rule_verdict"],
+          "properties": {
+            "cohort_source": { "type": "string" },
+            "cohort_name": { "type": ["string", "null"] },
+            "models": { "type": "array", "items": { "type": "string" } },
+            "reference": { "type": ["string", "null"] },
+            "cache_factor_note": { "type": "string" },
+            "reason": { "type": ["string", "null"] },
+            "task_costs_reason": { "type": ["string", "null"] },
+            "rule": {
+              "type": "object",
+              "description": "bloque model_decision_rule de config (umbrales + acciones; provisional: true por EXCL-003 mientras no esté calibrado)"
+            },
+            "rule_verdict": {
+              "enum": ["mantener", "cambiar", "datos_insuficientes", null]
+            },
+            "rule_verdict_reason": { "type": ["string", "null"] },
+            "rule_verdict_per_model": {
+              "type": ["object", "null"],
+              "description": "modelo de la cohorte → {verdict, reason, ratio_vs_reference}",
+              "additionalProperties": {
+                "type": "object",
+                "properties": {
+                  "verdict": { "enum": ["mantener", "cambiar", "datos_insuficientes"] },
+                  "reason": { "type": "string" },
+                  "ratio_vs_reference": { "type": ["number", "null"] }
+                }
+              }
+            }
+          }
+        },
         "charges_total_real": {
           "description": "coffe-a31.2: suma IA total del ledger data/charges.json (USD, provenance reported)",
           "type": "number"
@@ -1226,6 +1260,98 @@
               }
             }
           }
+        }
+      }
+    },
+    "model_scorecard": {
+      "description": "coffe-dnx.8: scorecard de cohorte (benchmark_cohort en config/fpa.json) por modelo × ventana de período (todo/YTD/mes). cost_weighted_per_1m = cost / (input_fresh + output + cache_read × cache_factor), cache_factor explícito del pricing config (nunca 1.0 silencioso). Sin datos en la ventana ⇒ data null + razón (nunca 0, FPA-008). Toda cifra lleva provenance (reported|estimated|assumed); lo ausente → nulls[] con razón.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["model", "family", "version", "window", "data", "nulls"],
+        "properties": {
+          "model": { "type": "string", "description": "nombre del modelo en benchmark_cohort" },
+          "family": { "type": "string", "description": "familia resuelta por model_mapping (coffe-dnx.1)" },
+          "version": { "type": "string" },
+          "window": { "enum": ["todo", "ytd", "mes"] },
+          "data": {
+            "type": ["object", "null"],
+            "description": "null cuando el modelo no tiene interacciones en la ventana (ver reason, FPA-008)",
+            "required": ["interactions", "cost_effective", "cost_weighted_per_1m", "cost_per_1m_total_tokens", "cache_factor", "cache_share", "tokens", "cost_per_task", "cost_per_accepted_task", "latency", "stop_reasons", "aborts_per_100_turns", "tool_errors_per_100_turns", "model_switches", "subscription_vs_api", "provenance", "nulls"],
+            "properties": {
+              "interactions": { "type": "integer", "minimum": 0 },
+              "cost_effective": { "type": "number" },
+              "cost_weighted_per_1m": {
+                "type": ["number", "null"],
+                "description": "cost / (input_fresh + output + cache_read × cache_factor) × 1e6 — normalizado por composición de tokens (CORR-003)"
+              },
+              "cost_per_1m_total_tokens": {
+                "type": ["number", "null"],
+                "description": "diagnóstico: cost / tokens_totales × 1e6 (naive — invierte el ranking con cache_read alto)"
+              },
+              "cache_factor": {
+                "type": ["number", "null"],
+                "description": "cache_read_rate / input_rate del pricing vigente en config; null con razón si el modelo no tiene tarifa"
+              },
+              "cache_share": { "type": ["number", "null"] },
+              "tokens": {
+                "type": "object",
+                "properties": {
+                  "in": { "type": "integer", "minimum": 0 },
+                  "out": { "type": "integer", "minimum": 0 },
+                  "cache_read": { "type": "integer", "minimum": 0 },
+                  "cache_write": { "type": "integer", "minimum": 0 }
+                }
+              },
+              "cost_per_task": { "type": ["number", "null"], "description": "coffe-dnx.3: coste medio por tarea (agent_metrics.json)" },
+              "cost_per_accepted_task": { "type": ["number", "null"], "description": "coffe-dnx.3: coste medio por tarea aceptada (proxy: f sin bits aborted|error); null con razón si el cruce no es joinable" },
+              "latency": {
+                "type": ["object", "null"],
+                "description": "coffe-dnx.2: p50/p90 de durationMs medidos in-corpus + cobertura (% de turnos con durationMs); null con razón si la fuente no trae telemetría",
+                "properties": {
+                  "p50_ms": { "type": "number" },
+                  "p90_ms": { "type": "number" },
+                  "coverage_pct": { "type": "number", "minimum": 0, "maximum": 100 }
+                }
+              },
+              "stop_reasons": {
+                "type": "object",
+                "description": "toolUse/stop/error/aborted/length, tal cual aparece en el log",
+                "additionalProperties": { "type": "integer", "minimum": 0 }
+              },
+              "aborts_per_100_turns": { "type": ["number", "null"] },
+              "tool_errors_per_100_turns": { "type": ["number", "null"] },
+              "model_switches": { "type": "integer", "minimum": 0, "description": "coffe-dnx.2: suma de switches de las sesiones cuyo model_chain resuelve al modelo" },
+              "subscription_vs_api": {
+                "type": "object",
+                "properties": {
+                  "subscription": { "type": "number" },
+                  "api": { "type": "number" },
+                  "provenance": { "enum": ["reported", "estimated", "assumed"] }
+                }
+              },
+              "provenance": {
+                "type": "object",
+                "description": "provenance por cifra: reported|estimated|assumed — obligatorio en cada figura del bloque",
+                "required": ["interactions", "cost_effective", "cost_weighted_per_1m", "cost_per_1m_total_tokens", "cache_factor", "cache_share", "tokens", "cost_per_task", "cost_per_accepted_task", "latency", "stop_reasons", "aborts_per_100_turns", "tool_errors_per_100_turns", "model_switches", "subscription_vs_api"],
+                "additionalProperties": { "enum": ["reported", "estimated", "assumed", null] }
+              },
+              "nulls": {
+                "type": "array",
+                "description": "FPA-008: cada cifra ausente con su razón",
+                "items": {
+                  "type": "object",
+                  "required": ["field", "reason"],
+                  "properties": {
+                    "field": { "type": "string" },
+                    "reason": { "type": "string" }
+                  }
+                }
+              }
+            }
+          },
+          "reason": { "type": ["string", "null"], "description": "por qué data es null (ventana sin interacciones del modelo)" },
+          "nulls": { "type": "array", "items": { "type": "object" } }
         }
       }
     },

@@ -108,6 +108,29 @@
       { "priority": 101, "pattern": "mistral", "family": "mistral", "version": "mistral" }
     ]
   },
+  "benchmark_cohort": {
+    "_comment": "coffe-dnx.8: cohorte de benchmark para el scorecard del reporte. Debe coincidir 1:1 con config/model_eval.json (cohort, coffe-dnx.9) — test de consistencia en tests/test_scorecard.py. La referencia frontier NO participa del ranking: sirve de techo comparativo.",
+    "name": "cohorte-flash-2026",
+    "models": [
+      "glm-5.3-flash",
+      "deepseek-v4-flash",
+      "qwen3.8-flash",
+      "qwen3.8-max",
+      "claude-opus-4.5"
+    ],
+    "reference": "claude-opus-4.5"
+  },
+  "model_decision_rule": {
+    "_comment": "coffe-dnx.8: regla de decisión mantener|cambiar|datos_insuficientes sobre cost_per_accepted_task (coffe-dnx.3: tareas de agent_metrics.json; aceptada = tarea no abortada y sin error — proxy, provenance estimated). ratio = cost_per_accepted_task(modelo) / cost_per_accepted_task(reference). EXCL-003: umbrales provisionales, sin calibración; el veredicto es datos_insuficientes si falta cost_per_accepted_task en CUALQUIER modelo de la cohorte (la comparación es solo tan buena como su eslabón más débil).",
+    "provisional": true,
+    "metric": "cost_per_accepted_task",
+    "windows": "todo",
+    "actions": ["mantener", "cambiar", "datos_insuficientes"],
+    "thresholds": {
+      "cambiar_max_ratio_vs_reference": 0.8,
+      "mantener_max_ratio_vs_reference": 1.0
+    }
+  },
   "model_pricing": {
     "default_rates": {
       "input": 3e-06,

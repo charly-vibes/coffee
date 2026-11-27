@@ -70,6 +70,21 @@ las sesiones traen el model_change inicial). Ambos: cache_share
 (cache_read / tokens totales) y cost_provenance reported|estimated|mixed
 ("reported" SOLO si todos los turnos traen cost.totalFromProvider;
 corpus real ~1,6%). Schema bump en specs/usage-report-v3.schema.json.
+v4.10 (coffe-dnx.8): model_scorecard[] — scorecard de la cohorte
+benchmark_cohort (config/fpa.json, consistente con config/model_eval.json,
+coffe-dnx.9) por modelo × ventana (todo/YTD/mes).
+cost_weighted_per_1m = cost / (input_fresh + output + cache_read ×
+cache_factor) con cache_factor = cache_read_rate/input_rate del pricing
+config (fallback default_rates con provenance assumed — NUNCA 1.0
+silencioso: con 90% de cache_read el $/Mtok sobre tokens totales invierte
+el ranking, CORR-003). Cruce coffe-dnx.3 (cost_per_task /
+cost_per_accepted_task — aceptada = f sin bits aborted|error, proxy) y
+coffe-dnx.2 (latencia, stop_reasons, aborts/tool_errors per 100 turns,
+model_switches, subscription_vs_api). Toda cifra con provenance
+reported|estimated|assumed; ausente → null + nulls[] con razón (FPA-008).
+metadata.scorecard.rule_verdict = mantener|cambiar|datos_insuficientes
+según model_decision_rule (umbrales provisional: true, EXCL-003);
+datos_insuficientes si falta cost_per_accepted_task en la cohorte.
 """
 
 import argparse
@@ -2577,6 +2592,419 @@ def _model_mapping_coverage(interactions):
     }
 
 
+# ----------------------------------------------------------------------
+# coffe-dnx.8: scorecard de cohorte (benchmark_cohort en config/fpa.json)
+# ----------------------------------------------------------------------
+
+# Umbrales de reserva (solo si config/fpa.json no está). EXCL-003:
+# provisionales; los de config mandan y el reporte declara provisional.
+_FALLBACK_BENCHMARK_COHORT = {
+    "name": "cohorte-flash-2026",
+    "models": ["glm-5.3-flash", "deepseek-v4-flash", "qwen3.8-flash",
+               "qwen3.8-max", "claude-opus-4.5"],
+    "reference": "claude-opus-4.5",
+}
+_FALLBACK_DECISION_RULE = {
+    "provisional": True,
+    "metric": "cost_per_accepted_task",
+    "thresholds": {"cambiar_max_ratio_vs_reference": 0.8,
+                   "mantener_max_ratio_vs_reference": 1.0},
+}
+SCORECARD_AGENT_METRICS_PATH = _REPO_ROOT / "data" / "agent_metrics.json"
+# task_flags() de scripts/agent-metrics-tracker.py: bit 1 = aborted, bit 2 =
+# error. Tarea "aceptada" = ni abortada ni con error (proxy de resultado —
+# provenance estimated; la señal positiva de aceptación no existe todavía).
+_SCORECARD_TASK_REJECTED_BITS = 1 | 2
+SCORECARD_WINDOWS = ("todo", "ytd", "mes")
+
+
+def _scorecard_window_filters(interactions):
+    """Ventanas de período del scorecard derivadas del corpus (FPA-008:
+    sin data no hay ventanas fantasma). todo = todo el corpus; ytd = desde
+    el 1-ene del último año con datos; mes = último mes con datos."""
+    if not interactions:
+        return {}
+    last = max(r["timestamp"] for r in interactions)[:10]
+    ym = last[:7]
+    ytd = last[:4] + "-01-01"
+    return {
+        "todo": (None, None),
+        "ytd": (ytd, None),
+        "mes": (None, ym),
+    }
+
+
+def _in_scorecard_window(ts, since, until_prefix):
+    d = ts[:10]
+    if since and d < since:
+        return False
+    if until_prefix and d[:7] != until_prefix:
+        return False
+    return True
+
+
+def _scorecard_cache_factor(family, version, when=None):
+    """cache_factor = cache_read_rate / input_rate del pricing VIGENTE en
+    config (nunca un 1.0 silencioso — el bug que motiva el ticket: con 90%
+    de cache_read a ~0.1× del input, $/Mtok sobre tokens totales invierte
+    el ranking). Devuelve (factor, reason, provenance) — provenance
+    reported con tarifa explícita, assumed con fallback default_rates;
+    sin tarifa → (None, razón, None): FPA-008."""
+    rates = _pricing_for(when).get(family, {}).get(version)
+    if rates is None:
+        # misma convención que estimate_cost(): fallback a default_rates
+        # del config — explícito (provenance assumed), nunca 1.0 silencioso
+        dr = DEFAULT_RATES
+        if dr.get("input"):
+            if dr.get("cache_read"):
+                return (round(dr["cache_read"] / dr["input"], 8), None, "assumed")
+            return (0.1, "cache_read sin tarifa en default_rates — fallback "
+                         "documentado 0.1× input", "assumed")
+        return None, (f"sin tarifa en model_pricing para {family}/{version} "
+                      f"(config {CONFIG_SOURCE or 'builtin-fallback'})"), None
+    cr = rates.get("cache_read")
+    if cr is None:
+        # misma convención que estimate_cost(): cache_read a 0.1× del input
+        return 0.1, ("cache_read sin tarifa explícita en model_pricing — "
+                     f"fallback documentado 0.1× input ({family}/{version})"), "assumed"
+    return round(cr / rates["input"], 8), None, "reported"
+
+
+def _scorecard_task_costs():
+    """coffe-dnx.3: coste por tarea y por tarea aceptada, por
+    (family, version). Lee el artefacto columnar de agent_metrics.json
+    (tasks: day/s/model/f/cost). Aceptada = f sin bits aborted|error
+    (proxy — la señal positiva de aceptación no existe aún). Devuelve
+    ({(fam, ver): [(day, cost, accepted), ...]}, reason|None)."""
+    path = SCORECARD_AGENT_METRICS_PATH
+    if not path.exists():
+        return {}, f"unavailable: {path} no encontrado (artefacto coffe-dnx.3)"
+    try:
+        with open(path) as f:
+            am = json.load(f)
+    except (OSError, json.JSONDecodeError) as exc:
+        return {}, f"unavailable: {path} ilegible ({exc})"
+    tasks = am.get("tasks") or {}
+    need = ("day", "model", "f", "cost")
+    if any(k not in tasks for k in need):
+        return {}, ("unavailable: agent_metrics.json sin columnas de tareas "
+                    f"{need} (artefacto coffe-dnx.3 incompleto)")
+    days = am.get("days") or []
+    models = am.get("models") or []
+    n = min(len(tasks[k]) for k in need)
+    out = defaultdict(list)
+    for i in range(n):
+        m_ix = tasks["model"][i]
+        raw = models[m_ix] if isinstance(m_ix, int) and m_ix < len(models) else "?"
+        fam, ver = model_details(raw)
+        d_ix = tasks["day"][i]
+        day = days[d_ix] if isinstance(d_ix, int) and d_ix < len(days) else None
+        out[(fam, ver)].append((
+            day,
+            float(tasks["cost"][i] or 0.0),
+            not (int(tasks["f"][i] or 0) & _SCORECARD_TASK_REJECTED_BITS),
+        ))
+    return dict(out), None
+
+
+def _scorecard_rule_verdict(todo_entries, cohort, rule):
+    """Veredicto según model_decision_rule sobre cost_per_accepted_task de
+    la ventana 'todo'. Per-model: cambiar si ratio <= cambiar_max_ratio;
+    mantener si ratio > cambiar_max_ratio; datos_insuficientes si falta
+    cost_per_accepted_task propio o de la referencia. El veredicto global
+    es datos_insuficientes si CUALQUIER modelo de la cohorte lo está
+    (ticket coffe-dnx.8), luego cambiar si algún subject lo es."""
+    ref_name = cohort.get("reference")
+    thresholds = rule.get("thresholds") or {}
+    cambiar_max = thresholds.get("cambiar_max_ratio_vs_reference", 0.8)
+    cpat = {e["model"]: ((e.get("data") or {}).get("cost_per_accepted_task"))
+            for e in todo_entries}
+    if ref_name not in cpat or cpat.get(ref_name) is None:
+        reason = (f"referencia {ref_name} sin cost_per_accepted_task "
+                  "(datos_insuficientes: la comparación no puede calibrarse)")
+        per_model = {m: {"verdict": "datos_insuficientes", "reason": reason,
+                         "ratio_vs_reference": None}
+                     for m in cohort.get("models", [])}
+        return "datos_insuficientes", reason, per_model
+    ref_cost = cpat[ref_name]
+    per_model = {}
+    any_missing = any(v is None for v in cpat.values())
+    any_cambiar = False
+    for m in cohort.get("models", []):
+        cost = cpat.get(m)
+        if cost is None:
+            per_model[m] = {
+                "verdict": "datos_insuficientes",
+                "reason": "sin cost_per_accepted_task en la cohorte "
+                          "(cruce task×modelo no joinable o sin tareas)",
+                "ratio_vs_reference": None,
+            }
+            continue
+        ratio = round(cost / ref_cost, 4) if ref_cost else None
+        if ratio is None:
+            per_model[m] = {"verdict": "datos_insuficientes",
+                            "reason": "referencia con cost_per_accepted_task 0",
+                            "ratio_vs_reference": None}
+            continue
+        if m == ref_name:
+            per_model[m] = {"verdict": "mantener",
+                            "reason": "referencia frontier: no participa del "
+                                      "ranking (techo comparativo)",
+                            "ratio_vs_reference": 1.0}
+        elif ratio <= cambiar_max:
+            per_model[m] = {
+                "verdict": "cambiar",
+                "reason": (f"cost_per_accepted_task <= {cambiar_max}× la "
+                           f"referencia ({ref_name})"),
+                "ratio_vs_reference": ratio,
+            }
+            any_cambiar = True
+        else:
+            per_model[m] = {
+                "verdict": "mantener",
+                "reason": (f"cost_per_accepted_task > {cambiar_max}× la "
+                           f"referencia ({ref_name})"),
+                "ratio_vs_reference": ratio,
+            }
+    if any_missing:
+        return ("datos_insuficientes",
+                "falta cost_per_accepted_task en la cohorte "
+                "(datos_insuficientes: la regla exige la cohorte completa)",
+                per_model)
+    if any_cambiar:
+        return "cambiar", "al menos un subject de la cohorte cumple el umbral cambiar", per_model
+    return "mantener", "ningún subject cumple el umbral cambiar", per_model
+
+
+def _model_scorecard(interactions, spend_rows):
+    """coffe-dnx.8: bloque model_scorecard[] del reporte.
+
+    Para cada modelo de benchmark_cohort (config/fpa.json) × ventana
+    (todo/ytd/mes): cost_weighted_per_1m = cost / (input_fresh + output +
+    cache_read × cache_factor) — normalizado por COMPOSICIÓN de tokens, no
+    sobre tokens totales (CORR-003: con 90% de cache_read a ~0.1× del
+    input, $/Mtok-naive invierte el ranking). cache_factor es explícito del
+    pricing config. Cruce con coffe-dnx.3 (cost_per_task /
+    cost_per_accepted_task) y coffe-dnx.2 (latencia, stop_reasons, abortos,
+    errores de tool, switches, cache_share). Toda cifra lleva provenance
+    (reported|estimated|assumed); lo ausente → null + razón en nulls[]
+    (FPA-008, nunca 0 fake). Devuelve (entries, metadata_scorecard)."""
+    cfg = _FPA_CONFIG or {}
+    cohort = cfg.get("benchmark_cohort") or _FALLBACK_BENCHMARK_COHORT
+    rule = cfg.get("model_decision_rule") or _FALLBACK_DECISION_RULE
+    meta = {
+        "cohort_source": CONFIG_SOURCE or "builtin-fallback",
+        "cohort_name": cohort.get("name"),
+        "models": list(cohort.get("models") or []),
+        "reference": cohort.get("reference"),
+        "cache_factor_note": (
+            "cost_weighted_per_1m = cost / (input_fresh + output + "
+            "cache_read × cache_factor) × 1e6; cache_factor = "
+            "cache_read_rate / input_rate del pricing vigente en config — "
+            "nunca un 1.0 silencioso"),
+        "reason": None,
+        "rule": rule,
+        "rule_verdict": None,
+        "rule_verdict_reason": None,
+        "rule_verdict_per_model": None,
+    }
+    if not cohort.get("models"):
+        meta["reason"] = "benchmark_cohort sin modelos en config"
+        return [], meta
+
+    # Resolución cohorte → (family, version) vía el MISMO mapeo config-driven
+    # que el resto del reporte (coffe-dnx.1).
+    unresolved = []
+    for name in cohort["models"]:
+        fam, ver = model_details(name)
+        if (fam, ver) == ("other", name[:20]):
+            unresolved.append(name)
+
+    task_costs, task_reason = _scorecard_task_costs()
+    windows = _scorecard_window_filters(interactions)
+    entries = []
+    todo_entries = []
+    for name in cohort["models"]:
+        fam, ver = model_details(name)
+        for win, (since, until_prefix) in (windows.items() if windows
+                                           else (("todo", (None, None)),)):
+            entry = {"model": name, "family": fam, "version": ver,
+                     "window": win, "data": None, "reason": None, "nulls": []}
+            if name in unresolved:
+                entry["reason"] = ("modelo de la cohorte sin match en "
+                                   "model_mapping (coffe-dnx.1)")
+                entries.append(entry)
+                continue
+            rows = [r for r in interactions
+                    if (r.get("model_family"), r.get("model_version")) == (fam, ver)
+                    and _in_scorecard_window(r["timestamp"], since, until_prefix)]
+            if not rows:
+                entry["reason"] = (
+                    "sin interacciones de este modelo en la ventana "
+                    f"(mapeo {fam}/{ver}) — patrón FPA-008: null con razón, "
+                    "nunca 0")
+                entries.append(entry)
+                continue
+
+            tokens = {
+                "in": sum(r.get("input_tokens", 0) or 0 for r in rows),
+                "out": sum(r.get("output_tokens", 0) or 0 for r in rows),
+                "cache_read": sum(r.get("cache_read_tokens", 0) or 0 for r in rows),
+                "cache_write": sum(r.get("cache_write_tokens", 0) or 0 for r in rows),
+            }
+            cost = sum(r.get("cost_effective", 0) or 0 for r in rows)
+            total_tok = sum(tokens.values())
+            when = None
+            try:
+                when = date.fromisoformat(max(r["timestamp"][:10] for r in rows))
+            except ValueError:
+                pass
+            cache_factor, cf_reason, cf_prov = _scorecard_cache_factor(fam, ver, when)
+            nulls = []
+            if cf_reason:
+                nulls.append({"field": "cache_factor", "reason": cf_reason})
+            denom = tokens["in"] + tokens["out"] + tokens["cache_read"] * (cache_factor or 0.0)
+            if cost > 0 and denom > 0 and cache_factor is not None:
+                cost_weighted = round(cost / denom * 1e6, 4)
+            else:
+                cost_weighted = None
+                nulls.append({
+                    "field": "cost_weighted_per_1m",
+                    "reason": ("sin coste en la ventana (turnos abortados o "
+                               "proveedor sin billing por token)"
+                               if cost <= 0 else
+                               f"denominador 0 sin cache_factor usable — {cf_reason}"),
+                })
+            naive_denom = total_tok
+            cost_naive = round(cost / naive_denom * 1e6, 4) if cost > 0 and naive_denom else None
+
+            # --- cruce coffe-dnx.3: coste por tarea / tarea aceptada ------
+            tlist = [t for t in (task_costs.get((fam, ver)) or [])
+                     if _in_scorecard_window(t[0] or "", since, until_prefix)]
+            if tlist:
+                n_tasks = len(tlist)
+                acc = [t for t in tlist if t[2]]
+                cost_per_task = round(sum(t[1] for t in tlist) / n_tasks, 8) if n_tasks else None
+                cost_per_acc = (round(sum(t[1] for t in acc) / len(acc), 8)
+                                if acc else None)
+                if cost_per_acc is None:
+                    nulls.append({
+                        "field": "cost_per_accepted_task",
+                        "reason": "sin tareas aceptadas en la ventana "
+                                  "(proxy: f sin bits aborted|error)",
+                    })
+            else:
+                cost_per_task = cost_per_acc = None
+                nulls.append({
+                    "field": "cost_per_task",
+                    "reason": task_reason or
+                              "sin tareas de este modelo en agent_metrics.json "
+                              "para la ventana (cruce task×modelo vacío)",
+                })
+                if not task_reason:
+                    nulls.append({
+                        "field": "cost_per_accepted_task",
+                        "reason": "sin tareas de este modelo en la ventana",
+                    })
+
+            # --- coffe-dnx.2: latencia (medida in-corpus sobre las filas) --
+            lat_rows = sorted(r["duration_ms"] for r in rows
+                              if r.get("duration_ms") is not None)
+            if lat_rows:
+                latency = {
+                    "p50_ms": _pctl(lat_rows, 0.5),
+                    "p90_ms": _pctl(lat_rows, 0.9),
+                    "coverage_pct": round(len(lat_rows) / len(rows) * 100, 2),
+                }
+            else:
+                latency = None
+                nulls.append({
+                    "field": "latency",
+                    "reason": "sin turnos con durationMs en la ventana "
+                              "(cobertura por fuente en "
+                              "metadata.latency_coverage)",
+                })
+
+            stop_reasons = dict(Counter(
+                r["stop_reason"] for r in rows if r.get("stop_reason")))
+            aborts = stop_reasons.get("aborted", 0)
+            turns = len(rows)
+            t_calls = sum(r.get("tool_calls") or 0 for r in rows)
+            t_errs = sum(r.get("tool_errors") or 0 for r in rows)
+
+            # switches: sesión atribuida si su model_chain resuelve al modelo
+            raw_ids = {r["model_raw"] for r in rows}
+            switches = sum(
+                s["model_switches"] for s in spend_rows
+                if any(model_details(mid) == (fam, ver)
+                       for mid in (s.get("model_chain") or []))
+                and _in_scorecard_window(s.get("day") or "", since, until_prefix))
+
+            api_cost = sum(s.get("cost_effective") or 0 for s in spend_rows
+                           if any(model_details(mid) == (fam, ver)
+                                  for mid in (s.get("model_chain") or []))
+                           and _in_scorecard_window(s.get("day") or "", since, until_prefix))
+            sub_cost = sum(
+                max(0.0, (s.get("cost_real") or 0) - (s.get("cost_effective") or 0))
+                for s in spend_rows
+                if any(model_details(mid) == (fam, ver)
+                       for mid in (s.get("model_chain") or []))
+                and _in_scorecard_window(s.get("day") or "", since, until_prefix))
+
+            entry["data"] = {
+                "interactions": turns,
+                "cost_effective": round(cost, 8),
+                "cost_weighted_per_1m": cost_weighted,
+                "cost_per_1m_total_tokens": cost_naive,
+                "cache_factor": cache_factor,
+                "cache_share": (round(tokens["cache_read"] / total_tok, 4)
+                                if total_tok else None),
+                "tokens": tokens,
+                "cost_per_task": cost_per_task,
+                "cost_per_accepted_task": cost_per_acc,
+                "latency": latency,
+                "stop_reasons": stop_reasons,
+                "aborts_per_100_turns": round(aborts / turns * 100, 4) if turns else None,
+                "tool_errors_per_100_turns": (round(t_errs / turns * 100, 4)
+                                              if turns else None),
+                "model_switches": switches,
+                "subscription_vs_api": {
+                    "subscription": round(sub_cost, 8),
+                    "api": round(api_cost, 8),
+                    "provenance": "estimated",
+                },
+                "provenance": {
+                    "interactions": "reported",
+                    "cost_effective": "estimated",
+                    "cost_weighted_per_1m": "estimated",
+                    "cost_per_1m_total_tokens": "estimated",
+                    "cache_factor": cf_prov,
+                    "cache_share": "reported",
+                    "tokens": "reported",
+                    "cost_per_task": "estimated",
+                    "cost_per_accepted_task": "estimated",
+                    "latency": "reported" if latency is not None else None,
+                    "stop_reasons": "reported",
+                    "aborts_per_100_turns": "reported",
+                    "tool_errors_per_100_turns": "reported",
+                    "model_switches": "estimated",
+                    "subscription_vs_api": "estimated",
+                },
+                "nulls": nulls,
+            }
+            entries.append(entry)
+            if win == "todo":
+                todo_entries.append(entry)
+
+    verdict, v_reason, per_model = _scorecard_rule_verdict(
+        todo_entries, cohort, rule)
+    meta["rule_verdict"] = verdict
+    meta["rule_verdict_reason"] = v_reason
+    meta["rule_verdict_per_model"] = per_model
+    meta["task_costs_reason"] = task_reason
+    return entries, meta
+
+
 def aggregate(interactions, sessions, skills_total=None, skills_by_project=None,
               commands=None, excluded=None, interaction_kinds=None,
               outcomes=None, outcomes_reason=None, context_metrics=None):
@@ -2844,6 +3272,11 @@ def aggregate(interactions, sessions, skills_total=None, skills_by_project=None,
             return dict(o.most_common())
         return o
 
+    # coffe-dnx.8: session_spend se calcula UNA vez (bloque del reporte +
+    # insumo del scorecard de cohorte: latencia/switches/subscription split)
+    spend_rows = _session_spend(interactions)
+    model_scorecard, scorecard_meta = _model_scorecard(interactions, spend_rows)
+
     return clean({
         "metadata": {
             "date_range": {
@@ -2918,6 +3351,8 @@ def aggregate(interactions, sessions, skills_total=None, skills_by_project=None,
                            "CORR-005 (~400 archivos/provider, nov 2026); "
                            "medido, nunca extrapolado ni maquillado"),
             },
+            # coffe-dnx.8: regla de decisión del scorecard de cohorte
+            "scorecard": scorecard_meta,
         },
         "hourly": {h: b.to_dict() | {"projects_active": getattr(b, "projects_active", 0)}
                    for h, b in hourly.items()},
@@ -2955,7 +3390,9 @@ def aggregate(interactions, sessions, skills_total=None, skills_by_project=None,
         },
         "multitasking": multitasking,
         "project_daily": project_daily,
-        "session_spend": _session_spend(interactions),
+        "session_spend": spend_rows,
+        # coffe-dnx.8: scorecard de cohorte (misma sesión-gasto como insumo)
+        "model_scorecard": model_scorecard,
         "project_daily_spend": {
             p: {day: {
                 "interactions": v["interactions"],
