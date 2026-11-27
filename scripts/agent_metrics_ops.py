@@ -92,6 +92,40 @@ def merge_ops(doc, ops_slice):
     return doc
 
 
+SCHEMA_PATH = ROOT / "specs" / "agent-metrics.schema.json"
+
+
+def run_slice(slice_name, compute, inputs_extra=None):
+    """Contrato uniforme de slice (epic coffe-a5v): carga el dataset y el
+    model_mapping, computa el slice con compute(inputs), hace merge, valida
+    contra el schema y escribe. Devuelve (doc, slice) o levanta.
+
+    compute(inputs) recibe {'doc', 'mapping', 'config', 'root'} y el contenido
+    de inputs_extra (paths, loaders propios del slice). El slice devuelto va
+    bajo ops[slice_name]."""
+    doc = json.loads(OUT.read_text(encoding="utf-8"))
+    cfg = load_config()
+    mapping = compile_mapping((cfg.get("model_mapping") or {}).get("entries"))
+    inputs = {"doc": doc, "mapping": mapping, "config": cfg, "root": ROOT}
+    if inputs_extra:
+        inputs.update(inputs_extra)
+    slice_data = compute(inputs)
+    merge_ops(doc, {slice_name: slice_data})
+    from schema_validate import validate_against_schema  # noqa: PLC0415
+    errors = validate_against_schema(doc, json.loads(SCHEMA.read_text(encoding="utf-8")))
+    if errors:
+        for e in errors[:5]:
+            print(f"schema: {e}", file=sys.stderr)
+        raise SystemExit(1)
+    write_doc(doc)
+    return doc, slice_data
+
+
+def write_doc(doc):
+    OUT.write_text(json.dumps(doc, ensure_ascii=False, indent=2) + "\n",
+                   encoding="utf-8")
+
+
 # ----------------------------------------------------------------------
 # Bloque ops.latency
 # ----------------------------------------------------------------------

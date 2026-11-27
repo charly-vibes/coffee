@@ -177,7 +177,7 @@ def build_model(metrics, report):
                      "repos_total": len(metrics["repos"]), "min_commit_days": repo_meta["min_commit_days"],
                      "min_returning_months": repo_meta["min_returning_months"],
                      "bulk_day_interactions": repo_meta.get("bulk_day_interactions"), "talk": TALK,
-                     "ops_latency": (metrics.get("ops") or {}).get("latency")},
+                     "ops": metrics.get("ops")},
             "windows": [{"key": k, "label": lab}
                         for k, lab, _m in windows(sorted(report["monthly"].keys()))],
             "views": views}
@@ -219,6 +219,28 @@ def _ops_latency_section(metrics, top=12):
             'n = turnos con duración; cobertura = % de turnos assistant de la celda.</p>')
 def _num_es_ms(ms):
     return "—" if ms is None else f"{ms / 1000:,.1f} s".replace(",", "@").replace(".", ",").replace("@", ".")
+# Slices del epic coffe-a5v: cada módulo expone render_section(ops) -> HTML
+# (una <section class="block">). Import con guard: un slice sin módulo se
+# renderiza como n/a, no rompe el dashboard.
+OPS_SLICES = [
+    ("agent_metrics_ops_fallback", "fallback"),
+    ("agent_metrics_ops_quota", "quota_events"),
+    ("agent_metrics_ops_completion", "completion+intervention"),
+    ("agent_metrics_ops_subscription", "subscription"),
+    ("agent_metrics_ops_concurrency", "concurrency/stall/queue_wait"),
+]
+def _ops_sections(ops):
+    parts = ['<section class="block"><h2>Latencia p95 por modelo (ops, población completa)</h2>'
+             + _ops_latency_section({"ops": ops or {}}) + "</section>"]
+    for mod_name, label in OPS_SLICES:
+        try:
+            import importlib
+            mod = importlib.import_module(mod_name)
+            parts.append(mod.render_section(ops or {}))
+        except ImportError:
+            parts.append(f'<section class="block"><h2>ops: {label}</h2>'
+                         f'<p class="reason">n/a: módulo {mod_name} no disponible (epic coffe-a5v).</p></section>')
+    return "\n".join(parts)
 def _page_css():
     return CSS % {"vars": "\n".join(f"{k}: {v};" for k, v in site_theme.TOKENS.items()),
                   "base": site_theme.base_css() + _CSS_RULES}
@@ -232,7 +254,7 @@ _PAGE = """<!DOCTYPE html>
 <section class="block"><h2>Prompts por día activo y horas de agente por mes</h2><figure id="chart-prompts"></figure><figure id="chart-hours"></figure><figcaption>El talk las muestra planas (prompts) y exponenciales (horas): acá se recalculan sobre la ventana.</figcaption></section>
 <section class="block"><h2>Detalle mensual de la ventana</h2><div id="monthly"></div></section>
 <section class="block"><h2>Por modelo (la comparación del talk: pushback por generación)</h2><div id="by-model"></div></section>
-<section class="block"><h2>Latencia p95 por modelo (ops, población completa)</h2>{ops_latency_section}</section>
+{ops_sections}
 <section class="block"><h2>Cobertura por fuente</h2><table><thead><tr><th>Fuente</th><th>Turnos con timestamp</th><th>Señal de aborto</th><th>Sesiones</th><th>Nota</th></tr></thead><tbody>
 {coverage_rows}
     </tbody></table>
@@ -260,7 +282,7 @@ def render(model):
         retry_window_minutes=m["retry_window_minutes"], opts=_period_options(model["windows"]),
         coverage_rows=_coverage_rows(m["coverage"]), task_definition=m["task_definition"],
         reasons=_reason_items(m["reasons"]), orphan_turns=m["orphan_turns"],
-        ops_latency_section=_ops_latency_section({"ops": {"latency": m.get("ops_latency")}}),
+        ops_sections=_ops_sections(m.get("ops")),
         preamble_prompts_skipped=m["preamble_prompts_skipped"],
         repo_roots_missing=", ".join(m["repo_roots_missing"]) or "ninguna", model_json=json.dumps(model, ensure_ascii=False, separators=(",", ":")), js=JS)
 def _num_es(value, digits=1): return "n/a" if value is None else f"{value:.{digits}f}".replace(".", ",")

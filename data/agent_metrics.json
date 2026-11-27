@@ -113974,8 +113974,8 @@
     "latency": {
       "sources": {
         "pi": {
-          "turns_total": 294533,
-          "turns_with_duration": 51567,
+          "turns_total": 294541,
+          "turns_with_duration": 51575,
           "coverage_pct": 17.5,
           "models": {
             "MiniMax-M2.7": {
@@ -114228,11 +114228,11 @@
               "coverage_pct": 100.0
             },
             "glm-5.3-flash": {
-              "n": 5204,
+              "n": 5212,
               "p50_ms": 6549.0,
-              "p90_ms": 23332.6,
-              "p95_ms": 33658.2,
-              "turns_total": 5204,
+              "p90_ms": 23322.600000000024,
+              "p95_ms": 33653.399999999994,
+              "turns_total": 5212,
               "coverage_pct": 100.0
             },
             "google/gemini-2.0-flash-001": {
@@ -114784,11 +114784,11 @@
           "coverage_pct": 2.5
         },
         "glm": {
-          "n": 34689,
+          "n": 34697,
           "p50_ms": 7562.0,
-          "p90_ms": 27850.000000000007,
-          "p95_ms": 41286.79999999998,
-          "turns_total": 195308,
+          "p90_ms": 27843.20000000001,
+          "p95_ms": 41281.59999999996,
+          "turns_total": 195316,
           "coverage_pct": 17.8
         },
         "kimi": {

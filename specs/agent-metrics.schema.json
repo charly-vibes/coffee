@@ -417,7 +417,28 @@
     },
     "ops": {
       "type": "object",
-      "description": "Métricas de continuidad operativa (agent_metrics_ops.py, epic coffe-a5v). Los hijos del epic agregan claves: latency (coffe-9ia), fallback, quota_events, completion, subscription, concurrency/stall/queue_wait.",
+      "description": "Métricas de continuidad operativa (agent_metrics_ops*.py, epic coffe-a5v). Cada slice se computa sobre población completa, con provenance/coverage por fuente y null-con-razón cuando no hay señal.",
+      "$defs": {
+        "coverage": {
+          "type": "array",
+          "description": "Cobertura por fuente para la clave de ops.",
+          "items": {
+            "type": "object",
+            "required": ["source", "coverage_pct"],
+            "properties": {
+              "source": {"type": "string"},
+              "coverage_pct": {"type": "number", "minimum": 0, "maximum": 100},
+              "reason": {"type": ["string", "null"]}
+            },
+            "additionalProperties": false
+          }
+        },
+        "provenance": {
+          "type": "object",
+          "description": "Léxico: reported/derived/measured/assumed por clave.",
+          "additionalProperties": {"type": "string"}
+        }
+      },
       "required": ["latency"],
       "properties": {
         "latency": {
@@ -493,6 +514,208 @@
                 "additionalProperties": false
               }
             }
+          },
+          "additionalProperties": false
+        },
+        "fallback": {
+          "type": "object",
+          "description": "coffe-8mh: fallback de modelo. omp: registros resolvedModelIsFallback reportados; pi/claude-cli: proxy (cambio de modelo a mitad de tarea).",
+          "required": ["by_source", "events_total", "provenance", "coverage"],
+          "properties": {
+            "by_source": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "object",
+                "required": ["method", "events", "denominator", "rate"],
+                "properties": {
+                  "method": {"enum": ["reported-resolvedModelIsFallback", "proxy-mid-task-switch"]},
+                  "events": {"type": "integer", "minimum": 0},
+                  "denominator": {"type": "integer", "minimum": 0},
+                  "rate": {"type": ["number", "null"]},
+                  "reason": {"type": "string"}
+                },
+                "additionalProperties": false
+              }
+            },
+            "events_total": {"type": "integer", "minimum": 0},
+            "provenance": {"$ref": "#/properties/ops/$defs/provenance"},
+            "coverage": {"$ref": "#/properties/ops/$defs/coverage"}
+          },
+          "additionalProperties": false
+        },
+        "quota_events": {
+          "type": "object",
+          "description": "coffe-t6e: eventos de agotamiento de cuota detectados por firmas de error de proveedor en turnos raw (errorMessage de pi; claude-cli sin señal de cuota -> razón).",
+          "required": ["events", "counts", "sources_without_signature", "provenance", "coverage"],
+          "properties": {
+            "events": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["ts", "provider", "signature", "source"],
+                "properties": {
+                  "ts": {"type": "string"},
+                  "provider": {"type": "string"},
+                  "signature": {"type": "string"},
+                  "source": {"type": "string"}
+                },
+                "additionalProperties": false
+              }
+            },
+            "counts": {
+              "type": "object",
+              "additionalProperties": {"type": "integer", "minimum": 0}
+            },
+            "sources_without_signature": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["source", "reason"],
+                "properties": {"source": {"type": "string"}, "reason": {"type": "string"}},
+                "additionalProperties": false
+              }
+            },
+            "provenance": {"$ref": "#/properties/ops/$defs/provenance"},
+            "coverage": {"$ref": "#/properties/ops/$defs/coverage"}
+          },
+          "additionalProperties": false
+        },
+        "completion": {
+          "type": "object",
+          "description": "coffe-af2: % de tareas terminadas autónomamente (sin pushback/error) sobre cohort no ambigua; gate de frescura del estimador (docs/model-cost-estimate-v0.json).",
+          "required": ["started", "autonomous", "rate", "ambiguous_share", "cohort", "provenance", "coverage"],
+          "properties": {
+            "started": {"type": "integer", "minimum": 0},
+            "autonomous": {"type": "integer", "minimum": 0},
+            "rate": {"type": ["number", "null"]},
+            "ambiguous_share": {"type": "number", "minimum": 0, "maximum": 100},
+            "cohort": {"const": "unambiguous"},
+            "reason": {"type": "string"},
+            "provenance": {"$ref": "#/properties/ops/$defs/provenance"},
+            "coverage": {"$ref": "#/properties/ops/$defs/coverage"}
+          },
+          "additionalProperties": false
+        },
+        "intervention": {
+          "type": "object",
+          "description": "coffe-af2: intervención humana — aborts + prompts de recuperación en retry_window tras error, por 100 beads aceptadas (n_beads_sin_coste/no_table del estimador excluidas).",
+          "required": ["aborts", "recovery_prompts", "per_100_accepted", "provenance", "coverage"],
+          "properties": {
+            "aborts": {"type": "integer", "minimum": 0},
+            "recovery_prompts": {"type": "integer", "minimum": 0},
+            "per_100_accepted": {"type": ["number", "null"]},
+            "accepted_beads": {"type": ["integer", "null"], "minimum": 0},
+            "reason": {"type": "string"},
+            "provenance": {"$ref": "#/properties/ops/$defs/provenance"},
+            "coverage": {"$ref": "#/properties/ops/$defs/coverage"}
+          },
+          "additionalProperties": false
+        },
+        "subscription": {
+          "type": "object",
+          "description": "coffe-9fp: utilización de suscripción — coste notional (de usage_report session_spend, lane notional) vs cuota mensual reportada de config; sin cifras inventadas.",
+          "required": ["periods", "models_without_period", "provenance", "coverage"],
+          "properties": {
+            "periods": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["source", "label", "monthly_fee", "cost_imputed", "utilization"],
+                "properties": {
+                  "source": {"type": "string"},
+                  "label": {"type": "string"},
+                  "start": {"type": ["string", "null"], "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"},
+                  "end": {"type": ["string", "null"], "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"},
+                  "monthly_fee": {"type": "number", "minimum": 0},
+                  "cost_imputed": {"type": ["number", "null"]},
+                  "utilization": {"type": ["number", "null"]},
+                  "headroom_daily": {"type": ["number", "null"]},
+                  "reason": {"type": "string"}
+                },
+                "additionalProperties": false
+              }
+            },
+            "models_without_period": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["model", "reason"],
+                "properties": {"model": {"type": "string"}, "reason": {"type": "string"}},
+                "additionalProperties": false
+              }
+            },
+            "provenance": {"$ref": "#/properties/ops/$defs/provenance"},
+            "coverage": {"$ref": "#/properties/ops/$defs/coverage"}
+          },
+          "additionalProperties": false
+        },
+        "concurrency": {
+          "type": "object",
+          "description": "coffe-qi7: saturación — p95 diario de agentes activos y de requests en vuelo (turnos que se solapan en el tiempo), no agentes configurados.",
+          "required": ["daily", "agents_p95", "requests_p95", "provenance", "coverage"],
+          "properties": {
+            "daily": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["day", "agents_p95", "requests_p95"],
+                "properties": {
+                  "day": {"type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"},
+                  "agents_p95": {"type": "number"},
+                  "requests_p95": {"type": ["number", "null"]},
+                  "reason": {"type": "string"}
+                },
+                "additionalProperties": false
+              }
+            },
+            "agents_p95": {"type": ["number", "null"]},
+            "requests_p95": {"type": ["number", "null"]},
+            "reason": {"type": "string"},
+            "provenance": {"$ref": "#/properties/ops/$defs/provenance"},
+            "coverage": {"$ref": "#/properties/ops/$defs/coverage"}
+          },
+          "additionalProperties": false
+        },
+        "stall": {
+          "type": "object",
+          "description": "coffe-qi7: minutos por día adyacentes a error/retry y minutos idle entre tareas.",
+          "required": ["daily", "totals", "provenance", "coverage"],
+          "properties": {
+            "daily": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["day", "minutes_error_adjacent", "minutes_idle"],
+                "properties": {
+                  "day": {"type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"},
+                  "minutes_error_adjacent": {"type": "number", "minimum": 0},
+                  "minutes_idle": {"type": "number", "minimum": 0}
+                },
+                "additionalProperties": false
+              }
+            },
+            "totals": {
+              "type": "object",
+              "required": ["minutes_error_adjacent", "minutes_idle"],
+              "properties": {
+                "minutes_error_adjacent": {"type": "number", "minimum": 0},
+                "minutes_idle": {"type": "number", "minimum": 0}
+              },
+              "additionalProperties": false
+            },
+            "provenance": {"$ref": "#/properties/ops/$defs/provenance"},
+            "coverage": {"$ref": "#/properties/ops/$defs/coverage"}
+          },
+          "additionalProperties": false
+        },
+        "queue_wait": {
+          "type": "object",
+          "description": "coffe-qi7: TTFT/cola no medible en logs locales -> null con razón (no 0).",
+          "required": ["value", "reason", "provenance"],
+          "properties": {
+            "value": {"const": null},
+            "reason": {"const": "no_ttft_in_local_logs"},
+            "provenance": {"$ref": "#/properties/ops/$defs/provenance"}
           },
           "additionalProperties": false
         },
