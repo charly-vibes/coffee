@@ -47,6 +47,14 @@ python3 scripts/usage-tracker.py $FORCE_FLAG
 if ! python3 scripts/agent-metrics-tracker.py --validate; then
     log "AVISO: agent_metrics no valida contra el schema — se sigue con el resto"
 fi
+# coffe-dnx.4: bead_index (agregados repo×mes desde .beads/issues.jsonl, sin
+# texto de issues) sale del mismo proceso que agent_metrics, así que
+# data/bead_index.json ya quedó escrito; se valida aparte, sin abortar.
+if [ -f data/bead_index.json ]; then
+    if ! python3 scripts/agent-metrics-tracker.py --validate-bead data/bead_index.json; then
+        log "AVISO: bead_index no valida — se sigue con el resto"
+    fi
+fi
 python3 scripts/viz-agent.py
 python3 scripts/viz-agent.py --update-docs
 python3 scripts/viz-agent.py --check-docs

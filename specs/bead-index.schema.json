@@ -1,0 +1,97 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "bead_index — índice de beads agregado por repo × mes",
+  "description": "Dataset coffe-dnx.4 (scripts/agent-metrics-tracker.py, fuera de repo_metrics): escanea .beads/issues.jsonl de cada repo bajo agent_behavior.repo_roots (bd corre no-db: el JSONL es la fuente de verdad) y emite agregados por repo × mes. Sin texto de issues: title/description/notes/design no se publican (los ids son opacos y quedan permitidos).",
+  "type": "object",
+  "required": [
+    "metadata",
+    "repos",
+    "excluded"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "metadata": {
+      "type": "object",
+      "required": [
+        "generated_at",
+        "repo_roots",
+        "definition",
+        "reasons"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "generated_at": { "type": ["string", "null"] },
+        "repo_roots": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "definition": { "type": "string" },
+        "reasons": {
+          "type": "object",
+          "required": ["reopened"],
+          "additionalProperties": true,
+          "properties": {
+            "reopened": {
+              "type": "string",
+              "enum": ["no event log in no-db mode"]
+            }
+          }
+        }
+      }
+    },
+    "repos": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "months"],
+        "additionalProperties": false,
+        "properties": {
+          "name": { "type": "string", "pattern": "^(charly|sk|ak)(/.*)?$" },
+          "months": {
+            "type": "object",
+            "additionalProperties": false,
+            "patternProperties": {
+              "^[0-9]{4}-[0-9]{2}$": { "$ref": "#/definitions/month" }
+            }
+          }
+        }
+      }
+    },
+    "excluded": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "issues"],
+        "additionalProperties": false,
+        "properties": {
+          "name": { "type": "string" },
+          "issues": { "type": "integer", "minimum": 0 }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "month": {
+      "type": "object",
+      "required": [
+        "created",
+        "started",
+        "closed",
+        "lead_time_p50_min",
+        "lead_time_n",
+        "completeness",
+        "reopened"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "created": { "type": "integer", "minimum": 0 },
+        "started": { "type": "integer", "minimum": 0 },
+        "closed": { "type": "integer", "minimum": 0 },
+        "lead_time_p50_min": { "type": ["number", "null"] },
+        "lead_time_n": { "type": "integer", "minimum": 0 },
+        "completeness": { "type": ["number", "null"] },
+        "reopened": { "type": "null" }
+      }
+    }
+  }
+}

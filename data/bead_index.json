@@ -1,0 +1,2349 @@
+{
+  "metadata": {
+    "generated_at": "2026-11-27T01:23:17.894295+00:00",
+    "repo_roots": [
+      "~/para/areas/dev/gh"
+    ],
+    "definition": "por repo × mes (mes de created_at): created = beads creados; started/closed = con started_at/closed_at dentro de la cohorte; lead_time = closed_at − started_at en minutos para beads con ambos, p50 exacto; completeness = lead_time_n / closed. Fuente: .beads/issues.jsonl de cada repo (bd no-db).",
+    "reasons": {
+      "reopened": "no event log in no-db mode",
+      "excluded": "repos fuera del filtro charly (FPA-141): conteo de issues, sin texto"
+    }
+  },
+  "repos": [
+    {
+      "name": "ak/catitas",
+      "months": {
+        "2026-10": {
+          "created": 140,
+          "started": 88,
+          "closed": 111,
+          "lead_time_p50_min": 17.8,
+          "lead_time_n": 86,
+          "completeness": 0.7748,
+          "reopened": null
+        },
+        "2026-11": {
+          "created": 40,
+          "started": 18,
+          "closed": 26,
+          "lead_time_p50_min": 25.7,
+          "lead_time_n": 15,
+          "completeness": 0.5769,
+          "reopened": null
+        }
+      }
+    },
+    {
+      "name": "ak/el-mundo-ha-vivido-equivocado",
+      "months": {
+        "2026-07": {
+          "created": 46,
+          "started": 18,
+          "closed": 43,
+          "lead_time_p50_min": 4.4,
+          "lead_time_n": 18,
+          "completeness": 0.4186,
+          "reopened": null
+        },
+        "2026-08": {
+          "created": 8,
+          "started": 8,
+          "closed": 8,
+          "lead_time_p50_min": 2.7,
+          "lead_time_n": 8,
+          "completeness": 1.0,
+          "reopened": null
+        },
+        "2026-09": {
+          "created": 5,
+          "started": 0,
+          "closed": 0,
+          "lead_time_p50_min": null,
+          "lead_time_n": 0,
+          "completeness": null,
+          "reopened": null
+        },
+        "2026-11": {
+          "created": 4,
+          "started": 0,
+          "closed": 0,
+          "lead_time_p50_min": null,
+          "lead_time_n": 0,
+          "completeness": null,
+          "reopened": null
+        }
+      }
+    },
+    {
+      "name": "ak/finanzas",
+      "months": {
+        "2026-09": {
+          "created": 29,
+          "started": 17,
+          "closed": 23,
+          "lead_time_p50_min": 29.4,
+          "lead_time_n": 15,
+          "completeness": 0.6522,
+          "reopened": null
+        },
+        "2026-10": {
+          "created": 105,
+          "started": 38,
+          "closed": 64,
+          "lead_time_p50_min": 26.3,
+          "lead_time_n": 37,
+          "completeness": 0.5781,
+          "reopened": null
+        },
+        "2026-11": {
+          "created": 7,
+          "started": 3,
+          "closed": 3,
+          "lead_time_p50_min": 18.1,
+          "lead_time_n": 3,
+          "completeness": 1.0,
+          "reopened": null
+        }
+      }
+    },
+    {
+      "name": "ak/matadero",
+      "months": {
+        "2026-10": {
+          "created": 17,
+          "started": 15,
+          "closed": 11,
+          "lead_time_p50_min": 5.5,
+          "lead_time_n": 10,
+          "completeness": 0.9091,
+          "reopened": null
+        },
+        "2026-11": {
+          "created": 10,
+          "started": 10,
+          "closed": 10,
+          "lead_time_p50_min": 3.4,
+          "lead_time_n": 10,
+          "completeness": 1.0,
+          "reopened": null
+        }
+      }
+    },
+    {
+      "name": "ak/pinky",
+      "months": {
+        "2026-10": {
+          "created": 57,
+          "started": 40,
+          "closed": 47,
+          "lead_time_p50_min": 17.8,
+          "lead_time_n": 39,
+          "completeness": 0.8298,
+          "reopened": null
+        },
+        "2026-11": {
+          "created": 12,
+          "started": 2,
+          "closed": 4,
+          "lead_time_p50_min": 7.2,
+          "lead_time_n": 1,
+          "completeness": 0.25,
+          "reopened": null
+        }
+      }
+    },
+    {
+      "name": "ak/uarup",
+      "months": {
+        "2026-09": {
+          "created": 6,
+          "started": 2,
+          "closed": 4,
+          "lead_time_p50_min": 11.1,
+          "lead_time_n": 2,
+          "completeness": 0.5,
+          "reopened": null
+        },
+        "2026-10": {
+          "created": 1,
+          "started": 1,
+          "closed": 1,
+          "lead_time_p50_min": 46.4,
+          "lead_time_n": 1,
+          "completeness": 1.0,
+          "reopened": null
+        }
+      }
+    },
+    {
+      "name": "charly",
+      "months": {
+        "2026-07": {
+          "created": 1,
+          "started": 0,
+          "closed": 0,
+          "lead_time_p50_min": null,
+          "lead_time_n": 0,
+          "completeness": null,
+          "reopened": null
+        },
+        "2026-09": {
+          "created": 10,
+          "started": 0,
+          "closed": 0,
+          "lead_time_p50_min": null,
+          "lead_time_n": 0,
+          "completeness": null,
+          "reopened": null
+        },
+        "2026-10": {
+          "created": 11,
+          "started": 4,
+          "closed": 8,
+          "lead_time_p50_min": 3.0,
+          "lead_time_n": 4,
+          "completeness": 0.5,
+          "reopened": null
+        },
+        "2026-11": {
+          "created": 23,
+          "started": 1,
+          "closed": 11,
+          "lead_time_p50_min": 26.0,
+          "lead_time_n": 1,
+          "completeness": 0.0909,
+          "reopened": null
+        }
+      }
+    },
+    {
+      "name": "charly/atril",
+      "months": {
+        "2026-04": {
+          "created": 93,
+          "started": 51,
+          "closed": 69,
+          "lead_time_p50_min": 1.8,
+          "lead_time_n": 51,
+          "completeness": 0.7391,
+          "reopened": null
+        },
+        "2026-05": {
+          "created": 6,
+          "started": 2,
+          "closed": 2,
+          "lead_time_p50_min": 19.1,
+          "lead_time_n": 2,
+          "completeness": 1.0,
+          "reopened": null
+        },
+        "2026-11": {
+          "created": 1,
+          "started": 0,
+          "closed": 0,
+          "lead_time_p50_min": null,
+          "lead_time_n": 0,
+          "completeness": null,
+          "reopened": null
+        }
+      }
+    },
+    {
+      "name": "charly/bajan",
+      "months": {
+        "2026-09": {
+          "created": 65,
+          "started": 57,
+          "closed": 61,
+          "lead_time_p50_min": 5.1,
+          "lead_time_n": 56,
+          "completeness": 0.918,
+          "reopened": null
+        },
+        "2026-10": {
+          "created": 14,
+          "started": 12,
+          "closed": 14,
+          "lead_time_p50_min": 3.6,
+          "lead_time_n": 12,
+          "completeness": 0.8571,
+          "reopened": null
+        },
+        "2026-11": {
+          "created": 29,
+          "started": 11,
+          "closed": 16,
+          "lead_time_p50_min": 11.7,
+          "lead_time_n": 11,
+          "completeness": 0.6875,
+          "reopened": null
+        }
+      }
+    },
+    {
+      "name": "charly/bichos",
+      "months": {
+        "2026-02": {
+          "created": 63,
+          "started": 0,
+          "closed": 56,
+          "lead_time_p50_min": null,
+          "lead_time_n": 0,
+          "completeness": 0.0,
+          "reopened": null
+        },
+        "2026-10": {
+          "created": 1,
+          "started": 0,
+          "closed": 0,
+          "lead_time_p50_min": null,
+          "lead_time_n": 0,
+          "completeness": null,
+          "reopened": null
+        },
+        "2026-11": {
+          "created": 1,
+          "started": 0,
+          "closed": 0,
+          "lead_time_p50_min": null,
+          "lead_time_n": 0,
+          "completeness": null,
+          "reopened": null
+        }
+      }
+    },
+    {
+      "name": "charly/canticos",
+      "months": {
+        "2026-10": {
+          "created": 2,
+          "started": 1,
+          "closed": 1,
+          "lead_time_p50_min": 2.3,
+          "lead_time_n": 1,
+          "completeness": 1.0,
+          "reopened": null
+        },
+        "2026-11": {
+          "created": 38,
+          "started": 11,
+          "closed": 36,
+          "lead_time_p50_min": 1.8,
+          "lead_time_n": 11,
+          "completeness": 0.3056,
+          "reopened": null
+        }
+      }
+    },
+    {
+      "name": "charly/charly-vibes",
+      "months": {
+        "2026-11": {
+          "created": 1,
+          "started": 0,
+          "closed": 0,
+          "lead_time_p50_min": null,
+          "lead_time_n": 0,
+          "completeness": null,
+          "reopened": null
+        }
+      }
+    },
+    {
+      "name": "charly/charly-vibes.github.io",
+      "months": {
+        "2026-11": {
+          "created": 1,
+          "started": 0,
+          "closed": 0,
+          "lead_time_p50_min": null,
+          "lead_time_n": 0,
+          "completeness": null,
+          "reopened": null
+        }
+      }
+    },
+    {
+      "name": "charly/coffee",
+      "months": {
+        "2026-09": {
+          "created": 83,
+          "started": 60,
+          "closed": 82,
+          "lead_time_p50_min": 8.3,
+          "lead_time_n": 60,
+          "completeness": 0.7317,
+          "reopened": null
+        },
+        "2026-10": {
+          "created": 82,
+          "started": 57,
+          "closed": 70,
+          "lead_time_p50_min": 4.0,
+          "lead_time_n": 57,
+          "completeness": 0.8143,
+          "reopened": null
+        },
+        "2026-11": {
+          "created": 29,
+          "started": 2,
+          "closed": 2,
+          "lead_time_p50_min": 0.1,
+          "lead_time_n": 2,
+          "completeness": 1.0,
+          "reopened": null
+        }
+      }
+    },
+    {
+      "name": "charly/crua",
+      "months": {
+        "2026-07": {
+          "created": 3,
+          "started": 0,
+          "closed": 0,
+          "lead_time_p50_min": null,
+          "lead_time_n": 0,
+          "completeness": null,
+          "reopened": null
+        },
+        "2026-10": {
+          "created": 1,
+          "started": 0,
+          "closed": 0,
+          "lead_time_p50_min": null,
+          "lead_time_n": 0,
+          "completeness": null,
+          "reopened": null
+        },
+        "2026-11": {
+          "created": 1,
+          "started": 0,
+          "closed": 0,
+          "lead_time_p50_min": null,
+          "lead_time_n": 0,
+          "completeness": null,
+          "reopened": null
+        }
+      }
+    },
+    {
+      "name": "charly/dont",
+      "months": {
+        "2026-04": {
+          "created": 21,
+          "started": 20,
+          "closed": 21,
+          "lead_time_p50_min": 4.0,
+          "lead_time_n": 20,
+          "completeness": 0.9524,
+          "reopened": null
+        },
+        "2026-05": {
+          "created": 265,
+          "started": 147,
+          "closed": 213,
+          "lead_time_p50_min": 5.4,
+          "lead_time_n": 144,
+          "completeness": 0.6761,
+          "reopened": null
+        },
+        "2026-06": {
+          "created": 12,
+          "started": 1,
+          "closed": 12,
+          "lead_time_p50_min": 5.8,
+          "lead_time_n": 1,
+          "completeness": 0.0833,
+          "reopened": null
+        },
+        "2026-07": {
+          "created": 71,
+          "started": 39,
+          "closed": 59,
+          "lead_time_p50_min": 3.7,
+          "lead_time_n": 37,
+          "completeness": 0.6271,
+          "reopened": null
+        },
+        "2026-08": {
+          "created": 5,
+          "started": 1,
+          "closed": 5,
+          "lead_time_p50_min": 22.3,
+          "lead_time_n": 1,
+          "completeness": 0.2,
+          "reopened": null
+        },
+        "2026-09": {
+          "created": 2,
+          "started": 0,
+          "closed": 0,
+          "lead_time_p50_min": null,
+          "lead_time_n": 0,
+          "completeness": null,
+          "reopened": null
+        },
+        "2026-10": {
+          "created": 15,
+          "started": 5,
+          "closed": 12,
+          "lead_time_p50_min": 38.6,
+          "lead_time_n": 5,
+          "completeness": 0.4167,
+          "reopened": null
+        },
+        "2026-11": {
+          "created": 9,
+          "started": 0,
+          "closed": 0,
+          "lead_time_p50_min": null,
+          "lead_time_n": 0,
+          "completeness": null,
+          "reopened": null
+        }
+      }
+    },
+    {
+      "name": "charly/dulce-de-leche",
+      "months": {
+        "2026-07": {
+          "created": 73,
+          "started": 50,
+          "closed": 73,
+          "lead_time_p50_min": 4.2,
+          "lead_time_n": 50,
+          "completeness": 0.6849,
+          "reopened": null
+        },
+        "2026-08": {
+          "created": 8,
+          "started": 6,
+          "closed": 8,
+          "lead_time_p50_min": 4.3,
+          "lead_time_n": 6,
+          "completeness": 0.75,
+          "reopened": null
+        },
+        "2026-09": {
+          "created": 29,
+          "started": 22,
+          "closed": 29,
+          "lead_time_p50_min": 4.3,
+          "lead_time_n": 22,
+          "completeness": 0.7586,
+          "reopened": null
+        },
+        "2026-10": {
+          "created": 83,
+          "started": 51,
+          "closed": 70,
+          "lead_time_p50_min": 23.4,
+          "lead_time_n": 51,
+          "completeness": 0.7286,
+          "reopened": null
+        },
+        "2026-11": {
+          "created": 79,
+          "started": 9,
+          "closed": 33,
+          "lead_time_p50_min": 19.0,
+          "lead_time_n": 8,
+          "completeness": 0.2424,
+          "reopened": null
+        }
+      }
+    },
+    {
+      "name": "charly/espectacular",
+      "months": {
+        "2026-05": {
+          "created": 37,
+          "started": 29,
+          "closed": 37,
+          "lead_time_p50_min": 4.0,
+          "lead_time_n": 29,
+          "completeness": 0.7838,
+          "reopened": null
+        },
+        "2026-06": {
+          "created": 20,
+          "started": 18,
+          "closed": 20,
+          "lead_time_p50_min": 2.9,
+          "lead_time_n": 18,
+          "completeness": 0.9,
+          "reopened": null
+        },
+        "2026-07": {
+          "created": 43,
+          "started": 23,
+          "closed": 43,
+          "lead_time_p50_min": 3.0,
+          "lead_time_n": 23,
+          "completeness": 0.5349,
+          "reopened": null
+        },
+        "2026-08": {
+          "created": 12,
+          "started": 10,
+          "closed": 12,
+          "lead_time_p50_min": 3.6,
+          "lead_time_n": 10,
+          "completeness": 0.8333,
+          "reopened": null
+        },
+        "2026-09": {
+          "created": 27,
+          "started": 25,
+          "closed": 27,
+          "lead_time_p50_min": 4.7,
+          "lead_time_n": 25,
+          "completeness": 0.9259,
+          "reopened": null
+        },
+        "2026-10": {
+          "created": 33,
+          "started": 29,
+          "closed": 33,
+          "lead_time_p50_min": 9.5,
+          "lead_time_n": 29,
+          "completeness": 0.8788,
+          "reopened": null
+        },
+        "2026-11": {
+          "created": 10,
+          "started": 1,
+          "closed": 2,
+          "lead_time_p50_min": 89.3,
+          "lead_time_n": 1,
+          "completeness": 0.5,
+          "reopened": null
+        }
+      }
+    },
+    {
+      "name": "charly/evallerina",
+      "months": {
+        "2026-09": {
+          "created": 10,
+          "started": 9,
+          "closed": 10,
+          "lead_time_p50_min": 5.1,
+          "lead_time_n": 9,
+          "completeness": 0.9,
+          "reopened": null
+        },
+        "2026-10": {
+          "created": 35,
+          "started": 20,
+          "closed": 25,
+          "lead_time_p50_min": 17.6,
+          "lead_time_n": 19,
+          "completeness": 0.76,
+          "reopened": null
+        },
+        "2026-11": {
+          "created": 3,
+          "started": 0,
+          "closed": 0,
+          "lead_time_p50_min": null,
+          "lead_time_n": 0,
+          "completeness": null,
+          "reopened": null
+        }
+      }
+    },
+    {
+      "name": "charly/fabbro",
+      "months": {
+        "2026-01": {
+          "created": 132,
+          "started": 0,
+          "closed": 111,
+          "lead_time_p50_min": null,
+          "lead_time_n": 0,
+          "completeness": 0.0,
+          "reopened": null
+        },
+        "2026-02": {
+          "created": 26,
+          "started": 0,
+          "closed": 25,
+          "lead_time_p50_min": null,
+          "lead_time_n": 0,
+          "completeness": 0.0,
+          "reopened": null
+        },
+        "2026-03": {
+          "created": 6,
+          "started": 0,
+          "closed": 5,
+          "lead_time_p50_min": null,
+          "lead_time_n": 0,
+          "completeness": 0.0,
+          "reopened": null
+        },
+        "2026-04": {
+          "created": 12,
+          "started": 0,
+          "closed": 11,
+          "lead_time_p50_min": null,
+          "lead_time_n": 0,
+          "completeness": 0.0,
+          "reopened": null
+        },
+        "2026-08": {
+          "created": 3,
+          "started": 0,
+          "closed": 0,
+          "lead_time_p50_min": null,
+          "lead_time_n": 0,
+          "completeness": null,
+          "reopened": null
+        },
+        "2026-09": {
+          "created": 1,
+          "started": 0,
+          "closed": 0,
+          "lead_time_p50_min": null,
+          "lead_time_n": 0,
+          "completeness": null,
+          "reopened": null
+        },
+        "2026-11": {
+          "created": 7,
+          "started": 0,
+          "closed": 0,
+          "lead_time_p50_min": null,
+          "lead_time_n": 0,
+          "completeness": null,
+          "reopened": null
+        }
+      }
+    },
+    {
+      "name": "charly/fck",
+      "months": {
+        "2026-09": {
+          "created": 9,
+          "started": 9,
+          "closed": 9,
+          "lead_time_p50_min": 0.4,
+          "lead_time_n": 9,
+          "completeness": 1.0,
+          "reopened": null
+        },
+        "2026-11": {
+          "created": 1,
+          "started": 0,
+          "closed": 0,
+          "lead_time_p50_min": null,
+          "lead_time_n": 0,
+          "completeness": null,
+          "reopened": null
+        }
+      }
+    },
+    {
+      "name": "charly/fotos",
+      "months": {
+        "2026-02": {
+          "created": 76,
+          "started": 0,
+          "closed": 76,
+          "lead_time_p50_min": null,
+          "lead_time_n": 0,
+          "completeness": 0.0,
+          "reopened": null
+        },
+        "2026-03": {
+          "created": 38,
+          "started": 0,
+          "closed": 34,
+          "lead_time_p50_min": null,
+          "lead_time_n": 0,
+          "completeness": 0.0,
+          "reopened": null
+        },
+        "2026-08": {
+          "created": 7,
+          "started": 0,
+          "closed": 2,
+          "lead_time_p50_min": null,
+          "lead_time_n": 0,
+          "completeness": 0.0,
+          "reopened": null
+        },
+        "2026-10": {
+          "created": 1,
+          "started": 0,
+          "closed": 0,
+          "lead_time_p50_min": null,
+          "lead_time_n": 0,
+          "completeness": null,
+          "reopened": null
+        },
+        "2026-11": {
+          "created": 2,
+          "started": 0,
+          "closed": 0,
+          "lead_time_p50_min": null,
+          "lead_time_n": 0,
+          "completeness": null,
+          "reopened": null
+        }
+      }
+    },
+    {
+      "name": "charly/funkalization",
+      "months": {
+        "2026-10": {
+          "created": 10,
+          "started": 9,
+          "closed": 9,
+          "lead_time_p50_min": 4306.1,
+          "lead_time_n": 8,
+          "completeness": 0.8889,
+          "reopened": null
+        },
+        "2026-11": {
+          "created": 9,
+          "started": 0,
+          "closed": 0,
+          "lead_time_p50_min": null,
+          "lead_time_n": 0,
+          "completeness": null,
+          "reopened": null
+        }
+      }
+    },
+    {
+      "name": "charly/genesis",
+      "months": {
+        "2026-07": {
+          "created": 56,
+          "started": 26,
+          "closed": 56,
+          "lead_time_p50_min": 2.2,
+          "lead_time_n": 26,
+          "completeness": 0.4643,
+          "reopened": null
+        },
+        "2026-08": {
+          "created": 2,
+          "started": 1,
+          "closed": 1,
+          "lead_time_p50_min": 8.8,
+          "lead_time_n": 1,
+          "completeness": 1.0,
+          "reopened": null
+        },
+        "2026-09": {
+          "created": 44,
+          "started": 31,
+          "closed": 39,
+          "lead_time_p50_min": 4.8,
+          "lead_time_n": 30,
+          "completeness": 0.7692,
+          "reopened": null
+        },
+        "2026-10": {
+          "created": 33,
+          "started": 23,
+          "closed": 21,
+          "lead_time_p50_min": 4.3,
+          "lead_time_n": 20,
+          "completeness": 0.9524,
+          "reopened": null
+        },
+        "2026-11": {
+          "created": 42,
+          "started": 19,
+          "closed": 31,
+          "lead_time_p50_min": 7.1,
+          "lead_time_n": 19,
+          "completeness": 0.6129,
+          "reopened": null
+        }
+      }
+    },
+    {
+      "name": "charly/gently",
+      "months": {
+        "2026-10": {
+          "created": 123,
+          "started": 94,
+          "closed": 122,
+          "lead_time_p50_min": 17.1,
+          "lead_time_n": 94,
+          "completeness": 0.7705,
+          "reopened": null
+        },
+        "2026-11": {
+          "created": 7,
+          "started": 0,
+          "closed": 0,
+          "lead_time_p50_min": null,
+          "lead_time_n": 0,
+          "completeness": null,
+          "reopened": null
+        }
+      }
+    },
+    {
+      "name": "charly/incitaciones",
+      "months": {
+        "2026-07": {
+          "created": 1,
+          "started": 0,
+          "closed": 1,
+          "lead_time_p50_min": null,
+          "lead_time_n": 0,
+          "completeness": 0.0,
+          "reopened": null
+        },
+        "2026-08": {
+          "created": 1,
+          "started": 0,
+          "closed": 0,
+          "lead_time_p50_min": null,
+          "lead_time_n": 0,
+          "completeness": null,
+          "reopened": null
+        },
+        "2026-09": {
+          "created": 33,
+          "started": 15,
+          "closed": 29,
+          "lead_time_p50_min": 4.7,
+          "lead_time_n": 15,
+          "completeness": 0.5172,
+          "reopened": null
+        },
+        "2026-10": {
+          "created": 20,
+          "started": 13,
+          "closed": 13,
+          "lead_time_p50_min": 5.8,
+          "lead_time_n": 11,
+          "completeness": 0.8462,
+          "reopened": null
+        },
+        "2026-11": {
+          "created": 19,
+          "started": 12,
+          "closed": 13,
+          "lead_time_p50_min": 4.8,
+          "lead_time_n": 12,
+          "completeness": 0.9231,
+          "reopened": null
+        }
+      }
+    },
+    {
+      "name": "charly/jams",
+      "months": {
+        "2026-10": {
+          "created": 19,
+          "started": 17,
+          "closed": 17,
+          "lead_time_p50_min": 5.2,
+          "lead_time_n": 17,
+          "completeness": 1.0,
+          "reopened": null
+        },
+        "2026-11": {
+          "created": 19,
+          "started": 15,
+          "closed": 15,
+          "lead_time_p50_min": 8.4,
+          "lead_time_n": 15,
+          "completeness": 1.0,
+          "reopened": null
+        }
+      }
+    },
+    {
+      "name": "charly/kaya",
+      "months": {
+        "2026-11": {
+          "created": 96,
+          "started": 65,
+          "closed": 94,
+          "lead_time_p50_min": 26.7,
+          "lead_time_n": 65,
+          "completeness": 0.6915,
+          "reopened": null
+        }
+      }
+    },
+    {
+      "name": "charly/khipu",
+      "months": {
+        "2026-03": {
+          "created": 30,
+          "started": 0,
+          "closed": 20,
+          "lead_time_p50_min": null,
+          "lead_time_n": 0,
+          "completeness": 0.0,
+          "reopened": null
+        },
+        "2026-10": {
+          "created": 1,
+          "started": 0,
+          "closed": 0,
+          "lead_time_p50_min": null,
+          "lead_time_n": 0,
+          "completeness": null,
+          "reopened": null
+        },
+        "2026-11": {
+          "created": 1,
+          "started": 0,
+          "closed": 0,
+          "lead_time_p50_min": null,
+          "lead_time_n": 0,
+          "completeness": null,
+          "reopened": null
+        }
+      }
+    },
+    {
+      "name": "charly/livin",
+      "months": {
+        "2026-07": {
+          "created": 3,
+          "started": 0,
+          "closed": 0,
+          "lead_time_p50_min": null,
+          "lead_time_n": 0,
+          "completeness": null,
+          "reopened": null
+        },
+        "2026-11": {
+          "created": 1,
+          "started": 0,
+          "closed": 0,
+          "lead_time_p50_min": null,
+          "lead_time_n": 0,
+          "completeness": null,
+          "reopened": null
+        }
+      }
+    },
+    {
+      "name": "charly/miblioteca",
+      "months": {
+        "2026-05": {
+          "created": 322,
+          "started": 151,
+          "closed": 295,
+          "lead_time_p50_min": 4.0,
+          "lead_time_n": 150,
+          "completeness": 0.5085,
+          "reopened": null
+        },
+        "2026-08": {
+          "created": 2,
+          "started": 0,
+          "closed": 0,
+          "lead_time_p50_min": null,
+          "lead_time_n": 0,
+          "completeness": null,
+          "reopened": null
+        },
+        "2026-10": {
+          "created": 1,
+          "started": 0,
+          "closed": 0,
+          "lead_time_p50_min": null,
+          "lead_time_n": 0,
+          "completeness": null,
+          "reopened": null
+        },
+        "2026-11": {
+          "created": 2,
+          "started": 0,
+          "closed": 0,
+          "lead_time_p50_min": null,
+          "lead_time_n": 0,
+          "completeness": null,
+          "reopened": null
+        }
+      }
+    },
+    {
+      "name": "charly/michael",
+      "months": {
+        "2026-11": {
+          "created": 1,
+          "started": 0,
+          "closed": 0,
+          "lead_time_p50_min": null,
+          "lead_time_n": 0,
+          "completeness": null,
+          "reopened": null
+        }
+      }
+    },
+    {
+      "name": "charly/microdancing",
+      "months": {
+        "2026-11": {
+          "created": 1,
+          "started": 0,
+          "closed": 0,
+          "lead_time_p50_min": null,
+          "lead_time_n": 0,
+          "completeness": null,
+          "reopened": null
+        }
+      }
+    },
+    {
+      "name": "charly/nayra",
+      "months": {
+        "2026-01": {
+          "created": 39,
+          "started": 0,
+          "closed": 39,
+          "lead_time_p50_min": null,
+          "lead_time_n": 0,
+          "completeness": 0.0,
+          "reopened": null
+        },
+        "2026-02": {
+          "created": 86,
+          "started": 0,
+          "closed": 82,
+          "lead_time_p50_min": null,
+          "lead_time_n": 0,
+          "completeness": 0.0,
+          "reopened": null
+        },
+        "2026-03": {
+          "created": 35,
+          "started": 0,
+          "closed": 23,
+          "lead_time_p50_min": null,
+          "lead_time_n": 0,
+          "completeness": 0.0,
+          "reopened": null
+        },
+        "2026-04": {
+          "created": 6,
+          "started": 0,
+          "closed": 6,
+          "lead_time_p50_min": null,
+          "lead_time_n": 0,
+          "completeness": 0.0,
+          "reopened": null
+        },
+        "2026-10": {
+          "created": 1,
+          "started": 0,
+          "closed": 0,
+          "lead_time_p50_min": null,
+          "lead_time_n": 0,
+          "completeness": null,
+          "reopened": null
+        },
+        "2026-11": {
+          "created": 1,
+          "started": 0,
+          "closed": 0,
+          "lead_time_p50_min": null,
+          "lead_time_n": 0,
+          "completeness": null,
+          "reopened": null
+        }
+      }
+    },
+    {
+      "name": "charly/paranoid",
+      "months": {
+        "2026-04": {
+          "created": 48,
+          "started": 2,
+          "closed": 46,
+          "lead_time_p50_min": 28.0,
+          "lead_time_n": 2,
+          "completeness": 0.0435,
+          "reopened": null
+        },
+        "2026-05": {
+          "created": 26,
+          "started": 8,
+          "closed": 23,
+          "lead_time_p50_min": 2.9,
+          "lead_time_n": 8,
+          "completeness": 0.3478,
+          "reopened": null
+        },
+        "2026-06": {
+          "created": 9,
+          "started": 8,
+          "closed": 9,
+          "lead_time_p50_min": 14.0,
+          "lead_time_n": 8,
+          "completeness": 0.8889,
+          "reopened": null
+        },
+        "2026-08": {
+          "created": 2,
+          "started": 0,
+          "closed": 0,
+          "lead_time_p50_min": null,
+          "lead_time_n": 0,
+          "completeness": null,
+          "reopened": null
+        },
+        "2026-10": {
+          "created": 1,
+          "started": 0,
+          "closed": 0,
+          "lead_time_p50_min": null,
+          "lead_time_n": 0,
+          "completeness": null,
+          "reopened": null
+        },
+        "2026-11": {
+          "created": 2,
+          "started": 0,
+          "closed": 1,
+          "lead_time_p50_min": null,
+          "lead_time_n": 0,
+          "completeness": 0.0,
+          "reopened": null
+        }
+      }
+    },
+    {
+      "name": "charly/paseos",
+      "months": {
+        "2026-11": {
+          "created": 1,
+          "started": 0,
+          "closed": 0,
+          "lead_time_p50_min": null,
+          "lead_time_n": 0,
+          "completeness": null,
+          "reopened": null
+        }
+      }
+    },
+    {
+      "name": "charly/podras",
+      "months": {
+        "2026-11": {
+          "created": 46,
+          "started": 37,
+          "closed": 41,
+          "lead_time_p50_min": 21.6,
+          "lead_time_n": 37,
+          "completeness": 0.9024,
+          "reopened": null
+        }
+      }
+    },
+    {
+      "name": "charly/pretender",
+      "months": {
+        "2026-05": {
+          "created": 45,
+          "started": 40,
+          "closed": 45,
+          "lead_time_p50_min": 3.8,
+          "lead_time_n": 40,
+          "completeness": 0.8889,
+          "reopened": null
+        },
+        "2026-06": {
+          "created": 17,
+          "started": 17,
+          "closed": 17,
+          "lead_time_p50_min": 3.0,
+          "lead_time_n": 17,
+          "completeness": 1.0,
+          "reopened": null
+        },
+        "2026-07": {
+          "created": 64,
+          "started": 54,
+          "closed": 64,
+          "lead_time_p50_min": 3.5,
+          "lead_time_n": 54,
+          "completeness": 0.8438,
+          "reopened": null
+        },
+        "2026-08": {
+          "created": 7,
+          "started": 3,
+          "closed": 7,
+          "lead_time_p50_min": 10.9,
+          "lead_time_n": 3,
+          "completeness": 0.4286,
+          "reopened": null
+        },
+        "2026-09": {
+          "created": 13,
+          "started": 8,
+          "closed": 12,
+          "lead_time_p50_min": 5.4,
+          "lead_time_n": 8,
+          "completeness": 0.6667,
+          "reopened": null
+        },
+        "2026-10": {
+          "created": 11,
+          "started": 8,
+          "closed": 8,
+          "lead_time_p50_min": 8.2,
+          "lead_time_n": 8,
+          "completeness": 1.0,
+          "reopened": null
+        },
+        "2026-11": {
+          "created": 133,
+          "started": 61,
+          "closed": 123,
+          "lead_time_p50_min": 37.1,
+          "lead_time_n": 60,
+          "completeness": 0.4878,
+          "reopened": null
+        }
+      }
+    },
+    {
+      "name": "charly/rizomas",
+      "months": {
+        "2026-02": {
+          "created": 120,
+          "started": 0,
+          "closed": 98,
+          "lead_time_p50_min": null,
+          "lead_time_n": 0,
+          "completeness": 0.0,
+          "reopened": null
+        },
+        "2026-10": {
+          "created": 1,
+          "started": 0,
+          "closed": 0,
+          "lead_time_p50_min": null,
+          "lead_time_n": 0,
+          "completeness": null,
+          "reopened": null
+        },
+        "2026-11": {
+          "created": 1,
+          "started": 0,
+          "closed": 0,
+          "lead_time_p50_min": null,
+          "lead_time_n": 0,
+          "completeness": null,
+          "reopened": null
+        }
+      }
+    },
+    {
+      "name": "charly/ruta",
+      "months": {
+        "2026-04": {
+          "created": 34,
+          "started": 17,
+          "closed": 32,
+          "lead_time_p50_min": 1.8,
+          "lead_time_n": 17,
+          "completeness": 0.5312,
+          "reopened": null
+        },
+        "2026-10": {
+          "created": 1,
+          "started": 0,
+          "closed": 0,
+          "lead_time_p50_min": null,
+          "lead_time_n": 0,
+          "completeness": null,
+          "reopened": null
+        },
+        "2026-11": {
+          "created": 1,
+          "started": 0,
+          "closed": 0,
+          "lead_time_p50_min": null,
+          "lead_time_n": 0,
+          "completeness": null,
+          "reopened": null
+        }
+      }
+    },
+    {
+      "name": "charly/sad",
+      "months": {
+        "2026-11": {
+          "created": 48,
+          "started": 16,
+          "closed": 43,
+          "lead_time_p50_min": 29.0,
+          "lead_time_n": 16,
+          "completeness": 0.3721,
+          "reopened": null
+        }
+      }
+    },
+    {
+      "name": "charly/specodelic",
+      "months": {
+        "2026-09": {
+          "created": 67,
+          "started": 57,
+          "closed": 67,
+          "lead_time_p50_min": 7.8,
+          "lead_time_n": 57,
+          "completeness": 0.8507,
+          "reopened": null
+        },
+        "2026-10": {
+          "created": 223,
+          "started": 141,
+          "closed": 192,
+          "lead_time_p50_min": 18.7,
+          "lead_time_n": 141,
+          "completeness": 0.7344,
+          "reopened": null
+        },
+        "2026-11": {
+          "created": 71,
+          "started": 32,
+          "closed": 46,
+          "lead_time_p50_min": 49.1,
+          "lead_time_n": 31,
+          "completeness": 0.6739,
+          "reopened": null
+        }
+      }
+    },
+    {
+      "name": "charly/sunset",
+      "months": {
+        "2026-10": {
+          "created": 84,
+          "started": 67,
+          "closed": 84,
+          "lead_time_p50_min": 11.0,
+          "lead_time_n": 67,
+          "completeness": 0.7976,
+          "reopened": null
+        },
+        "2026-11": {
+          "created": 77,
+          "started": 65,
+          "closed": 77,
+          "lead_time_p50_min": 26.1,
+          "lead_time_n": 65,
+          "completeness": 0.8442,
+          "reopened": null
+        }
+      }
+    },
+    {
+      "name": "charly/sunshine",
+      "months": {
+        "2026-11": {
+          "created": 27,
+          "started": 17,
+          "closed": 25,
+          "lead_time_p50_min": 26.0,
+          "lead_time_n": 17,
+          "completeness": 0.68,
+          "reopened": null
+        }
+      }
+    },
+    {
+      "name": "charly/superficies",
+      "months": {
+        "2026-05": {
+          "created": 23,
+          "started": 15,
+          "closed": 23,
+          "lead_time_p50_min": 2.8,
+          "lead_time_n": 15,
+          "completeness": 0.6522,
+          "reopened": null
+        },
+        "2026-10": {
+          "created": 1,
+          "started": 0,
+          "closed": 0,
+          "lead_time_p50_min": null,
+          "lead_time_n": 0,
+          "completeness": null,
+          "reopened": null
+        },
+        "2026-11": {
+          "created": 1,
+          "started": 0,
+          "closed": 0,
+          "lead_time_p50_min": null,
+          "lead_time_n": 0,
+          "completeness": null,
+          "reopened": null
+        }
+      }
+    },
+    {
+      "name": "charly/tRAGar",
+      "months": {
+        "2026-04": {
+          "created": 12,
+          "started": 8,
+          "closed": 11,
+          "lead_time_p50_min": 4.3,
+          "lead_time_n": 7,
+          "completeness": 0.6364,
+          "reopened": null
+        },
+        "2026-05": {
+          "created": 112,
+          "started": 0,
+          "closed": 4,
+          "lead_time_p50_min": null,
+          "lead_time_n": 0,
+          "completeness": 0.0,
+          "reopened": null
+        },
+        "2026-09": {
+          "created": 2,
+          "started": 0,
+          "closed": 0,
+          "lead_time_p50_min": null,
+          "lead_time_n": 0,
+          "completeness": null,
+          "reopened": null
+        },
+        "2026-10": {
+          "created": 1,
+          "started": 0,
+          "closed": 0,
+          "lead_time_p50_min": null,
+          "lead_time_n": 0,
+          "completeness": null,
+          "reopened": null
+        },
+        "2026-11": {
+          "created": 1,
+          "started": 0,
+          "closed": 0,
+          "lead_time_p50_min": null,
+          "lead_time_n": 0,
+          "completeness": null,
+          "reopened": null
+        }
+      }
+    },
+    {
+      "name": "charly/tambor",
+      "months": {
+        "2026-10": {
+          "created": 124,
+          "started": 103,
+          "closed": 116,
+          "lead_time_p50_min": 33.8,
+          "lead_time_n": 102,
+          "completeness": 0.8793,
+          "reopened": null
+        },
+        "2026-11": {
+          "created": 56,
+          "started": 16,
+          "closed": 41,
+          "lead_time_p50_min": 60.5,
+          "lead_time_n": 15,
+          "completeness": 0.3659,
+          "reopened": null
+        }
+      }
+    },
+    {
+      "name": "charly/testaruda",
+      "months": {
+        "2026-07": {
+          "created": 197,
+          "started": 147,
+          "closed": 195,
+          "lead_time_p50_min": 4.4,
+          "lead_time_n": 147,
+          "completeness": 0.7538,
+          "reopened": null
+        },
+        "2026-08": {
+          "created": 15,
+          "started": 10,
+          "closed": 15,
+          "lead_time_p50_min": 11.3,
+          "lead_time_n": 10,
+          "completeness": 0.6667,
+          "reopened": null
+        },
+        "2026-09": {
+          "created": 32,
+          "started": 24,
+          "closed": 30,
+          "lead_time_p50_min": 4.5,
+          "lead_time_n": 24,
+          "completeness": 0.8,
+          "reopened": null
+        },
+        "2026-10": {
+          "created": 44,
+          "started": 24,
+          "closed": 30,
+          "lead_time_p50_min": 13.0,
+          "lead_time_n": 24,
+          "completeness": 0.8,
+          "reopened": null
+        },
+        "2026-11": {
+          "created": 13,
+          "started": 2,
+          "closed": 3,
+          "lead_time_p50_min": 31.4,
+          "lead_time_n": 2,
+          "completeness": 0.6667,
+          "reopened": null
+        }
+      }
+    },
+    {
+      "name": "charly/tv",
+      "months": {
+        "2026-09": {
+          "created": 19,
+          "started": 7,
+          "closed": 10,
+          "lead_time_p50_min": 8.7,
+          "lead_time_n": 7,
+          "completeness": 0.7,
+          "reopened": null
+        },
+        "2026-11": {
+          "created": 1,
+          "started": 0,
+          "closed": 0,
+          "lead_time_p50_min": null,
+          "lead_time_n": 0,
+          "completeness": null,
+          "reopened": null
+        }
+      }
+    },
+    {
+      "name": "charly/vampiro",
+      "months": {
+        "2026-07": {
+          "created": 157,
+          "started": 102,
+          "closed": 157,
+          "lead_time_p50_min": 4.7,
+          "lead_time_n": 102,
+          "completeness": 0.6497,
+          "reopened": null
+        },
+        "2026-08": {
+          "created": 12,
+          "started": 3,
+          "closed": 12,
+          "lead_time_p50_min": 12.6,
+          "lead_time_n": 3,
+          "completeness": 0.25,
+          "reopened": null
+        },
+        "2026-09": {
+          "created": 17,
+          "started": 14,
+          "closed": 17,
+          "lead_time_p50_min": 6.8,
+          "lead_time_n": 14,
+          "completeness": 0.8235,
+          "reopened": null
+        },
+        "2026-10": {
+          "created": 3,
+          "started": 2,
+          "closed": 3,
+          "lead_time_p50_min": 16.5,
+          "lead_time_n": 2,
+          "completeness": 0.6667,
+          "reopened": null
+        },
+        "2026-11": {
+          "created": 14,
+          "started": 1,
+          "closed": 4,
+          "lead_time_p50_min": 16.6,
+          "lead_time_n": 1,
+          "completeness": 0.25,
+          "reopened": null
+        }
+      }
+    },
+    {
+      "name": "charly/wai",
+      "months": {
+        "2026-02": {
+          "created": 340,
+          "started": 0,
+          "closed": 340,
+          "lead_time_p50_min": null,
+          "lead_time_n": 0,
+          "completeness": 0.0,
+          "reopened": null
+        },
+        "2026-03": {
+          "created": 105,
+          "started": 0,
+          "closed": 105,
+          "lead_time_p50_min": null,
+          "lead_time_n": 0,
+          "completeness": 0.0,
+          "reopened": null
+        },
+        "2026-04": {
+          "created": 48,
+          "started": 6,
+          "closed": 48,
+          "lead_time_p50_min": 7.5,
+          "lead_time_n": 6,
+          "completeness": 0.125,
+          "reopened": null
+        },
+        "2026-05": {
+          "created": 133,
+          "started": 64,
+          "closed": 94,
+          "lead_time_p50_min": 4.1,
+          "lead_time_n": 64,
+          "completeness": 0.6809,
+          "reopened": null
+        },
+        "2026-07": {
+          "created": 61,
+          "started": 43,
+          "closed": 61,
+          "lead_time_p50_min": 3.5,
+          "lead_time_n": 43,
+          "completeness": 0.7049,
+          "reopened": null
+        },
+        "2026-08": {
+          "created": 18,
+          "started": 3,
+          "closed": 18,
+          "lead_time_p50_min": 2.7,
+          "lead_time_n": 3,
+          "completeness": 0.1667,
+          "reopened": null
+        },
+        "2026-09": {
+          "created": 8,
+          "started": 5,
+          "closed": 5,
+          "lead_time_p50_min": 37.7,
+          "lead_time_n": 5,
+          "completeness": 1.0,
+          "reopened": null
+        },
+        "2026-10": {
+          "created": 64,
+          "started": 37,
+          "closed": 46,
+          "lead_time_p50_min": 14.9,
+          "lead_time_n": 37,
+          "completeness": 0.8043,
+          "reopened": null
+        },
+        "2026-11": {
+          "created": 48,
+          "started": 3,
+          "closed": 10,
+          "lead_time_p50_min": 7.4,
+          "lead_time_n": 3,
+          "completeness": 0.3,
+          "reopened": null
+        }
+      }
+    },
+    {
+      "name": "charly/wanna",
+      "months": {
+        "2026-10": {
+          "created": 91,
+          "started": 80,
+          "closed": 89,
+          "lead_time_p50_min": 21.0,
+          "lead_time_n": 78,
+          "completeness": 0.8764,
+          "reopened": null
+        },
+        "2026-11": {
+          "created": 3,
+          "started": 0,
+          "closed": 0,
+          "lead_time_p50_min": null,
+          "lead_time_n": 0,
+          "completeness": null,
+          "reopened": null
+        }
+      }
+    },
+    {
+      "name": "charly/whisper",
+      "months": {
+        "2026-09": {
+          "created": 15,
+          "started": 12,
+          "closed": 15,
+          "lead_time_p50_min": 7.1,
+          "lead_time_n": 12,
+          "completeness": 0.8,
+          "reopened": null
+        },
+        "2026-10": {
+          "created": 10,
+          "started": 7,
+          "closed": 9,
+          "lead_time_p50_min": 4.5,
+          "lead_time_n": 7,
+          "completeness": 0.7778,
+          "reopened": null
+        },
+        "2026-11": {
+          "created": 4,
+          "started": 0,
+          "closed": 1,
+          "lead_time_p50_min": null,
+          "lead_time_n": 0,
+          "completeness": 0.0,
+          "reopened": null
+        }
+      }
+    },
+    {
+      "name": "charly/wild",
+      "months": {
+        "2026-10": {
+          "created": 82,
+          "started": 61,
+          "closed": 68,
+          "lead_time_p50_min": 22.9,
+          "lead_time_n": 60,
+          "completeness": 0.8824,
+          "reopened": null
+        },
+        "2026-11": {
+          "created": 22,
+          "started": 8,
+          "closed": 8,
+          "lead_time_p50_min": 12.3,
+          "lead_time_n": 8,
+          "completeness": 1.0,
+          "reopened": null
+        }
+      }
+    },
+    {
+      "name": "sk/REPLy.jl",
+      "months": {
+        "2026-04": {
+          "created": 151,
+          "started": 122,
+          "closed": 151,
+          "lead_time_p50_min": 6.2,
+          "lead_time_n": 122,
+          "completeness": 0.8079,
+          "reopened": null
+        },
+        "2026-05": {
+          "created": 5,
+          "started": 4,
+          "closed": 5,
+          "lead_time_p50_min": 2.9,
+          "lead_time_n": 4,
+          "completeness": 0.8,
+          "reopened": null
+        },
+        "2026-06": {
+          "created": 20,
+          "started": 8,
+          "closed": 9,
+          "lead_time_p50_min": 1357.7,
+          "lead_time_n": 7,
+          "completeness": 0.7778,
+          "reopened": null
+        },
+        "2026-07": {
+          "created": 62,
+          "started": 42,
+          "closed": 58,
+          "lead_time_p50_min": 9.8,
+          "lead_time_n": 41,
+          "completeness": 0.7069,
+          "reopened": null
+        },
+        "2026-08": {
+          "created": 22,
+          "started": 4,
+          "closed": 5,
+          "lead_time_p50_min": 17.2,
+          "lead_time_n": 4,
+          "completeness": 0.8,
+          "reopened": null
+        },
+        "2026-09": {
+          "created": 23,
+          "started": 6,
+          "closed": 7,
+          "lead_time_p50_min": 3.6,
+          "lead_time_n": 6,
+          "completeness": 0.8571,
+          "reopened": null
+        },
+        "2026-10": {
+          "created": 22,
+          "started": 18,
+          "closed": 20,
+          "lead_time_p50_min": 17.9,
+          "lead_time_n": 18,
+          "completeness": 0.9,
+          "reopened": null
+        }
+      }
+    },
+    {
+      "name": "sk/Testimonial.jl",
+      "months": {
+        "2026-07": {
+          "created": 254,
+          "started": 167,
+          "closed": 236,
+          "lead_time_p50_min": 4.9,
+          "lead_time_n": 158,
+          "completeness": 0.6695,
+          "reopened": null
+        },
+        "2026-08": {
+          "created": 4,
+          "started": 2,
+          "closed": 2,
+          "lead_time_p50_min": 6.3,
+          "lead_time_n": 2,
+          "completeness": 1.0,
+          "reopened": null
+        },
+        "2026-09": {
+          "created": 5,
+          "started": 1,
+          "closed": 1,
+          "lead_time_p50_min": 43.1,
+          "lead_time_n": 1,
+          "completeness": 1.0,
+          "reopened": null
+        }
+      }
+    },
+    {
+      "name": "sk/Tray.jl",
+      "months": {
+        "2026-07": {
+          "created": 79,
+          "started": 60,
+          "closed": 79,
+          "lead_time_p50_min": 7.6,
+          "lead_time_n": 60,
+          "completeness": 0.7595,
+          "reopened": null
+        },
+        "2026-08": {
+          "created": 5,
+          "started": 0,
+          "closed": 0,
+          "lead_time_p50_min": null,
+          "lead_time_n": 0,
+          "completeness": null,
+          "reopened": null
+        }
+      }
+    },
+    {
+      "name": "sk/XAct.jl",
+      "months": {
+        "2026-01": {
+          "created": 28,
+          "started": 0,
+          "closed": 17,
+          "lead_time_p50_min": null,
+          "lead_time_n": 0,
+          "completeness": 0.0,
+          "reopened": null
+        },
+        "2026-02": {
+          "created": 24,
+          "started": 0,
+          "closed": 24,
+          "lead_time_p50_min": null,
+          "lead_time_n": 0,
+          "completeness": 0.0,
+          "reopened": null
+        },
+        "2026-03": {
+          "created": 381,
+          "started": 9,
+          "closed": 328,
+          "lead_time_p50_min": 6.6,
+          "lead_time_n": 9,
+          "completeness": 0.0274,
+          "reopened": null
+        },
+        "2026-04": {
+          "created": 47,
+          "started": 13,
+          "closed": 28,
+          "lead_time_p50_min": 16.3,
+          "lead_time_n": 12,
+          "completeness": 0.4286,
+          "reopened": null
+        },
+        "2026-05": {
+          "created": 8,
+          "started": 5,
+          "closed": 5,
+          "lead_time_p50_min": 11.4,
+          "lead_time_n": 5,
+          "completeness": 1.0,
+          "reopened": null
+        },
+        "2026-07": {
+          "created": 17,
+          "started": 6,
+          "closed": 12,
+          "lead_time_p50_min": 6.3,
+          "lead_time_n": 6,
+          "completeness": 0.5,
+          "reopened": null
+        },
+        "2026-08": {
+          "created": 3,
+          "started": 0,
+          "closed": 0,
+          "lead_time_p50_min": null,
+          "lead_time_n": 0,
+          "completeness": null,
+          "reopened": null
+        },
+        "2026-10": {
+          "created": 9,
+          "started": 1,
+          "closed": 1,
+          "lead_time_p50_min": 2.6,
+          "lead_time_n": 1,
+          "completeness": 1.0,
+          "reopened": null
+        }
+      }
+    },
+    {
+      "name": "sk/chacana",
+      "months": {
+        "2026-03": {
+          "created": 96,
+          "started": 0,
+          "closed": 75,
+          "lead_time_p50_min": null,
+          "lead_time_n": 0,
+          "completeness": 0.0,
+          "reopened": null
+        },
+        "2026-04": {
+          "created": 13,
+          "started": 9,
+          "closed": 11,
+          "lead_time_p50_min": 1.9,
+          "lead_time_n": 9,
+          "completeness": 0.8182,
+          "reopened": null
+        },
+        "2026-07": {
+          "created": 7,
+          "started": 7,
+          "closed": 7,
+          "lead_time_p50_min": 5.1,
+          "lead_time_n": 7,
+          "completeness": 1.0,
+          "reopened": null
+        },
+        "2026-08": {
+          "created": 3,
+          "started": 0,
+          "closed": 0,
+          "lead_time_p50_min": null,
+          "lead_time_n": 0,
+          "completeness": null,
+          "reopened": null
+        }
+      }
+    },
+    {
+      "name": "sk/clojnder",
+      "months": {
+        "2026-04": {
+          "created": 11,
+          "started": 11,
+          "closed": 10,
+          "lead_time_p50_min": 2.5,
+          "lead_time_n": 10,
+          "completeness": 1.0,
+          "reopened": null
+        },
+        "2026-05": {
+          "created": 5,
+          "started": 5,
+          "closed": 5,
+          "lead_time_p50_min": 2.2,
+          "lead_time_n": 5,
+          "completeness": 1.0,
+          "reopened": null
+        }
+      }
+    },
+    {
+      "name": "sk/clojure-tutor",
+      "months": {
+        "2026-05": {
+          "created": 32,
+          "started": 30,
+          "closed": 32,
+          "lead_time_p50_min": 0.6,
+          "lead_time_n": 30,
+          "completeness": 0.9375,
+          "reopened": null
+        }
+      }
+    },
+    {
+      "name": "sk/cosito",
+      "months": {
+        "2026-03": {
+          "created": 139,
+          "started": 0,
+          "closed": 131,
+          "lead_time_p50_min": null,
+          "lead_time_n": 0,
+          "completeness": 0.0,
+          "reopened": null
+        }
+      }
+    },
+    {
+      "name": "sk/cositos",
+      "months": {
+        "2026-07": {
+          "created": 16,
+          "started": 4,
+          "closed": 16,
+          "lead_time_p50_min": 1.6,
+          "lead_time_n": 4,
+          "completeness": 0.25,
+          "reopened": null
+        },
+        "2026-08": {
+          "created": 3,
+          "started": 3,
+          "closed": 3,
+          "lead_time_p50_min": 4.4,
+          "lead_time_n": 3,
+          "completeness": 1.0,
+          "reopened": null
+        },
+        "2026-09": {
+          "created": 1,
+          "started": 0,
+          "closed": 0,
+          "lead_time_p50_min": null,
+          "lead_time_n": 0,
+          "completeness": null,
+          "reopened": null
+        },
+        "2026-10": {
+          "created": 5,
+          "started": 4,
+          "closed": 4,
+          "lead_time_p50_min": 0.9,
+          "lead_time_n": 4,
+          "completeness": 1.0,
+          "reopened": null
+        }
+      }
+    },
+    {
+      "name": "sk/elegua",
+      "months": {
+        "2026-03": {
+          "created": 94,
+          "started": 0,
+          "closed": 91,
+          "lead_time_p50_min": null,
+          "lead_time_n": 0,
+          "completeness": 0.0,
+          "reopened": null
+        },
+        "2026-04": {
+          "created": 50,
+          "started": 10,
+          "closed": 49,
+          "lead_time_p50_min": 5.4,
+          "lead_time_n": 10,
+          "completeness": 0.2041,
+          "reopened": null
+        },
+        "2026-05": {
+          "created": 52,
+          "started": 26,
+          "closed": 25,
+          "lead_time_p50_min": 3.0,
+          "lead_time_n": 24,
+          "completeness": 0.96,
+          "reopened": null
+        },
+        "2026-07": {
+          "created": 9,
+          "started": 6,
+          "closed": 9,
+          "lead_time_p50_min": 2.5,
+          "lead_time_n": 6,
+          "completeness": 0.6667,
+          "reopened": null
+        },
+        "2026-08": {
+          "created": 3,
+          "started": 0,
+          "closed": 0,
+          "lead_time_p50_min": null,
+          "lead_time_n": 0,
+          "completeness": null,
+          "reopened": null
+        }
+      }
+    },
+    {
+      "name": "sk/poco",
+      "months": {
+        "2026-09": {
+          "created": 2,
+          "started": 0,
+          "closed": 0,
+          "lead_time_p50_min": null,
+          "lead_time_n": 0,
+          "completeness": null,
+          "reopened": null
+        },
+        "2026-10": {
+          "created": 9,
+          "started": 0,
+          "closed": 0,
+          "lead_time_p50_min": null,
+          "lead_time_n": 0,
+          "completeness": null,
+          "reopened": null
+        }
+      }
+    },
+    {
+      "name": "sk/smithy",
+      "months": {}
+    },
+    {
+      "name": "sk/titi",
+      "months": {
+        "2026-04": {
+          "created": 1,
+          "started": 0,
+          "closed": 1,
+          "lead_time_p50_min": null,
+          "lead_time_n": 0,
+          "completeness": 0.0,
+          "reopened": null
+        },
+        "2026-07": {
+          "created": 111,
+          "started": 68,
+          "closed": 111,
+          "lead_time_p50_min": 3.9,
+          "lead_time_n": 68,
+          "completeness": 0.6126,
+          "reopened": null
+        },
+        "2026-08": {
+          "created": 8,
+          "started": 4,
+          "closed": 5,
+          "lead_time_p50_min": 8.0,
+          "lead_time_n": 4,
+          "completeness": 0.8,
+          "reopened": null
+        },
+        "2026-10": {
+          "created": 55,
+          "started": 4,
+          "closed": 3,
+          "lead_time_p50_min": 2.1,
+          "lead_time_n": 3,
+          "completeness": 1.0,
+          "reopened": null
+        }
+      }
+    }
+  ],
+  "excluded": [
+    {
+      "name": "at/aleandro",
+      "issues": 43
+    },
+    {
+      "name": "at/bogart",
+      "issues": 447
+    },
+    {
+      "name": "at/catherine",
+      "issues": 148
+    },
+    {
+      "name": "at/renzi",
+      "issues": 54
+    },
+    {
+      "name": "donp/SundaeMachine",
+      "issues": 13
+    },
+    {
+      "name": "donp/SundaeVolatility",
+      "issues": 1
+    },
+    {
+      "name": "lit/insta",
+      "issues": 31
+    },
+    {
+      "name": "phorma/talleres",
+      "issues": 10
+    },
+    {
+      "name": "tds/hamaca",
+      "issues": 48
+    }
+  ]
+}
