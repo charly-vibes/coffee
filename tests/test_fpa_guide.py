@@ -108,7 +108,7 @@ class TestMapping(unittest.TestCase):
         self.assertEqual(flat, mapped)
 
     def test_superficies_validas(self):
-        valid = {"summary", "cost", "breakdown", "habits", "outlook",
+        valid = {"summary", "cost", "breakdown", "models", "habits", "outlook",
                  "energy", "data", "gantt", "ddl"}
         for _, surfaces in guide.ANALYSIS_SURFACES:
             self.assertTrue(set(surfaces) <= valid)

@@ -194,7 +194,7 @@ class TestViewWiring(unittest.TestCase):
         self.assertIn('id="daily-spend-day"', html)
         # deep-link: ?view=gasto&day=... restaura el día (inválidos ignorados)
         self.assertIn('q.get("day")', html)
-        self.assertIn('"breakdown", "gasto", "habits"', html)
+        self.assertIn('"breakdown", "models", "gasto", "habits"', html)
 
 
 if __name__ == "__main__":

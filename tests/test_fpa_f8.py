@@ -88,7 +88,9 @@ class TestTabEnergia(unittest.TestCase):
     def test_css_toggle_toda_vista(self):
         """coffe-dqz: la sección nueva entra al toggle CSS (oculta por
         defecto, visible solo con body[data-view=energy])."""
-        self.assertIn('#outlook, #energy, #data { display: none; }', self.html)
+        self.assertIn(
+            '#summary, #cost, #breakdown, #models, #gasto, #habits, #outlook, #energy,\n'
+            '#data { display: none; }', self.html)
         self.assertRegex(
             self.html,
             r'body\[data-view="energy"\] #energy,\s*'

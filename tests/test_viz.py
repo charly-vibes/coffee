@@ -451,7 +451,9 @@ class TestFpaDisclosure(unittest.TestCase):
     PAGE = REPO / "data" / "fpa-dashboard.html"
 
     # Sección primaria por vista → abierta por defecto
-    OPEN = {"budget", "portfolio", "heatmap", "forecast", "data-method"}
+    # (coffe-dnx.6: la vista Modelos abre su scorecard)
+    OPEN = {"budget", "portfolio", "heatmap", "forecast", "data-method",
+            "models-scorecard"}
     # Resto de secciones disclosure → colapsadas por defecto
     CLOSED = {"bridge", "alerts", "plan-economy", "reconciliation",
               "time", "tool", "pareto", "weekly", "skills-commands",

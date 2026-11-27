@@ -3284,6 +3284,10 @@ header.site .meta, .small { color: var(--muted); font-size: .82rem; }
   border:1px solid var(--line); }
 .banner-partial { background: var(--card); border: 2px outset #fff;
   padding: .5rem .8rem; font-size: .85rem; }
+/* coffe-dnx.6: banner del veredicto de la regla de decisión */
+.banner-verdict { background: var(--card); border: 2px solid var(--line);
+  border-left: 6px solid var(--accent, #8a6d3b); padding: .5rem .8rem;
+  font-size: .85rem; margin: .6rem 0; }
 #summary { margin: 1rem 0; }
 #summary h2 { margin: 0 0 .2rem; }
 .headline h3 { margin: 0 0 .3rem; font-size: .8rem; font-weight: 600;
@@ -3386,10 +3390,13 @@ button, .cta, .ptoggle, .show-all, .export-csv, .dl-svg {
 /* coffe-dqz: una vista a la vez a TODO ancho (revierte deliberadamente
    la parte desktop de FPA-152: "en desktop las vistas van en secuencia");
    el ancla href de cada tab queda como fallback degradado sin JS. */
-#summary, #cost, #breakdown, #habits, #outlook, #energy, #data { display: none; }
+#summary, #cost, #breakdown, #models, #gasto, #habits, #outlook, #energy,
+#data { display: none; }
 body[data-view="summary"] #summary,
 body[data-view="cost"] #cost,
 body[data-view="breakdown"] #breakdown,
+body[data-view="models"] #models,
+body[data-view="gasto"] #gasto,
 body[data-view="habits"] #habits,
 body[data-view="outlook"] #outlook,
 body[data-view="energy"] #energy,
@@ -4180,6 +4187,183 @@ def usage_html(usage):
             + concurrency_html(usage) + lifecycle_html(usage))
 
 
+# ======================================================================
+# coffe-dnx.6: vista Modelos — scorecard de cohorte (coffe-dnx.8 emite
+# model_scorecard[] + metadata.scorecard.rule_verdict). Presentación
+# solamente: NINGUNA métrica se recalcula aquí (FPA-145).
+# ======================================================================
+
+_WINDOWS = ("todo", "ytd", "mes")
+_VERDICT_LABEL = {"mantener": "✅ mantener",
+                  "cambiar": "🔁 cambiar",
+                  "datos_insuficientes": "⚠ datos_insuficientes"}
+
+
+def _usd4(x):
+    """USD con 4 decimales: $ por tarea/tokens son cifras chicas."""
+    if x is None:
+        return "n/a"
+    return "${:,.4f}".format(x)
+
+
+def _cell(value, prov, fmt, reason=None):
+    """Celda con provenance por celda (FPA-003); sin dato ⇒ n/a con razón
+    (FPA-008), nunca 0."""
+    if value is None:
+        return _na_cell(reason or "sin dato en el scorecard")
+    return (fig(fmt(value), prov) + prov_tag(prov)
+            if prov else fig(fmt(value), "estimated"))
+
+
+def _latency_cell(lat):
+    """p50/p90 con cobertura al lado cuando coverage_pct < 50
+    (coffe-dnx.6); None ⇒ n/a con razón."""
+    if not isinstance(lat, dict):
+        return _na_cell("latencia sin datos en la ventana")
+    prov = "reported"
+    if lat.get("p50_ms") is None and lat.get("p90_ms") is None:
+        return _na_cell("latencia sin datos en la ventana")
+
+    def _s(ms):
+        return f"{ms / 1000:.1f}s" if ms is not None else "n/a"
+
+    txt = f"p50 {_s(lat.get('p50_ms'))} · p90 {_s(lat.get('p90_ms'))}"
+    cov = lat.get("coverage_pct")
+    if cov is not None and cov < 50:
+        txt += f" — cobertura {cov}%"
+    elif cov is None:
+        txt += " — " + _na_cell("cobertura no calculada")
+    return fig(txt, prov) + prov_tag(prov)
+
+
+def _split_cell(sub):
+    """Split suscripción vs API (coffe-dnx.8), con provenance."""
+    if not isinstance(sub, dict):
+        return _na_cell("split suscripción/API sin datos")
+    prov = sub.get("provenance", "estimated")
+    txt = (f"sub {_usd4(sub.get('subscription'))} · "
+           f"api {_usd4(sub.get('api'))}")
+    return fig(txt, prov) + prov_tag(prov)
+
+
+def _nulls_by_field(nulls):
+    """nulls[] del scorecard → {campo: razón} (formato flexible)."""
+    out = {}
+    for n in nulls or []:
+        if isinstance(n, dict):
+            key = n.get("field") or n.get("key") or n.get("name")
+            if key:
+                out[key] = n.get("reason") or "sin dato"
+    return out
+
+
+def _scorecard_row(entry, window, verdict_by_model, reference):
+    model = entry.get("model", "?")
+    data = entry.get("data")
+    cells = [f"<td>{esc_html(model)}{esc_html(' (referencia)' if model == reference else '')}</td>"]
+    if data is None:
+        reason = entry.get("reason") or entry.get("nulls") or "sin datos"
+        cells.append(f'<td colspan="11" class="na">sin datos — '
+                     f'{esc_html(reason)}</td>')
+        return "<tr>" + "".join(cells) + "</tr>"
+    prov = data.get("provenance") or {}
+    nulls = _nulls_by_field(data.get("nulls"))
+
+    def c(key, fmt):
+        return _cell(data.get(key), prov.get(key), fmt,
+                     nulls.get(key, f"{key} sin dato en la ventana"))
+
+    cells.append(c("cost_weighted_per_1m", _usd4))
+    cells.append(c("cost_per_task", _usd4))
+    cells.append(c("cost_per_accepted_task", _usd4))
+    # prompts/tarea: el scorecard .8 no lo emite (pendiente coffe-dnx.3)
+    cells.append(_na_cell("no emitido por el scorecard (coffe-dnx.3 "
+                          "pendiente)"))
+    cells.append(c("aborts_per_100_turns",
+                   lambda x: f"{x:.2f}"))
+    cells.append(c("tool_errors_per_100_turns",
+                   lambda x: f"{x:.2f}"))
+    cells.append(_latency_cell(data.get("latency")))
+    cs = data.get("cache_share")
+    cells.append(_cell(cs, prov.get("cache_share"),
+                       lambda x: f"{x * 100:.1f}%" if cs is not None else "n/a",
+                       nulls.get("cache_share")))
+    cells.append(c("model_switches", fmt_int))
+    cells.append(_split_cell(data.get("subscription_vs_api")))
+    v = verdict_by_model.get(model) or {}
+    ratio = v.get("ratio_vs_reference")
+    vtxt = _VERDICT_LABEL.get(v.get("verdict") or "", "n/a")
+    if ratio is not None:
+        vtxt += f" (ratio {ratio:.2f})"
+    cells.append(f"<td>{esc_html(vtxt)}</td>")
+    return "<tr>" + "".join(cells) + "</tr>"
+
+
+def models_html(report, cfg):
+    """coffe-dnx.6: contenido de la vista Modelos — una tabla por ventana
+    (todo/ytd/mes) con las filas de la cohorte, banner del veredicto de la
+    regla de decisión y provenance por celda. Datos: model_scorecard[] del
+    reporte (coffe-dnx.8); el CSV exportado conserva la provenance porque
+    cada celda lleva su tag visible."""
+    sc_meta = (report.get("metadata") or {}).get("scorecard") or {}
+    entries = report.get("model_scorecard") or []
+    cohort = sc_meta.get("models") or []
+    reference = sc_meta.get("reference")
+    verdict_by_model = sc_meta.get("rule_verdict_per_model") or {}
+
+    verdict = sc_meta.get("rule_verdict")
+    banner = ""
+    if verdict:
+        vtxt = _VERDICT_LABEL.get(verdict, esc_html(verdict))
+        reason = sc_meta.get("rule_verdict_reason") or ""
+        rule = sc_meta.get("rule") or {}
+        banner = (f'<p class="banner-verdict">Regla de decisión '
+                  f'(coffe-dnx.8): <strong>{vtxt}</strong> — '
+                  f'{esc_html(reason)} '
+                  f'(métrica {esc_html(rule.get("metric") or "n/a")}, '
+                  f'ventana {esc_html(rule.get("windows") or "todo")}'
+                  f'{"; umbrales provisionales" if rule.get("provisional") else ""})'
+                  f'</p>')
+
+    tables = []
+    for window in _WINDOWS:
+        window_entries = [e for e in entries if e.get("window") == window]
+        order = cohort or [e.get("model") for e in window_entries]
+        ordered = sorted(
+            window_entries,
+            key=lambda e: order.index(e.get("model"))
+            if e.get("model") in order else len(order))
+        rows = "".join(_scorecard_row(e, window, verdict_by_model, reference)
+                       for e in ordered)
+        tables.append(
+            f'<table class="small"><caption>Scorecard de cohorte — ventana '
+            f'{window} (coffe-dnx.8)</caption>'
+            '<thead><tr><th>Modelo</th><th>$ ponderado por 1M tokens</th>'
+            '<th>$ / tarea</th><th>$ / tarea aceptada</th>'
+            '<th>Prompts/tarea</th><th>Abortos/100 turnos</th>'
+            '<th>Errores tool/100 turnos</th><th>Latencia p50/p90</th>'
+            '<th>Cache share</th><th>Escalaciones (model switches)</th>'
+            '<th>Suscripción vs API</th><th>Veredicto regla</th></tr>'
+            f'</thead><tbody>{rows}</tbody></table>')
+
+    if not tables or not entries:
+        tables = [f'<p class="small">{_na_cell(
+            "model_scorecard[] ausente en el reporte (coffe-dnx.8)")}</p>']
+
+    note = (f'<p class="small">$ ponderado usa el cache_factor vigente del '
+            f'pricing ({esc_html(sc_meta.get("cache_factor_note") or "")}) '
+            f'— la cifra por 1M tokens nunca es el coste sobre tokens '
+            f'totales sin ponderar por caché. '
+            f'Cohorte: {esc_html(sc_meta.get("cohort_name") or "n/a")} '
+            f'(fuente {esc_html(sc_meta.get("cohort_source") or "n/a")}); '
+            f'referencia: {esc_html(reference or "n/a")}.</p>')
+    return (f'<details class="tree" data-tree="models-scorecard" '
+            f'id="models-scorecard" open><summary><h2>Modelos: coste y '
+            f'resultado por cohorte</h2></summary>{banner}{"".join(tables)}'
+            f'{note}</details>')
+
+
+
 def render_html(report, cfg, generated=None, today=None):
     """Generar el HTML completo (determinista salvo `generated`, FPA-104)."""
     generated = generated or datetime.now().strftime("%Y-%m-%d %H:%M")
@@ -4255,6 +4439,9 @@ def render_html(report, cfg, generated=None, today=None):
     budget_bridge_html = (budget_html(model["budget"])
                           + bridge_html(model["bridge"]))
     forecast_only_html = forecast_html(model["forecast"])
+    # coffe-dnx.6: vista Modelos — scorecard de cohorte (presentación del
+    # bloque model_scorecard[] de coffe-dnx.8; nada se recalcula)
+    models_only_html = models_html(report, cfg)
     # coffe-5ng (F8): vista Energía
     energy_only_html = energy_html(model["energy"])
     # add-session-spend-report: vista Gasto diario
@@ -4263,10 +4450,11 @@ def render_html(report, cfg, generated=None, today=None):
     ctas_block = ctas_html(cfg)
 
     model_json = json.dumps(model, ensure_ascii=False, sort_keys=True)
-    tabs = ("summary", "cost", "breakdown", "gasto", "habits", "outlook",
-            "energy", "data")
+    tabs = ("summary", "cost", "breakdown", "models", "gasto", "habits",
+            "outlook", "energy", "data")
     tab_labels = {"summary": "Resumen", "cost": "Costo",
-                  "breakdown": "Desglose", "gasto": "Gasto diario",
+                  "breakdown": "Desglose", "models": "Modelos",
+                  "gasto": "Gasto diario",
                   "habits": "Hábitos", "outlook": "Pronóstico",
                   "energy": "Energía", "data": "Datos y método"}
     tab_html = "".join(
@@ -4296,11 +4484,12 @@ def render_html(report, cfg, generated=None, today=None):
         figures = guide.derive_figures(report, cfg)
         marginalia = {
             s: guide.marginalia_html(guide_dict, cfg, s, figures=figures)
-            for s in ("summary", "cost", "breakdown", "gasto", "habits",
-                      "outlook", "energy", "data")}
+            for s in ("summary", "cost", "breakdown", "models", "gasto",
+                      "habits", "outlook", "energy", "data")}
     else:
-        marginalia = {s: "" for s in ("summary", "cost", "breakdown", "gasto",
-                                      "habits", "outlook", "energy", "data")}
+        marginalia = {s: "" for s in ("summary", "cost", "breakdown", "models",
+                                      "gasto", "habits", "outlook", "energy",
+                                      "data")}
 
     body_inner = f"""<main id="main">
   {banner}
@@ -4330,6 +4519,11 @@ def render_html(report, cfg, generated=None, today=None):
     {marginalia["breakdown"]}
     <div id="tree-box">{trees_html}</div>
     {pareto_only_html}
+  </section>
+  <section id="models" class="fpa-view" aria-label="Modelos">
+    <h2>¿Qué modelo me conviene?</h2>
+    {marginalia["models"]}
+    {models_only_html}
   </section>
   <section id="habits" class="fpa-view" aria-label="Hábitos">
     <h2>¿Cómo trabajo?</h2>
@@ -4602,8 +4796,8 @@ def render_html(report, cfg, generated=None, today=None):
   }});
 
   // ============ F6: vistas, tabs, top-5, export, share, readout ============
-  var VIEWS = ["summary", "cost", "breakdown", "gasto", "habits", "outlook",
-               "energy", "data"];
+  var VIEWS = ["summary", "cost", "breakdown", "models", "gasto", "habits",
+               "outlook", "energy", "data"];
   function setView(key) {{
     if (VIEWS.indexOf(key) < 0) return;
     document.body.setAttribute("data-view", key);

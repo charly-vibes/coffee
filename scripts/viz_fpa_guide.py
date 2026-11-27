@@ -442,14 +442,16 @@ def marginalia_html(guide_dict, cfg, surface, figures=None):
 
 
 # Mapeo declarado análisis→superficie (coffe-gen.4 lo consume para la
-# marginalia). Claves canónicas del texto; superficies: las 6 vistas del
-# dashboard (coffe-8kx suma 'energy') + 'data' (Datos y método) + 'gantt'.
+# marginalia). Claves canónicas del texto; superficies: las vistas del
+# dashboard (coffe-8kx suma 'energy', coffe-dnx.6 suma 'models') + 'data'
+# (Datos y método) + 'gantt'.
 ANALYSIS_SURFACES = [
     ("1", ["summary"]),      # efectivo vs real vs apalancamiento (headline)
     ("2", ["summary"]),      # claim coste/1k vs target
     ("3", ["summary"]),      # headline costo por sesión
     ("4", ["breakdown", "outlook"]),  # Pareto/portfolio + alerta top-3
-    ("5", ["cost"]),         # mezcla mensual de modelos + premium share
+    ("5", ["cost", "models"]),  # mezcla mensual de modelos + premium share
+                                # (coffe-dnx.6: también en la vista Modelos)
     ("6", ["cost"]),         # KPIs cache-hit rate y out/in
     ("7", ["habits"]),       # share de sesiones con Agent
     ("8", ["habits", "gantt"]),  # multitasking (3 medidas) + concurrencia

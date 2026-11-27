@@ -49,7 +49,7 @@ los cuida `tests/test_site_nav.py`.
 | Archivo | Tamaño | Contenido |
 |---------|--------|-----------|
 | `data/usage_report_v3.json` | 1.0M | **Reporte principal.** Interacciones del scope in-scope (charly/sk/ak, coffe-vp8). Incluye hourly, daily, monthly, projects, sessions, skills, commands, multitasking, project_daily (matriz para el Gantt), energía estimada por modelo (coffe-7mj, *assumed*) y context_metrics por sesión de Pi (epic add-context-dashboard: pico por segmento de compactación, atribución de chars por fuente, models_turns, coste por sesión con null con razón; estimación chars/chars_per_token — *assumed*, default 4, subestima ~25% el contexto real: español/código ~3 chars/token; ver ratio de validación en context_metrics.meta). Última regeneración: ver CHECK-DOCS. |
-| `data/fpa-dashboard.html` | 1.7M | **Dashboard principal — Uso y costos de IA.** Resumen ejecutivo, KPIs, presupuestos, bridge precio-volumen-mix (con selector de mes), forecast, alertas, economía de suscripción, patrones de uso. 6 vistas (una a la vez a todo ancho, tabs + deep-link por hash) + selector de periodo; export CSV/SVG; share-URL; disclosure por defecto solo en la sección primaria de cada vista; marginalia con guía a 4 niveles. En <https://charly-vibes.github.io/coffee/data/fpa-dashboard.html>. |
+| `data/fpa-dashboard.html` | 1.7M | **Dashboard principal — Uso y costos de IA.** Resumen ejecutivo, KPIs, presupuestos, bridge precio-volumen-mix (con selector de mes), forecast, alertas, economía de suscripción, patrones de uso. 7 vistas (una a la vez a todo ancho, tabs + deep-link por hash; Resumen, Costo, Desglose, Modelos — scorecard de cohorte con veredicto de la regla de decisión, coffe-dnx.6/8) + selector de periodo; export CSV/SVG; share-URL; disclosure por defecto solo en la sección primaria de cada vista; marginalia con guía a 4 niveles. En <https://charly-vibes.github.io/coffee/data/fpa-dashboard.html>. |
 | `data/context-dashboard.html` | ~7K | **Dashboard de contexto** (Pi-only): distribución del pico por sesión, composición por fuente, tiempo mes×modelo, coste, ley de crecimiento y patologías. En <https://charly-vibes.github.io/coffee/data/context-dashboard.html>. |
 | `data/fpa-guide.html` | — | **Guía de análisis.** Los 22 análisis del dashboard explicados a 4 niveles (ELI5 → experto), en español, con grounding verificado por `--check-docs`. En <https://charly-vibes.github.io/coffee/data/fpa-guide.html>. |
 | `data/gantt-multitasking.html` | 41K | **Visualización Gantt.** Actividad por proyecto/día, fila de concurrencia diaria, toggle interacciones/presencia, tooltips. Abrir en navegador (o en <https://charly-vibes.github.io/coffee/data/gantt-multitasking.html>). |
@@ -134,13 +134,13 @@ El deploy es vía **GitHub Actions** (no hay branch `gh-pages`): `.github/workfl
 ## Estado de los datos
 
 <!-- CHECK-DOCS:BEGIN -->
-- Interacciones: 312,998
+- Interacciones: 313,685
 - Proyectos: 123
-- Costo efectivo: $3,911.51
-- Costo real: $1,963.39
+- Costo efectivo: $3,913.76
+- Costo real: $1,965.64
 - Cash real (ledger): $1,516.72
-- Sesiones: 3,209
-- Periodo: 2025-12-23 → 2026-11-25
+- Sesiones: 3,217
+- Periodo: 2025-12-23 → 2026-11-26
 <!-- CHECK-DOCS:END -->
 
 Nota: `Costo real` es la suma mensual del tracker (fees implícitos del
@@ -401,7 +401,7 @@ Con los datos actuales podemos generar:
 5. [ ] Interpretar el Gantt: los gaps sin actividad (vacaciones?) y los bloques densos de julio-agosto (¿migración masiva? ¿agentes paralelos?)
 
 <!-- CTX-DOCS:BEGIN -->
-- Sesiones con contexto: 2623
+- Sesiones con contexto: 2629
 - Excluidas (patológicas): 34
 - Stubs: 0
 - Pico p50 (tok): 72172
