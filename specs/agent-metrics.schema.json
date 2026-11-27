@@ -121,6 +121,13 @@
                   "null"
                 ]
               },
+              "cost_parity": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "coffe-dnx.3: alcance declarado del gate de paridad de coste (session_spend también incluye amp, omp, codex y otras fuentes que agent_metrics no procesa)."
+              },
               "note": {
                 "type": [
                   "string",
@@ -238,7 +245,7 @@
     },
     "tasks": {
       "type": "object",
-      "description": "Series paralelas: day=índice en days, s=segundos ocupados, sp=segundos de reloj de la tarea, src/model=índices, f=bitmask (1 aborted, 2 error, 4 tool_error, 8 retry).",
+      "description": "Series paralelas: day=índice en days, s=segundos ocupados, sp=segundos de reloj de la tarea, src/model=índices, f=bitmask (1 aborted, 2 error, 4 tool_error, 8 retry). coffe-dnx.3: sid=índice en sessions[] (null si la tarea no conoce su sesión), cost=coste de los turnos assistant, tokens={in,out,cache_read,cache_write} acumulados. Las claves nuevas no son required: datasets anteriores al cambio o con regen pendiente no las traen.",
       "required": [
         "day",
         "s",
@@ -289,6 +296,86 @@
           "items": {
             "type": "integer",
             "minimum": 0
+          }
+        },
+        "sid": {
+          "type": "array",
+          "description": "Índice en sessions[]; null si la tarea no conoce su sesión.",
+          "items": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          }
+        },
+        "cost": {
+          "type": "array",
+          "description": "Coste (usage.cost.total) de los turnos assistant de la tarea.",
+          "items": {
+            "type": "number",
+            "minimum": 0
+          }
+        },
+        "tokens": {
+          "type": "array",
+          "description": "Tokens acumulados de los turnos assistant de la tarea.",
+          "items": {
+            "type": "object",
+            "required": [
+              "in",
+              "out",
+              "cache_read",
+              "cache_write"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "in": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "out": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "cache_read": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "cache_write": {
+                "type": "integer",
+                "minimum": 0
+              }
+            }
+          }
+        }
+      }
+    },
+    "sessions": {
+      "type": "array",
+      "description": "coffe-dnx.3: sesiones con al menos una tarea, en orden de primera aparición; tasks.sid indexa acá. Una sesión sin tareas (prompt abortado antes de la respuesta) no aparece. Opcional: datasets anteriores al cambio no la traen.",
+      "items": {
+        "type": "object",
+        "required": [
+          "source",
+          "project",
+          "session_id"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "source": {
+            "type": "string"
+          },
+          "project": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "session_id": {
+            "type": [
+              "string",
+              "null"
+            ]
           }
         }
       }

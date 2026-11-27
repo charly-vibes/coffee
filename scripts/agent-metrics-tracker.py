@@ -140,10 +140,56 @@ def _iter_jsonl(path):
 # Turnos por fuente
 # ----------------------------------------------------------------------
 
-def turns_from_pi(records):
+def _usage_tokens(u):
+    """usage de un turno assistant → tokens {in, out, cache_read,
+    cache_write}. Acepta el formato pi ({input, output, cacheRead,
+    cacheWrite}) y el claude ({input_tokens, output_tokens, ...})."""
+    if not isinstance(u, dict):
+        return {"in": 0, "out": 0, "cache_read": 0, "cache_write": 0}
+    return {"in": u.get("input_tokens") or u.get("input") or 0,
+            "out": u.get("output_tokens") or u.get("output") or 0,
+            "cache_read": u.get("cache_read_input_tokens") or u.get("cacheRead") or 0,
+            "cache_write": u.get("cache_creation_input_tokens") or u.get("cacheWrite") or 0}
+
+
+def _cost_from(cost):
+    """usage.cost puede venir como dict {total: n} (pi) o número; nada
+    medible → 0.0."""
+    if isinstance(cost, dict):
+        cost = cost.get("total")
+    return float(cost) if isinstance(cost, (int, float)) else 0.0
+
+
+def _project_from_cwd(cwd):
+    """Proyecto de la sesión resuelto desde su cwd: última componente del
+    path (cwd ausente → None, la sesión queda sin proyecto)."""
+    if not isinstance(cwd, str) or not cwd:
+        return None
+    return Path(cwd).name or cwd
+
+
+def _session_from_records(records, source):
+    """Encabezado de sesión → {source, project, session_id}. pi lo declara
+    en el registro `type: session` (con cwd); claude-cli trae sessionId/cwd
+    en cada línea. Sin encabezado reconocible → sesión anónima."""
+    for r in records[:10]:
+        if source == "pi":
+            if r.get("type") != "session":
+                continue
+            return {"source": source, "project": _project_from_cwd(r.get("cwd")),
+                    "session_id": r.get("id")}
+        if r.get("sessionId"):
+            return {"source": source, "project": _project_from_cwd(r.get("cwd")),
+                    "session_id": r.get("sessionId")}
+    return {"source": source, "project": None, "session_id": None}
+
+
+def turns_from_pi(records, session=None):
     """Registros de una sesión Pi → turnos {ts, role, model, stop, is_error,
-    dur_s}. Roles: user_prompt / assistant / tool. Los preámbulos inyectados
-    del harness viajan como `custom`, no como user: no abren tarea."""
+    dur_s, usage, cost, ses}. Roles: user_prompt / assistant / tool. Los
+    preámbulos inyectados del harness viajan como `custom`, no como user: no
+    abren tarea. `session` = {source, project, session_id} de la sesión
+    (coffe-dnx.3): viaja en cada turno para que la tarea pueda llevar sid."""
     model = None
     turns = []
     for r in records:
@@ -159,18 +205,24 @@ def turns_from_pi(records):
         if ts is None:
             continue
         if role == "user":
-            turns.append({"ts": ts, "role": "user_prompt", "model": model})
+            turns.append({"ts": ts, "role": "user_prompt", "model": model,
+                          "ses": session})
         elif role == "assistant":
             dur_ms = msg.get("durationMs")
+            usage = msg.get("usage")
             turns.append({
                 "ts": ts, "role": "assistant",
                 "model": msg.get("model") or model,
                 "stop": msg.get("stopReason"),
                 "dur_s": (float(dur_ms) / 1000.0) if isinstance(dur_ms, (int, float)) else None,
+                "usage": _usage_tokens(usage),
+                "cost": _cost_from((usage or {}).get("cost")),
+                "ses": session,
             })
         elif role == "toolResult":
             turns.append({"ts": ts, "role": "tool",
-                          "is_error": bool(msg.get("isError"))})
+                          "is_error": bool(msg.get("isError")),
+                          "ses": session})
     return turns
 
 
@@ -194,10 +246,13 @@ def _is_preamble(content):
     return any(head.startswith(marker) for marker in PREAMBLE_MARKERS)
 
 
-def turns_from_claude(records, stats=None):
+def turns_from_claude(records, stats=None, session=None):
     """Registros de una sesión Claude Code → turnos. Solo el hilo principal
     (`isSidechain` false): los subagentes duplicarían los conteos. Claude no
-    escribe stopReason `aborted`, así que `stop` queda None (cobertura)."""
+    escribe stopReason `aborted`, así que `stop` queda None (cobertura).
+    `session` = {source, project, session_id} de la sesión (coffe-dnx.3).
+    El coste por turno: claude-cli no escribe usage.cost; se toma costUSD
+    cuando el log lo trae (sino 0.0 — cobertura declarada)."""
     turns = []
     for r in records:
         if r.get("isSidechain"):
@@ -214,17 +269,26 @@ def turns_from_claude(records, stats=None):
             if is_tool_result:
                 err = bool(r.get("toolUseResult", {}).get("is_error")) if isinstance(
                     r.get("toolUseResult"), dict) else False
-                turns.append({"ts": ts, "role": "tool", "is_error": err})
+                turns.append({"ts": ts, "role": "tool", "is_error": err,
+                              "ses": session})
             elif isinstance(content, str) or isinstance(content, list):
                 if _is_preamble(content):
                     if stats is not None:
                         stats["preambles_skipped"] = stats.get("preambles_skipped", 0) + 1
                 else:
-                    turns.append({"ts": ts, "role": "user_prompt"})
+                    turns.append({"ts": ts, "role": "user_prompt",
+                                  "ses": session})
         elif typ == "assistant":
+            usage = msg.get("usage")
+            cost = _cost_from((usage or {}).get("cost"))
+            if not cost and isinstance(r.get("costUSD"), (int, float)):
+                cost = float(r["costUSD"])
             turns.append({"ts": ts, "role": "assistant",
                           "model": msg.get("model"),
-                          "stop": msg.get("stop_reason")})
+                          "stop": msg.get("stop_reason"),
+                          "usage": _usage_tokens(usage),
+                          "cost": cost,
+                          "ses": session})
     return turns
 
 
@@ -250,7 +314,7 @@ def load_pi_turns(sessions_dir=None):
             by_id[key] = (path, len(records), records)
     turns = []
     for path, _n, records in by_id.values():
-        turns.extend(turns_from_pi(records))
+        turns.extend(turns_from_pi(records, session=_session_from_records(records, "pi")))
     return turns, {"sessions": len(by_id), "files": len(list(base.glob("*/*.jsonl")))}
 
 
@@ -268,7 +332,8 @@ def load_claude_turns(claude_dir=None):
         if not records:
             continue
         sessions += 1
-        turns.extend(turns_from_claude(records, stats))
+        turns.extend(turns_from_claude(records, stats,
+                                       session=_session_from_records(records, "claude-cli")))
     return turns, {"sessions": sessions, **stats}
 
 
@@ -289,6 +354,12 @@ def build_tasks(turns, gap_cap_s=1800, retry_window_s=300, max_task_s=14400,
     ≤ retry_window_s después del ÚLTIMO turno de una tarea anterior que
     terminó en fallo y tuvo actividad). `stats` acumula `orphan_turns`
     (turnos previos al primer prompt de una sesión retomada).
+
+    coffe-dnx.3: una tarea no cruza sesiones — si el siguiente turno (prompt
+    o respuesta) viene de otra sesión (`t["ses"]`), la tarea abierta se
+    cierra y el prompt de la nueva sesión abre otra. Cada tarea suma `cost`
+    y `tokens` de sus turnos assistant (`t["cost"]`, `t["usage"]`) y lleva
+    `_ses` = sesión de origen, que series/build_report convierten en sid.
     """
     ordered = sorted(turns, key=lambda t: t["ts"])
     tasks = []
@@ -315,6 +386,15 @@ def build_tasks(turns, gap_cap_s=1800, retry_window_s=300, max_task_s=14400,
         gap = (t["ts"] - prev_ts).total_seconds() if prev_ts else None
         if gap is not None and gap < 0:
             gap = 0
+        if cur is not None and t.get("ses") is not None \
+                and cur["_ses"] is not None and t["ses"] is not cur["_ses"]:
+            # coffe-dnx.3: la tarea no cruza sesiones — el primer turno de
+            # otra sesión la cierra (el gap se considera inactividad, no se
+            # suma a la tarea cerrada)
+            close(cur, t["ts"])
+            cur = None
+            prev_ts = t["ts"]
+            continue
         if t["role"] == "user_prompt":
             if cur is not None:
                 # la ventana se mide desde el último turno de la tarea
@@ -328,7 +408,11 @@ def build_tasks(turns, gap_cap_s=1800, retry_window_s=300, max_task_s=14400,
             close(cur, t["ts"])
             cur = {"_start": t["ts"], "busy_s": 0.0, "turns": 0,
                    "aborted": 0, "errors": 0, "tool_errors": 0, "retry": 0,
-                   "model": None, "clipped": False}
+                   "model": None, "clipped": False,
+                   "cost": 0.0,
+                   "tokens": {"in": 0, "out": 0, "cache_read": 0,
+                              "cache_write": 0},
+                   "_ses": t.get("ses")}
             if (prev_ended_error and prev_end_ts is not None
                     and (t["ts"] - prev_end_ts).total_seconds() <= retry_window_s):
                 cur["retry"] = 1
@@ -349,6 +433,11 @@ def build_tasks(turns, gap_cap_s=1800, retry_window_s=300, max_task_s=14400,
                 cur["errors"] = 1
             if t.get("dur_s") is not None:
                 busy = min(float(t["dur_s"]), gap_cap_s)
+            # coffe-dnx.3: coste y tokens de los turnos assistant de la tarea
+            cur["cost"] += float(t.get("cost") or 0.0)
+            usage = t.get("usage") or {}
+            for k in ("in", "out", "cache_read", "cache_write"):
+                cur["tokens"][k] += usage.get(k) or 0
         elif t["role"] == "tool":
             if t.get("is_error"):
                 cur["tool_errors"] += 1
@@ -407,11 +496,15 @@ def series(tasks, days, sources, models, tz=None):
     `day` = índice en `days` (día local), `s` = segundos ocupados (int),
     `sp` = segundos de reloj de la tarea (incluye esperas),
     `src`/`model` = índice, `f` = bitmask de flags.
+    coffe-dnx.3: `sid` = índice en `sessions[]` (null si la tarea no conoce
+    su sesión), `cost` = coste de los turnos assistant de la tarea, `tokens`
+    = {in, out, cache_read, cache_write} acumulados.
     """
     day_ix = {d: i for i, d in enumerate(days)}
     src_ix = {s: i for i, s in enumerate(sources)}
     model_ix = {m: i for i, m in enumerate(models)}
-    out = {"day": [], "s": [], "sp": [], "src": [], "model": [], "f": []}
+    out = {"day": [], "s": [], "sp": [], "src": [], "model": [], "f": [],
+           "sid": [], "cost": [], "tokens": []}
     for t in tasks:
         day = task_day(t, tz)
         if day not in day_ix:
@@ -422,7 +515,35 @@ def series(tasks, days, sources, models, tz=None):
         out["src"].append(src_ix.get(t.get("source"), 0))
         out["model"].append(model_ix.get(t.get("model") or "?", 0))
         out["f"].append(task_flags(t))
+        out["sid"].append(t.get("_sid"))
+        out["cost"].append(round(float(t.get("cost") or 0.0), 8))
+        tok = t.get("tokens") or {}
+        out["tokens"].append({k: int(tok.get(k) or 0)
+                              for k in ("in", "out", "cache_read",
+                                        "cache_write")})
     return out
+
+
+def _sessions_from_tasks(tasks):
+    """coffe-dnx.3: sessions[] = sesiones con al menos una tarea, en orden de
+    primera aparición; cada tarea lleva `_sid` = índice en esa lista. Una
+    sesión sin tareas (p. ej. un prompt abortado antes de la respuesta) no
+    aparece. `None` como session_id se desambigua por identidad del dict."""
+    seen = {}
+    sessions = []
+    for t in tasks:
+        ses = t.get("_ses")
+        if not ses:
+            continue
+        key = ("__id__", id(ses)) if ses.get("session_id") is None else (
+            ses.get("source"), ses.get("session_id"))
+        if key not in seen:
+            seen[key] = len(sessions)
+            sessions.append({"source": ses.get("source"),
+                             "project": ses.get("project"),
+                             "session_id": ses.get("session_id")})
+        t["_sid"] = seen[key]
+    return sessions
 
 
 # ----------------------------------------------------------------------
@@ -504,6 +625,7 @@ def build_report(tasks, cfg, coverage, repos, report_meta, tz=None):
     days = sorted({task_day(t, tz) for t in tasks})
     sources = sorted({t["source"] for t in tasks}) or ["pi"]
     models = sorted({t["model"] for t in tasks if t.get("model")}) or ["?"]
+    sessions = _sessions_from_tasks(tasks)
     return {
         "metadata": {
             "date_range": {"start": report_meta["date_range"]["start"],
@@ -515,12 +637,17 @@ def build_report(tasks, cfg, coverage, repos, report_meta, tz=None):
                 "una tarea = un prompt de usuario y los turnos que dispara "
                 "hasta el prompt siguiente; el tiempo del agente es la suma "
                 "de los turnos (durationMs reportado, o gap desde el evento "
-                "previo con tope gap_cap)."),
+                "previo con tope gap_cap). coffe-dnx.3: una tarea no cruza "
+                "sesiones — si el prompt siguiente abre otra sesión, es otra "
+                "tarea; sid indexa sessions[] = {source, project, "
+                "session_id}, y cost/tokens suman los turnos assistant de "
+                "la tarea."),
             "gap_cap_minutes": cfg["gap_cap_minutes"],
             "retry_window_minutes": cfg["retry_window_minutes"],
             "config_source": cfg.get("config_source"),
             "provenance": {"tasks": "derived", "aborts": "reported",
-                           "tool_errors": "reported", "repos": "reported"},
+                           "tool_errors": "reported", "repos": "reported",
+                           "cost": "reported", "sessions": "derived"},
             "coverage": coverage,
             "reasons": {
                 "abort_signal": "solo pi registra stopReason aborted/error; "
@@ -534,19 +661,27 @@ def build_report(tasks, cfg, coverage, repos, report_meta, tz=None):
         "models": models,
         "daily": daily_from_tasks(tasks, tz),
         "tasks": series(tasks, days, sources, models, tz),
+        "sessions": sessions,
         "repos": repos,
         "months": sorted({t["_start"].strftime("%Y-%m") for t in tasks}),
     }
 
 
 def summarize_coverage(pi_stats, claude_stats):
+    # coffe-dnx.3: el gate de paridad de coste está acotado — session_spend
+    # incluye fuentes (amp, omp, codex, ...) que agent_metrics no procesa;
+    # el alcance declarado queda en cada fila con `cost_parity`.
     return [
         {"source": "pi", "turn_level": True, "abort_signal": True,
          "sessions": pi_stats.get("sessions", 0),
+         "cost_parity": "sum(tasks.cost) por modelo == suma de las filas "
+                        "session_spend de pi (sesiones no-fork)",
          "note": pi_stats.get("skipped_reason") or
                  "solo sesiones on-disk (pi rota las viejas; arranca 2026-04)"},
         {"source": "claude-cli", "turn_level": True, "abort_signal": False,
          "sessions": claude_stats.get("sessions", 0),
+         "cost_parity": "sum(tasks.cost) por modelo == suma de las filas "
+                        "session_spend de claude-cli (sesiones no-fork)",
          "note": claude_stats.get("skipped_reason") or (
              f"preámbulos de reanudación excluidos: "
              f"{claude_stats.get('preambles_skipped', 0)}")},
