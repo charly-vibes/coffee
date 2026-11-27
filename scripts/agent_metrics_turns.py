@@ -2,6 +2,8 @@
 
 Turnos por fuente (pi y claude-cli): registros JSONL → turnos con rol,
 modelo, stopReason, duración, usage y coste; loaders con dedupe de forks.
+coffe-t6e: el turno assistant de pi además viaja con `error_message`
+(errorMessage crudo del registro) para las firmas de cuota de ops.quota_events.
 """
 from __future__ import annotations
 
@@ -34,6 +36,7 @@ def _pi_assistant_turn(msg, ts, session, model):
         "dur_s": (float(dur_ms) / 1000.0) if isinstance(dur_ms, (int, float)) else None,
         "usage": _usage_tokens(usage),
         "cost": _cost_from((usage or {}).get("cost")),
+        "error_message": msg.get("errorMessage"),
         "ses": session,
     }
 
