@@ -113969,5 +113969,892 @@
     "2026-09",
     "2026-10",
     "2026-11"
-  ]
+  ],
+  "ops": {
+    "latency": {
+      "sources": {
+        "pi": {
+          "turns_total": 294533,
+          "turns_with_duration": 51567,
+          "coverage_pct": 17.5,
+          "models": {
+            "MiniMax-M2.7": {
+              "n": 2826,
+              "p50_ms": 2562.0,
+              "p90_ms": 9107.0,
+              "p95_ms": 16471.5,
+              "turns_total": 2826,
+              "coverage_pct": 100.0
+            },
+            "MiniMax-M3.1-Flash": {
+              "n": 6320,
+              "p50_ms": 4050.0,
+              "p90_ms": 15256.000000000007,
+              "p95_ms": 23505.699999999946,
+              "turns_total": 6320,
+              "coverage_pct": 100.0
+            },
+            "anthropic/claude-3-haiku": {
+              "n": 0,
+              "p50_ms": null,
+              "p90_ms": null,
+              "p95_ms": null,
+              "turns_total": 3,
+              "coverage_pct": 0.0,
+              "reason": "no_duration_signal"
+            },
+            "anthropic/claude-opus-4.8": {
+              "n": 0,
+              "p50_ms": null,
+              "p90_ms": null,
+              "p95_ms": null,
+              "turns_total": 18,
+              "coverage_pct": 0.0,
+              "reason": "no_duration_signal"
+            },
+            "anthropic/claude-sonnet-4.6": {
+              "n": 0,
+              "p50_ms": null,
+              "p90_ms": null,
+              "p95_ms": null,
+              "turns_total": 538,
+              "coverage_pct": 0.0,
+              "reason": "no_duration_signal"
+            },
+            "beam-free": {
+              "n": 45,
+              "p50_ms": 4423.0,
+              "p90_ms": 9181.4,
+              "p95_ms": 11379.399999999994,
+              "turns_total": 45,
+              "coverage_pct": 100.0
+            },
+            "big-pickle": {
+              "n": 8,
+              "p50_ms": 283.0,
+              "p90_ms": 415.09999999999997,
+              "p95_ms": 431.54999999999995,
+              "turns_total": 8,
+              "coverage_pct": 100.0
+            },
+            "big-pickle-free": {
+              "n": 4,
+              "p50_ms": 344.0,
+              "p90_ms": 710.2,
+              "p95_ms": 777.0999999999999,
+              "turns_total": 4,
+              "coverage_pct": 100.0
+            },
+            "claude-3-sonnet-20240229": {
+              "n": 0,
+              "p50_ms": null,
+              "p90_ms": null,
+              "p95_ms": null,
+              "turns_total": 1,
+              "coverage_pct": 0.0,
+              "reason": "no_duration_signal"
+            },
+            "claude-opus-4-6": {
+              "n": 0,
+              "p50_ms": null,
+              "p90_ms": null,
+              "p95_ms": null,
+              "turns_total": 107,
+              "coverage_pct": 0.0,
+              "reason": "no_duration_signal"
+            },
+            "claude-opus-4-7": {
+              "n": 0,
+              "p50_ms": null,
+              "p90_ms": null,
+              "p95_ms": null,
+              "turns_total": 75,
+              "coverage_pct": 0.0,
+              "reason": "no_duration_signal"
+            },
+            "claude-sonnet-4-6": {
+              "n": 0,
+              "p50_ms": null,
+              "p90_ms": null,
+              "p95_ms": null,
+              "turns_total": 1422,
+              "coverage_pct": 0.0,
+              "reason": "no_duration_signal"
+            },
+            "deepseek-flash": {
+              "n": 507,
+              "p50_ms": 3317.0,
+              "p90_ms": 10280.800000000001,
+              "p95_ms": 14206.3,
+              "turns_total": 507,
+              "coverage_pct": 100.0
+            },
+            "deepseek-v4-flash-0731": {
+              "n": 1009,
+              "p50_ms": 8846.0,
+              "p90_ms": 23282.200000000004,
+              "p95_ms": 32409.99999999997,
+              "turns_total": 1009,
+              "coverage_pct": 100.0
+            },
+            "deepseek-v4.1-flash-free": {
+              "n": 8,
+              "p50_ms": 512.5,
+              "p90_ms": 1165.1999999999998,
+              "p95_ms": 1348.5999999999997,
+              "turns_total": 8,
+              "coverage_pct": 100.0
+            },
+            "deepseek/deepseek-chat-v3.1": {
+              "n": 0,
+              "p50_ms": null,
+              "p90_ms": null,
+              "p95_ms": null,
+              "turns_total": 46,
+              "coverage_pct": 0.0,
+              "reason": "no_duration_signal"
+            },
+            "deepseek/deepseek-v4-flash": {
+              "n": 1,
+              "p50_ms": 332.0,
+              "p90_ms": 332.0,
+              "p95_ms": 332.0,
+              "turns_total": 58298,
+              "coverage_pct": 0.0
+            },
+            "deepseek/deepseek-v4-flash:free": {
+              "n": 0,
+              "p50_ms": null,
+              "p90_ms": null,
+              "p95_ms": null,
+              "turns_total": 1,
+              "coverage_pct": 0.0,
+              "reason": "no_duration_signal"
+            },
+            "deepseek/deepseek-v4-pro": {
+              "n": 0,
+              "p50_ms": null,
+              "p90_ms": null,
+              "p95_ms": null,
+              "turns_total": 69,
+              "coverage_pct": 0.0,
+              "reason": "no_duration_signal"
+            },
+            "deepseek/deepseek-v4.1-flash": {
+              "n": 0,
+              "p50_ms": null,
+              "p90_ms": null,
+              "p95_ms": null,
+              "turns_total": 165,
+              "coverage_pct": 0.0,
+              "reason": "no_duration_signal"
+            },
+            "devstral-2512": {
+              "n": 8,
+              "p50_ms": 347.5,
+              "p90_ms": 1067.6,
+              "p95_ms": 1295.7999999999997,
+              "turns_total": 8,
+              "coverage_pct": 100.0
+            },
+            "flint-40b-free": {
+              "n": 8,
+              "p50_ms": 388.5,
+              "p90_ms": 501.0,
+              "p95_ms": 560.4999999999999,
+              "turns_total": 8,
+              "coverage_pct": 100.0
+            },
+            "gemini-1.5-pro-latest": {
+              "n": 0,
+              "p50_ms": null,
+              "p90_ms": null,
+              "p95_ms": null,
+              "turns_total": 1,
+              "coverage_pct": 0.0,
+              "reason": "no_duration_signal"
+            },
+            "gemini-2.5-flash": {
+              "n": 0,
+              "p50_ms": null,
+              "p90_ms": null,
+              "p95_ms": null,
+              "turns_total": 1,
+              "coverage_pct": 0.0,
+              "reason": "no_duration_signal"
+            },
+            "gemini-2.5-pro": {
+              "n": 0,
+              "p50_ms": null,
+              "p90_ms": null,
+              "p95_ms": null,
+              "turns_total": 86,
+              "coverage_pct": 0.0,
+              "reason": "no_duration_signal"
+            },
+            "gemini-3-flash-preview": {
+              "n": 0,
+              "p50_ms": null,
+              "p90_ms": null,
+              "p95_ms": null,
+              "turns_total": 259,
+              "coverage_pct": 0.0,
+              "reason": "no_duration_signal"
+            },
+            "gemini-3-pro-preview": {
+              "n": 0,
+              "p50_ms": null,
+              "p90_ms": null,
+              "p95_ms": null,
+              "turns_total": 553,
+              "coverage_pct": 0.0,
+              "reason": "no_duration_signal"
+            },
+            "gemini-3.1-pro-preview": {
+              "n": 0,
+              "p50_ms": null,
+              "p90_ms": null,
+              "p95_ms": null,
+              "turns_total": 12,
+              "coverage_pct": 0.0,
+              "reason": "no_duration_signal"
+            },
+            "glm-5.3": {
+              "n": 29,
+              "p50_ms": 25782.0,
+              "p90_ms": 57247.6,
+              "p95_ms": 72380.39999999997,
+              "turns_total": 29,
+              "coverage_pct": 100.0
+            },
+            "glm-5.3-flash": {
+              "n": 5204,
+              "p50_ms": 6549.0,
+              "p90_ms": 23332.6,
+              "p95_ms": 33658.2,
+              "turns_total": 5204,
+              "coverage_pct": 100.0
+            },
+            "google/gemini-2.0-flash-001": {
+              "n": 0,
+              "p50_ms": null,
+              "p90_ms": null,
+              "p95_ms": null,
+              "turns_total": 1,
+              "coverage_pct": 0.0,
+              "reason": "no_duration_signal"
+            },
+            "google/gemini-2.5-flash": {
+              "n": 0,
+              "p50_ms": null,
+              "p90_ms": null,
+              "p95_ms": null,
+              "turns_total": 135,
+              "coverage_pct": 0.0,
+              "reason": "no_duration_signal"
+            },
+            "google/gemini-2.5-flash-image": {
+              "n": 0,
+              "p50_ms": null,
+              "p90_ms": null,
+              "p95_ms": null,
+              "turns_total": 2,
+              "coverage_pct": 0.0,
+              "reason": "no_duration_signal"
+            },
+            "google/gemini-2.5-pro": {
+              "n": 0,
+              "p50_ms": null,
+              "p90_ms": null,
+              "p95_ms": null,
+              "turns_total": 2,
+              "coverage_pct": 0.0,
+              "reason": "no_duration_signal"
+            },
+            "google/gemini-3.1-pro-preview-customtools": {
+              "n": 0,
+              "p50_ms": null,
+              "p90_ms": null,
+              "p95_ms": null,
+              "turns_total": 31,
+              "coverage_pct": 0.0,
+              "reason": "no_duration_signal"
+            },
+            "google/gemini-3.5-flash": {
+              "n": 0,
+              "p50_ms": null,
+              "p90_ms": null,
+              "p95_ms": null,
+              "turns_total": 75,
+              "coverage_pct": 0.0,
+              "reason": "no_duration_signal"
+            },
+            "google/gemini-3.8-flash": {
+              "n": 0,
+              "p50_ms": null,
+              "p90_ms": null,
+              "p95_ms": null,
+              "turns_total": 196,
+              "coverage_pct": 0.0,
+              "reason": "no_duration_signal"
+            },
+            "gpt-5.2": {
+              "n": 0,
+              "p50_ms": null,
+              "p90_ms": null,
+              "p95_ms": null,
+              "turns_total": 2,
+              "coverage_pct": 0.0,
+              "reason": "no_duration_signal"
+            },
+            "gpt-5.3-codex": {
+              "n": 0,
+              "p50_ms": null,
+              "p90_ms": null,
+              "p95_ms": null,
+              "turns_total": 146,
+              "coverage_pct": 0.0,
+              "reason": "no_duration_signal"
+            },
+            "gpt-5.4": {
+              "n": 0,
+              "p50_ms": null,
+              "p90_ms": null,
+              "p95_ms": null,
+              "turns_total": 9787,
+              "coverage_pct": 0.0,
+              "reason": "no_duration_signal"
+            },
+            "gpt-5.5": {
+              "n": 0,
+              "p50_ms": null,
+              "p90_ms": null,
+              "p95_ms": null,
+              "turns_total": 3014,
+              "coverage_pct": 0.0,
+              "reason": "no_duration_signal"
+            },
+            "gpt-6-luna": {
+              "n": 25,
+              "p50_ms": 5529.0,
+              "p90_ms": 10706.2,
+              "p95_ms": 11595.399999999998,
+              "turns_total": 25,
+              "coverage_pct": 100.0
+            },
+            "gpt-6.1-sol": {
+              "n": 81,
+              "p50_ms": 7685.0,
+              "p90_ms": 13770.0,
+              "p95_ms": 18873.0,
+              "turns_total": 81,
+              "coverage_pct": 100.0
+            },
+            "hungerg-free": {
+              "n": 1,
+              "p50_ms": 4102.0,
+              "p90_ms": 4102.0,
+              "p95_ms": 4102.0,
+              "turns_total": 1,
+              "coverage_pct": 100.0
+            },
+            "hy4-flash-free": {
+              "n": 1,
+              "p50_ms": 3536.0,
+              "p90_ms": 3536.0,
+              "p95_ms": 3536.0,
+              "turns_total": 1,
+              "coverage_pct": 100.0
+            },
+            "iceman-contributor-free": {
+              "n": 1,
+              "p50_ms": 526.0,
+              "p90_ms": 526.0,
+              "p95_ms": 526.0,
+              "turns_total": 1,
+              "coverage_pct": 100.0
+            },
+            "kimi-for-coding": {
+              "n": 1581,
+              "p50_ms": 8002.000000000001,
+              "p90_ms": 28472.0,
+              "p95_ms": 46184.0,
+              "turns_total": 1581,
+              "coverage_pct": 100.0
+            },
+            "meta-llama/llama-4-maverick": {
+              "n": 0,
+              "p50_ms": null,
+              "p90_ms": null,
+              "p95_ms": null,
+              "turns_total": 1,
+              "coverage_pct": 0.0,
+              "reason": "no_duration_signal"
+            },
+            "mimo-v2.6-flash-free": {
+              "n": 8,
+              "p50_ms": 475.0,
+              "p90_ms": 785.4999999999999,
+              "p95_ms": 965.7499999999998,
+              "turns_total": 8,
+              "coverage_pct": 100.0
+            },
+            "minimax/minimax-m2.7": {
+              "n": 1,
+              "p50_ms": 205.0,
+              "p90_ms": 205.0,
+              "p95_ms": 205.0,
+              "turns_total": 1,
+              "coverage_pct": 100.0
+            },
+            "minimax/minimax-m3.1-flash": {
+              "n": 142,
+              "p50_ms": 3612.5,
+              "p90_ms": 7532.700000000001,
+              "p95_ms": 12037.449999999986,
+              "turns_total": 142,
+              "coverage_pct": 100.0
+            },
+            "mistral-small-latest": {
+              "n": 0,
+              "p50_ms": null,
+              "p90_ms": null,
+              "p95_ms": null,
+              "turns_total": 16,
+              "coverage_pct": 0.0,
+              "reason": "no_duration_signal"
+            },
+            "mistralai/mistral-small-3.2-24b-instruct": {
+              "n": 0,
+              "p50_ms": null,
+              "p90_ms": null,
+              "p95_ms": null,
+              "turns_total": 130,
+              "coverage_pct": 0.0,
+              "reason": "no_duration_signal"
+            },
+            "mistralai/mistral-small-3.2-24b-instruct:free": {
+              "n": 0,
+              "p50_ms": null,
+              "p90_ms": null,
+              "p95_ms": null,
+              "turns_total": 1,
+              "coverage_pct": 0.0,
+              "reason": "no_duration_signal"
+            },
+            "moonshotai/kimi-k2": {
+              "n": 0,
+              "p50_ms": null,
+              "p90_ms": null,
+              "p95_ms": null,
+              "turns_total": 6,
+              "coverage_pct": 0.0,
+              "reason": "no_duration_signal"
+            },
+            "moonshotai/kimi-k2.5": {
+              "n": 0,
+              "p50_ms": null,
+              "p90_ms": null,
+              "p95_ms": null,
+              "turns_total": 75,
+              "coverage_pct": 0.0,
+              "reason": "no_duration_signal"
+            },
+            "nemotron-3.5-lightning-free": {
+              "n": 4,
+              "p50_ms": 350.5,
+              "p90_ms": 564.3000000000001,
+              "p95_ms": 598.6499999999999,
+              "turns_total": 4,
+              "coverage_pct": 100.0
+            },
+            "nemotron-3.5-super-vl-free": {
+              "n": 4,
+              "p50_ms": 340.0,
+              "p90_ms": 537.2,
+              "p95_ms": 568.0999999999999,
+              "turns_total": 4,
+              "coverage_pct": 100.0
+            },
+            "nvidia/nemotron-3-ultra-550b-a55b:free": {
+              "n": 0,
+              "p50_ms": null,
+              "p90_ms": null,
+              "p95_ms": null,
+              "turns_total": 2,
+              "coverage_pct": 0.0,
+              "reason": "no_duration_signal"
+            },
+            "nvidia/nemotron-3.5-lightning:free": {
+              "n": 0,
+              "p50_ms": null,
+              "p90_ms": null,
+              "p95_ms": null,
+              "turns_total": 214,
+              "coverage_pct": 0.0,
+              "reason": "no_duration_signal"
+            },
+            "openrouter/free": {
+              "n": 182,
+              "p50_ms": 4823.5,
+              "p90_ms": 16065.100000000004,
+              "p95_ms": 24218.79999999998,
+              "turns_total": 1702,
+              "coverage_pct": 10.7
+            },
+            "poolside/laguna-s-2.1:free": {
+              "n": 14,
+              "p50_ms": 6893.5,
+              "p90_ms": 17078.200000000004,
+              "p95_ms": 36431.29999999998,
+              "turns_total": 913,
+              "coverage_pct": 1.5
+            },
+            "qwen-token-plan": {
+              "n": 1,
+              "p50_ms": 2247.0,
+              "p90_ms": 2247.0,
+              "p95_ms": 2247.0,
+              "turns_total": 1,
+              "coverage_pct": 100.0
+            },
+            "qwen/qwen3-coder-next": {
+              "n": 0,
+              "p50_ms": null,
+              "p90_ms": null,
+              "p95_ms": null,
+              "turns_total": 65,
+              "coverage_pct": 0.0,
+              "reason": "no_duration_signal"
+            },
+            "qwen/qwen3.8-27b:free": {
+              "n": 0,
+              "p50_ms": null,
+              "p90_ms": null,
+              "p95_ms": null,
+              "turns_total": 1,
+              "coverage_pct": 0.0,
+              "reason": "no_duration_signal"
+            },
+            "qwen/qwen3.8-flash": {
+              "n": 2,
+              "p50_ms": 116.0,
+              "p90_ms": 120.0,
+              "p95_ms": 120.5,
+              "turns_total": 2,
+              "coverage_pct": 100.0
+            },
+            "qwen3.7-max": {
+              "n": 1,
+              "p50_ms": 2462.0,
+              "p90_ms": 2462.0,
+              "p95_ms": 2462.0,
+              "turns_total": 1,
+              "coverage_pct": 100.0
+            },
+            "qwen3.8-flash": {
+              "n": 2798,
+              "p50_ms": 9500.0,
+              "p90_ms": 26619.100000000002,
+              "p95_ms": 36483.3,
+              "turns_total": 2798,
+              "coverage_pct": 100.0
+            },
+            "qwen3.8-max": {
+              "n": 462,
+              "p50_ms": 18022.0,
+              "p90_ms": 57609.90000000003,
+              "p95_ms": 80664.29999999997,
+              "turns_total": 462,
+              "coverage_pct": 100.0
+            },
+            "recursive/flint-v1.0:free": {
+              "n": 771,
+              "p50_ms": 4059.0,
+              "p90_ms": 25788.0,
+              "p95_ms": 43168.5,
+              "turns_total": 771,
+              "coverage_pct": 100.0
+            },
+            "seaglass-alpha-free": {
+              "n": 8,
+              "p50_ms": 643.5,
+              "p90_ms": 962.9999999999999,
+              "p95_ms": 1218.4999999999995,
+              "turns_total": 8,
+              "coverage_pct": 100.0
+            },
+            "stealth/ox-alpha": {
+              "n": 0,
+              "p50_ms": null,
+              "p90_ms": null,
+              "p95_ms": null,
+              "turns_total": 115,
+              "coverage_pct": 0.0,
+              "reason": "no_duration_signal"
+            },
+            "thinkingmachines/inkling:free": {
+              "n": 0,
+              "p50_ms": null,
+              "p90_ms": null,
+              "p95_ms": null,
+              "turns_total": 74,
+              "coverage_pct": 0.0,
+              "reason": "no_duration_signal"
+            },
+            "tidepool-alpha-free": {
+              "n": 8,
+              "p50_ms": 449.5,
+              "p90_ms": 893.0999999999998,
+              "p95_ms": 1294.5499999999993,
+              "turns_total": 8,
+              "coverage_pct": 100.0
+            },
+            "x-ai/grok-4-fast": {
+              "n": 0,
+              "p50_ms": null,
+              "p90_ms": null,
+              "p95_ms": null,
+              "turns_total": 1,
+              "coverage_pct": 0.0,
+              "reason": "no_duration_signal"
+            },
+            "x-ai/grok-4.3": {
+              "n": 0,
+              "p50_ms": null,
+              "p90_ms": null,
+              "p95_ms": null,
+              "turns_total": 22,
+              "coverage_pct": 0.0,
+              "reason": "no_duration_signal"
+            },
+            "z-ai/glm-5.2": {
+              "n": 0,
+              "p50_ms": null,
+              "p90_ms": null,
+              "p95_ms": null,
+              "turns_total": 4124,
+              "coverage_pct": 0.0,
+              "reason": "no_duration_signal"
+            },
+            "z-ai/glm-5.2:free": {
+              "n": 0,
+              "p50_ms": null,
+              "p90_ms": null,
+              "p95_ms": null,
+              "turns_total": 4,
+              "coverage_pct": 0.0,
+              "reason": "no_duration_signal"
+            },
+            "z-ai/glm-5.3": {
+              "n": 1,
+              "p50_ms": 462.0,
+              "p90_ms": 462.0,
+              "p95_ms": 462.0,
+              "turns_total": 1,
+              "coverage_pct": 100.0
+            },
+            "z-ai/glm-5.3-flash": {
+              "n": 29485,
+              "p50_ms": 7765.0,
+              "p90_ms": 28724.40000000001,
+              "p95_ms": 42613.999999999985,
+              "turns_total": 190104,
+              "coverage_pct": 15.5
+            },
+            "z-ai/glm-5.3-flash:batch": {
+              "n": 0,
+              "p50_ms": null,
+              "p90_ms": null,
+              "p95_ms": null,
+              "turns_total": 1,
+              "coverage_pct": 0.0,
+              "reason": "no_duration_signal"
+            },
+            "z-ai/glm-5.3-flash:free": {
+              "n": 1,
+              "p50_ms": 342.0,
+              "p90_ms": 342.0,
+              "p95_ms": 342.0,
+              "turns_total": 1,
+              "coverage_pct": 100.0
+            },
+            "zai-glm-5-3": {
+              "n": 1,
+              "p50_ms": 351.0,
+              "p90_ms": 351.0,
+              "p95_ms": 351.0,
+              "turns_total": 1,
+              "coverage_pct": 100.0
+            },
+            "zai-glm-5-3-flash": {
+              "n": 1,
+              "p50_ms": 425.0,
+              "p90_ms": 425.0,
+              "p95_ms": 425.0,
+              "turns_total": 1,
+              "coverage_pct": 100.0
+            },
+            "~anthropic/claude-haiku-latest": {
+              "n": 1,
+              "p50_ms": 360.0,
+              "p90_ms": 360.0,
+              "p95_ms": 360.0,
+              "turns_total": 1,
+              "coverage_pct": 100.0
+            },
+            "~google/gemini-pro-latest": {
+              "n": 4,
+              "p50_ms": 617.0,
+              "p90_ms": 1107.3000000000002,
+              "p95_ms": 1209.1499999999996,
+              "turns_total": 4,
+              "coverage_pct": 100.0
+            },
+            "~openai/gpt-mini-latest": {
+              "n": 0,
+              "p50_ms": null,
+              "p90_ms": null,
+              "p95_ms": null,
+              "turns_total": 29,
+              "coverage_pct": 0.0,
+              "reason": "no_duration_signal"
+            },
+            "~z-ai/glm-latest": {
+              "n": 0,
+              "p50_ms": null,
+              "p90_ms": null,
+              "p95_ms": null,
+              "turns_total": 2,
+              "coverage_pct": 0.0,
+              "reason": "no_duration_signal"
+            }
+          }
+        },
+        "claude-cli": {
+          "turns_total": 7976,
+          "turns_with_duration": 0,
+          "coverage_pct": 0.0,
+          "models": {
+            "<synthetic>": {
+              "n": 0,
+              "p50_ms": null,
+              "p90_ms": null,
+              "p95_ms": null,
+              "turns_total": 15,
+              "coverage_pct": 0.0,
+              "reason": "no_duration_signal"
+            },
+            "claude-sonnet-4-6": {
+              "n": 0,
+              "p50_ms": null,
+              "p90_ms": null,
+              "p95_ms": null,
+              "turns_total": 7961,
+              "coverage_pct": 0.0,
+              "reason": "no_duration_signal"
+            }
+          },
+          "reason": "no_duration_signal"
+        }
+      },
+      "providers": {
+        "claude": {
+          "n": 1,
+          "p50_ms": 360.0,
+          "p90_ms": 360.0,
+          "p95_ms": 360.0,
+          "turns_total": 1,
+          "coverage_pct": 100.0
+        },
+        "codex": {
+          "n": 106,
+          "p50_ms": 7104.0,
+          "p90_ms": 13687.0,
+          "p95_ms": 18272.0,
+          "turns_total": 106,
+          "coverage_pct": 100.0
+        },
+        "deepseek": {
+          "n": 1525,
+          "p50_ms": 7110.0,
+          "p90_ms": 19065.2,
+          "p95_ms": 29045.99999999998,
+          "turns_total": 59822,
+          "coverage_pct": 2.5
+        },
+        "glm": {
+          "n": 34689,
+          "p50_ms": 7562.0,
+          "p90_ms": 27850.000000000007,
+          "p95_ms": 41286.79999999998,
+          "turns_total": 195308,
+          "coverage_pct": 17.8
+        },
+        "kimi": {
+          "n": 1581,
+          "p50_ms": 8002.000000000001,
+          "p90_ms": 28472.0,
+          "p95_ms": 46184.0,
+          "turns_total": 1581,
+          "coverage_pct": 100.0
+        },
+        "minimax": {
+          "n": 9289,
+          "p50_ms": 3529.0,
+          "p90_ms": 13737.400000000005,
+          "p95_ms": 22063.00000000002,
+          "turns_total": 9289,
+          "coverage_pct": 100.0
+        },
+        "mistral": {
+          "n": 8,
+          "p50_ms": 347.5,
+          "p90_ms": 1067.6,
+          "p95_ms": 1295.7999999999997,
+          "turns_total": 8,
+          "coverage_pct": 100.0
+        },
+        "openrouter": {
+          "n": 786,
+          "p50_ms": 4064.0,
+          "p90_ms": 25675.5,
+          "p95_ms": 43708.75,
+          "turns_total": 1685,
+          "coverage_pct": 46.6
+        },
+        "other": {
+          "n": 320,
+          "p50_ms": 4085.5,
+          "p90_ms": 18061.400000000005,
+          "p95_ms": 32495.950000000008,
+          "turns_total": 1840,
+          "coverage_pct": 17.4
+        },
+        "qwen": {
+          "n": 3262,
+          "p50_ms": 10572.0,
+          "p90_ms": 30485.4,
+          "p95_ms": 43789.849999999984,
+          "turns_total": 3262,
+          "coverage_pct": 100.0
+        }
+      },
+      "provenance": {
+        "latency": "measured"
+      },
+      "coverage": [
+        {
+          "source": "pi",
+          "coverage_pct": 17.5,
+          "reason": null
+        },
+        {
+          "source": "claude-cli",
+          "coverage_pct": 0.0,
+          "reason": "no_duration_signal"
+        }
+      ]
+    }
+  }
 }
