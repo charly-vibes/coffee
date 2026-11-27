@@ -53,19 +53,21 @@ def load_tracker():
 ut = load_tracker()
 
 
-def row(ts="2026-05-10T14:23:00+00:00", project="charly-coffee",
-        tool="claude-cli", model_raw="claude-sonnet-4-6", **kw):
-    """Row sintético con el shape exacto que producen los extractores."""
+def row(ts="2026-05-10T14:23:00+00:00", overrides=None):
+    """Row sintético con el shape exacto que producen los extractores;
+    `overrides` ajusta campos puntuales (tool, model_raw, ...)."""
     base = {
-        "source": "test", "tool": tool, "model_raw": model_raw,
+        "source": "test", "tool": "claude-cli",
+        "model_raw": "claude-sonnet-4-6",
         "model_family": "claude", "model_version": "sonnet-4.6",
-        "project": project, "timestamp": ts,
+        "project": "charly-coffee", "timestamp": ts,
         "hour": ut.hour_key(ut.parse_ts(ts)),
         "input_tokens": 1000, "output_tokens": 500,
         "cache_read_tokens": 0, "cache_write_tokens": 0,
         "cost_effective": 0.01,
     }
-    base.update(kw)
+    if overrides:
+        base.update(overrides)
     return base
 
 
@@ -128,9 +130,9 @@ class TestEmisionReporte(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         rows = [
-            row(ts="2026-03-25T10:00:00+00:00", tool="claude-cli"),
-            row(ts="2026-05-10T14:23:00+00:00", tool="claude-cli"),
-            row(ts="2026-06-02T09:00:00+00:00", tool="codex"),
+            row('2026-03-25T10:00:00+00:00', overrides=dict(tool='claude-cli')),
+            row('2026-05-10T14:23:00+00:00', overrides=dict(tool='claude-cli')),
+            row('2026-06-02T09:00:00+00:00', overrides=dict(tool='codex')),
         ]
         cls.report = ut.aggregate(rows, [])
 
@@ -218,10 +220,7 @@ class TestPayPerTokenReported(unittest.TestCase):
         self.assertEqual("reported", sep["pay_per_token_provenance"])
         # mes sin cargas p2p en el ledger → estimado del tracker (assumed),
         # null no: la cifra existe (FPA-008)
-        rep2 = ut.aggregate([row(ts="2026-04-10T10:00:00+00:00",
-                                 tool="codex", model_raw="gpt-5.4",
-                                 model_family="codex",
-                                 model_version="gpt-5.4")], [])
+        rep2 = ut.aggregate([row('2026-04-10T10:00:00+00:00', overrides=dict(tool='codex', model_raw='gpt-5.4', model_family='codex', model_version='gpt-5.4'))], [])
         abril = rep2["monthly"]["2026-04"]
         self.assertAlmostEqual(0.0, abril["pay_per_token_charges"])
         self.assertEqual("assumed", abril["pay_per_token_provenance"])
@@ -230,10 +229,7 @@ class TestPayPerTokenReported(unittest.TestCase):
         """May 2026 tiene suscripción (fee implícito $100 claude + $20 codex
         + $19.99 gemini) Y cargas p2p reales (amp $60): el ppt reportado es
         solo el ledger, sin fees implícitos mezclados."""
-        rep = ut.aggregate([row(ts="2026-05-10T14:23:00+00:00",
-                               tool="amp", model_raw="claude-opus-4.7",
-                               model_family="claude",
-                               model_version="opus-4.7")], [])
+        rep = ut.aggregate([row('2026-05-10T14:23:00+00:00', overrides=dict(tool='amp', model_raw='claude-opus-4.7', model_family='claude', model_version='opus-4.7'))], [])
         mayo = rep["monthly"]["2026-05"]
         amp = rep["charges_real_by_month"].get("amp", {}).get("2026-05", 0.0)
         self.assertAlmostEqual(10.0, round(amp, 2))  # manual 1,000 credits (20-may)

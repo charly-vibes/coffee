@@ -33,40 +33,35 @@ def load_tracker():
 ut = load_tracker()
 
 
-def row(ts="2026-05-10T14:23:00+00:00", project="charly-coffee", tool="claude-cli",
-        model_raw="claude-sonnet-4-6", kind="assistant_turn", **kw):
+def row(ts="2026-05-10T14:23:00+00:00", kind="assistant_turn", overrides=None):
     base = {
-        "source": "test", "tool": tool, "model_raw": model_raw,
+        "source": "test", "tool": "claude-cli",
+        "model_raw": "claude-sonnet-4-6",
         "model_family": "claude", "model_version": "sonnet-4.6",
-        "project": project, "timestamp": ts,
+        "project": "charly-coffee", "timestamp": ts,
         "hour": ut.hour_key(ut.parse_ts(ts)),
         "input_tokens": 1000, "output_tokens": 500,
         "cache_read_tokens": 0, "cache_write_tokens": 0,
         "cost_effective": 0.01, "kind": kind,
     }
-    base.update(kw)
+    if overrides:
+        base.update(overrides)
     return base
 
 
 def f2_rows():
     """2 meses, 2 tools, 2 modelos, 2 proyectos, kinds mezclados."""
     return [
-        row(ts="2026-05-10T14:23:00+00:00", project="charly-coffee",
-            kind="tool_call"),
-        row(ts="2026-05-11T09:00:00+00:00", project="charly-atril", tool="codex",
-            model_raw="gpt-5.4", model_family="codex", model_version="gpt-5.4",
-            kind="assistant_turn", input_tokens=0, output_tokens=0),
-        row(ts="2026-06-01T09:00:00+00:00", project="charly-coffee",
-            kind="tool_call", input_tokens=2000, output_tokens=800),
+        row('2026-05-10T14:23:00+00:00', 'tool_call', overrides=dict(project='charly-coffee')),
+        row('2026-05-11T09:00:00+00:00', 'assistant_turn', overrides=dict(project='charly-atril', tool='codex', model_raw='gpt-5.4', model_family='codex', model_version='gpt-5.4', input_tokens=0, output_tokens=0)),
+        row('2026-06-01T09:00:00+00:00', 'tool_call', overrides=dict(project='charly-coffee', input_tokens=2000, output_tokens=800)),
     ]
 
 
 def f2_excluded():
     return [
-        row(ts="2026-05-10T15:00:00+00:00", project="otro-repo", kind="tool_call"),
-        row(ts="2026-06-02T10:00:00+00:00", project="trabajo-ajeno", tool="codex",
-            model_raw="gpt-5.4", model_family="codex", model_version="gpt-5.4",
-            kind="assistant_turn", input_tokens=0, output_tokens=0),
+        row('2026-05-10T15:00:00+00:00', 'tool_call', overrides=dict(project='otro-repo')),
+        row('2026-06-02T10:00:00+00:00', 'assistant_turn', overrides=dict(project='trabajo-ajeno', tool='codex', model_raw='gpt-5.4', model_family='codex', model_version='gpt-5.4', input_tokens=0, output_tokens=0)),
     ]
 
 

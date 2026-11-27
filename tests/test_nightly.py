@@ -2,9 +2,14 @@
 """test_nightly.py — contrato del job nocturno (coffe-tw6, 6.1).
 
 Hermetic: parsea scripts/nightly-update.sh y verifica orden de pasos y el
-guard de --no-push (sin correr los trackers reales — esos viven en el
-timer systemd y tocan logs vivos). bash -n valida sintaxis.
+guard de --no-push (sin correr los trackers reales — esos viven en el timer
+systemd y tocan logs vivos). bash -n valida sintaxis.
+
+El snapshot del cache frágil de Claude corre ANTES de la regen (coffe-0c8:
+dashboard-cache.json es fuente única de claude-cli para sesiones cuyo jsonl
+ya no existe, y Claude Code lo trunca sin aviso — coffe-jg3).
 """
+import re
 import subprocess
 import unittest
 from pathlib import Path
@@ -13,9 +18,10 @@ REPO = Path(__file__).resolve().parent.parent
 SCRIPT = REPO / "scripts" / "nightly-update.sh"
 
 
-class NightlyStructureTest(unittest.TestCase):
-    """El orden importa: ddl tracker tras usage-tracker, viz tras tracker,
-    y --no-push sale antes de tocar git."""
+class NightlyContractTest(unittest.TestCase):
+    """El orden importa: snapshot del cache antes del tracker, ddl tracker
+    tras usage-tracker, viz tras tracker, y --no-push sale antes de tocar
+    git; los derivados de data/ entran via STAGED."""
 
     @classmethod
     def setUpClass(cls):
@@ -31,47 +37,36 @@ class NightlyStructureTest(unittest.TestCase):
                             capture_output=True, text=True)
         self.assertEqual(rc.returncode, 0, rc.stderr)
 
-    def test_ddl_tracker_tras_usage_tracker(self):
-        self.assertLess(self._index("scripts/usage-tracker.py"),
-                        self._index("scripts/ddl-effect-tracker.py"),
-                        "ddl-effect-tracker debe correr tras usage-tracker "
-                        "(consume data/usage_report_v3.json)")
-
-    def test_ddl_viz_tras_ddl_tracker(self):
-        self.assertLess(self._index("scripts/ddl-effect-tracker.py"),
-                        self._index("scripts/viz-ddl.py"),
-                        "viz-ddl debe correr tras ddl-effect-tracker "
-                        "(el dashboard es derivado, nunca fuente)")
+    def test_orden_de_pasos_del_nightly(self):
+        """Cada paso va antes del que lo consume (en orden):
+        - snapshot del cache de Claude antes del tracker (coffe-0c8),
+        - ddl-effect-tracker tras usage-tracker (consume
+          data/usage_report_v3.json),
+        - viz-ddl tras ddl-effect-tracker (dashboard derivado, nunca fuente),
+        - el guard --no-push (log + exit 0) antes del primer git add."""
+        pares = [
+            ("dashboard-cache.json", "scripts/usage-tracker.py",
+             "el snapshot del cache debe correr antes del tracker"),
+            ("scripts/usage-tracker.py", "scripts/ddl-effect-tracker.py",
+             "ddl-effect-tracker debe correr tras usage-tracker "
+             "(consume data/usage_report_v3.json)"),
+            ("scripts/ddl-effect-tracker.py", "scripts/viz-ddl.py",
+             "viz-ddl debe correr tras ddl-effect-tracker "
+             "(el dashboard es derivado, nunca fuente)"),
+            ("modo --no-push", "git add",
+             "--no-push debe salir antes de tocar git"),
+        ]
+        for antes, despues, msg in pares:
+            with self.subTest(paso=f"{antes} -> {despues}"):
+                self.assertLess(self._index(antes), self._index(despues), msg)
 
     def test_staged_incluye_data(self):
-        # data/ddl_effect.json y data/ddl-dashboard.html entran via 'data'
+        """data/ddl_effect.json y data/ddl-dashboard.html entran via 'data':
+        la lista STAGED declara data entre los archivos staged."""
         self._index('STAGED="data README.md index.html"')
-
-    def test_no_push_sale_antes_de_git(self):
-        """El bloque --no-push (log + exit 0) va antes del primer git add."""
-        guard = self._index("modo --no-push")
-        self.assertLess(guard, self._index("git add"),
-                        "--no-push debe salir antes de tocar git")
-
-
-class NightlyCacheSnapshotTest(unittest.TestCase):
-    """coffe-0c8: snapshot diario del cache frágil de Claude ANTES de la regen
-    (dashboard-cache.json es fuente única de claude-cli para sesiones cuyo
-    jsonl ya no existe, y Claude Code lo trunca sin aviso — coffe-jg3)."""
-
-    @classmethod
-    def setUpClass(cls):
-        cls.text = SCRIPT.read_text()
-
-    def _index(self, needle):
-        i = self.text.find(needle)
-        self.assertGreaterEqual(i, 0, f"no está en el script: {needle}")
-        return i
-
-    def test_snapshot_antes_de_regen(self):
-        self.assertLess(self._index("dashboard-cache.json"),
-                        self._index("scripts/usage-tracker.py"),
-                        "el snapshot del cache debe correr antes del tracker")
+        staged = re.search(r'STAGED="([^"]*)"', self.text).group(1)
+        self.assertIn("data", staged.split(),
+                      f"STAGED sin data entre los staged: {staged!r}")
 
     def test_snapshot_fuera_de_git(self):
         """El cache pesa ~50MB: el destino NO puede ser el repo (data/ entra

@@ -55,23 +55,26 @@ def e_user(text, ts="2026-10-01T10:00:00.000Z"):
                         "content": [{"type": "text", "text": text}]}}
 
 
-def e_assistant(text="", thinking="", tool_calls=None, usage=None,
-                ts="2026-10-01T10:00:05.000Z", model="claude-sonnet-4-6",
-                provider="anthropic"):
+def e_assistant(text="", thinking="", usage=None, overrides=None):
+    """Entry assistant; overrides ajusta tool_calls/model/provider opcionales."""
+    extra = overrides or {}
     content = []
     if thinking:
         content.append({"type": "thinking", "thinking": thinking})
     if text:
         content.append({"type": "text", "text": text})
-    for tc in (tool_calls or []):
+    for tc in (extra.get("tool_calls") or []):
         content.append({"type": "toolCall", "id": tc.get("id", "c1"),
                         "name": tc["name"], "arguments": tc["arguments"]})
-    msg = {"role": "assistant", "content": content, "model": model}
+    msg = {"role": "assistant", "content": content,
+           "model": extra.get("model", "claude-sonnet-4-6")}
+    provider = extra.get("provider", "anthropic")
     if provider is not None:
         msg["provider"] = provider
     if usage is not None:
         msg["usage"] = usage
-    return {"type": "message", "timestamp": ts, "message": msg}
+    return {"type": "message", "timestamp": "2026-10-01T10:00:05.000Z",
+            "message": msg}
 
 
 def e_tool_result(name, text, ts="2026-10-01T10:00:10.000Z", is_error=False):
@@ -82,15 +85,16 @@ def e_tool_result(name, text, ts="2026-10-01T10:00:10.000Z", is_error=False):
 
 
 def e_compaction(ts="2026-10-01T10:05:00.000Z"):
-    return {"type": "compaction", "timestamp": ts,
-            "tokensBefore": 100_000, "fromHook": False}
+    return dict(type="compaction", timestamp=ts,
+                tokensBefore=100_000, fromHook=False)
 
 
-def usage(inp=1000, out=500, cr=0, cw=0, cost=None):
-    u = {"input": inp, "output": out, "cacheRead": cr, "cacheWrite": cw,
-         "totalTokens": inp + out + cr + cw}
-    if cost is not None:
-        u["cost"] = cost
+def usage(overrides=None):
+    """usage de Pi v3 con defaults sintéticos; overrides ajusta campos."""
+    u = {"input": 1000, "output": 500, "cacheRead": 0, "cacheWrite": 0}
+    if overrides:
+        u.update(overrides)
+    u["totalTokens"] = u["input"] + u["output"] + u["cacheRead"] + u["cacheWrite"]
     return u
 
 
@@ -105,11 +109,7 @@ class TestSesionNormal(unittest.TestCase):
         """Sesión con 1 turno: pico == final == chars del turno."""
         entries = [
             e_user("hola" * 100),                       # 400 chars
-            e_assistant(text="mundo" * 100,             # 500 chars text
-                        thinking="pienso" * 50,         # 300 chars thinking
-                        tool_calls=[{"name": "bash",
-                                     "arguments": {"command": "ls" * 50}}],  # 100 chars
-                        usage=usage()),
+            e_assistant('mundo' * 100, 'pienso' * 50, usage(), overrides=dict(tool_calls=[{'name': 'bash', 'arguments': {'command': 'ls' * 50}}])),
             e_tool_result("bash", "salida" * 50),       # 250 chars
         ]
         m = ut.reduce_context(entries)
@@ -133,10 +133,7 @@ class TestSesionNormal(unittest.TestCase):
         tool_out = "resultado " * 25
         entries = [
             e_user(text_u),
-            e_assistant(text=text_a, thinking=think,
-                        tool_calls=[{"name": "bash",
-                                     "arguments": json.loads(args)}],
-                        usage=usage()),
+            e_assistant(text_a, think, usage(), overrides=dict(tool_calls=[{'name': 'bash', 'arguments': json.loads(args)}])),
             e_tool_result("bash", tool_out),
         ]
         m = ut.reduce_context(entries)
@@ -251,132 +248,6 @@ class TestBigResults(unittest.TestCase):
         m2 = ut.reduce_context(entries)  # default 100k → no
         self.assertEqual(0, m2["big_results"])
 
-
-class TestModelosTurnos(unittest.TestCase):
-    """coffe-sht (1.2): atribución por modelo — CORR-002 del review R5:
-    66 model_change en 40 archivos muestreados; un solo modelo por fila
-    no alcanza. models_turns es fuente de verdad, model es el dominante."""
-
-    def _turnos(self, modelo, n, model_change=True):
-        out = []
-        if model_change:
-            out.append({"type": "model_change", "provider": "anthropic",
-                        "modelId": modelo})
-        for i in range(n):
-            out.append(e_assistant(text="r", usage=usage(), model=modelo))
-        return out
-
-    def test_model_change_mid_sesion(self):
-        """20 turnos A + 10 turnos B → models_turns {A:20,B:10}, model A."""
-        entries = (self._turnos("modelo-a", 20)
-                   + self._turnos("modelo-b", 10))
-        m = ut.reduce_context(entries)
-        self.assertEqual({"modelo-a": 20, "modelo-b": 10}, m["models_turns"])
-        self.assertEqual("modelo-a", m["model"])
-        self.assertEqual(30, m["turns"])
-
-    def test_modelo_desde_mensaje_sin_model_change(self):
-        """Sin entradas model_change: el modelo viene del campo message.model
-        de cada assistant (presente en los archivos reales verificados)."""
-        entries = self._turnos("solo-b", 3, model_change=False)
-        m = ut.reduce_context(entries)
-        self.assertEqual({"solo-b": 3}, m["models_turns"])
-        self.assertEqual("solo-b", m["model"])
-
-    def test_provider_ultima_model_change(self):
-        """provider se lleva en paralelo al modelo (context_source en 5uu):
-        mensajes sin provider propio caen al último model_change."""
-        entries = [{"type": "model_change", "provider": "openrouter",
-                    "modelId": "m-x"}]
-        for i in range(2):
-            entries.append(e_assistant(text="r", usage=usage(), model="m-x",
-                                       provider=None))
-        m = ut.reduce_context(entries)
-        self.assertEqual("openrouter", m["provider"])
-        self.assertEqual({"m-x": 2}, m["models_turns"])
-
-    def test_sin_turnos_model_none(self):
-        m = ut.reduce_context([e_user("p")])
-        self.assertIsNone(m["model"])
-        self.assertEqual({}, m["models_turns"])
-
-    def test_month_desde_filename(self):
-        """month viene del filename del archivo de sesión (documentado):
-        el reducer lo recibe, no lo deriva."""
-        m = ut.reduce_context([e_user("p")], month="2026-10")
-        self.assertEqual("2026-10", m["month"])
-        m2 = ut.reduce_context([e_user("p")])
-        self.assertNotIn("month", m2)
-
-
-class TestCostePorSesion(unittest.TestCase):
-    """coffe-5uu (1.3): cost.in/out/cacheRead/cacheWrite por sesión;
-    coste ausente → null con razón (patrón 'sin telemetría', no 0 fake);
-    context_source: pi vs claude-cli (usage inválido, coste de suscripción)."""
-
-    def test_coste_completo_soma_componentes(self):
-        entries = [
-            e_user("q"),
-            e_assistant(text="a", usage=usage(cost={"input": 0.01,
-                                                    "output": 0.02,
-                                                    "cacheRead": 0.001,
-                                                    "cacheWrite": 0.002})),
-            e_assistant(text="b", usage=usage(cost={"input": 0.03,
-                                                    "output": 0.04,
-                                                    "cacheRead": 0.003,
-                                                    "cacheWrite": 0.004})),
-        ]
-        m = ut.reduce_context(entries)
-        self.assertAlmostEqual(0.04, m["cost_in"])
-        self.assertAlmostEqual(0.06, m["cost_out"])
-        self.assertAlmostEqual(0.004, m["cost_cr"])
-        self.assertAlmostEqual(0.006, m["cost_cw"])
-        self.assertNotIn("cost_null_reason", m)
-
-    def test_coste_ausente_null_con_razon(self):
-        """Ningún turno trae usage.cost → los 4 campos null + razón."""
-        entries = [e_user("q"), e_assistant(text="a", usage=usage()),
-                   e_assistant(text="b")]  # abortado: ni usage
-        m = ut.reduce_context(entries)
-        self.assertIsNone(m["cost_in"])
-        self.assertIsNone(m["cost_out"])
-        self.assertIsNone(m["cost_cr"])
-        self.assertIsNone(m["cost_cw"])
-        self.assertIn("cost_null_reason", m)
-        self.assertTrue(m["cost_null_reason"])
-
-    def test_coste_parcial_solo_turnos_con_coste(self):
-        """Turno abortado (sin coste) + turno con coste → suma del disponible;
-        el resto visible vía turns_no_usage (loss visible, no 0 fake)."""
-        entries = [
-            e_user("q"),
-            e_assistant(text="abortado"),
-            e_assistant(text="ok", usage=usage(cost={"input": 0.05,
-                                                     "output": 0.01,
-                                                     "cacheRead": 0.0,
-                                                     "cacheWrite": 0.0})),
-        ]
-        m = ut.reduce_context(entries)
-        self.assertAlmostEqual(0.05, m["cost_in"])
-        self.assertAlmostEqual(0.01, m["cost_out"])
-        self.assertEqual(1, m["turns_no_usage"])
-
-    def test_context_source_claude_cli(self):
-        entries = [{"type": "model_change", "provider": "claude-cli",
-                    "modelId": "claude-sonnet-4-6"}]
-        entries += [e_user("q"),
-                    e_assistant(text="a", provider="claude-cli",
-                                usage=usage())]
-        m = ut.reduce_context(entries)
-        self.assertEqual("claude-cli", m["context_source"])
-
-    def test_context_source_pi_default(self):
-        m = ut.reduce_context([e_user("q"),
-                               e_assistant(text="a", provider="anthropic",
-                                           usage=usage())])
-        self.assertEqual("pi", m["context_source"])
-
-
 class TestPatologias(unittest.TestCase):
     """coffe-gp8 (1.4): sesión con bloque assistant >
     context_thresholds.pathological_chars (config, default 500k) → flag
@@ -420,9 +291,8 @@ class TestTokensReported(unittest.TestCase):
 
     def test_tokens_reported_soma_usage(self):
         entries = [e_user("q"),
-                   e_assistant(text="a", usage=usage(inp=1000, out=500,
-                                                     cr=100, cw=50)),
-                   e_assistant(text="b", usage=usage(inp=200, out=100))]
+                   e_assistant(text="a", usage=usage(overrides=dict(input=1000, output=500, cacheRead=100, cacheWrite=50))),
+                   e_assistant(text="b", usage=usage(overrides=dict(input=200, output=100)))]
         m = ut.reduce_context(entries)
         self.assertEqual(1000 + 500 + 100 + 50 + 200 + 100,
                          m["tokens_reported"])
@@ -430,249 +300,6 @@ class TestTokensReported(unittest.TestCase):
     def test_tokens_reported_sin_usage(self):
         m = ut.reduce_context([e_user("q"), e_assistant(text="a")])
         self.assertEqual(0, m["tokens_reported"])
-
-
-def _row(turns_peak_chars, model="m-a", month="2026-10", turns=10,
-         pathological=False, context_source="pi", tokens_reported=None,
-         final_turn_tokens=None, costs=None, chars_by_source=None,
-         project="charly-coffee"):
-    """Fila de sesión sintética con el shape que emite reduce_context
-    (más month y tokens_reported)."""
-    r = {
-        "turns": turns,
-        "turns_no_usage": 0,
-        "chars_by_source": chars_by_source or {"asst_text": turns_peak_chars},
-        "big_results": 0,
-        "big_results_by_tool": {},
-        "compactions": 0,
-        "segment_count": 1,
-        "peak_ctx_chars": turns_peak_chars * 4,
-        "final_ctx_chars": turns_peak_chars * 4,
-        "peak_ctx_est": turns_peak_chars,
-        "final_ctx_est": turns_peak_chars,
-        "max_assistant_block_chars": 1000,
-        "chars_per_token": 4,
-        "model": model,
-        "models_turns": {model: turns},
-        "provider": "anthropic",
-        "cost_in": None, "cost_out": None, "cost_cr": None, "cost_cw": None,
-        "context_source": context_source,
-        "pathological": pathological,
-    }
-    if tokens_reported is not None:
-        r["tokens_reported"] = tokens_reported
-    if final_turn_tokens is not None:
-        r["final_turn_tokens"] = final_turn_tokens
-    if costs:
-        r.update({"cost_in": costs[0], "cost_out": costs[1],
-                  "cost_cr": costs[2], "cost_cw": costs[3]})
-    r["month"] = month
-    r["project"] = project
-    return r
-
-
-class TestMonthlyModel(unittest.TestCase):
-    """coffe-2xj (1.6): agregados monthly_model[] por mes × modelo dominante,
-    sobre el set limpio (turns>0, sin patológicas) + meta completo (1.7)."""
-
-    def test_dos_modelos_un_mes_dos_filas(self):
-        rows = [_row(50_000, model="m-a"), _row(60_000, model="m-a"),
-                _row(80_000, model="m-b")]
-        agg = ut.aggregate_context(rows)
-        filas = [f for f in agg["monthly_model"] if f["month"] == "2026-10"]
-        self.assertEqual(2, len(filas))
-        modelos = {f["model"] for f in filas}
-        self.assertEqual({"m-a", "m-b"}, modelos)
-
-    def test_p50_p90_del_pico(self):
-        picos = [10_000, 20_000, 30_000, 40_000, 50_000]
-        rows = [_row(p, model="m-a") for p in picos]
-        agg = ut.aggregate_context(rows)
-        f = agg["monthly_model"][0]
-        self.assertAlmostEqual(30_000, f["peak_p50"])
-        self.assertAlmostEqual(46_000, f["peak_p90"])  # interpolación lineal
-
-    def test_pct_big_session(self):
-        """% de sesiones > context_thresholds.big_session_tokens (config)."""
-        rows = [_row(50_000), _row(150_000), _row(200_000)]  # 2/3 > 100k
-        agg = ut.aggregate_context(rows)
-        f = agg["monthly_model"][0]
-        self.assertAlmostEqual(66.67, f["pct_big_session"], places=1)
-
-    def test_tok_por_turno_por_fuente(self):
-        """tok/turno por fuente: est tokens de la fuente / turns del grupo."""
-        rows = [
-            _row(0, turns=2,
-                 chars_by_source={"asst_text": 8_000, "asst_thinking": 4_000,
-                                  "tool:bash": 8_000}),
-            _row(0, turns=2,
-                 chars_by_source={"asst_text": 16_000,
-                                  "asst_thinking": 4_000}),
-        ]
-        agg = ut.aggregate_context(rows)
-        f = agg["monthly_model"][0]
-        # est tokens por fuente / total turns del grupo (4 turnos):
-        # asst_text (8000+16000)/4 = 6000 tok → 1500/turno
-        self.assertAlmostEqual(1_500, f["tokens_per_turn_by_source"]["asst_text"])
-        self.assertAlmostEqual(500, f["tokens_per_turn_by_source"]["asst_thinking"])
-        self.assertAlmostEqual(500, f["tokens_per_turn_by_source"]["tool:bash"])
-
-    def test_spend_por_componente(self):
-        rows = [_row(10_000, costs=(1.0, 2.0, 0.1, 0.2)),
-                _row(20_000, costs=(3.0, 4.0, 0.3, 0.4)),
-                _row(30_000)]  # coste null: no suma, no ensucia
-        agg = ut.aggregate_context(rows)
-        f = agg["monthly_model"][0]
-        self.assertAlmostEqual(4.0, f["spend_in"])
-        self.assertAlmostEqual(6.0, f["spend_out"])
-        self.assertAlmostEqual(0.4, f["spend_cr"])
-        self.assertAlmostEqual(0.6, f["spend_cw"])
-
-    def test_set_limpio_excluye_stubs_y_patologicas(self):
-        rows = [_row(50_000), _row(0, turns=0),  # stub
-                _row(16_000_000, pathological=True)]
-        agg = ut.aggregate_context(rows)
-        self.assertEqual(1, agg["meta"]["stubs"])
-        self.assertEqual(1, agg["meta"]["excluded_pathological"])
-        self.assertEqual(1, len(agg["monthly_model"]))
-        self.assertEqual(50_000, agg["monthly_model"][0]["peak_p50"])
-
-    def test_mes_vacio_sin_fila(self):
-        rows = [_row(50_000, month="2026-10")]
-        agg = ut.aggregate_context(rows)
-        self.assertFalse(any(f["month"] == "2026-09"
-                             for f in agg["monthly_model"]))
-
-    def test_mes_parcial_marcado(self):
-        """El mes máximo del dataset es parcial (patrón fpa-dashboard)."""
-        rows = [_row(50_000, month="2026-09"),
-                _row(60_000, month="2026-10")]
-        agg = ut.aggregate_context(rows)
-        por_mes = {f["month"]: f["partial"] for f in agg["monthly_model"]}
-        self.assertFalse(por_mes["2026-09"])
-        self.assertTrue(por_mes["2026-10"])
-
-
-class TestMetaContexto(unittest.TestCase):
-    def test_meta_chars_per_token_y_umbrales(self):
-        agg = ut.aggregate_context([_row(50_000)])
-        self.assertEqual(4, agg["meta"]["chars_per_token"])
-        self.assertEqual("assumed", agg["meta"]["chars_per_token_tag"])
-        self.assertIn("subestima", agg["meta"]["chars_per_token_bias"])
-        self.assertEqual(100_000, agg["meta"]["thresholds"]["big_session_tokens"])
-
-    def test_validation_ratio_median_solo_pi_con_usage(self):
-        """ratio = tokens del ÚLTIMO turno con usage / final_ctx_est (el
-        último turno ≈ contexto final real, no la suma acumulada de la
-        sesión); mediana sobre sesiones pi con usage — claude-cli (usage
-        inválido) fuera, sin usage fuera."""
-        rows = [
-            _row(1_000, tokens_reported=3_000, final_turn_tokens=3_000),
-            _row(1_000, tokens_reported=5_000, final_turn_tokens=5_000),
-            _row(1_000, tokens_reported=4_000, final_turn_tokens=4_000),  # mediana
-            _row(1_000, context_source="claude-cli",
-                 tokens_reported=99_000, final_turn_tokens=99_000),  # excluida
-            _row(1_000),                           # sin usage → excluida
-        ]
-        agg = ut.aggregate_context(rows)
-        self.assertAlmostEqual(4.0, agg["meta"]["validation_ratio_median"])
-
-    def test_validation_ratio_sin_datos_null(self):
-        agg = ut.aggregate_context([_row(1_000)])
-        self.assertIsNone(agg["meta"]["validation_ratio_median"])
-
-    def test_meta_umbrales_desde_config(self):
-        cfg = dict(DEFAULT_THRESHOLDS, big_session_tokens=250_000)
-        agg = ut.aggregate_context([_row(50_000)], config=cfg)
-        self.assertEqual(250_000, agg["meta"]["thresholds"]["big_session_tokens"])
-
-
-class TestWiringContext(unittest.TestCase):
-    """coffe-kup (1.8+1.9): wiring — extract_context_metrics camina los JSONL
-    de Pi (1 archivo = 1 sesión, month desde el filename) y aggregate()
-    emite context_metrics en el reporte. Schema lo requiere."""
-
-    def setUp(self):
-        self._tmp = tempfile.TemporaryDirectory()
-        self.tmp = Path(self._tmp.name)
-
-    def tearDown(self):
-        self._tmp.cleanup()
-
-    def _write_session(self, proj, fname, entries):
-        d = self.tmp / proj
-        d.mkdir(parents=True, exist_ok=True)
-        (d / fname).write_text(
-            "\n".join(json.dumps(e) for e in entries) + "\n")
-
-    def test_extract_context_metrics_desde_tmpdir(self):
-        self._write_session("charly-coffee",
-                            "2026-05-10T14-23-00-000Z_a.jsonl", [
-                                e_user("hola" * 1000),
-                                e_assistant(text="mundo" * 1000,
-                                            usage=usage()),
-                            ])
-        cm = ut.extract_context_metrics(sessions_dir=self.tmp)
-        self.assertTrue(cm["available"])
-        self.assertEqual(1, len(cm["sessions"]))
-        row = cm["sessions"][0]
-        self.assertEqual("2026-05", row["month"])   # filename, no contenido
-        self.assertEqual("charly-coffee", row["project"])
-        self.assertEqual(1, row["turns"])
-        self.assertEqual(1, len(cm["monthly_model"]))
-        self.assertIn("chars_per_token", cm["meta"])
-
-    def test_stubs_fuera_del_array_contados(self):
-        self._write_session("charly-coffee",
-                            "2026-05-10T14-23-00-000Z_a.jsonl",
-                            [e_user("solo pregunta")])
-        cm = ut.extract_context_metrics(sessions_dir=self.tmp)
-        self.assertEqual(0, len(cm["sessions"]))
-        self.assertEqual(1, cm["meta"]["stubs"])
-
-    def test_fuera_de_scope_excluida(self):
-        # proyectos no-charly quedan fuera (in_scope), como extract_pi_sessions
-        self._write_session("otro-proyecto",
-                            "2026-05-10T14-23-00-000Z_a.jsonl", [
-                                e_user("hola"),
-                                e_assistant(text="x", usage=usage()),
-                            ])
-        cm = ut.extract_context_metrics(sessions_dir=self.tmp)
-        self.assertEqual(0, len(cm["sessions"]))
-
-    def test_dir_ausente_unavailable_con_razon(self):
-        cm = ut.extract_context_metrics(sessions_dir=self.tmp / "nope")
-        self.assertFalse(cm["available"])
-        self.assertTrue(cm["reason"])
-
-    def test_ventana_since_until_aplicada(self):
-        """coffe-snj: la ventana --since/--until filtra los archivos por la
-        fecha del filename (solape), como el resto del reporte."""
-        self._write_session("charly-coffee",
-                            "2026-03-10T14-23-00-000Z_a.jsonl", [
-                                e_user("hola"),
-                                e_assistant(text="x", usage=usage()),
-                            ])
-        cm = ut.extract_context_metrics(sessions_dir=self.tmp)
-        self.assertEqual(1, len(cm["sessions"]))  # sin ventana → entra
-        ut.SINCE = ut.parse_ts("2026-05-01T00:00:00+00:00").date()
-        try:
-            cm2 = ut.extract_context_metrics(sessions_dir=self.tmp)
-            self.assertEqual(0, len(cm2["sessions"]))
-        finally:
-            ut.SINCE = None
-
-    def test_aggregate_emite_context_metrics(self):
-        cm = {"available": True, "reason": None, "sessions": [],
-              "monthly_model": [], "meta": {"chars_per_token": 4}}
-        report = ut.aggregate([], [], context_metrics=cm)
-        self.assertEqual(cm, report["context_metrics"])
-
-    def test_aggregate_sin_context_emite_unavailable(self):
-        report = ut.aggregate([], [])
-        self.assertFalse(report["context_metrics"]["available"])
-        self.assertTrue(report["context_metrics"]["reason"])
-
 
 class TestPureza(unittest.TestCase):
     def test_puro_no_escribe_ni_leo_disco(self):
@@ -689,6 +316,7 @@ class TestPureza(unittest.TestCase):
         self.assertEqual(0, m["turns"])
         self.assertEqual(0, m["peak_ctx_chars"])
         self.assertEqual(0, m["compactions"])
+
 
 
 if __name__ == "__main__":

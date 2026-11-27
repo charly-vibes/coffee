@@ -135,9 +135,11 @@ class ModelTest(unittest.TestCase):
 
     def test_meta_declara_alcance_real_y_tz(self):
         m = self.model["meta"]
-        self.assertEqual(m["first_task"], "2026-04-02")
-        self.assertEqual(m["last_task"], "2026-07-20")
-        self.assertEqual(m["timezone"], "-03")
+        self.assertEqual(
+            {"first_task": m["first_task"], "last_task": m["last_task"],
+             "timezone": m["timezone"]},
+            {"first_task": "2026-04-02", "last_task": "2026-07-20",
+             "timezone": "-03"})
 
     def test_horas_de_agente_por_dia_activo(self):
         v = self.model["views"]["all"]
@@ -172,9 +174,12 @@ class ModelTest(unittest.TestCase):
 
     def test_escala_de_automatizacion_usa_el_umbral_del_config(self):
         v = self.model["views"]["all"]
-        self.assertEqual(v["bulk_days"], 1)          # 2026-06-15 ≥ 5.000
-        self.assertEqual(v["peak_day"], "2026-06-15")
-        self.assertEqual(v["peak_day_interactions"], 6000)
+        self.assertEqual({"bulk_days": v["bulk_days"],
+                          "peak_day": v["peak_day"],
+                          "peak_day_interactions": v["peak_day_interactions"]},
+                         {"bulk_days": 1,          # 2026-06-15 ≥ 5.000
+                          "peak_day": "2026-06-15",
+                          "peak_day_interactions": 6000})
 
     def test_por_modelo_ordena_por_tareas(self):
         rows = self.model["views"]["all"]["by_model"]

@@ -33,19 +33,26 @@ def load_tracker():
 ut = load_tracker()
 
 
-def row(ts="2026-05-10T14:23:00+00:00", project="charly-coffee", tool="test",
-        model_raw="x", **kw):
-    base = {
-        "source": "test", "tool": tool, "model_raw": model_raw,
-        "model_family": "other", "model_version": "unknown",
-        "project": project, "timestamp": ts,
+ROW_DEFAULTS = {
+    "source": "test", "tool": "test", "model_raw": "x",
+    "model_family": "other", "model_version": "unknown",
+    "project": "charly-coffee", "ts": "2026-05-10T14:23:00+00:00",
+    "input_tokens": 1000, "output_tokens": 500,
+    "cache_read_tokens": 0, "cache_write_tokens": 0,
+    "cost_effective": 0.0,
+}
+
+
+def row(overrides=None):
+    """Row sintético con el shape exacto que producen los extractores."""
+    o = dict(ROW_DEFAULTS)
+    o.update(overrides or {})
+    ts = o.pop("ts")
+    return {
+        **o,
+        "timestamp": ts,
         "hour": ut.hour_key(ut.parse_ts(ts)),
-        "input_tokens": 1000, "output_tokens": 500,
-        "cache_read_tokens": 0, "cache_write_tokens": 0,
-        "cost_effective": 0.0,
     }
-    base.update(kw)
-    return base
 
 
 class TestModelMapping(unittest.TestCase):
@@ -126,12 +133,15 @@ class TestMappingCoverage(unittest.TestCase):
 
     def test_metadata_model_mapping_coverage(self):
         rows = [
-            row(model_raw="z-ai/glm-5.3-flash", model_family="glm",
-                model_version="glm-5.3-flash", input_tokens=900, output_tokens=100),
-            row(ts="2026-06-01T09:00:00+00:00", model_raw="claude-sonnet-4-6",
-                model_family="claude", model_version="sonnet-4.6"),
-            row(model_raw="coso-raro", model_family="other", model_version="coso-raro",
-                input_tokens=100, output_tokens=100),
+            row({"model_raw": "z-ai/glm-5.3-flash", "model_family": "glm",
+                 "model_version": "glm-5.3-flash",
+                 "input_tokens": 900, "output_tokens": 100}),
+            row({"ts": "2026-06-01T09:00:00+00:00",
+                 "model_raw": "claude-sonnet-4-6",
+                 "model_family": "claude", "model_version": "sonnet-4.6"}),
+            row({"model_raw": "coso-raro", "model_family": "other",
+                 "model_version": "coso-raro",
+                 "input_tokens": 100, "output_tokens": 100}),
         ]
         report = ut.aggregate(rows, [])
         cov = report["metadata"]["model_mapping_coverage"]

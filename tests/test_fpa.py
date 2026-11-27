@@ -6,15 +6,14 @@ Cubre el alcance del ticket coffe-lat.2 (FPA-001…009, 093, 095, 108):
 - validación de schema stdlib-only con exit non-zero y campos fallidos (FPA-006)
 - mes parcial con días transcurridos/total (FPA-004)
 - separación estricta efectivo/cash, jamás sumados (FPA-002)
-- provenance tag reported/assumed en toda figura (FPA-003)
-- resumen ejecutivo 3–5 headlines con interpretación y n/a con razón (FPA-007/008)
 - claims solo con métrica + threshold visibles (FPA-009)
-- tema claro/oscuro (FPA-093), formatos USD con separadores (FPA-095)
-- placeholder-check: resumen nunca vacío, sin placeholders sin valor (FPA-108)
 - golden test de las agregaciones base (FPA-100, fase 1): REGEN_GOLDEN=1
   contra el dataset congelado tests/fixtures/usage-report-frozen.json
   (coffe-xvt: el golden ya no amanece rojo cuando el nightly regenera el
   dataset vivo; regen del golden solo ante cambios de lógica/schema)
+
+(coffe-kav.5: los tests de headlines, render y vista Modelos viven ahora
+en test_fpa_headlines.py, test_fpa_render.py y test_fpa_models.py.)
 """
 
 import importlib.util
@@ -42,11 +41,6 @@ viz = _load("viz_fpa", "scripts/viz-fpa.py")
 
 REPORT = json.loads((REPO / "data" / "usage_report_v3.json").read_text())
 CONFIG = json.loads((REPO / "config" / "fpa.json").read_text())
-
-
-def _rendered():
-    """HTML real del reporte del repo."""
-    return viz.render_html(REPORT, CONFIG, generated="2026-09-19 12:00")
 
 
 def _mini_report(**meta_over):
@@ -130,83 +124,6 @@ class TestMonthsMeta(unittest.TestCase):
         self.assertTrue(meta["2026-06"]["has_data"])
 
 
-class TestHeadlines(unittest.TestCase):
-    """FPA-007/008: 3–5 headlines con interpretación; n/a con razón."""
-
-    def test_entre_3_y_5_headlines(self):
-        heads = viz.build_headlines(REPORT)
-        self.assertTrue(3 <= len(heads) <= 5, f"{len(heads)} headlines")
-
-    def test_headlines_obligatorios_presentes(self):
-        heads = {h["key"] for h in viz.build_headlines(REPORT)}
-        self.assertIn("cost_effective", heads)
-        self.assertIn("cost_cash", heads)
-        self.assertIn("leverage", heads)
-        self.assertIn("cost_per_1k", heads)
-
-    def test_efectivo_y_cash_separados_y_distinguidos(self):
-        """FPA-002: dos medidas separadas, nunca sumadas."""
-        heads = {h["key"]: h for h in viz.build_headlines(REPORT)}
-        self.assertNotEqual(heads["cost_effective"]["value"],
-                            heads["cost_cash"]["value"])
-        # no hay ningún headline combinado efectivo+cash
-        self.assertNotIn("total_cost", heads)
-
-    def test_valores_contra_el_reporte(self):
-        heads = {h["key"]: h for h in viz.build_headlines(REPORT)}
-        eff = sum(m["cost_effective"] for m in REPORT["monthly"].values()
-                  if m["interactions"] > 0)
-        self.assertAlmostEqual(eff, heads["cost_effective"]["value"], places=2)
-        # coffe-a31.3 (CRG-F2): cost_cash del headline = cash del ledger
-        # (charges_real_by_month, *reported*), NO la suma mensual del tracker
-        # (fees implícitos + p2p, *assumed*) — FPA-002 las mantiene separadas.
-        meses_con_datos = {ym for ym, mo in REPORT["monthly"].items()
-                           if mo["interactions"] > 0}
-        cash = sum(v
-                   for prov in REPORT.get("charges_real_by_month",
-                                          {}).values()
-                   for ym, v in prov.items() if ym in meses_con_datos)
-        self.assertAlmostEqual(cash, heads["cost_cash"]["value"], places=2)
-        self.assertAlmostEqual(eff / cash, heads["leverage"]["value"], places=2)
-
-    def test_toda_headline_tiene_provenance(self):
-        """FPA-003: reported o assumed, nunca vacío."""
-        for h in viz.build_headlines(REPORT):
-            self.assertIn(h["provenance"], ("reported", "assumed"), h["key"])
-
-    def test_outcome_sin_datos_es_na_con_razon(self):
-        """FPA-008: n/a con razón, nunca vacío ni cero inventado."""
-        heads = viz.build_headlines(REPORT)
-        outcome = [h for h in heads if h["key"] == "outcome"]
-        if not outcome:
-            self.fail("falta el headline outcome")
-        h = outcome[0]
-        if h["value"] is None:
-            self.assertTrue(h["reason"], "n/a sin razón")
-            self.assertEqual("n/a", h["display"])
-
-    def test_outcome_con_datos_de_commits(self):
-        rep = json.loads(json.dumps(REPORT))
-        rep["monthly"]["2026-06"]["outcomes_by_project"] = {
-            "charly-wai": {"commits": 10, "releases": 1}}
-        heads = {h["key"]: h for h in viz.build_headlines(rep)}
-        self.assertIsNotNone(heads["outcome"]["value"])
-        self.assertIsNone(heads["outcome"]["reason"])
-
-    def test_interpretacion_de_una_linea(self):
-        for h in viz.build_headlines(REPORT):
-            if h["value"] is not None:
-                self.assertTrue(h["interp"], h["key"])
-                self.assertNotIn("\n", h["interp"])
-
-    def test_headline_na_cuando_no_hay_datos(self):
-        rep = _mini_report()
-        rep["monthly"]["2026-06"]["interactions"] = 0
-        heads = {h["key"]: h for h in viz.build_headlines(rep)}
-        self.assertIsNone(heads["cost_per_1k"]["value"])
-        self.assertTrue(heads["cost_per_1k"]["reason"])
-
-
 class TestClaims(unittest.TestCase):
     """FPA-009: claim solo con métrica nombrada + threshold visibles."""
 
@@ -237,23 +154,18 @@ class TestSchemaValidation(unittest.TestCase):
         schema = json.loads((REPO / "specs" / "usage-report-v3.schema.json").read_text())
         self.assertEqual([], viz.validate_against_schema(REPORT, schema))
 
-    def test_campo_mal_tipado_detectado(self):
+    def test_campos_malos_detectados(self):
+        """Mal tipado, requerido ausente y enum inválido se listan campo por
+        campo (FPA-006)."""
         schema = json.loads((REPO / "specs" / "usage-report-v3.schema.json").read_text())
-        rep = _mini_report(total_interactions="mucho")
-        errors = viz.validate_against_schema(rep, schema)
+        rep_mal = _mini_report(total_interactions="mucho")
+        errors = viz.validate_against_schema(rep_mal, schema)
         self.assertTrue(any("total_interactions" in e for e in errors), errors)
-
-    def test_campo_requerido_ausente_detectado(self):
-        schema = json.loads((REPO / "specs" / "usage-report-v3.schema.json").read_text())
         rep = _mini_report()
         del rep["metadata"]["date_range"]
         errors = viz.validate_against_schema(rep, schema)
         self.assertTrue(any("date_range" in e for e in errors), errors)
-
-    def test_enum_invalido_detectado(self):
-        schema = json.loads((REPO / "specs" / "usage-report-v3.schema.json").read_text())
-        rep = _mini_report(filter="todo")
-        errors = viz.validate_against_schema(rep, schema)
+        errors = viz.validate_against_schema(_mini_report(filter="todo"), schema)
         self.assertTrue(any("filter" in e for e in errors), errors)
 
     def test_main_reporte_invalido_exit_nonzero(self):
@@ -279,176 +191,6 @@ class TestSchemaValidation(unittest.TestCase):
             self.assertTrue(out.exists())
         finally:
             out.unlink(missing_ok=True)
-
-
-class TestRender(unittest.TestCase):
-    """HTML: header, tema, formatos, provenance, placeholder-check."""
-
-    def test_header_generacion_y_tracker(self):
-        """FPA-005: fecha de generación y versión del tracker en el header."""
-        html = _rendered()
-        self.assertIn("2026-09-19 12:00", html)
-        self.assertIn("Tracker", html)
-
-    def test_tracker_version_ausente_na_con_razon(self):
-        """FPA-005/008: si el reporte no registra versión, n/a con razón."""
-        html = viz.render_html(REPORT, CONFIG, generated="2026-09-19 12:00")
-        self.assertTrue("no registrada" in html or "tracker_version" in html)
-
-    def test_tema_claroy_oscuro(self):
-        """Tema: decisión D2 del change update-fpa-dashboard-ux — SOLO tema
-        claro (Corporate Infographics silver), sin dark mode. El assert
-        histórico de prefers-color-scheme quedó obsoleto con D2."""
-        html = _rendered()
-        self.assertNotIn("prefers-color-scheme", html)  # D2: sin dark mode
-        self.assertIn("--bg", html)  # tokens del tema compartido presentes
-
-    def test_tabular_nums_en_css(self):
-        """FPA-095: cifras tabulares en tablas/cards."""
-        self.assertIn("tabular-nums", _rendered())
-
-    def test_fmt_usd(self):
-        self.assertEqual("$1,234.50", viz.fmt_usd(1234.5))
-        self.assertEqual("$0.27", viz.fmt_usd(0.273))
-        self.assertEqual("$3,810.94", viz.fmt_usd(3810.94))
-
-    def test_fmt_int_miles(self):
-        self.assertEqual("139,735", viz.fmt_int(139735))
-        self.assertEqual("1,397,354", viz.fmt_int(1397354))
-        self.assertEqual("42", viz.fmt_int(42))
-
-    def test_figuras_con_provenance_tag(self):
-        """FPA-003: toda figura lleva tag reported/assumed via envoltorio."""
-        html = _rendered()
-        self.assertIn('data-provenance="reported"', html)
-        self.assertIn('data-provenance="assumed"', html)
-        # ninguna cifra sin tag: los spans de valor siempre van envueltos
-        self.assertNotIn('<span class="fig">', html.replace(
-            '<span class="fig" data-provenance="reported">', "")
-            .replace('<span class="fig" data-provenance="assumed">', ""))
-
-    def test_mes_parcial_marcado_en_html(self):
-        """FPA-004: marker 'n/total' + 'parcial' en el HTML (coffe-6i8: n se
-        deriva del reporte en vez de clavar 19/30)."""
-        end = REPORT["metadata"]["date_range"]["end"]
-        meta = viz.build_months(REPORT)
-        sep = [m for m in meta if m["ym"] == end[:7]][0]
-        html = _rendered()
-        self.assertIn(f"{sep['elapsed']}/{sep['total_days']}", html)
-        self.assertIn("parcial", html.lower())
-
-    def test_resumen_no_vacio(self):
-        """FPA-108: el resumen ejecutivo nunca queda vacío."""
-        html = _rendered()
-        self.assertGreaterEqual(html.count('class="headline'), 3)
-
-    def test_check_placeholders_detecta_vacio(self):
-        """FPA-108: placeholder-check falla si hay placeholder sin valor."""
-        self.assertEqual([], viz.check_placeholders(_rendered()))
-        html_vacio = '<section id="summary"><div class="ph"></div></section>'
-        problems = viz.check_placeholders(html_vacio)
-        self.assertTrue(problems, "no detectó placeholder vacío")
-
-    def test_claim_renderizado_con_metrica_y_threshold(self):
-        """FPA-009: métrica y threshold visibles junto al claim."""
-        html = _rendered()
-        self.assertIn("umbral", html.lower())
-        self.assertIn("por 1k", html.lower())
-
-    def test_html_autocontenido_sin_recursos_externos(self):
-        """FPA-001: un solo HTML autocontenido, sin <script src>/<link href>."""
-        html = _rendered()
-        self.assertNotIn("<script src=", html)
-        self.assertNotIn('<link rel="stylesheet"', html)
-
-    def test_sin_js_de_calculo(self):
-        """design.md: maths pre-calculadas en Python; JS solo re-escala (F2+)."""
-        html = _rendered()
-        # el modelo va embebido como JSON, no hay lógica de negocio en JS
-        self.assertIn('id="fpa-model"', html)
-
-    def test_determinismo_salvo_timestamp(self):
-        """FPA-104 (semilla): mismo input → mismo HTML salvo fecha de generación."""
-        a = viz.render_html(REPORT, CONFIG, generated="T")
-        b = viz.render_html(REPORT, CONFIG, generated="T")
-        self.assertEqual(a, b)
-        self.assertNotEqual(a, viz.render_html(REPORT, CONFIG, generated="T2"))
-
-
-class TestModelsView(unittest.TestCase):
-    """coffe-dnx.6: vista 'Modelos' consumiendo model_scorecard[] (.8)."""
-
-    @staticmethod
-    def _rows():
-        return viz.models_html(REPORT, CONFIG)
-
-    def test_metrica_ponderada_no_coste_por_tokens_totales(self):
-        """Rojo (coffe-dnx.6): la vista usa cost_weighted_per_1m; si el
-        render usara cost_per_1m_total_tokens (cost/tokens_totales) el
-        test falla."""
-        html = self._rows()
-        self.assertIn("$ ponderado por 1M tokens", html)
-        self.assertNotIn("tokens_totales", html)
-        self.assertNotIn("cost_per_1m_total_tokens", html)
-
-    def test_cohorte_sin_datos_fila_sin_datos_con_razon(self):
-        """coffe-dnx.6: claude-opus-4.5 no tiene interacciones en el
-        scorecard (data: null con razón) ⇒ fila 'sin datos' con la razón,
-        nunca 0."""
-        html = self._rows()
-        self.assertIn("sin datos", html)
-        self.assertIn("sin interacciones de este modelo", html)
-        # la fila del modelo sin datos no debe rendir 0 disfrazado de dato
-        row = [r for r in html.split("<tr")
-               if "claude-opus-4.5" in r][0]
-        self.assertNotIn(">$0.00<", row)
-
-    def test_latencia_con_cobertura_cuando_baja(self):
-        """coffe-dnx.6: latency.coverage_pct < 50 ⇒ cobertura junto a la
-        cifra; >= 50 no la necesita."""
-        html = self._rows()
-        self.assertIn("cobertura 11.8%", html)   # glm-5.3-flash, todo
-        self.assertIn("cobertura 1.05%", html)   # deepseek-v4-flash, todo
-        self.assertNotIn("cobertura 100%", html)  # >=50 no necesita cobertura
-
-    def test_csv_mantiene_provenance_por_fila(self):
-        """coffe-dnx.6: el export CSV toma el DOM de la tabla; cada fila
-        con cifras lleva su provenance (reported/estimated/assumed)."""
-        html = self._rows()
-        rows = [r for r in html.split("<tr")
-                if "prov-tag" in r and "</td>" in r]
-        self.assertGreater(len(rows), 0)
-        for r in rows:
-            self.assertIn('class="prov-tag"', r)
-
-    def test_banner_veredicto_con_razon(self):
-        """coffe-dnx.6: banner de la regla de decisión con veredicto y
-        razón (mantener|cambiar|datos_insuficientes)."""
-        html = self._rows()
-        self.assertIn("datos_insuficientes", html)
-        self.assertIn("referencia claude-opus-4.5 sin cost_per_accepted_task",
-                      html)
-
-    def test_nulos_con_razon_y_nunca_cero(self):
-        """coffe-dnx.6: nulls[] del scorecard se renderizan con razón;
-        celdas ausentes son n/a con razón, no 0."""
-        report = json.loads(json.dumps(REPORT))
-        entry = report["model_scorecard"][0]
-        entry["data"]["cost_per_task"] = None
-        entry["data"]["nulls"] = [{"field": "cost_per_task",
-                                   "reason": "sin tareas aceptadas"}]
-        html = viz.models_html(report, CONFIG)
-        self.assertIn("n/a", html)
-        self.assertIn("sin tareas aceptadas", html)
-
-    def test_vista_registrada_con_deeplink(self):
-        """coffe-dnx.6: tab 'Modelos', sección #models y deep-link ?view=
-        models (VIEWS del JS), sin página nueva en data/."""
-        html = _rendered()
-        self.assertIn('id="models"', html)
-        self.assertIn('data-view="models"', html)
-        self.assertIn('"models", "gasto"', html)  # VIEWS del JS
-        self.assertIn("Modelos", html)
 
 
 FROZEN_REPORT = json.loads((REPO / "tests" / "fixtures"

@@ -78,7 +78,9 @@ class StdlibOnlyTest(unittest.TestCase):
             self.assertTrue(imported <= expected, f"imports inesperados: {imported - expected}")
 
 
-class RunTest(unittest.TestCase):
+class RunCase(unittest.TestCase):
+    """Base común: bd stub limpio + data/model_eval.json aislado por test."""
+
     def setUp(self):
         _fake_bd.log = []
         self.tmp = tempfile.TemporaryDirectory()
@@ -87,6 +89,8 @@ class RunTest(unittest.TestCase):
     def tearDown(self):
         self.tmp.cleanup()
 
+
+class RunTest(RunCase):
     def test_run_without_verdict_excluded_from_acceptance(self):
         """Rojo: run sin veredicto ⇒ no entra en las tasas de aceptación."""
         rc, _ = run_cmd(["run", "--task", TASK, "--model", MODEL], self.data_path)
@@ -121,15 +125,7 @@ class RunTest(unittest.TestCase):
         self.assertEqual(run["verdict"], "accepted")
 
 
-class IncompleteCohortTest(unittest.TestCase):
-    def setUp(self):
-        _fake_bd.log = []
-        self.tmp = tempfile.TemporaryDirectory()
-        self.data_path = str(Path(self.tmp.name) / "model_eval.json")
-
-    def tearDown(self):
-        self.tmp.cleanup()
-
+class IncompleteCohortTest(RunCase):
     def test_incomplete_cohort_flagged_not_averaged(self):
         """Corrida con cohorte incompleta ⇒ incomplete: true y sin promedio."""
         rc, _ = run_cmd(["run", "--task", TASK, "--model", MODEL,
@@ -140,11 +136,9 @@ class IncompleteCohortTest(unittest.TestCase):
         self.assertNotIn("cohort_average", report)  # no se promedia
 
 
-class ProvenanceTest(unittest.TestCase):
+class ProvenanceTest(RunCase):
     def setUp(self):
-        _fake_bd.log = []
-        self.tmp = tempfile.TemporaryDirectory()
-        self.data_path = str(Path(self.tmp.name) / "model_eval.json")
+        super().setUp()
         run_cmd(["run", "--task", TASK, "--model", MODEL, "--verdict", "accepted"],
                 self.data_path)
         run_cmd(["run", "--task", TASK, "--model", OTHER_MODEL,
@@ -191,15 +185,7 @@ class ProvenanceTest(unittest.TestCase):
         self.assertTrue(errors)
 
 
-class BlindTest(unittest.TestCase):
-    def setUp(self):
-        _fake_bd.log = []
-        self.tmp = tempfile.TemporaryDirectory()
-        self.data_path = str(Path(self.tmp.name) / "model_eval.json")
-
-    def tearDown(self):
-        self.tmp.cleanup()
-
+class BlindTest(RunCase):
     def test_judged_by_present_when_blind_broken(self):
         """Si el ciego se rompe (--judged-by), el reporte lo declara."""
         rc, _ = run_cmd(["run", "--task", TASK, "--model", MODEL,
@@ -218,15 +204,7 @@ class BlindTest(unittest.TestCase):
         self.assertNotIn("judged_by", report["models"][MODEL]["by_class"]["docs"])
 
 
-class BeadTest(unittest.TestCase):
-    def setUp(self):
-        _fake_bd.log = []
-        self.tmp = tempfile.TemporaryDirectory()
-        self.data_path = str(Path(self.tmp.name) / "model_eval.json")
-
-    def tearDown(self):
-        self.tmp.cleanup()
-
+class BeadTest(RunCase):
     def test_bead_created_once_idempotent(self):
         """Bead eval-* creado una sola vez por corrida (idempotente)."""
         argv = ["run", "--task", TASK, "--model", MODEL, "--verdict", "accepted"]

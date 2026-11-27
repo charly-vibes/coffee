@@ -41,22 +41,20 @@ class TestRepoLink(unittest.TestCase):
         self.assertEqual("https://github.com/charly-vibes/coffee", link["url"])
         self.assertFalse(link["private"])
 
-    def test_ak_url(self):
-        link = viz.repo_link("ak-journal", CONFIG)
-        self.assertEqual("https://github.com/akielbowicz/journal", link["url"])
+    def test_urls_por_label(self):
+        """label → URL: owner por prefijo (ak-/sk-), casing del repo
+        preservado (REPLy.jl, tRAGar)."""
+        casos = [("ak-journal", "https://github.com/akielbowicz/journal"),
+                 ("sk-REPLy-jl", "https://github.com/sashakile/REPLy.jl"),
+                 ("charly-tRAGar", "https://github.com/charly-vibes/tRAGar")]
+        for label, url in casos:
+            with self.subTest(repo=label):
+                self.assertEqual(url, viz.repo_link(label, CONFIG)["url"])
 
     def test_ak_org_con_dashes(self):
         # repos con guiones: el corte es por prefijo de org, no primer '-'
         link = viz.repo_link("ak-la-vida-privada-de-los-pensamientos", CONFIG)
         self.assertIsNone(link)  # sin remoto público → no se linkea
-
-    def test_julia_reverse(self):
-        link = viz.repo_link("sk-REPLy-jl", CONFIG)
-        self.assertEqual("https://github.com/sashakile/REPLy.jl", link["url"])
-
-    def test_case_preserved(self):
-        link = viz.repo_link("charly-tRAGar", CONFIG)
-        self.assertEqual("https://github.com/charly-vibes/tRAGar", link["url"])
 
     def test_private_flag(self):
         link = viz.repo_link("charly-tv", CONFIG)
@@ -173,24 +171,26 @@ class TestValidateReposBlock(unittest.TestCase):
         repos_errors = [e for e in errors if "repos" in e]
         self.assertEqual([], repos_errors)
 
-    def test_override_no_https(self):
-        cfg = json.loads(json.dumps(CONFIG))
-        cfg["repos"]["url_overrides"]["x"] = "http://inseguro"
-        errors = fpa_config.validate_config(cfg)
-        self.assertTrue(any("repos" in e and "url_overrides" in e
-                            for e in errors))
-
-    def test_private_org_desconocida(self):
-        cfg = json.loads(json.dumps(CONFIG))
-        cfg["repos"]["private"] = ["zzz/tv"]
-        errors = fpa_config.validate_config(cfg)
-        self.assertTrue(any("repos" in e and "zzz" in e for e in errors))
-
-    def test_no_remote_sin_slash(self):
-        cfg = json.loads(json.dumps(CONFIG))
-        cfg["repos"]["no_remote"] = ["sin-slash"]
-        errors = fpa_config.validate_config(cfg)
-        self.assertTrue(any("repos" in e for e in errors))
+    def test_forma_invalida_del_bloque_da_error(self):
+        """Mutaciones del bloque repos que el schema rechaza: override sin
+        https (se menciona url_overrides), org privada desconocida (se
+        menciona la org) y no_remote sin slash — todas nombran 'repos'."""
+        casos = [
+            ({"url_overrides": {"x": "http://inseguro"}}, "url_overrides"),
+            ({"private": ["zzz/tv"]}, "zzz"),
+            ({"no_remote": ["sin-slash"]}, None),
+        ]
+        for mutacion, mencionar in casos:
+            with self.subTest(bloque=mutacion):
+                cfg = json.loads(json.dumps(CONFIG))
+                cfg["repos"].update(mutacion)
+                errors = fpa_config.validate_config(cfg)
+                self.assertTrue(any("repos" in e for e in errors),
+                                f"sin error de repos para {mutacion}")
+                if mencionar:
+                    self.assertTrue(
+                        any(mencionar in e for e in errors),
+                        f"el error no menciona {mencionar}: {errors}")
 
 
 if __name__ == "__main__":

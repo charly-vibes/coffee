@@ -133,13 +133,18 @@ class TestModeloEnergia(unittest.TestCase):
         self.assertEqual(self.e["nominal_factor"], 0.1)
 
 
-class TestChartBanda(unittest.TestCase):
-    """SVG accesible con banda low–high y nominal dentro."""
+class _EnergyRender(unittest.TestCase):
+    """HTML + sección energía del fixture de banda, renderizados una vez
+    (compartido por las tres vistas que inspeccionan el mismo render)."""
 
     @classmethod
     def setUpClass(cls):
         cls.html = viz.render_html(_fixture(), CONFIG, generated="2026-09-24 20:00")
         cls.sec = _energy_section(cls.html)
+
+
+class TestChartBanda(_EnergyRender):
+    """SVG accesible con banda low–high y nominal dentro."""
 
     def test_chart_con_clase_chart_para_dl_svg(self):
         self.assertRegex(self.sec, r'<svg class="[^"]*chart')
@@ -169,13 +174,8 @@ class TestChartBanda(unittest.TestCase):
                 self.assertLessEqual(kwh, high)
 
 
-class TestCaptionYProvenance(unittest.TestCase):
+class TestCaptionYProvenance(_EnergyRender):
     """Caption de banda y tag assumed (FPA-003) en toda cifra."""
-
-    @classmethod
-    def setUpClass(cls):
-        cls.html = viz.render_html(_fixture(), CONFIG, generated="2026-09-24 20:00")
-        cls.sec = _energy_section(cls.html)
 
     def test_caption_explica_extremos(self):
         self.assertIn("0%", self.sec)
@@ -213,23 +213,17 @@ class TestDatasetReal(unittest.TestCase):
         self.assertEqual(self.e["provenance"], "assumed")
 
 
-class TestReviewFixes(unittest.TestCase):
+class TestReviewFixes(_EnergyRender):
     """Hallazgos rule-of-5 post-ship (ro5u): readout, export, fallback,
     meses parciales."""
 
-    @classmethod
-    def setUpClass(cls):
-        cls.html = viz.render_html(_fixture(), CONFIG, generated="2026-09-24 20:00")
-        cls.sec = _energy_section(cls.html)
-
-    def test_readout_cubre_chart_energia(self):
-        """EDGE-001: el selector del readout incluye .enb-chart (FPA-175)."""
+    def test_readout_y_dl_svg_en_energia(self):
+        """EDGE-001: el selector del readout incluye .enb-chart (FPA-175);
+        EDGE-002: el chart energía recibe botón Descargar SVG (FPA-169)."""
         self.assertIn(".enb-chart rect[data-label]", self.html)
-
-    def test_boton_descargar_svg_en_energia(self):
-        """EDGE-002: el chart energía recibe botón Descargar SVG (FPA-169)."""
         self.assertIn('<button class="dl-svg" type="button">Descargar SVG</button>'
                       '<svg class="enb-chart chart"', self.html)
+        self.assertIn("Descargar SVG</button><svg", self.html)
 
     def test_css_tema_para_barras_energia(self):
         """CLAR-001: las barras usan el tema compartido, no defaults."""

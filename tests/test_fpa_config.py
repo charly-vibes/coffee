@@ -71,33 +71,35 @@ class TestConfigRealValido(unittest.TestCase):
         self.assertEqual("09:00", cfg["working_hours"]["start"])
         self.assertEqual("18:00", cfg["working_hours"]["end"])
 
-    def test_suscripciones_claude_facturas(self):
-        """FPA-082/reales: calendario corregido a las facturas de claude-cli.
-        Max 19-mar, Max 19-abr, Pro 19-may — cancelado, sin factura jun."""
-        subs = fpa_config.load_fpa_config()["subscriptions"]["claude-cli"]
-        self.assertEqual([
-            ("2026-03-19", "2026-04-19", 100),
-            ("2026-04-19", "2026-05-19", 100),
-            ("2026-05-19", "2026-06-19", 20),
-        ], [(s["start"], s["end"], s["monthly_fee"]) for s in subs])
+    def test_suscripciones_facturadas(self):
+        """FPA-082/reales: calendarios corregidos a las facturas por tool.
 
-    def test_suscripciones_codex_facturas(self):
-        """FPA-082/reales: ChatGPT Plus $20 el 2-abr y el 2-may; Free después
-        hasta el trial de coffe-wo1 (1 mes free desde el 6-oct)."""
-        subs = fpa_config.load_fpa_config()["subscriptions"]["codex"]
-        self.assertEqual([
-            ("2026-04-02", "2026-05-02", 20),
-            ("2026-05-02", "2026-06-02", 20),
-            ("2026-10-06", "2026-11-06", 0),  # coffe-wo1: trial 1 mes free
-        ], [(s["start"], s["end"], s["monthly_fee"]) for s in subs])
-
-    def test_suscripciones_gemini_facturas(self):
-        """FPA-082/reales: Google AI Pro $19.99/mes desde dic-2025,
-        cancelado después de mayo-2026 (sin facturas jun+)."""
-        subs = fpa_config.load_fpa_config()["subscriptions"]["gemini-cli"]
-        self.assertEqual([
-            ("2025-12-03", "2026-06-03", 19.99),
-        ], [(s["start"], s["end"], s["monthly_fee"]) for s in subs])
+        claude-cli: Max 19-mar, Max 19-abr, Pro 19-may — cancelado, sin
+        factura jun. codex: ChatGPT Plus $20 el 2-abr y el 2-may; Free
+        después hasta el trial de coffe-wo1 (1 mes free desde el 6-oct).
+        gemini-cli: Google AI Pro $19.99/mes desde dic-2025, cancelado
+        después de mayo-2026 (sin facturas jun+)."""
+        cases = {
+            "claude-cli": [
+                ("2026-03-19", "2026-04-19", 100),
+                ("2026-04-19", "2026-05-19", 100),
+                ("2026-05-19", "2026-06-19", 20),
+            ],
+            "codex": [
+                ("2026-04-02", "2026-05-02", 20),
+                ("2026-05-02", "2026-06-02", 20),
+                ("2026-10-06", "2026-11-06", 0),  # coffe-wo1: trial 1 mes free
+            ],
+            "gemini-cli": [
+                ("2025-12-03", "2026-06-03", 19.99),
+            ],
+        }
+        subs = fpa_config.load_fpa_config()["subscriptions"]
+        for tool, expected in cases.items():
+            with self.subTest(tool=tool):
+                self.assertEqual(expected,
+                                 [(s["start"], s["end"], s["monthly_fee"])
+                                  for s in subs[tool]])
 
     def test_suscripciones_sin_cola_fantasma(self):
         """Los calendarios terminan según facturas: ninguna entrada con
@@ -164,23 +166,23 @@ class TestValidateConfig(unittest.TestCase):
         errors = fpa_config.validate_config(cfg)
         self.assertTrue(any("target" in e.lower() for e in errors))
 
-    def test_budget_start_month_formato(self):
+    def test_campos_mal_formados_detectados(self):
+        """FPA-050…: formatos inválidos se listan campo por campo."""
         cfg = _cfg()
         cfg["budgets"]["start_month"] = "abril"
-        errors = fpa_config.validate_config(cfg)
-        self.assertTrue(any("start_month" in e for e in errors))
-
-    def test_horario_dia_invalido(self):
+        self.assertTrue(any("start_month" in e
+                            for e in fpa_config.validate_config(cfg)))
         cfg = _cfg()
         cfg["working_hours"]["days"] = [0, 8]
-        errors = fpa_config.validate_config(cfg)
-        self.assertTrue(any("working_hours" in e for e in errors))
-
-    def test_horario_hora_invalida(self):
+        self.assertTrue(any("working_hours" in e
+                            for e in fpa_config.validate_config(cfg)))
         cfg = _cfg()
         cfg["working_hours"]["start"] = "9am"
-        errors = fpa_config.validate_config(cfg)
-        self.assertTrue(any("start" in e for e in errors))
+        self.assertTrue(any("start" in e
+                            for e in fpa_config.validate_config(cfg)))
+        cfg = _cfg()
+        cfg["taxonomy"]["rules"] = [{"category": "x"}, {"match": "^y"}]
+        self.assertTrue(any("rules" in e for e in fpa_config.validate_config(cfg)))
 
     def test_forma_malformada_no_crash(self):
         """Config malformado devuelve errores, nunca excepción."""
@@ -194,11 +196,7 @@ class TestValidateConfig(unittest.TestCase):
                 errors = fpa_config.validate_config(_cfg(**{section: bad}))
                 self.assertTrue(any(section in e for e in errors))
 
-    def test_regla_taxonomia_sin_shape(self):
-        cfg = _cfg()
-        cfg["taxonomy"]["rules"] = [{"category": "x"}, {"match": "^y"}]
-        errors = fpa_config.validate_config(cfg)
-        self.assertTrue(any("rules" in e for e in errors))
+
 
 
 class TestClassifyProject(unittest.TestCase):
@@ -208,10 +206,6 @@ class TestClassifyProject(unittest.TestCase):
         cfg = _cfg()
         self.assertEqual("charly", fpa_config.classify_project(cfg, "charly-wai"))
         self.assertEqual("charly", fpa_config.classify_project(cfg, "charly/tv"))
-
-    def test_regla_sk(self):
-        cfg = _cfg()
-        self.assertEqual("sk", fpa_config.classify_project(cfg, "sk-REPLy-jl"))
 
     def test_regla_ak(self):
         """coffe-vp8: repos ak (akielbowicz) son categoría propia."""
@@ -227,17 +221,16 @@ class TestClassifyProject(unittest.TestCase):
         self.assertEqual("sk", fpa_config.classify_project(cfg, "sk"))
         self.assertEqual("ak", fpa_config.classify_project(cfg, "ak"))
 
-    def test_override_gana_sobre_regla(self):
+    def test_override_gana_y_fallback(self):
+        """FPA-018: una regla matchea (sk), el override gana sobre la regla y
+        sin match de reglas cae en Unclassified."""
         cfg = _cfg()
+        self.assertEqual("sk", fpa_config.classify_project(cfg, "sk-REPLy-jl"))
         cfg["taxonomy"]["overrides"]["charly-wai"] = "otro"
         self.assertEqual("otro", fpa_config.classify_project(cfg, "charly-wai"))
-
-    def test_fallback_unclassified(self):
-        cfg = _cfg()
         cfg["taxonomy"]["rules"] = []
-        self.assertEqual(
-            "Unclassified", fpa_config.classify_project(cfg, "proyecto-raro")
-        )
+        self.assertEqual("Unclassified",
+                         fpa_config.classify_project(cfg, "proyecto-raro"))
 
 
 class TestRatesFor(unittest.TestCase):
@@ -281,24 +274,28 @@ class TestSchemaExtendido(unittest.TestCase):
         )
 
     def _validate(self, doc):
+        """Lista de mensajes de error ([] si el doc valida)."""
         try:
             import jsonschema
         except ImportError:
             self.skipTest("jsonschema no instalado")
-        jsonschema.validate(doc, self.schema)
+        try:
+            jsonschema.validate(doc, self.schema)
+        except jsonschema.exceptions.ValidationError as e:
+            return [e.message]
+        return []
 
-    def test_reporte_actual_sigue_valido(self):
+    def test_schema_acepta_reportes_validos(self):
+        """El schema extendido acepta el reporte actual, los campos nuevos
+        (FPA-013) y pay-per-token null."""
         report = json.loads((REPO / "data" / "usage_report_v3.json").read_text())
-        self._validate(report)
-
-    def test_emisiones_nuevas_aceptadas(self):
-        report = json.loads((REPO / "data" / "usage_report_v3.json").read_text())
-        report["metadata"]["timezone"] = "America/Argentina/Buenos_Aires"
-        report["metadata"]["interaction_kinds"] = {
+        nuevo = json.loads(json.dumps(report))
+        nuevo["metadata"]["timezone"] = "America/Argentina/Buenos_Aires"
+        nuevo["metadata"]["interaction_kinds"] = {
             "user_prompt": 10, "assistant_turn": 20, "tool_call": 30,
         }
-        report["metadata"]["filtered"] = {"interactions": 5, "cost_effective": 0.5}
-        mes = report["monthly"]["2026-06"]
+        nuevo["metadata"]["filtered"] = {"interactions": 5, "cost_effective": 0.5}
+        mes = nuevo["monthly"]["2026-06"]
         mes["tokens_by_model"] = {
             "opus-4.5": {
                 "in": 1, "out": 2, "cache_read": 3, "cache_write": 4,
@@ -307,17 +304,20 @@ class TestSchemaExtendido(unittest.TestCase):
         mes["pay_per_token_charges"] = 0.0
         mes["interaction_kinds"] = {"user_prompt": 1, "tool_call": 2}
         mes["outcomes_by_project"] = {"charly-wai": {"commits": 3, "releases": 1}}
-        report["concurrency"] = {
+        nuevo["concurrency"] = {
             "peak_simultaneous_sessions": {"peak": 2, "measure": "parallel-agent"},
             "switches_per_active_hour": 1.5,
         }
-        self._validate(report)
-
-    def test_pay_per_token_admite_null(self):
-        """FPA-013: cargas pay-per-token sin datos reales → null permitido."""
-        report = json.loads((REPO / "data" / "usage_report_v3.json").read_text())
-        report["monthly"]["2026-06"]["pay_per_token_charges"] = None
-        self._validate(report)
+        nulo = json.loads(json.dumps(report))
+        nulo["monthly"]["2026-06"]["pay_per_token_charges"] = None
+        reports = [
+            ("reporte_actual", report),
+            ("campos_nuevos_fpa_013", nuevo),
+            ("pay_per_token_null", nulo),
+        ]
+        for name, doc in reports:
+            with self.subTest(report=name):
+                self.assertEqual([], self._validate(doc))
 
 
 class TestConsistenciaConTracker(unittest.TestCase):

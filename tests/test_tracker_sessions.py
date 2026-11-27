@@ -32,33 +32,32 @@ ut = _load("usage_tracker_i31", "scripts/usage-tracker.py")
 viz = _load("viz_fpa_i31", "scripts/viz-fpa.py")
 
 
-def row(ts="2026-05-10T14:23:00+00:00", project="charly-coffee", tool="claude-cli",
-        model_raw="claude-sonnet-4-6", **kw):
-    """Row sintético con el shape exacto que producen los extractores."""
+def row(ts="2026-05-10T14:23:00+00:00", overrides=None):
+    """Row sintético con el shape exacto que producen los extractores;
+    `overrides` ajusta campos puntuales (project, tool, ...)."""
     base = {
-        "source": "test", "tool": tool, "model_raw": model_raw,
+        "source": "test", "tool": "claude-cli",
+        "model_raw": "claude-sonnet-4-6",
         "model_family": "claude", "model_version": "sonnet-4.6",
-        "project": project, "timestamp": ts,
+        "project": "charly-coffee", "timestamp": ts,
         "hour": ut.hour_key(ut.parse_ts(ts)),
         "input_tokens": 1000, "output_tokens": 500,
         "cache_read_tokens": 0, "cache_write_tokens": 0,
         "cost_effective": 0.01,
     }
-    base.update(kw)
+    if overrides:
+        base.update(overrides)
     return base
 
 
 ut.row = row  # los tests llaman ut.row
 
 
-def _pi_msg(ts, role, parts=None, usage=None, provider=None):
+def _pi_msg(ts, role, parts=None, usage=None):
     msg = {"role": role, "content": parts or []}
     if usage is not None:
         msg["usage"] = usage
-    e = {"type": "message", "timestamp": ts, "message": msg}
-    if provider is not None:
-        e["provider"] = provider
-    return e
+    return {"type": "message", "timestamp": ts, "message": msg}
 
 
 def _write_jsonl(path, entries):
@@ -78,9 +77,9 @@ def _pi_project(tmp, name):
         _pi_msg("2026-05-10T14:23:00.000Z", "user",
                 [{"type": "text", "text": "hola"}]),
         _pi_msg("2026-05-10T14:23:05.000Z", "assistant"),
-        _pi_msg("2026-05-10T14:24:00.000Z", "assistant",
-                [{"type": "tool-call", "toolName": "bash"}],
-                provider="openrouter"),
+        dict(_pi_msg("2026-05-10T14:24:00.000Z", "assistant",
+                     [{"type": "tool-call", "toolName": "bash"}]),
+             provider="openrouter"),
         _pi_msg("2026-05-10T14:25:00.000Z", "user",
                 [{"type": "text", "text": "otra"}]),
         _pi_msg("2026-05-10T14:26:00.000Z", "assistant"),
@@ -296,7 +295,7 @@ class TestSessionStatsByTool(unittest.TestCase):
         self.assertIn("pi", stats["agent_semantics"].lower())
 
     def test_aggregate_emite_by_tool(self):
-        rows = [ut.row(ts="2026-05-10T14:23:00+00:00", project="charly-coffee")]
+        rows = [ut.row("2026-05-10T14:23:00+00:00")]
         report = ut.aggregate(rows, self._sessions(),
                               Counter(), {}, Counter({"/clear": 7}))
         self.assertIn("by_tool", report["sessions"])
@@ -311,7 +310,7 @@ class TestVizSessionsScope(unittest.TestCase):
 
     def _report(self):
         sessions = TestSessionStatsByTool()._sessions()
-        rows = [ut.row(ts="2026-05-10T14:23:00+00:00", project="charly-coffee")]
+        rows = [ut.row("2026-05-10T14:23:00+00:00")]
         return ut.aggregate(rows, sessions, Counter(), {},
                             Counter({"/clear": 7}))
 

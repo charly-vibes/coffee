@@ -61,10 +61,22 @@ def _rows(claude_by_month, codex_by_month=None):
 class DetectMonthlyRegressionsTest(unittest.TestCase):
     """detect_monthly_regressions(): pura, solo claude-cli, mes actual fuera."""
 
-    def test_sin_caida_no_reporta(self):
-        old = _old_report({"2026-04": 100, "2026-05": 200})
-        new = _rows({"2026-04": 105, "2026-05": 220})
-        self.assertEqual(ut.detect_monthly_regressions(new, old, 20.0), [])
+    # (nombre, reporte viejo, filas nuevas) — casos donde el guard NO reporta
+    SIN_REGRESION = [
+        ("sin_caida", _old_report({"2026-04": 100, "2026-05": 200}),
+         _rows({"2026-04": 105, "2026-05": 220})),
+        ("caida_bajo_umbral", _old_report({"2026-05": 100}),
+         _rows({"2026-05": 90})),  # -10% < 20%
+        ("solo_otras_tools", _old_report(codex_by_month={"2026-05": 100}),
+         _rows(claude_by_month={}, codex_by_month={"2026-05": 5})),
+        ("mes_nuevo_sin_reporte_viejo", _old_report({"2026-04": 100}),
+         _rows({"2026-04": 100, "2026-05": 50})),  # mes ausente del viejo
+    ]
+
+    def test_casos_sin_regresion_no_reportan(self):
+        for nombre, old, new in self.SIN_REGRESION:
+            with self.subTest(caso=nombre):
+                self.assertEqual(ut.detect_monthly_regressions(new, old, 20.0), [])
 
     def test_caida_sobre_umbral_detecta(self):
         old = _old_report({"2026-04": 100, "2026-05": 200})
@@ -76,27 +88,11 @@ class DetectMonthlyRegressionsTest(unittest.TestCase):
         self.assertEqual(regs[0]["new"], 80)
         self.assertAlmostEqual(regs[0]["drop_pct"], 60.0)
 
-    def test_caida_bajo_umbral_no_reporta(self):
-        old = _old_report({"2026-05": 100})
-        new = _rows({"2026-05": 90})  # -10% < 20%
-        self.assertEqual(ut.detect_monthly_regressions(new, old, 20.0), [])
-
     def test_mes_actual_ignorado(self):
         # el mes en curso crece mes a mes; una "caída" a mitad de mes es ruido
         hoy = ut.datetime.now().strftime("%Y-%m")
         old = _old_report({hoy: 500})
         new = _rows({hoy: 10})
-        self.assertEqual(ut.detect_monthly_regressions(new, old, 20.0), [])
-
-    def test_solo_claude_cli_otras_tools_ignoradas(self):
-        old = _old_report(codex_by_month={"2026-05": 100})
-        new = _rows(claude_by_month={}, codex_by_month={"2026-05": 5})
-        self.assertEqual(ut.detect_monthly_regressions(new, old, 20.0), [])
-
-    def test_mes_nuevo_no_reporta(self):
-        # mes ausente del reporte viejo: no hay contra qué comparar
-        old = _old_report({"2026-04": 100})
-        new = _rows({"2026-04": 100, "2026-05": 50})
         self.assertEqual(ut.detect_monthly_regressions(new, old, 20.0), [])
 
     def test_sin_reporte_previo_no_reporta(self):
@@ -128,7 +124,9 @@ class CheckMonthlyRegressionsWiringTest(unittest.TestCase):
 
     def test_sin_reporte_previo_pasa(self):
         rows = _rows({"2026-05": 10})
-        ut.check_monthly_regressions(rows, self.out_path, force=False)  # no raise
+        # devuelve None (pasa) en vez de abortar con SystemExit
+        self.assertIsNone(
+            ut.check_monthly_regressions(rows, self.out_path, force=False))
 
     def test_regresion_aborta(self):
         self.out_path.write_text(json.dumps(
@@ -140,8 +138,10 @@ class CheckMonthlyRegressionsWiringTest(unittest.TestCase):
 
     def test_force_pisando_acepta(self):
         self.out_path.write_text(json.dumps(_old_report({"2026-05": 100})))
-        rows = _rows({"2026-05": 10})
-        ut.check_monthly_regressions(rows, self.out_path, force=True)  # no raise
+        rows = _rows({"2026-05": 10})  # -90%: regresión, pero --force la permite
+        # devuelve None (escribe) en vez de abortar con SystemExit
+        self.assertIsNone(
+            ut.check_monthly_regressions(rows, self.out_path, force=True))
 
     def test_umbral_por_env(self):
         import os

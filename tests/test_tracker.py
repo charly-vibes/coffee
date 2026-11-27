@@ -15,6 +15,7 @@ import io
 import json
 import os
 import re
+import sys
 import tempfile
 import unittest
 from datetime import date, datetime, timezone
@@ -38,29 +39,30 @@ def load_tracker():
 ut = load_tracker()
 
 
-def row(ts="2026-05-10T14:23:00+00:00", project="charly-coffee", tool="claude-cli",
-        model_raw="claude-sonnet-4-6", **kw):
-    """Row sintético con el shape exacto que producen los extractores."""
+def row(ts="2026-05-10T14:23:00+00:00", overrides=None):
+    """Row sintética con el shape exacto que producen los extractores;
+    overrides ajusta campos puntuales (project, tool, tokens, ...)."""
     base = {
-        "source": "test", "tool": tool, "model_raw": model_raw,
+        "source": "test", "tool": "claude-cli",
+        "model_raw": "claude-sonnet-4-6",
         "model_family": "claude", "model_version": "sonnet-4.6",
-        "project": project, "timestamp": ts,
+        "project": "charly-coffee", "timestamp": ts,
         "hour": ut.hour_key(ut.parse_ts(ts)),
         "input_tokens": 1000, "output_tokens": 500,
         "cache_read_tokens": 0, "cache_write_tokens": 0,
         "cost_effective": 0.01,
     }
-    base.update(kw)
+    if overrides:
+        base.update(overrides)
     return base
 
 
 def synthetic_rows():
     """3 rows: 2 proyectos, 2 meses, 1 hora compartida (multitasking)."""
     return [
-        row(ts="2026-05-10T14:23:00+00:00", project="charly-coffee"),
-        row(ts="2026-05-10T14:40:00+00:00", project="charly-atril", tool="codex",
-            model_raw="gpt-5.4", model_family="codex", model_version="gpt-5.4"),
-        row(ts="2026-06-01T09:00:00+00:00", project="charly-coffee"),
+        row('2026-05-10T14:23:00+00:00', overrides=dict(project='charly-coffee')),
+        row('2026-05-10T14:40:00+00:00', overrides=dict(project='charly-atril', tool='codex', model_raw='gpt-5.4', model_family='codex', model_version='gpt-5.4')),
+        row('2026-06-01T09:00:00+00:00', overrides=dict(project='charly-coffee')),
     ]
 
 
@@ -109,38 +111,25 @@ class TestPureFunctions(unittest.TestCase):
         self.assertEqual(ut.model_details("deepseek-v4"), ("deepseek", "v4-flash"))
         self.assertEqual(ut.model_details("algo-desconocido")[0], "other")
 
-    def test_clean_proj_name_strips_path_prefix(self):
-        # logs históricos (path pre-rename) derivan el label viejo y se
-        # canonicalizan al nombre corregido (bd coffe-85z)
-        self.assertEqual(
-            ut.clean_proj_name("-var-home-sasha-para-areas-dev-gh-charly-coffee"),
-            "charly-coffee")
+    # (label mungeado, label canónico) — tabla coffe-vp8/coffe-85z:
+    # logs históricos pre-rename, dir local post-rename y alias convergen
+    CASOS_CLEAN_PROJ = [
+        ("-var-home-sasha-para-areas-dev-gh-charly-coffee", "charly-coffee"),
+        ("charly-mibilioteca", "charly-miblioteca"),
+        ("sk-sxAct", "sk-XAct-jl"),
+        ("charly-coffee", "charly-coffee"),
+        ("-sk-REPLy.jl", "sk-REPLy-jl"),
+        # Claude mungea '.' del path a '-', Pi no — alias a un label (coffe-vp8)
+        ("ak-akielbowicz-github-io", "ak-akielbowicz.github.io"),
+        ("ak-akielbowicz.github.io", "ak-akielbowicz.github.io"),
+        # uri de Amp a archivo en raíz del org colapsa a la org (coffe-vp8)
+        ("ak-justfile", "ak"),
+    ]
 
-    def test_clean_proj_name_strips_renamed_dir(self):
-        # dir local post-rename y label histórico convergen al mismo label
-        self.assertEqual(
-            ut.clean_proj_name("-var-home-sasha-para-areas-dev-gh-charly-coffee"),
-            "charly-coffee")
-
-    def test_clean_proj_name_aliases(self):
-        self.assertEqual(ut.clean_proj_name("charly-mibilioteca"), "charly-miblioteca")
-        self.assertEqual(ut.clean_proj_name("sk-sxAct"), "sk-XAct-jl")
-        self.assertEqual(ut.clean_proj_name("charly-coffee"), "charly-coffee")
-
-    def test_clean_proj_name_julia_repos(self):
-        self.assertEqual(ut.clean_proj_name("-sk-REPLy.jl"), "sk-REPLy-jl")
-
-    def test_clean_proj_name_dots_vs_dashes(self):
-        """coffe-vp8: Claude mungea '.' del path a '-', Pi no — alias a un label."""
-        self.assertEqual(ut.clean_proj_name("ak-akielbowicz-github-io"),
-                         "ak-akielbowicz.github.io")
-        self.assertEqual(ut.clean_proj_name("ak-akielbowicz.github.io"),
-                         "ak-akielbowicz.github.io")
-
-    def test_clean_proj_name_amp_org_root_file(self):
-        """coffe-vp8: uri de Amp a archivo en raíz del org (gh/ak/justfile)
-        derivaba un repo fantasma 'ak-justfile' — colapsa a la org."""
-        self.assertEqual(ut.clean_proj_name("ak-justfile"), "ak")
+    def test_clean_proj_name_tabla(self):
+        for label, esperado in self.CASOS_CLEAN_PROJ:
+            with self.subTest(label=label):
+                self.assertEqual(ut.clean_proj_name(label), esperado)
 
     def test_is_charly(self):
         # coffe-vp8: el scope incluye repos ak (akielbowicz) además de charly/sk
@@ -167,18 +156,23 @@ class TestPureFunctions(unittest.TestCase):
         # segmento completo, no prefijo: -gh-akaria no es org ak
         self.assertFalse(ut.in_scope("-var-home-sasha-para-areas-dev-gh-akaria-x"))
 
-    def test_get_sub_cost_subscription_period(self):
+    # (tool, ts, coste, (real, label) esperados) — calendario de suscripciones
+    CASOS_SUB_COST = [
         # mayo 2026 = Max $100 → real cost 0
-        real, eff, label = ut.get_sub_cost("claude-cli", "2026-05-10T14:23:00+00:00", 0.01)
-        self.assertEqual((real, label), (0.0, "Max $100/mes"))
+        ("claude-cli", "2026-05-10T14:23:00+00:00", 0.01, (0.0, "Max $100/mes")),
+        # post 2026-05-15: cobra pay-per-token (label sin plan: no asertado)
+        ("codex", "2026-06-10T14:23:00+00:00", 0.01, (0.01, None)),
+        ("amp", "2026-05-10", 0.0, (0.0, "pay-per-token")),
+    ]
 
-    def test_get_sub_cost_pay_per_token_after_period(self):
-        real, eff, label = ut.get_sub_cost("codex", "2026-06-10T14:23:00+00:00", 0.01)
-        self.assertEqual(real, 0.01)  # post 2026-05-15: pay-per-token
-
-    def test_get_sub_cost_non_subscribed_tool(self):
-        real, eff, label = ut.get_sub_cost("amp", "2026-05-10", 0.0)
-        self.assertEqual(label, "pay-per-token")
+    def test_get_sub_cost_calendario(self):
+        for tool, ts, coste, esperado in self.CASOS_SUB_COST:
+            with self.subTest(tool=tool):
+                real, eff, label = ut.get_sub_cost(tool, ts, coste)
+                if esperado[1] is None:
+                    self.assertEqual(real, esperado[0])
+                else:
+                    self.assertEqual((real, label), esperado)
 
     def test_calc_subscription_fees_present_for_active_months(self):
         monthly = {"2026-04": {"tools": ["claude-cli", "codex"]},
@@ -212,6 +206,13 @@ class TestTrackerConfig(unittest.TestCase):
         path.write_text(json.dumps(cfg))
         old = os.environ.get("TRACKER_CONFIG")
         os.environ["TRACKER_CONFIG"] = str(path)
+        # El tracker partido cachea su estado de config en módulos
+        # compartidos (usage_state/usage_config/usage_cli/fpa_*), y
+        # load_config() corre en el import: sin purgar sys.modules el
+        # re-import devuelve el config real en vez del fixture. Se
+        # restauran al salir para no desacoplar a otros consumers.
+        saved = {k: sys.modules.pop(k) for k in list(sys.modules)
+                 if k.startswith(("usage_", "fpa_"))}
         try:
             spec = importlib.util.spec_from_file_location(name, TRACKER_PATH)
             m = importlib.util.module_from_spec(spec)
@@ -221,6 +222,7 @@ class TestTrackerConfig(unittest.TestCase):
                 os.environ.pop("TRACKER_CONFIG", None)
             else:
                 os.environ["TRACKER_CONFIG"] = old
+            sys.modules.update(saved)
         return m
 
     def test_subs_desde_config_real(self):
@@ -292,10 +294,15 @@ class TestTrackerConfig(unittest.TestCase):
         falla loud (FileNotFoundError), no fallback silencioso."""
         old_cwd = os.getcwd()
         old_root, old_subs, old_cfg = ut._REPO_ROOT, ut.SUBSCRIPTIONS, ut._FPA_CONFIG
+        # el split del tracker vive en usage_config: su copia de _REPO_ROOT
+        # (importada por nombre) es la que load_config() realmente lee
+        cfgmod = sys.modules[ut.load_config.__module__]
+        old_cfgmod_root = cfgmod._REPO_ROOT
         os.chdir(tempfile.mkdtemp())
         err = io.StringIO()
         try:
             ut._REPO_ROOT = Path(tempfile.mkdtemp())  # sin config/fpa.json
+            cfgmod._REPO_ROOT = ut._REPO_ROOT
             with contextlib.redirect_stderr(err):
                 cfg = ut.load_config()
             self.assertIsNone(cfg)
@@ -308,6 +315,7 @@ class TestTrackerConfig(unittest.TestCase):
         finally:
             os.chdir(old_cwd)
             ut._REPO_ROOT = old_root
+            cfgmod._REPO_ROOT = old_cfgmod_root
             ut.load_config()  # restaura globals con el config real
             self.assertEqual(ut._FPA_CONFIG, old_cfg)
 
@@ -334,193 +342,6 @@ class TestTrackerConfig(unittest.TestCase):
     def setUpClass(cls):
         cls.report = ut.aggregate(synthetic_rows(), synthetic_sessions())
 
-
-# ============================ aggregate ============================
-
-class TestAggregate(unittest.TestCase):
-
-    @classmethod
-    def setUpClass(cls):
-        cls.report = ut.aggregate(synthetic_rows(), synthetic_sessions())
-
-    def test_metadata_totals(self):
-        m = self.report["metadata"]
-        self.assertEqual(m["total_interactions"], 3)
-        self.assertEqual(m["total_projects"], 2)
-        self.assertEqual(m["total_hours"], 2)
-        self.assertEqual(m["total_days"], 2)
-        self.assertEqual(m["total_months"], 2)
-
-    def test_monthly(self):
-        self.assertIn("2026-05", self.report["monthly"])
-        self.assertIn("2026-06", self.report["monthly"])
-        self.assertEqual(self.report["monthly"]["2026-05"]["interactions"], 2)
-        self.assertEqual(self.report["monthly"]["2026-06"]["interactions"], 1)
-
-    def test_projects_sorted_by_cost_desc(self):
-        costs = [v["cost_effective"] for v in self.report["projects"].values()]
-        self.assertEqual(costs, sorted(costs, reverse=True))
-
-    def test_sessions_length_distribution(self):
-        ld = self.report["sessions"]["length_distribution"]
-        self.assertEqual(ld.get("1-10"), 1)
-        self.assertEqual(ld.get("101-300"), 1)
-        self.assertEqual(self.report["sessions"]["with_agent"], 1)
-        self.assertEqual(self.report["sessions"]["total_api_errors"], 1)
-
-    def test_multitasking_detects_shared_hour(self):
-        mt = self.report["multitasking"]["hourly"]
-        self.assertEqual(mt["total_active_hours"], 2)
-        self.assertEqual(mt["hours_with_multiple_projects"], 1)
-        self.assertEqual(mt["pct_hours_multitasking"], 50.0)
-
-    def test_context_switches(self):
-        # semántica real: cambio de proyecto entre requests consecutivos,
-        # aunque crucen la medianoche (coffe→atril=1, atril→coffe=1)
-        cs = self.report["multitasking"]["context_switches"]
-        self.assertEqual(cs["total"], 2)
-        self.assertEqual(cs["max_in_one_day"], 1)
-
-    def test_project_daily_dense_matrix(self):
-        pd_ = self.report["project_daily"]
-        self.assertEqual(set(pd_["matrix"].keys()), {"charly-coffee", "charly-atril"})
-        for p, series in pd_["matrix"].items():
-            self.assertEqual(len(series), len(pd_["days"]))  # densa, sin huecos
-        # días continuos: 2026-05-10 → 2026-06-01 = 23 días
-        self.assertEqual(len(pd_["days"]), 23)
-
-    def test_no_dead_keys(self):
-        self.assertNotIn("tools_summary", self.report)
-
-
-class TestProjectMonthlyTokens(unittest.TestCase):
-    """add-project-cost-token-timeline (d1/t1.2): project_monthly acumula
-    tokens (in/out/cache_read) y cost_real por proyecto×mes, para la timeline
-    de volumen y coste por proyecto del dashboard (d2)."""
-
-    @classmethod
-    def setUpClass(cls):
-        rows = [
-            row(ts="2026-05-10T14:23:00+00:00", project="charly-coffee",
-                tool="gemini-cli", model_raw="gemini-3-pro",
-                model_family="gemini", model_version="gemini-3-pro",
-                input_tokens=1000, output_tokens=500,
-                cache_read_tokens=200, cost_effective=0.01),
-            row(ts="2026-05-11T09:00:00+00:00", project="charly-coffee",
-                tool="gemini-cli", model_raw="gemini-3-pro",
-                model_family="gemini", model_version="gemini-3-pro",
-                input_tokens=0, output_tokens=0, cache_read_tokens=0,
-                cost_effective=0.0),
-            row(ts="2026-06-01T09:00:00+00:00", project="charly-coffee",
-                tool="gemini-cli", model_raw="gemini-3-pro",
-                model_family="gemini", model_version="gemini-3-pro",
-                input_tokens=100, output_tokens=50, cache_read_tokens=0,
-                cost_effective=0.005),
-        ]
-        rep = ut.aggregate(rows, synthetic_sessions())
-        cls.pm = rep["project_monthly"]["charly-coffee"]
-
-    def test_tokens_acumulan_por_proyecto_mes(self):
-        # gemini-cli no está suscripto en el calendario sintético → real = effective
-        may = self.pm["2026-05"]
-        self.assertEqual(1000, may["tokens"]["in"])
-        self.assertEqual(500, may["tokens"]["out"])
-        self.assertEqual(200, may["tokens"]["cache_read"])
-
-    def test_project_multiple_months(self):
-        self.assertEqual(set(self.pm.keys()), {"2026-05", "2026-06"})
-        self.assertEqual(100, self.pm["2026-06"]["tokens"]["in"])
-
-    def test_mes_coste_cero_con_tokens(self):
-        # mes con coste 0.0 pero tokens > 0: el volumen timeline no depende del coste
-        # (aquí la row 2026-06 tiene coste pero 0 tokens: usa la row de 2026-05 con 0)
-        # para la aserción dedicada usamos el mes donde el coste es 0 y tokens no:
-        # tomamos la row 2 (2026-05, 0 tokens) vs mes completo: el caso limpio es
-        # un mes entero sin coste — sintetizamos dentro del test.
-        rows = [row(ts="2026-07-01T09:00:00+00:00", project="charly-coffee",
-                    tool="gemini-cli", model_raw="gemini-3-pro",
-                    model_family="gemini", model_version="gemini-3-pro",
-                    input_tokens=42, output_tokens=0, cache_read_tokens=0,
-                    cost_effective=0.0)]
-        pm = ut.aggregate(rows, synthetic_sessions())["project_monthly"]
-        july = pm["charly-coffee"]["2026-07"]
-        self.assertEqual(0.0, july["cost_effective"])
-        self.assertEqual(42, july["tokens"]["in"])
-
-
-# ============================ golden ============================
-
-class TestPiCostEstimate(unittest.TestCase):
-    """coffe-8t8: logs Pi sin cost (gemini-cli) → estimación pay-per-token
-    con estimate_cost (rates del config versionados por fecha)."""
-
-    def _extract(self, usage):
-        entry = {"type": "message", "timestamp": "2026-05-10T14:23:00Z",
-                 "provider": "google-gemini-cli",
-                 "message": {"role": "assistant", "model": "gemini-3-pro",
-                             "usage": usage}}
-        with tempfile.TemporaryDirectory() as tmp:
-            d = Path(tmp) / "charly-coffee"
-            d.mkdir()
-            (d / "s1.jsonl").write_text(json.dumps(entry) + "\n")
-            rows, _ = ut.extract_pi(sessions_dir=Path(tmp))
-        return rows
-
-    def test_gemini_sin_cost_se_estima(self):
-        rows = self._extract({"input_tokens": 1000, "output_tokens": 500,
-                              "cacheRead": 100, "cacheWrite": 0, "cost": {}})
-        self.assertEqual(1, len(rows))
-        ts = date(2026, 5, 10)
-        expected = ut.estimate_cost("gemini", "gemini-3-pro", 1000, 500,
-                                    100, 0, when=ts)
-        self.assertEqual(expected, rows[0]["cost_effective"])
-        self.assertGreater(rows[0]["cost_effective"], 0)
-
-    def test_cost_presente_pasa_directo(self):
-        rows = self._extract({"input_tokens": 1000, "output_tokens": 500,
-                              "cost": {"total": 0.42}})
-        self.assertEqual(0.42, rows[0]["cost_effective"])
-
-    def test_cero_coste_y_cero_tokens_queda_cero(self):
-        rows = self._extract({"input_tokens": 0, "output_tokens": 0,
-                              "cost": {}})
-        self.assertEqual(0.0, rows[0]["cost_effective"])
-
-
-class TestGolden(unittest.TestCase):
-
-    @staticmethod
-    def _injected_skills():
-        """Skills/comandos herméticos: derivados del propio golden.
-
-        aggregate() es pura e inyectable (project.md: probar con rows
-        sintéticos, no logs reales) — inyectar evita que la colección en
-        vivo de skills de la máquina contamine el snapshot (drift entre
-        entornos). Sin golden todavía: colección en vivo (regen inicial).
-        """
-        if GOLDEN.exists():
-            g = json.loads(GOLDEN.read_text())
-            return (g.get("skills") or {},
-                    {p: v.get("skills") or {}
-                     for p, v in (g.get("projects") or {}).items()},
-                    g.get("commands") or {})
-        return None
-
-    def test_aggregate_golden(self):
-        skills = self._injected_skills()
-        report = ut.aggregate(synthetic_rows(), synthetic_sessions(),
-                              skills_total=skills[0],
-                              skills_by_project=skills[1],
-                              commands=skills[2])
-        if REGEN_GOLDEN:
-            GOLDEN.parent.mkdir(parents=True, exist_ok=True)
-            GOLDEN.write_text(json.dumps(report, indent=2, sort_keys=True, default=str) + "\n")
-            self.skipTest("golden regenerado")
-        self.assertTrue(GOLDEN.exists(),
-                        "Falta golden; corre REGEN_GOLDEN=1 python3 tests/test_tracker.py")
-        expected = json.loads(GOLDEN.read_text())
-        actual = json.loads(json.dumps(report, default=str))
-        self.assertEqual(actual, expected)
 
 
 if __name__ == "__main__":

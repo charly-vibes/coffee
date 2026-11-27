@@ -2,10 +2,13 @@
 """
 test_fpa_f2.py — tests de viz-fpa.py F2 (ticket coffe-lat.3)
 
-Alcance: árboles expandibles Time/Tool/Portfolio con roll-up (FPA-020…027,
-101), KPI strip con sparkline y delta (FPA-030…045), secciones Data
-(FPA-140/141/142/120) y vistas pre-calculadas por periodo (FPA-026).
+Alcance: árboles expandibles Time/Tool con roll-up (FPA-020…025, 101).
 Golden con fixture de meses parciales (FPA-102): REGEN_GOLDEN=1.
+
+(coffe-kav.5: KPIs/DataNotes, Portfolio+vistas y render viven ahora en
+test_fpa_f2_kpis.py, test_fpa_f2_portfolio.py y test_fpa_f2_render.py;
+el fixture se compone de helpers _f2_* que devuelven estructuras
+parciales.)
 """
 
 import importlib.util
@@ -30,15 +33,16 @@ viz = _load("viz_fpa_f2", "scripts/viz-fpa.py")
 CONFIG = json.loads((REPO / "config" / "fpa.json").read_text())
 
 
-def _month(ym, interactions=100, cost_eff=50.0, cost_cash=20.0, **extra):
+def _month(interactions=100, cost_eff=50.0, cost_cash=20.0, tools=None):
+    tools = tools if tools is not None else {}
     return {
         "interactions": interactions, "input_tokens": 1000 * interactions,
         "output_tokens": 500 * interactions, "cache_read_tokens": 400 * interactions,
         "cache_write_tokens": 100 * interactions,
         "cost_effective": cost_eff, "cost_real": cost_cash,
-        "tools": extra.pop("tools", {}),
-        "models": extra.pop("models", {}),
-        "subscription_fees": cost_cash, **extra,
+        "tools": tools,
+        "models": flat_models(tools),
+        "subscription_fees": cost_cash,
     }
 
 
@@ -53,38 +57,42 @@ def flat_models(tools):
     return out
 
 
-def f2_fixture():
-    """FPA-102: fixture con mes parcial (julio 10/31) y meses completos.
+def _f2_tools():
+    """Tools por mes del fixture F2: may, jun, jul (julio con codex sin
+    coste — FPA-045)."""
+    return {
+        "2026-05": {
+            "claude-cli": {"interactions": 60, "cost_effective": 40.0, "cost_real": 0.0,
+                           "models": {"claude-sonnet-4-6": {"interactions": 40, "cost_effective": 30.0},
+                                      "claude-opus-4.7": {"interactions": 20, "cost_effective": 10.0}}},
+            "codex": {"interactions": 40, "cost_effective": 10.0, "cost_real": 10.0,
+                      "models": {"gpt-5.4": {"interactions": 40, "cost_effective": 10.0}}},
+        },
+        "2026-06": {
+            "claude-cli": {"interactions": 80, "cost_effective": 60.0, "cost_real": 0.0,
+                           "models": {"claude-opus-4.7": {"interactions": 80, "cost_effective": 60.0}}},
+            "codex": {"interactions": 20, "cost_effective": 5.0, "cost_real": 5.0,
+                      "models": {"gpt-5.4": {"interactions": 20, "cost_effective": 5.0}}},
+        },
+        "2026-07": {
+            "claude-cli": {"interactions": 30, "cost_effective": 30.0, "cost_real": 0.0,
+                           "models": {"claude-sonnet-4-6": {"interactions": 30, "cost_effective": 30.0}}},
+            "codex": {"interactions": 70, "cost_effective": 0.0, "cost_real": 0.0,
+                      "models": {"gpt-5.4": {"interactions": 70, "cost_effective": 0.0}}},
+        },
+    }
 
-    Dos tools, 3 modelos (opus = premium), 3 proyectos (2 charly + 1
-    unclassified). Julio con codex sin tokens (FPA-045)."""
-    tools_may = {
-        "claude-cli": {"interactions": 60, "cost_effective": 40.0, "cost_real": 0.0,
-                       "models": {"claude-sonnet-4-6": {"interactions": 40, "cost_effective": 30.0},
-                                  "claude-opus-4.7": {"interactions": 20, "cost_effective": 10.0}}},
-        "codex": {"interactions": 40, "cost_effective": 10.0, "cost_real": 10.0,
-                  "models": {"gpt-5.4": {"interactions": 40, "cost_effective": 10.0}}},
-    }
-    tools_jun = {
-        "claude-cli": {"interactions": 80, "cost_effective": 60.0, "cost_real": 0.0,
-                       "models": {"claude-opus-4.7": {"interactions": 80, "cost_effective": 60.0}}},
-        "codex": {"interactions": 20, "cost_effective": 5.0, "cost_real": 5.0,
-                  "models": {"gpt-5.4": {"interactions": 20, "cost_effective": 5.0}}},
-    }
-    tools_jul = {
-        "claude-cli": {"interactions": 30, "cost_effective": 30.0, "cost_real": 0.0,
-                       "models": {"claude-sonnet-4-6": {"interactions": 30, "cost_effective": 30.0}}},
-        "codex": {"interactions": 70, "cost_effective": 0.0, "cost_real": 0.0,
-                  "models": {"gpt-5.4": {"interactions": 70, "cost_effective": 0.0}}},
-    }
-    months = {
-        "2026-05": _month("2026-05", 100, 50.0, 20.0, tools=tools_may,
-                          models=flat_models(tools_may)),
-        "2026-06": _month("2026-06", 100, 65.0, 25.0, tools=tools_jun,
-                          models=flat_models(tools_jun)),
-        "2026-07": _month("2026-07", 100, 30.0, 0.0, tools=tools_jul,
-                          models=flat_models(tools_jul)),
-    }
+
+def _f2_monthly(tools_by_month):
+    """Monthly del fixture: tres meses con tokens_by_model (cache-hit rate
+    FPA-043, ratio out/in FPA-044) y interaction_kinds por mes."""
+    months = {}
+    costes = {"2026-05": (100, 50.0, 20.0),
+              "2026-06": (100, 65.0, 25.0),
+              "2026-07": (100, 30.0, 0.0)}
+    for ym, tools in tools_by_month.items():
+        n, eff, cash = costes[ym]
+        months[ym] = _month(n, eff, cash, tools=tools)
     # tokens_by_model por mes (cache-hit rate FPA-043, ratio out/in FPA-044)
     months["2026-05"]["tokens_by_model"] = {
         "claude-sonnet-4-6": {"in": 40000, "out": 20000, "cache_read": 32000, "cache_write": 8000},
@@ -99,6 +107,13 @@ def f2_fixture():
     months["2026-05"]["interaction_kinds"] = {"user_prompt": 20, "assistant_turn": 60, "tool_call": 20}
     months["2026-06"]["interaction_kinds"] = {"user_prompt": 30, "assistant_turn": 60, "tool_call": 10}
     months["2026-07"]["interaction_kinds"] = {"user_prompt": 25, "assistant_turn": 55, "tool_call": 20}
+    return dict(sorted(months.items()))
+
+
+def _f2_structure():
+    """Estructuras estáticas del fixture F2: metadata, hourly, proyectos
+    (monthly + models, consistentes — roll-up del drill, FPA-021),
+    concurrencia, filtrado y sesiones."""
     return {
         "metadata": {
             "date_range": {"start": "2026-05-01", "end": "2026-07-10"},
@@ -124,23 +139,21 @@ def f2_fixture():
                                                      "cache_read": 0, "cache_write": 0,
                                                      "cost_eff": 0.0, "cost_real": 0.0}}},
         },
-        "daily": {}, "monthly": dict(sorted(months.items())),
         "projects": {}, "skills": {}, "commands": {},
         "sessions": {"total_sessions": 8},
         "multitasking": {}, "project_daily": {},
         "project_monthly": {
             "charly-coffee": {"2026-05": {"interactions": 55, "cost_effective": 30.0},
-                             "2026-06": {"interactions": 60, "cost_effective": 40.0},
-                             "2026-07": {"interactions": 30, "cost_effective": 15.0}},
+                              "2026-06": {"interactions": 60, "cost_effective": 40.0},
+                              "2026-07": {"interactions": 30, "cost_effective": 15.0}},
             "charly-atril": {"2026-05": {"interactions": 35, "cost_effective": 15.0},
                              "2026-06": {"interactions": 40, "cost_effective": 25.0},
                              "2026-07": {"interactions": 70, "cost_effective": 15.0}},
             "proyecto-externo": {"2026-05": {"interactions": 10, "cost_effective": 5.0}},
         },
-        # consistente con project_monthly (roll-up del drill, FPA-021)
         "project_models": {
             "charly-coffee": {"claude-sonnet-4-6": {"interactions": 70, "cost_effective": 60.0},
-                             "claude-opus-4.7": {"interactions": 75, "cost_effective": 25.0}},
+                              "claude-opus-4.7": {"interactions": 75, "cost_effective": 25.0}},
             "charly-atril": {"gpt-5.4": {"interactions": 145, "cost_effective": 55.0}},
             "proyecto-externo": {"gpt-5.4": {"interactions": 10, "cost_effective": 5.0}},
         },
@@ -155,6 +168,18 @@ def f2_fixture():
                              "2026-06": {"total": 4, "with_agent": 2}},
         "subscription_config": {}, "subscription_fees_by_month": {},
     }
+
+
+def f2_fixture():
+    """FPA-102: fixture con mes parcial (julio 10/31) y meses completos.
+
+    Dos tools, 3 modelos (opus = premium), 3 proyectos (2 charly + 1
+    unclassified). Julio con codex sin tokens (FPA-045). Compuesto a
+    partir de helpers _f2_* (coffe-kav.5)."""
+    fx = _f2_structure()
+    fx["daily"] = {}
+    fx["monthly"] = _f2_monthly(_f2_tools())
+    return fx
 
 
 def _raw_tree(fixture, cfg, name):
@@ -246,264 +271,6 @@ class TestTimeTree(F2Base):
 
     def test_rollup_time(self):
         self.assertEqual([], viz.check_rollup(viz.build_time_tree(self.fixture, CONFIG)))
-
-
-class TestPortfolioTree(F2Base):
-    """FPA-018/020/021/027: taxonomía, drill y limitación."""
-
-    def test_categorias_y_unclassified(self):
-        tree = self.model["views"]["all"]["trees"]["portfolio"]
-        labels = {c["label"] for c in tree["children"]}
-        self.assertIn("charly", labels)
-        self.assertIn("Unclassified", labels)
-
-    def test_drill_model_solo_periodo_completo(self):
-        """FPA-021/027: drill Project→Model solo en la vista 'all'."""
-        full = self.model["views"]["all"]["trees"]["portfolio"]
-        charly = next(c for c in full["children"] if c["label"] == "charly")
-        coffee = next(c for c in charly["children"] if c["label"] == "charly-coffee")
-        self.assertEqual({"claude-sonnet-4-6", "claude-opus-4.7"},
-                         {c["label"] for c in coffee["children"]})
-        for c in coffee["children"]:
-            self.assertTrue(c["totals_only"])
-
-    def test_drill_cifras_de_project_models(self):
-        """coffe-0d5/coffe-itp: las filas pfm del drill leen el total
-        (__total__) — muestran las cifras de project_models, no n/a/0."""
-        full = self.model["views"]["all"]["trees"]["portfolio"]
-        charly = next(c for c in full["children"] if c["label"] == "charly")
-        coffee = next(c for c in charly["children"] if c["label"] == "charly-coffee")
-        for c in coffee["children"]:
-            pm = self.fixture["project_models"]["charly-coffee"][c["label"]]
-            self.assertEqual(pm["cost_effective"], c["cost"])
-            self.assertEqual(pm["interactions"], c["interactions"])
-            self.assertNotEqual("n/a", c["cost_display"])
-            self.assertNotEqual("n/a", c["interactions_display"])
-            self.assertEqual("n/a", c["delta_display"])  # totals_only: sin delta vs prior
-        month_view = self.model["views"]["month:2026-06"]
-        charly_m = next(c for c in month_view["trees"]["portfolio"]["children"]
-                        if c["label"] == "charly")
-        for proj in charly_m["children"]:
-            self.assertEqual([], proj["children"])
-
-    def test_limitation_en_vistas_no_full(self):
-        """FPA-027: limitación visible en vistas que no son el periodo completo."""
-        for key, view in self.model["views"].items():
-            if key == "all":
-                self.assertNotIn("limitation", view)
-            else:
-                self.assertIn("Project→Model", view["limitation"])
-
-    def test_rollup_portfolio(self):
-        """FPA-025: categoría = suma de proyectos (los totals_only se excluyen)."""
-        self.assertEqual([], viz.check_rollup(viz.build_portfolio_tree(self.fixture, CONFIG)))
-
-
-class TestKpis(F2Base):
-    """FPA-030…045: valores, n/a con denominador cero, daily rates, exclusión."""
-
-    def test_12_kpis_base(self):
-        keys = {k["key"] for k in self.model["views"]["all"]["kpis"]}
-        for expected in ("cost_effective", "cost_cash", "leverage", "cost_per_1k_eff",
-                         "cost_per_1k_cash", "cost_per_session", "top3_concentration",
-                         "premium_share", "autonomous_share", "multitasking_share",
-                         "cache_hit_rate", "out_in_ratio"):
-            self.assertIn(expected, keys)
-
-    def test_valores_contra_fixture(self):
-        """Full period: efectivo 50+65+30 = 145; cash 20+25+0 = 45."""
-        kpis = {k["key"]: k for k in self.model["views"]["all"]["kpis"]}
-        self.assertAlmostEqual(145.0, kpis["cost_effective"]["value"])
-        self.assertAlmostEqual(45.0, kpis["cost_cash"]["value"])
-        self.assertAlmostEqual(145.0 / 45.0, kpis["leverage"]["value"], places=4)
-        # 3 proyectos con coste → top-3 = 100%
-        self.assertAlmostEqual(1.0, kpis["top3_concentration"]["value"])
-        # premium = opus: 10 (may) + 60 (jun) + 0 (jul) = 70 / 145
-        self.assertAlmostEqual(70.0 / 145.0, kpis["premium_share"]["value"], places=4)
-        # autonomous: (1+2)/8 sesiones
-        self.assertAlmostEqual(3 / 8, kpis["autonomous_share"]["value"], places=4)
-
-    def test_top3_concentracion_del_periodo_no_suma_mensuales(self):
-        """coffe-hn7: el KPI top-3 de una ventana es el top-3 del agregado
-        del periodo (matchea Pareto y alerta), no la suma de top-3
-        mensuales (que sobreestima cuando el ranking cambia por mes)."""
-        fx = f2_fixture()
-        # 4to proyecto: su coste vive en jun, donde los demás ya son top
-        fx["project_monthly"]["charly-zzz"] = {
-            "2026-05": {"interactions": 0, "cost_effective": 0.0},
-            "2026-06": {"interactions": 60, "cost_effective": 60.0},
-            "2026-07": {"interactions": 0, "cost_effective": 0.0}}
-        kpis = {k["key"]: k for k in
-                viz.build_model(fx, CONFIG)["views"]["all"]["kpis"]}
-        # agregado del periodo: top-3 = coffee 85 + zzz 60 + atril 55 = 200
-        # (total 205) → 97.6%; la suma de top-3 mensuales daría 100%.
-        self.assertAlmostEqual(200.0 / 205.0,
-                               kpis["top3_concentration"]["value"], places=4)
-
-    def test_delta_vs_prior_ventana_previa(self):
-        """jun vs may por tasa diaria: 65/30 vs 50/31 → +34.3%.
-        'all' no tiene periodo previo en el reporte → delta n/a."""
-        kpis = {k["key"]: k for k in self.model["views"]["month:2026-06"]["kpis"]}
-        self.assertAlmostEqual((65.0 / 30) / (50.0 / 31) - 1,
-                               kpis["cost_effective"]["delta"], places=3)
-        self.assertIsNone(self.model["views"]["all"]["kpis"][0]["delta"])
-
-    def test_daily_rate_en_mes_parcial(self):
-        """FPA-041: julio parcial (10/31) compara por tasa diaria."""
-        eff = next(k for k in self.model["views"]["month:2026-07"]["kpis"]
-                   if k["key"] == "cost_effective")
-        self.assertEqual("daily-rate", eff["delta_kind"])
-        # julio: 30/10 = 3.0/día; junio: 65/30 ≈ 2.1667/día → +38.46%
-        self.assertAlmostEqual((30.0 / 10) / (65.0 / 30) - 1, eff["delta"], places=4)
-
-    def test_denominador_cero_na_con_razon(self):
-        """FPA-042: julio sin sesiones → coste por sesión n/a, no cero."""
-        k = next(k for k in self.model["views"]["month:2026-07"]["kpis"]
-                 if k["key"] == "cost_per_session")
-        self.assertIsNone(k["value"])
-        self.assertEqual("n/a", k["display"])
-        self.assertTrue(k["reason"])
-
-    def test_outcome_kpis_solo_con_datos(self):
-        """FPA-040: sin commits/releases en el fixture → sin cards outcome."""
-        keys = {k["key"] for k in self.model["views"]["all"]["kpis"]}
-        self.assertNotIn("cost_per_commit", keys)
-
-    def test_token_kpis_con_excluded_share(self):
-        """FPA-045: julio con codex sin tokens → exclusión con share visible."""
-        cache_hit = next(k for k in self.model["views"]["month:2026-07"]["kpis"]
-                         if k["key"] == "cache_hit_rate")
-        self.assertAlmostEqual(0.7, cache_hit["excluded_share"])  # 70/100 codex
-        self.assertIsNotNone(cache_hit["value"])
-
-    def test_cache_hit_rate_formula(self):
-        """FPA-043: cache_read / (in + cache_read + cache_write). may."""
-        ch = next(k for k in self.model["views"]["month:2026-05"]["kpis"]
-                  if k["key"] == "cache_hit_rate")
-        # in 60000, cr 40000, cw 12000 → 40000/112000
-        self.assertAlmostEqual(40000 / 112000, ch["value"], places=6)
-
-    def test_out_in_ratio(self):
-        """FPA-044: out/in del periodo = 85000/170000 = 0.5."""
-        kpis = {k["key"]: k for k in self.model["views"]["all"]["kpis"]}
-        self.assertAlmostEqual(0.5, kpis["out_in_ratio"]["value"], places=6)
-
-    def test_premium_share_es_assumed(self):
-        """FPA-003/037: deriva de la lista premium del config → assumed."""
-        kpis = {k["key"]: k for k in self.model["views"]["all"]["kpis"]}
-        self.assertEqual("assumed", kpis["premium_share"]["provenance"])
-
-    def test_multitasking_weighted_by_interactions(self):
-        """FPA-039: share de interacciones en horas con ≥2 proyectos."""
-        mt = next(k for k in self.model["views"]["month:2026-05"]["kpis"]
-                  if k["key"] == "multitasking_share")
-        self.assertAlmostEqual(60 / 100, mt["value"], places=6)
-
-    def test_mes_sin_datos_excluido(self):
-        """FPA-017: ningún KPI tiene series de meses sin datos."""
-        for k in self.model["views"]["all"]["kpis"]:
-            for p in k["spark"]:
-                self.assertNotEqual("2026-08", p["ym"])
-
-
-class TestViews(F2Base):
-    """FPA-026: vistas pre-calculadas por periodo; JS solo re-escala."""
-
-    def test_presets_disponibles(self):
-        views = self.model["views"]
-        for key in ("all", "year:2026", "q:2026Q2", "month:2026-06"):
-            self.assertIn(key, views)
-
-    def test_kpis_de_vista_mensual_igualan_ventana(self):
-        eff = next(k for k in self.model["views"]["month:2026-06"]["kpis"]
-                   if k["key"] == "cost_effective")
-        self.assertAlmostEqual(65.0, eff["value"])
-
-    def test_rollup_de_todas_las_vistas(self):
-        """FPA-101 aplicado a cada árbol fuente (las vistas derivan de él)."""
-        for name in ("time", "tool", "portfolio"):
-            self.assertEqual([], viz.check_rollup(_raw_tree(self.fixture, CONFIG, name)),
-                             name)
-
-
-class TestDataNotes(F2Base):
-    """FPA-140/141/142/120: definición, kinds, share filtrado, timezone."""
-
-    def test_definicion_de_interaccion(self):
-        notes = self.model["data_notes"]
-        self.assertIn("interacción", notes["interaction_definition"])
-
-    def test_tool_call_share(self):
-        notes = self.model["data_notes"]
-        # tool calls: 20+10+20 = 50 de 300 eventos
-        self.assertAlmostEqual(50 / 300, notes["tool_call_share"], places=4)
-
-    def test_filtered_share(self):
-        """FPA-141: share de lo excluido por el filtro charly."""
-        notes = self.model["data_notes"]
-        self.assertAlmostEqual(30 / 330, notes["filtered_share"], places=4)
-
-    def test_timezone_presente(self):
-        """FPA-142: timezone del fixture → no unverified."""
-        notes = self.model["data_notes"]
-        self.assertFalse(notes["unverified_time"])
-        self.assertIn("Buenos_Aires", notes["timezone"])
-
-    def test_timezone_ausente_flag_unverified(self):
-        fixture = f2_fixture()
-        del fixture["metadata"]["timezone"]
-        notes = viz.build_data_notes(fixture)
-        self.assertTrue(notes["unverified_time"])
-        self.assertTrue(notes["timezone_missing_reason"])
-
-    def test_concurrency_labeled(self):
-        """FPA-120: (a)(b) paralelo, (c) contexto humano."""
-        conc = self.model["data_notes"]["concurrency"]
-        self.assertEqual("parallel-agent", conc["distinct_projects_per_hour"]["measure"])
-        self.assertEqual("parallel-agent", conc["peak_simultaneous_sessions"]["measure"])
-        self.assertEqual("human-context-switching",
-                         conc["project_switches_per_active_hour"]["measure"])
-
-
-class TestRenderF2(unittest.TestCase):
-    """Render del HTML F2: KPI cards, árboles, data, selector, sparklines."""
-
-    @classmethod
-    def setUpClass(cls):
-        cls.html = viz.render_html(f2_fixture(), CONFIG, generated="2026-09-20 12:00")
-
-    def test_kpi_cards_renderizadas(self):
-        self.assertGreaterEqual(self.html.count('class="headline kpi"'), 12)
-
-    def test_arboles_con_columnas(self):
-        for col in ("% total", "$/1k", "Δ vs prior", "Presupuesto*", "Varianza"):
-            self.assertIn(col, self.html)
-
-    def test_selector_de_periodo(self):
-        self.assertIn('id="period-select"', self.html)
-        self.assertIn('<option value="all"', self.html)
-        self.assertIn("month:2026-06", self.html)
-
-    def test_sparklines_svg(self):
-        self.assertIn('class="spark"', self.html)
-        self.assertIn("<polyline", self.html)
-
-    def test_provenance_en_kpis(self):
-        self.assertIn('data-provenance="assumed"', self.html)
-
-    def test_seccion_data(self):
-        self.assertIn("Datos y definiciones", self.html)
-        self.assertIn("tool calls", self.html)
-
-    def test_js_solo_reescala(self):
-        """design.md: sin fórmulas de negocio en JS — solo re-render."""
-        js = self.html.split("<script>")[-1]
-        for forbidden in ("cost_effective", "cache_read", "budgets", "fme("):
-            self.assertNotIn(forbidden, js, f"lógica de negocio en JS: {forbidden}")
-
-    def test_todos_los_kpis_llevan_valor_o_na(self):
-        """FPA-108: ninguna card KPI vacía."""
-        self.assertNotIn('<span class="val"></span>', self.html)
 
 
 class TestGolden(unittest.TestCase):

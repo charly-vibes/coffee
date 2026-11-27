@@ -24,37 +24,46 @@ spec.loader.exec_module(mc)
 SUBS = {"claude-cli": [], "codex": [], "gemini-cli": []}
 
 
+def _sess(model, cost, sid, end=10):
+    """Sesión sintética con el shape que consume build_rows()."""
+    return {"model": model, "source": "openrouter", "cost_effective": cost,
+            "cost_real": cost, "project": "p", "session_id": sid,
+            "start": 0, "end": end, "ambiguous": False}
+
+
 class LaneTest(unittest.TestCase):
     """CORR-001: notional (suscripción) y real (pay-per-token) no se mezclan."""
 
-    def test_suscripcion_es_carril_notional(self):
-        self.assertEqual(mc.lane_for("claude-cli", SUBS), "notional")
-        self.assertEqual(mc.lane_for("codex", SUBS), "notional")
-
-    def test_pay_per_token_es_carril_real(self):
-        self.assertEqual(mc.lane_for("openrouter", SUBS), "real")
-        self.assertEqual(mc.lane_for("zai", SUBS), "real")
-
-    def test_fuente_desconocida_no_se_asume_real_silenciosamente(self):
+    def test_lane_por_fuente(self):
         # sin entrada en config no hay base de coste declarada: se marca aparte
-        self.assertEqual(mc.lane_for("openrouter", SUBS), "real")
-        self.assertEqual(mc.lane_for("proveedor-nuevo", SUBS), "unknown")
+        casos = [
+            ("claude-cli", "notional"),
+            ("codex", "notional"),
+            ("openrouter", "real"),
+            ("zai", "real"),
+            ("proveedor-nuevo", "unknown"),
+        ]
+        for fuente, lane in casos:
+            with self.subTest(fuente=fuente):
+                self.assertEqual(mc.lane_for(fuente, SUBS), lane)
 
 
 class AssignUnitsTest(unittest.TestCase):
     """CORR-002: una unidad se acredita a UNA sesión, no a todas las que la contienen."""
 
-    def test_cerrada_dentro_de_una_sola_ventana(self):
-        win = [{"id": "a", "start": 100, "end": 200}]
-        self.assertEqual(mc.assign_units([("bead-1", 150)], win), {"bead-1": "a"})
-
-    def test_ventanas_solapadas_elige_la_de_inicio_mas_cercano(self):
-        win = [
-            {"id": "larga", "start": 0, "end": 600},
-            {"id": "corta", "start": 500, "end": 700},
+    def test_acreditacion_segun_ventanas(self):
+        casos = [
+            ("cerrada_dentro_de_una_sola_ventana", [("bead-1", 150)],
+             [{"id": "a", "start": 100, "end": 200}], {"bead-1": "a"}),
+            ("solapadas_elige_la_de_inicio_mas_cercano", [("bead-1", 520)],
+             [{"id": "larga", "start": 0, "end": 600},
+              {"id": "corta", "start": 500, "end": 700}], {"bead-1": "corta"}),
+            ("fuera_de_ventana_no_se_acredita", [("bead-1", 900)],
+             [{"id": "a", "start": 100, "end": 200}], {"bead-1": None}),
         ]
-        # 520 está en ambas; la de inicio más cercano es "corta"
-        self.assertEqual(mc.assign_units([("bead-1", 520)], win), {"bead-1": "corta"})
+        for nombre, unidades, win, esperado in casos:
+            with self.subTest(caso=nombre):
+                self.assertEqual(mc.assign_units(unidades, win), esperado)
 
     def test_no_se_puede_acreditar_a_dieciseis_sesiones(self):
         win = [{"id": f"s{i}", "start": i * 10, "end": 1000} for i in range(16)]
@@ -151,50 +160,40 @@ class ComparabilityTest(unittest.TestCase):
 class BeadsFreshnessTest(unittest.TestCase):
     """EDGE-001: un export viejo no es 'no hubo cierres'."""
 
-    def test_export_posterior_al_ultimo_commit_es_fresco(self):
-        self.assertEqual(mc.beads_freshness(2000, 1000, 30), "fresh")
-
-    def test_export_muy_anterior_al_ultimo_commit_es_stale(self):
-        self.assertEqual(mc.beads_freshness(1000, 1000 + 60 * 86400, 30), "stale")
-
-    def test_sin_archivo_es_no_data(self):
-        self.assertEqual(mc.beads_freshness(None, 1000, 30), "no-data")
-
-    def test_sin_historial_git_es_unknowable(self):
-        self.assertEqual(mc.beads_freshness(1000, None, 30), "unknown")
+    def test_beads_freshness_tabla_de_casos(self):
+        # un export viejo no es "no hubo cierres": cada hueco se declara
+        casos = [
+            (2000, 1000, "fresh"),                # export posterior al último commit
+            (1000, 1000 + 60 * 86400, "stale"),   # export muy anterior
+            (None, 1000, "no-data"),              # sin archivo
+            (1000, None, "unknown"),              # sin historial git
+        ]
+        for mtime, last_commit, esperado in casos:
+            with self.subTest(esperado=esperado):
+                self.assertEqual(mc.beads_freshness(mtime, last_commit, 30),
+                                 esperado)
 
 
 class BuildRowsTest(unittest.TestCase):
     """CORR-003 y EDGE-002: nada de 'mixed' como modelo, y el hueco se declara."""
 
     def test_mixed_no_aparece_como_modelo(self):
-        sessions = [
-            {"model": "mixed", "source": "openrouter", "cost_effective": 10.0,
-             "cost_real": 10.0, "project": "p", "session_id": "s1", "start": 0, "end": 10},
-        ]
+        sessions = [_sess("mixed", 10.0, "s1")]
         rows = mc.build_rows(sessions, units={}, projects={"p": "/tmp/p"},
                              subscriptions=SUBS)
         self.assertNotIn("mixed", [r["model"] for r in rows])
 
     def test_sesiones_sin_repo_van_a_unattributed_y_no_desaparecen(self):
-        sessions = [
-            {"model": "m1", "source": "openrouter", "cost_effective": 5.0,
-             "cost_real": 5.0, "project": "sin-repo", "session_id": "s1",
-             "start": 0, "end": 10},
-        ]
-        rows = mc.build_rows(sessions, units={}, projects={}, subscriptions=SUBS)
+        s = _sess("m1", 5.0, "s1")
+        s["project"] = "sin-repo"
+        rows = mc.build_rows([s], units={}, projects={}, subscriptions=SUBS)
         unatt = [r for r in rows if r["model"] == "unattributed"]
         self.assertEqual(len(unatt), 1)
         self.assertEqual(unatt[0]["n_sessions"], 1)
         self.assertAlmostEqual(unatt[0]["cost"], 5.0)
 
     def test_una_unidad_cuenta_para_una_sola_sesion_y_para_su_modelo(self):
-        sessions = [
-            {"model": "m1", "source": "openrouter", "cost_effective": 5.0,
-             "cost_real": 5.0, "project": "p", "session_id": "s1", "start": 0, "end": 10},
-            {"model": "m2", "source": "openrouter", "cost_effective": 5.0,
-             "cost_real": 5.0, "project": "p", "session_id": "s2", "start": 0, "end": 10},
-        ]
+        sessions = [_sess("m1", 5.0, "s1"), _sess("m2", 5.0, "s2")]
         units = {"bead-1": "s1", "bead-2": "s1", "bead-3": "s2"}
         rows = mc.build_rows(sessions, units=units, projects={"p": "/tmp/p"},
                              subscriptions=SUBS)
@@ -203,12 +202,10 @@ class BuildRowsTest(unittest.TestCase):
         self.assertEqual(by_model["m2"]["units"], 1)
 
     def test_los_dos_carriles_no_comparten_fila(self):
-        sessions = [
-            {"model": "glm", "source": "openrouter", "cost_effective": 1.0,
-             "cost_real": 1.0, "project": "p", "session_id": "s1", "start": 0, "end": 10},
-            {"model": "glm", "source": "codex", "cost_effective": 20.0,
-             "cost_real": 0.0, "project": "p", "session_id": "s2", "start": 0, "end": 10},
-        ]
+        s_notional = _sess("glm", 20.0, "s2")
+        s_notional["source"] = "codex"
+        s_notional["cost_real"] = 0.0
+        sessions = [_sess("glm", 1.0, "s1"), s_notional]
         rows = mc.build_rows(sessions, units={}, projects={"p": "/tmp/p"},
                              subscriptions=SUBS)
         self.assertEqual(sorted(r["lane"] for r in rows if r["model"] == "glm"),
@@ -219,26 +216,18 @@ class BuildRowsTest(unittest.TestCase):
         self.assertAlmostEqual(notional["cost"], 0.0)  # real, no el imputado
 
     def test_lamina_ambigua_se_declara_aparte(self):
-        sessions = [
-            {"model": "m1", "source": "openrouter", "cost_effective": 2.0,
-             "cost_real": 2.0, "project": "p", "session_id": "s1", "start": 0,
-             "end": 36000, "ambiguous": True},
-        ]
-        rows = mc.build_rows(sessions, units={}, projects={"p": "/tmp/p"},
+        s = _sess("m1", 2.0, "s1", end=36000)
+        s["ambiguous"] = True
+        rows = mc.build_rows([s], units={}, projects={"p": "/tmp/p"},
                              subscriptions=SUBS)
         row = [r for r in rows if r["model"] == "m1"][0]
         self.assertEqual(row["n_ambiguous"], 1)
         self.assertAlmostEqual(row["cost_ambiguous"], 2.0)
 
     def test_unidades_de_la_cohorte_ambigua_se_cuentan_aparte(self):
-        sessions = [
-            {"model": "m1", "source": "openrouter", "cost_effective": 2.0,
-             "cost_real": 2.0, "project": "p", "session_id": "s1", "start": 0,
-             "end": 36000, "ambiguous": True},
-            {"model": "m1", "source": "openrouter", "cost_effective": 1.0,
-             "cost_real": 1.0, "project": "p", "session_id": "s2", "start": 0,
-             "end": 60, "ambiguous": False},
-        ]
+        s_ambigua = _sess("m1", 2.0, "s1", end=36000)
+        s_ambigua["ambiguous"] = True
+        sessions = [s_ambigua, _sess("m1", 1.0, "s2", end=60)]
         rows = mc.build_rows(sessions, units={"b1": "s2", "b2": "s1"},
                              projects={"p": "/tmp/p"}, subscriptions=SUBS)
         row = rows[0]
@@ -249,14 +238,9 @@ class BuildRowsTest(unittest.TestCase):
     def test_banda_de_sensibilidad_excluye_la_cohorte_ambigua(self):
         # CORR-004: la métrica depende de max_window_s, así que se publica la
         # banda [solo sesiones limpias, todas] en lugar de un único número.
-        sessions = [
-            {"model": "m1", "source": "openrouter", "cost_effective": 9.0,
-             "cost_real": 9.0, "project": "p", "session_id": "s1", "start": 0,
-             "end": 36000, "ambiguous": True},
-            {"model": "m1", "source": "openrouter", "cost_effective": 1.0,
-             "cost_real": 1.0, "project": "p", "session_id": "s2", "start": 0,
-             "end": 60, "ambiguous": False},
-        ]
+        s_ambigua = _sess("m1", 9.0, "s1", end=36000)
+        s_ambigua["ambiguous"] = True
+        sessions = [s_ambigua, _sess("m1", 1.0, "s2", end=60)]
         rows = mc.build_rows(sessions, units={"b1": "s2", "b2": "s1"},
                              projects={"p": "/tmp/p"}, subscriptions=SUBS)
         row = rows[0]

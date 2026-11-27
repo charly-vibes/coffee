@@ -35,28 +35,29 @@ def load_tracker():
 ut = load_tracker()
 
 
-def srow(ts="2026-11-10T14:23:00+00:00", tool="pi",
-         model_raw="z-ai/glm-5.3-flash", model_family="glm",
-         model_version="glm-5.3-flash", input_tokens=1000,
-         output_tokens=500, cache_read_tokens=0, cache_write_tokens=0,
-         cost_effective=0.01, duration_ms=None, stop_reason="toolUse",
-         tool_calls=1, tool_errors=0, **kw):
+SROW_DEFAULTS = {
+    "source": "test", "tool": "pi", "model_raw": "z-ai/glm-5.3-flash",
+    "model_family": "glm", "model_version": "glm-5.3-flash",
+    "project": "charly-coffee", "ts": "2026-11-10T14:23:00+00:00",
+    "input_tokens": 1000, "output_tokens": 500,
+    "cache_read_tokens": 0, "cache_write_tokens": 0,
+    "cost_effective": 0.01, "duration_ms": None, "stop_reason": "toolUse",
+    "tool_calls": 1, "tool_errors": 0,
+}
+
+
+def srow(overrides=None):
     """Row sintético con el shape exacto que producen los extractores."""
-    base = {
-        "source": "test", "tool": tool, "model_raw": model_raw,
-        "model_family": model_family, "model_version": model_version,
-        "project": "charly-coffee", "timestamp": ts,
+    o = dict(SROW_DEFAULTS)
+    o.update(overrides or {})
+    ts = o.pop("ts")
+    model_raw = o["model_raw"]
+    return {
+        **o,
+        "timestamp": ts,
         "hour": ut.hour_key(ut.parse_ts(ts)),
-        "input_tokens": input_tokens, "output_tokens": output_tokens,
-        "cache_read_tokens": cache_read_tokens,
-        "cache_write_tokens": cache_write_tokens,
-        "cost_effective": cost_effective,
-        "duration_ms": duration_ms, "stop_reason": stop_reason,
-        "tool_calls": tool_calls, "tool_errors": tool_errors,
         "model_chain": [model_raw], "model_change_idx": None,
     }
-    base.update(kw)
-    return base
 
 
 def glm_rows_90pct_cache():
@@ -71,15 +72,15 @@ def glm_rows_90pct_cache():
     """
     rows = []
     for i in range(10):
-        rows.append(srow(
-            ts=f"2026-11-1{i % 10}T10:00:00+00:00",
-            model_raw="deepseek/deepseek-v4-flash",
-            model_family="deepseek", model_version="v4-flash",
-            input_tokens=1000, output_tokens=500,
-            cache_read_tokens=13500,
-            duration_ms=1500 + i, stop_reason="toolUse",
-            cost_effective=None,  # recalculado abajo con el pricing config
-        ))
+        rows.append(srow({
+            "ts": f"2026-11-1{i % 10}T10:00:00+00:00",
+            "model_raw": "deepseek/deepseek-v4-flash",
+            "model_family": "deepseek", "model_version": "v4-flash",
+            "input_tokens": 1000, "output_tokens": 500,
+            "cache_read_tokens": 13500,
+            "duration_ms": 1500 + i, "stop_reason": "toolUse",
+            "cost_effective": None,  # recalculado abajo con el pricing config
+        }))
     rates = ut._pricing_for().get("deepseek", {}).get("v4-flash")
     assert rates is not None, "deepseek/v4-flash debe tener tarifa en config"
     for r in rows:
@@ -249,9 +250,10 @@ class TestWindows(unittest.TestCase):
     def test_ytd_is_subset_of_todo(self):
         rows = glm_rows_90pct_cache()
         # fila fuera del año del último dato ⇒ ytd < todo
-        rows.append(srow(ts="2025-06-01T10:00:00+00:00",
-                         model_raw="deepseek/deepseek-v4-flash",
-                         model_family="deepseek", model_version="v4-flash"))
+        rows.append(srow({"ts": "2025-06-01T10:00:00+00:00",
+                          "model_raw": "deepseek/deepseek-v4-flash",
+                          "model_family": "deepseek",
+                          "model_version": "v4-flash"}))
         entries, _meta = build_scorecard(rows)
         glm = {e["window"]: e for e in entries if e["model"] == "deepseek-v4-flash"}
         self.assertIsNotNone(glm["todo"]["data"])

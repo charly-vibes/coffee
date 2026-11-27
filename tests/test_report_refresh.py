@@ -33,12 +33,21 @@ def load_tracker():
 ut = load_tracker()
 
 
-def _validate(self, doc):
+def _schema_errors(self, doc):
+    """Violaciones al schema usage-report-v3 ([] si el doc valida)."""
     try:
         import jsonschema
     except ImportError:
         self.skipTest("jsonschema no instalado")
-    jsonschema.validate(doc, json.loads(SCHEMA_PATH.read_text()))
+    schema = json.loads(SCHEMA_PATH.read_text())
+    return sorted(
+        f"{'/'.join(str(c) for c in e.absolute_path)}: {e.message}"
+        for e in jsonschema.Draft7Validator(schema).iter_errors(doc))
+
+
+def _validate(self, doc):
+    errors = _schema_errors(self, doc)
+    self.assertEqual([], errors, "violaciones al schema usage-report-v3")
 
 
 def rows():
@@ -69,7 +78,9 @@ class TestTokensByModelShape(unittest.TestCase):
                                  set(tokens.keys()), f"{ym}/{model}")
 
     def test_emision_valida_schema(self):
-        _validate(self, self.report)
+        errors = _schema_errors(self, self.report)
+        self.assertEqual([], errors,
+                         "el reporte generado viola el schema")
 
 
 def _session(project, first_full, last_full, first="2026-05-10"):
@@ -114,7 +125,8 @@ class TestDatasetComiteado(unittest.TestCase):
         cls.report = json.loads(DATASET_PATH.read_text())
 
     def test_dataset_valida_schema(self):
-        _validate(self, self.report)
+        self.assertFalse(_schema_errors(self, self.report),
+                         "el dataset commiteado viola el schema")
 
     def test_tokens_by_model_presente_y_dos_niveles(self):
         meses = [mo for mo in self.report["monthly"].values()

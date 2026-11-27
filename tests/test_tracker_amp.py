@@ -34,33 +34,40 @@ def load_tracker():
 ut = load_tracker()
 
 
+def _guardar_estado():
+    """Guarda los globals que tocan los tests para restaurarlos en tearDown."""
+    return (ut.CHARLY_FILTER, ut.AMP_DIR, ut.SINCE, ut.UNTIL)
+
+
+def _restaurar_estado(old):
+    (ut.CHARLY_FILTER, ut.AMP_DIR, ut.SINCE, ut.UNTIL) = old
+
+
 # ============================ amp_proj_from_uri ============================
 
 class TestAmpProjFromUri(unittest.TestCase):
     """Derivación pura de proyecto desde el uri file:// de Amp."""
 
-    def test_repo_charly(self):
-        self.assertEqual(
-            ut.amp_proj_from_uri(
-                "file:///var/home/sasha/para/areas/dev/gh/charly/coffe/a.py"),
-            "charly-coffee")
+    # (nombre, uri, proyecto esperado); la derivación no depende del esquema:
+    # basta el marker para/areas/dev/gh. REPLy.jl → REPLy-jl, igual que
+    # clean_proj_name (convención repos Julia).
+    CASOS = [
+        ("repo_charly", "file:///var/home/sasha/para/areas/dev/gh/charly/coffe/a.py",
+         "charly-coffee"),
+        ("repo_sk_con_sufijo_jl", "file:///var/home/sasha/para/areas/dev/gh/sk/REPLy.jl/x.txt",
+         "sk-REPLy-jl"),
+        ("path_sin_esquema", "/para/areas/dev/gh/charly/coffe/a.py",
+         "charly-coffee"),
+    ]
 
-    def test_repo_sk_con_sufijo_jl(self):
-        # REPLy.jl → REPLy-jl, igual que clean_proj_name (convención repos Julia)
-        self.assertEqual(
-            ut.amp_proj_from_uri(
-                "file:///var/home/sasha/para/areas/dev/gh/sk/REPLy.jl/x.txt"),
-            "sk-REPLy-jl")
+    def test_derivacion_de_proyectos(self):
+        for nombre, uri, esperado in self.CASOS:
+            with self.subTest(caso=nombre):
+                self.assertEqual(ut.amp_proj_from_uri(uri), esperado)
 
     def test_fuera_de_para_gh_da_none(self):
         self.assertIsNone(
             ut.amp_proj_from_uri("file:///tmp/x/proj/main.py"))
-
-    def test_path_sin_esquema_se_deri_igual(self):
-        # la derivación no depende del esquema: basta el marker para/areas/dev/gh
-        self.assertEqual(
-            ut.amp_proj_from_uri("/para/areas/dev/gh/charly/coffe/a.py"),
-            "charly-coffee")
 
     def test_uri_vacio_da_none(self):
         self.assertIsNone(ut.amp_proj_from_uri(""))
@@ -72,15 +79,15 @@ class TestExtractAmp(unittest.TestCase):
     """extract_amp respeta --filter (is_charly) y etiqueta por proyecto."""
 
     def setUp(self):
-        self._old = (ut.CHARLY_FILTER, ut.AMP_DIR, ut.SINCE, ut.UNTIL)
+        self._old = _guardar_estado()
         ut.SINCE = ut.UNTIL = None
 
     def tearDown(self):
-        (ut.CHARLY_FILTER, ut.AMP_DIR, ut.SINCE, ut.UNTIL) = self._old
+        _restaurar_estado(self._old)
 
     @staticmethod
     def _entry(uri, ts="2026-05-10T10:00:00+00:00"):
-        return {"uri": uri, "timestamp": ts}
+        return dict(uri=uri, timestamp=ts)
 
     def _fake_amp_dir(self, *entries):
         d = Path(tempfile.mkdtemp()) / "file-changes" / "T-fake"

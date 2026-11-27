@@ -34,47 +34,40 @@ ut = load_tracker()
 
 # ============================ fixtures ============================
 
-def session_line(cwd, ts="2026-11-11T15-27-59.682Z", sid="01a1cb39"):
-    return {"type": "session", "version": 3, "id": sid, "timestamp": ts,
-            "cwd": cwd}
+# ts/sid del fixture estándar (una sesión omp del 2026-11-11)
+TS_SESSION = "2026-11-11T15-27-59.682Z"
+SID = "01a1cb39"
 
 
-def user_msg_line(ts, text="hola"):
-    return {"type": "message", "id": "u1", "timestamp": ts,
-            "message": {"role": "user",
-                        "content": [{"type": "text", "text": text}],
-                        "attribution": "user"}}
+def _cost_block(cost):
+    """Desglose de coste *reported* que usa omp en usage.cost."""
+    return dict(input=cost * 0.9, output=cost * 0.1,
+                cacheRead=0, cacheWrite=0, total=cost)
 
 
-def assistant_msg_line(ts, inp, out, cache_r=0, cost=0.002,
-                       model="z-ai/glm-5.3-flash", error=False):
-    msg = {"role": "assistant", "model": model, "stopReason": "stop",
-           "usage": {"input": inp, "output": out, "cacheRead": cache_r,
+def assistant_msg_line(ts, inp_out, cost=0.002, error=False):
+    """Turno assistant con usage facturado; (inp, out) en tupla."""
+    inp, out = inp_out
+    msg = {"role": "assistant", "model": "z-ai/glm-5.3-flash",
+           "stopReason": "stop",
+           "usage": {"input": inp, "output": out, "cacheRead": 0,
                      "cacheWrite": 0, "totalTokens": inp + out,
-                     "cost": {"input": cost * 0.9, "output": cost * 0.1,
-                              "cacheRead": 0, "cacheWrite": 0, "total": cost}}}
+                     "cost": _cost_block(cost)}}
     if error:
         msg["errorId"] = "e1"
         msg["errorMessage"] = "boom"
     return {"type": "message", "id": "a1", "timestamp": ts, "message": msg}
 
 
-def model_usage_line(ts, purpose="title", model="z-ai/glm-5.3-flash",
-                     inp=100, out=10, cost=0.0001):
+def model_usage_line(ts, purpose="title"):
+    """Llamada auxiliar del harness (factura tokens, no es turno)."""
     return {"type": "model_usage", "timestamp": ts, "purpose": purpose,
             "role": None, "api": "openrouter", "provider": "openrouter",
-            "model": model,
-            "usage": {"input": inp, "output": out, "cacheRead": 0,
-                      "cacheWrite": 0, "totalTokens": inp + out,
-                      "cost": {"input": cost * 0.9, "output": cost * 0.1,
-                               "cacheRead": 0, "cacheWrite": 0,
-                               "total": cost}},
+            "model": "z-ai/glm-5.3-flash",
+            "usage": {"input": 100, "output": 10, "cacheRead": 0,
+                      "cacheWrite": 0, "totalTokens": 110,
+                      "cost": _cost_block(0.0001)},
             "stopReason": "stop"}
-
-
-def tool_line(ts, tool="bash"):
-    return {"type": "custom", "customType": "tool_execution_start",
-            "timestamp": ts, "data": {"toolName": tool, "toolCallId": "t1"}}
 
 
 def write_session(tmp, lines, proj="-para-areas-dev-gh-charly-coffee",
@@ -90,13 +83,21 @@ CWD_COFFEE = "/var/home/sasha/para/areas/dev/gh/charly/coffee"
 CWD_FUERA = "/var/home/sasha/para/areas/dev/gh/at/catherine"
 
 BASE_LINES = [
-    session_line(CWD_COFFEE),
-    user_msg_line("2026-11-11T15:28:46.905Z"),
-    assistant_msg_line("2026-11-11T15:28:57.060Z", 12000, 300, cost=0.002),
-    tool_line("2026-11-11T15:28:58.000Z", tool="bash"),
-    tool_line("2026-11-11T15:28:59.000Z", tool="read"),
-    model_usage_line("2026-11-11T15:29:01.000Z", purpose="title"),
-    assistant_msg_line("2026-11-11T15:29:10.000Z", 9000, 100, cost=0.001),
+    {"type": "session", "version": 3, "id": SID, "timestamp": TS_SESSION,
+     "cwd": CWD_COFFEE},
+    {"type": "message", "id": "u1", "timestamp": "2026-11-11T15:28:46.905Z",
+     "message": {"role": "user",
+                 "content": [{"type": "text", "text": "hola"}],
+                 "attribution": "user"}},
+    assistant_msg_line("2026-11-11T15:28:57.060Z", (12000, 300), cost=0.002),
+    {"type": "custom", "customType": "tool_execution_start",
+     "timestamp": "2026-11-11T15:28:58.000Z",
+     "data": {"toolName": "bash", "toolCallId": "t1"}},
+    {"type": "custom", "customType": "tool_execution_start",
+     "timestamp": "2026-11-11T15:28:59.000Z",
+     "data": {"toolName": "read", "toolCallId": "t1"}},
+    model_usage_line("2026-11-11T15:29:01.000Z"),
+    assistant_msg_line("2026-11-11T15:29:10.000Z", (9000, 100), cost=0.001),
 ]
 
 
@@ -161,10 +162,12 @@ class TestExtractOmp(OmpTestBase):
             self.assertEqual(sum(r["cost_effective"] for r in rows), 0.0031)
 
     def test_cost_fallback_estimates_without_cost(self):
-        line = assistant_msg_line("2026-11-11T15:28:57.060Z", 1000, 50, cost=0)
+        line = assistant_msg_line("2026-11-11T15:28:57.060Z", (1000, 50), cost=0)
         line["message"]["usage"].pop("cost")
         with tempfile.TemporaryDirectory() as td:
-            write_session(Path(td), [session_line(CWD_COFFEE), line])
+            write_session(Path(td), [
+                {"type": "session", "version": 3, "id": SID,
+                 "timestamp": TS_SESSION, "cwd": CWD_COFFEE}, line])
             rows, _ = ut.extract_omp(sessions_dir=Path(td))
             self.assertEqual(len(rows), 1)
             self.assertGreater(rows[0]["cost_effective"], 0)
@@ -201,7 +204,7 @@ class TestExtractOmpSessions(OmpTestBase):
 
     def test_error_signal(self):
         lines = BASE_LINES + [
-            assistant_msg_line("2026-11-11T15:29:20.000Z", 100, 10,
+            assistant_msg_line("2026-11-11T15:29:20.000Z", (100, 10),
                                error=True),
         ]
         with tempfile.TemporaryDirectory() as td:
@@ -213,8 +216,9 @@ class TestExtractOmpSessions(OmpTestBase):
 
     def test_out_of_scope_not_listed(self):
         with tempfile.TemporaryDirectory() as td:
-            write_session(Path(td), [session_line(CWD_FUERA),
-                                     *BASE_LINES[1:]],
+            fuera = {"type": "session", "version": 3, "id": SID,
+                     "timestamp": TS_SESSION, "cwd": CWD_FUERA}
+            write_session(Path(td), [fuera, *BASE_LINES[1:]],
                           proj="-para-areas-dev-gh-at-catherine")
             sessions = ut.extract_omp_sessions(sessions_dir=Path(td))
             self.assertEqual(sessions, [])
@@ -228,8 +232,9 @@ class TestExtractOmpExcluded(OmpTestBase):
 
     def test_excluded_rows_registered(self):
         with tempfile.TemporaryDirectory() as td:
-            write_session(Path(td), [session_line(CWD_FUERA),
-                                     *BASE_LINES[1:]],
+            fuera = {"type": "session", "version": 3, "id": SID,
+                     "timestamp": TS_SESSION, "cwd": CWD_FUERA}
+            write_session(Path(td), [fuera, *BASE_LINES[1:]],
                           proj="-para-areas-dev-gh-at-catherine")
             rows, excluded = ut.extract_omp(sessions_dir=Path(td))
             self.assertEqual(rows, [])
@@ -241,8 +246,9 @@ class TestExtractOmpExcluded(OmpTestBase):
     def test_filter_all_includes_everything(self):
         ut.CHARLY_FILTER = False
         with tempfile.TemporaryDirectory() as td:
-            write_session(Path(td), [session_line(CWD_FUERA),
-                                     *BASE_LINES[1:]],
+            fuera = {"type": "session", "version": 3, "id": SID,
+                     "timestamp": TS_SESSION, "cwd": CWD_FUERA}
+            write_session(Path(td), [fuera, *BASE_LINES[1:]],
                           proj="-para-areas-dev-gh-at-catherine")
             rows, excluded = ut.extract_omp(sessions_dir=Path(td))
             self.assertEqual(len(rows), 3)

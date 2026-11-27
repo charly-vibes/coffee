@@ -21,6 +21,18 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parent.parent
 TRACKER_PATH = REPO / "scripts" / "usage-tracker.py"
 
+# ventana de mayo 2026 reutilizada por varios tests
+_MAY_WINDOW = (date(2026, 5, 1), date(2026, 5, 31))
+
+
+def _guardar_ventana():
+    """Guarda (SINCE, UNTIL) para restaurarlos en tearDown."""
+    return (ut.SINCE, ut.UNTIL)
+
+
+def _restaurar_ventana(old):
+    ut.SINCE, ut.UNTIL = old
+
 
 def load_tracker():
     spec = importlib.util.spec_from_file_location("usage_tracker_window", TRACKER_PATH)
@@ -34,7 +46,6 @@ ut = load_tracker()
 
 def _dt(s):
     return datetime.fromisoformat(s)
-
 
 # ============================ parse_window ============================
 
@@ -75,43 +86,54 @@ class TestParseWindow(unittest.TestCase):
 class TestInWindow(unittest.TestCase):
 
     def setUp(self):
-        self._old = (ut.SINCE, ut.UNTIL)
+        self._old = _guardar_ventana()
 
     def tearDown(self):
-        ut.SINCE, ut.UNTIL = self._old
+        _restaurar_ventana(self._old)
 
-    def test_sin_ventana_todo_pasa(self):
+    # (nombre, (since, until), [(ts, esperado), ...])
+    CASOS = [
+        ("sin_ventana", (None, None), [
+            ("2026-01-01T00:00:00+00:00", True),
+            ("2099-12-31T23:59:59+00:00", True),
+        ]),
+        ("limites_inclusivos", _MAY_WINDOW, [
+            ("2026-05-01T00:00:00+00:00", True),    # borde since inclusivo
+            ("2026-05-31T23:59:59+00:00", True),    # borde until inclusivo
+            ("2026-04-30T23:59:59+00:00", False),   # un segundo antes
+            ("2026-06-01T00:00:00+00:00", False),   # un segundo después
+        ]),
+        ("dentro_de_ventana", _MAY_WINDOW, [
+            ("2026-05-15T12:00:00+00:00", True),
+        ]),
+        ("solo_since", (date(2026, 5, 1), None), [
+            ("2026-05-01T00:00:00+00:00", True),
+            ("2026-04-30T23:59:59+00:00", False),
+            ("2099-01-01T00:00:00+00:00", True),
+        ]),
+        ("solo_until", (None, date(2026, 5, 31)), [
+            ("2026-06-01T00:00:00+00:00", False),
+            ("2020-01-01T00:00:00+00:00", True),
+        ]),
+        ("acepta_date_y_datetime", _MAY_WINDOW, [
+            (date(2026, 5, 10), True),
+            (date(2026, 6, 10), False),
+        ]),
+    ]
+
+    def test_matriz_in_window(self):
+        for nombre, ventana, tabla in self.CASOS:
+            with self.subTest(caso=nombre):
+                ut.SINCE, ut.UNTIL = ventana
+                for valor, esperado in tabla:
+                    ts = _dt(valor) if isinstance(valor, str) else valor
+                    self.assertEqual(ut.in_window(ts), esperado, ts)
+
+    def test_sin_timestamp_pasa(self):
         ut.SINCE = ut.UNTIL = None
-        self.assertTrue(ut.in_window(_dt("2026-01-01T00:00:00+00:00")))
-        self.assertTrue(ut.in_window(_dt("2099-12-31T23:59:59+00:00")))
+        # sin fecha no hay que filtrar: entra
         self.assertTrue(ut.in_window(None))
 
-    def test_limites_inclusivos(self):
-        ut.SINCE, ut.UNTIL = date(2026, 5, 1), date(2026, 5, 31)
-        self.assertTrue(ut.in_window(_dt("2026-05-01T00:00:00+00:00")))
-        self.assertTrue(ut.in_window(_dt("2026-05-31T23:59:59+00:00")))
-        self.assertFalse(ut.in_window(_dt("2026-04-30T23:59:59+00:00")))
-        self.assertFalse(ut.in_window(_dt("2026-06-01T00:00:00+00:00")))
-
-    def test_dentro_de_ventana(self):
-        ut.SINCE, ut.UNTIL = date(2026, 5, 1), date(2026, 5, 31)
-        self.assertTrue(ut.in_window(_dt("2026-05-15T12:00:00+00:00")))
-
-    def test_solo_since(self):
-        ut.SINCE, ut.UNTIL = date(2026, 5, 1), None
-        self.assertTrue(ut.in_window(_dt("2026-05-01T00:00:00+00:00")))
-        self.assertFalse(ut.in_window(_dt("2026-04-30T23:59:59+00:00")))
-        self.assertTrue(ut.in_window(_dt("2099-01-01T00:00:00+00:00")))
-
-    def test_solo_until(self):
-        ut.SINCE, ut.UNTIL = None, date(2026, 5, 31)
-        self.assertFalse(ut.in_window(_dt("2026-06-01T00:00:00+00:00")))
-        self.assertTrue(ut.in_window(_dt("2020-01-01T00:00:00+00:00")))
-
-    def test_acepta_date_ademas_de_datetime(self):
-        ut.SINCE, ut.UNTIL = date(2026, 5, 1), date(2026, 5, 31)
-        self.assertTrue(ut.in_window(date(2026, 5, 10)))
-        self.assertFalse(ut.in_window(date(2026, 6, 10)))
 
 
 # ============================ filter_sessions ============================
@@ -172,10 +194,11 @@ class TestExtractorsWindow(unittest.TestCase):
     def setUp(self):
         self._old = (ut.SINCE, ut.UNTIL, ut.CLAUDE_DIR, ut.PI_DIR, ut.AMP_DIR)
         self.tmp = Path(tempfile.mkdtemp())
-        ut.SINCE, ut.UNTIL = date(2026, 5, 1), date(2026, 5, 31)
+        ut.SINCE, ut.UNTIL = _MAY_WINDOW
 
     def tearDown(self):
-        ut.SINCE, ut.UNTIL, ut.CLAUDE_DIR, ut.PI_DIR, ut.AMP_DIR = self._old
+        _restaurar_ventana(self._old[:2])
+        ut.CLAUDE_DIR, ut.PI_DIR, ut.AMP_DIR = self._old[2:]
 
     # --- fixtures ---
 
@@ -271,7 +294,7 @@ class TestExtractorsWindow(unittest.TestCase):
     def test_aggregate_sobre_rows_de_ventana(self):
         """aggregate() sobre rows ya filtrados por los extractores: date_range
         queda dentro de la ventana y los totales coinciden."""
-        ut.SINCE, ut.UNTIL = date(2026, 5, 1), date(2026, 5, 31)
+        ut.SINCE, ut.UNTIL = _MAY_WINDOW
         ut.CLAUDE_DIR = self._fake_claude_dir()
         kinds = {}
         rows, _ = ut.extract_claude(kinds=kinds)

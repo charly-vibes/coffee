@@ -1,9 +1,5 @@
 #!/usr/bin/env python3
-"""fpa_config_rules.py — validadores por sección del config FP&A.
-
-validate_config() y los _validate_* por sección (fechas, suscripciones,
-energía coffe-7mj.1, CTAs FPA-168); cada uno devuelve su lista de errores,
-el driver los compone en orden. Separado del loader (fpa_config.py)."""
+"""fpa_config_rules.py — validadores por sección del config FP&A (driver: validate_config)."""
 
 import re
 
@@ -57,19 +53,24 @@ def _validate_repo_entries(entries, key, owners):
     return errors
 
 
-def _validate_repos(repos):
-    if not isinstance(repos, dict):
-        return ["repos debe ser un objeto"]
+def _validate_url_overrides(repos):
     errors = []
-    owners = repos.get("owners") or {}
-    if not isinstance(owners, dict) or not owners:
-        errors.append("repos.owners ausente o vacío (label-prefix → org GH)")
-    for key in ("private", "no_remote"):
-        errors += _validate_repo_entries(repos.get(key) or [], key, owners)
     for label, url in (repos.get("url_overrides") or {}).items():
         if not isinstance(url, str) or not url.startswith("https://"):
             errors.append(f"repos.url_overrides[{label!r}]: URL no https: {url!r}")
     return errors
+
+
+def _validate_repos(repos):
+    if not isinstance(repos, dict):
+        return ["repos debe ser un objeto"]
+    owners = repos.get("owners") or {}
+    if not isinstance(owners, dict) or not owners:
+        return ["repos.owners ausente o vacío (label-prefix → org GH)"]
+    errors = []
+    for key in ("private", "no_remote"):
+        errors += _validate_repo_entries(repos.get(key) or [], key, owners)
+    return errors + _validate_url_overrides(repos)
 
 
 def _validate_subscription_entry(tool, i, entry):
@@ -274,11 +275,7 @@ def _validate_ctas(cfg):
 
 
 def validate_config(cfg):
-    """Validar el config; devuelve lista de errores ([] = válido).
-
-    Chequeos: secciones requeridas, formato de fechas/meses/horarios,
-    entradas de suscripción, targets de CTAs no vacíos (FPA-168).
-    """
+    """Validar el config; devuelve lista de errores ([] = válido)."""
     errors = []
     site_name = cfg.get("site_name")
     if not isinstance(site_name, str) or not site_name.strip():
