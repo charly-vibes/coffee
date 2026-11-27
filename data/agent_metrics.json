@@ -113974,8 +113974,8 @@
     "latency": {
       "sources": {
         "pi": {
-          "turns_total": 294541,
-          "turns_with_duration": 51575,
+          "turns_total": 294556,
+          "turns_with_duration": 51590,
           "coverage_pct": 17.5,
           "models": {
             "MiniMax-M2.7": {
@@ -114228,11 +114228,11 @@
               "coverage_pct": 100.0
             },
             "glm-5.3-flash": {
-              "n": 5212,
-              "p50_ms": 6549.0,
-              "p90_ms": 23322.600000000024,
-              "p95_ms": 33653.399999999994,
-              "turns_total": 5212,
+              "n": 5227,
+              "p50_ms": 6539.0,
+              "p90_ms": 23267.400000000016,
+              "p95_ms": 33639.299999999996,
+              "turns_total": 5227,
               "coverage_pct": 100.0
             },
             "google/gemini-2.0-flash-001": {
@@ -114784,11 +114784,11 @@
           "coverage_pct": 2.5
         },
         "glm": {
-          "n": 34697,
-          "p50_ms": 7562.0,
-          "p90_ms": 27843.20000000001,
-          "p95_ms": 41281.59999999996,
-          "turns_total": 195316,
+          "n": 34712,
+          "p50_ms": 7560.0,
+          "p90_ms": 27835.70000000002,
+          "p95_ms": 41277.899999999994,
+          "turns_total": 195331,
           "coverage_pct": 17.8
         },
         "kimi": {
@@ -114855,6 +114855,1499 @@
           "reason": "no_duration_signal"
         }
       ]
+    },
+    "fallback": {
+      "by_source": {
+        "omp": {
+          "method": "reported-resolvedModelIsFallback",
+          "events": 11,
+          "denominator": 1822,
+          "rate": 0.006
+        },
+        "pi": {
+          "method": "proxy-mid-task-switch",
+          "events": 252,
+          "denominator": 294373,
+          "rate": 0.0009
+        },
+        "claude-cli": {
+          "method": "proxy-mid-task-switch",
+          "events": 15,
+          "denominator": 7962,
+          "rate": 0.0019
+        }
+      },
+      "events_total": 278,
+      "provenance": {
+        "omp": "reported",
+        "pi": "derived",
+        "claude-cli": "derived"
+      },
+      "coverage": [
+        {
+          "source": "omp",
+          "coverage_pct": 100.0,
+          "reason": null
+        },
+        {
+          "source": "pi",
+          "coverage_pct": 100.0,
+          "reason": null
+        },
+        {
+          "source": "claude-cli",
+          "coverage_pct": 100.0,
+          "reason": null
+        }
+      ]
+    },
+    "quota_events": {
+      "events": [],
+      "counts": {},
+      "sources_without_signature": [
+        {
+          "source": "claude-cli",
+          "reason": "no_quota_signatures_in_source"
+        },
+        {
+          "source": "pi",
+          "reason": "no_quota_signatures_configured"
+        }
+      ],
+      "provenance": {
+        "quota_events": "derived"
+      },
+      "coverage": [
+        {
+          "source": "pi",
+          "coverage_pct": 0.9,
+          "reason": null
+        },
+        {
+          "source": "claude-cli",
+          "coverage_pct": 0.0,
+          "reason": "no_error_message_signal"
+        }
+      ]
+    },
+    "completion": {
+      "started": 566,
+      "autonomous": 476,
+      "rate": 0.841,
+      "ambiguous_share": 19.7,
+      "cohort": "unambiguous",
+      "provenance": {
+        "completion": "derived"
+      },
+      "coverage": [
+        {
+          "source": "task_beads",
+          "coverage_pct": 100.0,
+          "reason": null
+        },
+        {
+          "source": "agent_metrics.tasks",
+          "coverage_pct": 100.0,
+          "reason": null
+        },
+        {
+          "source": "model-cost-estimate-v0",
+          "coverage_pct": 100.0,
+          "reason": null
+        }
+      ]
+    },
+    "intervention": {
+      "aborts": 103,
+      "recovery_prompts": 138,
+      "per_100_accepted": 42.58,
+      "accepted_beads": 566,
+      "provenance": {
+        "intervention": "derived"
+      },
+      "coverage": [
+        {
+          "source": "agent_metrics.tasks",
+          "coverage_pct": 100.0,
+          "reason": null
+        }
+      ]
+    },
+    "subscription": {
+      "periods": [
+        {
+          "source": "claude-cli",
+          "label": "Max $100/mes",
+          "start": "2026-03-19",
+          "end": "2026-04-19",
+          "monthly_fee": 100,
+          "cost_imputed": 0,
+          "utilization": 0.0,
+          "headroom_daily": 3.12
+        },
+        {
+          "source": "claude-cli",
+          "label": "Max $100/mes",
+          "start": "2026-04-19",
+          "end": "2026-05-19",
+          "monthly_fee": 100,
+          "cost_imputed": 1117.5,
+          "utilization": 11.175,
+          "headroom_daily": 0.0
+        },
+        {
+          "source": "claude-cli",
+          "label": "Pro $20/mes",
+          "start": "2026-05-19",
+          "end": "2026-06-19",
+          "monthly_fee": 20,
+          "cost_imputed": 366.59,
+          "utilization": 18.3295,
+          "headroom_daily": 0.0
+        },
+        {
+          "source": "codex",
+          "label": "ChatGPT Plus $20/mes",
+          "start": "2026-04-02",
+          "end": "2026-05-02",
+          "monthly_fee": 20,
+          "cost_imputed": 428.35,
+          "utilization": 21.4175,
+          "headroom_daily": 0.0
+        },
+        {
+          "source": "codex",
+          "label": "ChatGPT Plus $20/mes",
+          "start": "2026-05-02",
+          "end": "2026-06-02",
+          "monthly_fee": 20,
+          "cost_imputed": 276.71,
+          "utilization": 13.8355,
+          "headroom_daily": 0.0
+        },
+        {
+          "source": "codex",
+          "label": "ChatGPT Plus trial (1 mes free)",
+          "start": "2026-10-06",
+          "end": "2026-11-06",
+          "monthly_fee": 0,
+          "cost_imputed": 332.13,
+          "utilization": null,
+          "headroom_daily": 0.0,
+          "reason": "no_monthly_fee"
+        },
+        {
+          "source": "gemini-cli",
+          "label": "Google AI Pro $19.99/mes",
+          "start": "2025-12-03",
+          "end": "2026-06-03",
+          "monthly_fee": 19.99,
+          "cost_imputed": 22.13,
+          "utilization": 1.1071,
+          "headroom_daily": 0.0
+        }
+      ],
+      "models_without_period": [
+        {
+          "model": "<synthetic>",
+          "reason": "no_subscription_for_model"
+        },
+        {
+          "model": "MiniMax-M2.7",
+          "reason": "no_subscription_for_model"
+        },
+        {
+          "model": "MiniMax-M3.1-Flash",
+          "reason": "no_subscription_for_model"
+        },
+        {
+          "model": "amp",
+          "reason": "no_subscription_for_model"
+        },
+        {
+          "model": "anthropic/claude-sonnet-4.6",
+          "reason": "no_subscription_for_model"
+        },
+        {
+          "model": "claude-opus-4-6",
+          "reason": "no_subscription_for_model"
+        },
+        {
+          "model": "claude-opus-4-7",
+          "reason": "no_subscription_for_model"
+        },
+        {
+          "model": "claude-sonnet-4-6",
+          "reason": "no_subscription_for_model"
+        },
+        {
+          "model": "deepseek-flash",
+          "reason": "no_subscription_for_model"
+        },
+        {
+          "model": "deepseek-v4-flash-0731",
+          "reason": "no_subscription_for_model"
+        },
+        {
+          "model": "deepseek-v4.1-flash-1017",
+          "reason": "no_subscription_for_model"
+        },
+        {
+          "model": "deepseek/deepseek-chat-v3.1",
+          "reason": "no_subscription_for_model"
+        },
+        {
+          "model": "deepseek/deepseek-v4-flash",
+          "reason": "no_subscription_for_model"
+        },
+        {
+          "model": "deepseek/deepseek-v4-pro",
+          "reason": "no_subscription_for_model"
+        },
+        {
+          "model": "deepseek/deepseek-v4.1-flash",
+          "reason": "no_subscription_for_model"
+        },
+        {
+          "model": "devstral-2512",
+          "reason": "no_subscription_for_model"
+        },
+        {
+          "model": "gemini-2.5-pro",
+          "reason": "no_subscription_for_model"
+        },
+        {
+          "model": "gemini-3-flash-preview",
+          "reason": "no_subscription_for_model"
+        },
+        {
+          "model": "gemini-3-pro-preview",
+          "reason": "no_subscription_for_model"
+        },
+        {
+          "model": "glm-5.3",
+          "reason": "no_subscription_for_model"
+        },
+        {
+          "model": "glm-5.3-flash",
+          "reason": "no_subscription_for_model"
+        },
+        {
+          "model": "google/gemini-2.5-flash",
+          "reason": "no_subscription_for_model"
+        },
+        {
+          "model": "google/gemini-2.5-flash-image",
+          "reason": "no_subscription_for_model"
+        },
+        {
+          "model": "google/gemini-3.1-pro-preview-customtools",
+          "reason": "no_subscription_for_model"
+        },
+        {
+          "model": "kimi-for-coding",
+          "reason": "no_subscription_for_model"
+        },
+        {
+          "model": "meta-llama/llama-4-maverick",
+          "reason": "no_subscription_for_model"
+        },
+        {
+          "model": "mistral-small-latest",
+          "reason": "no_subscription_for_model"
+        },
+        {
+          "model": "mistralai/mistral-small-3.2-24b-instruct",
+          "reason": "no_subscription_for_model"
+        },
+        {
+          "model": "mistralai/mistral-small-3.2-24b-instruct:free",
+          "reason": "no_subscription_for_model"
+        },
+        {
+          "model": "mixed",
+          "reason": "no_subscription_for_model"
+        },
+        {
+          "model": "moonshotai/kimi-k2.5",
+          "reason": "no_subscription_for_model"
+        },
+        {
+          "model": "nvidia/nemotron-3-ultra-550b-a55b:free",
+          "reason": "no_subscription_for_model"
+        },
+        {
+          "model": "openrouter/free",
+          "reason": "no_subscription_for_model"
+        },
+        {
+          "model": "poolside/laguna-s-2.1:free",
+          "reason": "no_subscription_for_model"
+        },
+        {
+          "model": "qwen/qwen3-coder-next",
+          "reason": "no_subscription_for_model"
+        },
+        {
+          "model": "qwen3.8-flash",
+          "reason": "no_subscription_for_model"
+        },
+        {
+          "model": "qwen3.8-max",
+          "reason": "no_subscription_for_model"
+        },
+        {
+          "model": "recursive/flint-v1.0:free",
+          "reason": "no_subscription_for_model"
+        },
+        {
+          "model": "stealth/ox-alpha",
+          "reason": "no_subscription_for_model"
+        },
+        {
+          "model": "x-ai/grok-4-fast",
+          "reason": "no_subscription_for_model"
+        },
+        {
+          "model": "x-ai/grok-4.3",
+          "reason": "no_subscription_for_model"
+        },
+        {
+          "model": "z-ai/glm-5.2",
+          "reason": "no_subscription_for_model"
+        },
+        {
+          "model": "z-ai/glm-5.3-flash",
+          "reason": "no_subscription_for_model"
+        },
+        {
+          "model": "z-ai/glm-5.3-flash:free",
+          "reason": "no_subscription_for_model"
+        },
+        {
+          "model": "zai-glm-5-3-flash",
+          "reason": "no_subscription_for_model"
+        },
+        {
+          "model": "~anthropic/claude-haiku-latest",
+          "reason": "no_subscription_for_model"
+        },
+        {
+          "model": "~google/gemini-pro-latest",
+          "reason": "no_subscription_for_model"
+        },
+        {
+          "model": "~openai/gpt-mini-latest",
+          "reason": "no_subscription_for_model"
+        }
+      ],
+      "provenance": {
+        "subscription": "derived"
+      },
+      "coverage": [
+        {
+          "source": "claude-cli Max $100/mes",
+          "coverage_pct": 0.0,
+          "reason": null
+        },
+        {
+          "source": "claude-cli Max $100/mes",
+          "coverage_pct": 71.0,
+          "reason": null
+        },
+        {
+          "source": "claude-cli Pro $20/mes",
+          "coverage_pct": 50.0,
+          "reason": null
+        },
+        {
+          "source": "codex ChatGPT Plus $20/mes",
+          "coverage_pct": 67.7,
+          "reason": null
+        },
+        {
+          "source": "codex ChatGPT Plus $20/mes",
+          "coverage_pct": 53.1,
+          "reason": null
+        },
+        {
+          "source": "codex ChatGPT Plus trial (1 mes free)",
+          "coverage_pct": 50.0,
+          "reason": null
+        },
+        {
+          "source": "gemini-cli Google AI Pro $19.99/mes",
+          "coverage_pct": 5.5,
+          "reason": null
+        }
+      ]
+    },
+    "concurrency": {
+      "daily": [
+        {
+          "day": "2026-10-28",
+          "agents_p95": 2.0,
+          "requests_p95": 4.0
+        },
+        {
+          "day": "2026-10-29",
+          "agents_p95": 3.0,
+          "requests_p95": 6.0
+        },
+        {
+          "day": "2026-11-01",
+          "agents_p95": 1.0,
+          "requests_p95": 3.0
+        },
+        {
+          "day": "2026-11-02",
+          "agents_p95": 8.0,
+          "requests_p95": 12.0
+        },
+        {
+          "day": "2026-11-03",
+          "agents_p95": 7.0,
+          "requests_p95": 13.0
+        },
+        {
+          "day": "2026-11-04",
+          "agents_p95": 9.0,
+          "requests_p95": 14.0
+        },
+        {
+          "day": "2026-11-05",
+          "agents_p95": 7.0,
+          "requests_p95": 11.0
+        },
+        {
+          "day": "2026-11-06",
+          "agents_p95": 5.0,
+          "requests_p95": 8.0
+        },
+        {
+          "day": "2026-11-07",
+          "agents_p95": 1.0,
+          "requests_p95": 2.0
+        },
+        {
+          "day": "2026-11-08",
+          "agents_p95": 5.0,
+          "requests_p95": 8.0
+        },
+        {
+          "day": "2026-11-09",
+          "agents_p95": 1.0,
+          "requests_p95": 3.0
+        },
+        {
+          "day": "2026-11-10",
+          "agents_p95": 5.0,
+          "requests_p95": 7.0
+        },
+        {
+          "day": "2026-11-11",
+          "agents_p95": 7.0,
+          "requests_p95": 12.0
+        },
+        {
+          "day": "2026-11-12",
+          "agents_p95": 4.0,
+          "requests_p95": 7.0
+        },
+        {
+          "day": "2026-11-13",
+          "agents_p95": 4.0,
+          "requests_p95": 8.0
+        },
+        {
+          "day": "2026-11-15",
+          "agents_p95": 3.0,
+          "requests_p95": 6.0
+        },
+        {
+          "day": "2026-11-16",
+          "agents_p95": 5.0,
+          "requests_p95": 8.0
+        },
+        {
+          "day": "2026-11-17",
+          "agents_p95": 4.0,
+          "requests_p95": 6.0
+        },
+        {
+          "day": "2026-11-18",
+          "agents_p95": 4.0,
+          "requests_p95": 10.0
+        },
+        {
+          "day": "2026-11-19",
+          "agents_p95": 4.0,
+          "requests_p95": 8.0
+        },
+        {
+          "day": "2026-11-21",
+          "agents_p95": 6.0,
+          "requests_p95": 7.0
+        },
+        {
+          "day": "2026-11-22",
+          "agents_p95": 2.0,
+          "requests_p95": 5.0
+        },
+        {
+          "day": "2026-11-23",
+          "agents_p95": 3.0,
+          "requests_p95": 5.0
+        },
+        {
+          "day": "2026-11-24",
+          "agents_p95": 4.0,
+          "requests_p95": 6.0
+        },
+        {
+          "day": "2026-11-25",
+          "agents_p95": 4.0,
+          "requests_p95": 7.0
+        },
+        {
+          "day": "2026-11-26",
+          "agents_p95": 2.0,
+          "requests_p95": 4.0
+        },
+        {
+          "day": "2026-11-27",
+          "agents_p95": 3.0,
+          "requests_p95": 5.0
+        }
+      ],
+      "agents_p95": 7.699999999999999,
+      "requests_p95": 12.7,
+      "provenance": {
+        "concurrency": "derived"
+      },
+      "coverage": [
+        {
+          "source": "claude-cli",
+          "coverage_pct": 0.0,
+          "reason": "no_overlap_data"
+        },
+        {
+          "source": "pi",
+          "coverage_pct": 17.5,
+          "reason": null
+        }
+      ],
+      "reason": "no_overlap_data"
+    },
+    "stall": {
+      "daily": [
+        {
+          "day": "2026-04-14",
+          "minutes_error_adjacent": 39.067,
+          "minutes_idle": 298.005
+        },
+        {
+          "day": "2026-04-16",
+          "minutes_error_adjacent": 16.221,
+          "minutes_idle": 328.122
+        },
+        {
+          "day": "2026-04-17",
+          "minutes_error_adjacent": 16.188,
+          "minutes_idle": 330.962
+        },
+        {
+          "day": "2026-04-18",
+          "minutes_error_adjacent": 39.096,
+          "minutes_idle": 305.683
+        },
+        {
+          "day": "2026-04-19",
+          "minutes_error_adjacent": 48.217,
+          "minutes_idle": 167.954
+        },
+        {
+          "day": "2026-04-20",
+          "minutes_error_adjacent": 51.743,
+          "minutes_idle": 342.17
+        },
+        {
+          "day": "2026-04-21",
+          "minutes_error_adjacent": 45.669,
+          "minutes_idle": 697.677
+        },
+        {
+          "day": "2026-04-22",
+          "minutes_error_adjacent": 151.455,
+          "minutes_idle": 1024.751
+        },
+        {
+          "day": "2026-04-23",
+          "minutes_error_adjacent": 92.214,
+          "minutes_idle": 1153.726
+        },
+        {
+          "day": "2026-04-24",
+          "minutes_error_adjacent": 87.889,
+          "minutes_idle": 584.788
+        },
+        {
+          "day": "2026-04-27",
+          "minutes_error_adjacent": 59.213,
+          "minutes_idle": 563.716
+        },
+        {
+          "day": "2026-04-28",
+          "minutes_error_adjacent": 37.943,
+          "minutes_idle": 1195.632
+        },
+        {
+          "day": "2026-04-29",
+          "minutes_error_adjacent": 0.641,
+          "minutes_idle": 345.128
+        },
+        {
+          "day": "2026-04-30",
+          "minutes_error_adjacent": 29.227,
+          "minutes_idle": 1683.159
+        },
+        {
+          "day": "2026-05-01",
+          "minutes_error_adjacent": 8.875,
+          "minutes_idle": 647.43
+        },
+        {
+          "day": "2026-05-02",
+          "minutes_error_adjacent": 0.0,
+          "minutes_idle": 32.682
+        },
+        {
+          "day": "2026-05-03",
+          "minutes_error_adjacent": 0.27,
+          "minutes_idle": 37.04
+        },
+        {
+          "day": "2026-05-04",
+          "minutes_error_adjacent": 9.3,
+          "minutes_idle": 403.709
+        },
+        {
+          "day": "2026-05-05",
+          "minutes_error_adjacent": 70.997,
+          "minutes_idle": 759.811
+        },
+        {
+          "day": "2026-05-06",
+          "minutes_error_adjacent": 84.615,
+          "minutes_idle": 1498.407
+        },
+        {
+          "day": "2026-05-07",
+          "minutes_error_adjacent": 44.738,
+          "minutes_idle": 1525.947
+        },
+        {
+          "day": "2026-05-08",
+          "minutes_error_adjacent": 45.325,
+          "minutes_idle": 1419.608
+        },
+        {
+          "day": "2026-05-09",
+          "minutes_error_adjacent": 4.392,
+          "minutes_idle": 670.137
+        },
+        {
+          "day": "2026-05-10",
+          "minutes_error_adjacent": 0.0,
+          "minutes_idle": 272.655
+        },
+        {
+          "day": "2026-05-11",
+          "minutes_error_adjacent": 90.0,
+          "minutes_idle": 825.586
+        },
+        {
+          "day": "2026-05-12",
+          "minutes_error_adjacent": 113.13,
+          "minutes_idle": 1084.202
+        },
+        {
+          "day": "2026-05-13",
+          "minutes_error_adjacent": 123.164,
+          "minutes_idle": 831.851
+        },
+        {
+          "day": "2026-05-14",
+          "minutes_error_adjacent": 62.248,
+          "minutes_idle": 621.297
+        },
+        {
+          "day": "2026-05-15",
+          "minutes_error_adjacent": 96.403,
+          "minutes_idle": 953.986
+        },
+        {
+          "day": "2026-05-18",
+          "minutes_error_adjacent": 31.31,
+          "minutes_idle": 403.182
+        },
+        {
+          "day": "2026-05-19",
+          "minutes_error_adjacent": 68.179,
+          "minutes_idle": 650.442
+        },
+        {
+          "day": "2026-05-20",
+          "minutes_error_adjacent": 18.9,
+          "minutes_idle": 395.125
+        },
+        {
+          "day": "2026-05-21",
+          "minutes_error_adjacent": 4.704,
+          "minutes_idle": 313.5
+        },
+        {
+          "day": "2026-05-22",
+          "minutes_error_adjacent": 3.612,
+          "minutes_idle": 261.126
+        },
+        {
+          "day": "2026-05-27",
+          "minutes_error_adjacent": 3.054,
+          "minutes_idle": 299.391
+        },
+        {
+          "day": "2026-05-29",
+          "minutes_error_adjacent": 12.253,
+          "minutes_idle": 40.76
+        },
+        {
+          "day": "2026-06-02",
+          "minutes_error_adjacent": 11.349,
+          "minutes_idle": 66.18
+        },
+        {
+          "day": "2026-06-03",
+          "minutes_error_adjacent": 14.347,
+          "minutes_idle": 223.357
+        },
+        {
+          "day": "2026-06-04",
+          "minutes_error_adjacent": 0.0,
+          "minutes_idle": 32.882
+        },
+        {
+          "day": "2026-06-05",
+          "minutes_error_adjacent": 3.79,
+          "minutes_idle": 265.108
+        },
+        {
+          "day": "2026-06-06",
+          "minutes_error_adjacent": 3.064,
+          "minutes_idle": 77.461
+        },
+        {
+          "day": "2026-06-08",
+          "minutes_error_adjacent": 0.0,
+          "minutes_idle": 71.052
+        },
+        {
+          "day": "2026-06-09",
+          "minutes_error_adjacent": 3.125,
+          "minutes_idle": 188.151
+        },
+        {
+          "day": "2026-06-10",
+          "minutes_error_adjacent": 6.555,
+          "minutes_idle": 593.963
+        },
+        {
+          "day": "2026-06-11",
+          "minutes_error_adjacent": 0.0,
+          "minutes_idle": 258.053
+        },
+        {
+          "day": "2026-06-14",
+          "minutes_error_adjacent": 0.0,
+          "minutes_idle": 42.647
+        },
+        {
+          "day": "2026-06-15",
+          "minutes_error_adjacent": 0.0,
+          "minutes_idle": 124.18
+        },
+        {
+          "day": "2026-06-16",
+          "minutes_error_adjacent": 0.0,
+          "minutes_idle": 384.208
+        },
+        {
+          "day": "2026-06-17",
+          "minutes_error_adjacent": 0.0,
+          "minutes_idle": 563.434
+        },
+        {
+          "day": "2026-06-18",
+          "minutes_error_adjacent": 0.0,
+          "minutes_idle": 584.145
+        },
+        {
+          "day": "2026-06-19",
+          "minutes_error_adjacent": 0.0,
+          "minutes_idle": 268.933
+        },
+        {
+          "day": "2026-06-25",
+          "minutes_error_adjacent": 15.737,
+          "minutes_idle": 25.758
+        },
+        {
+          "day": "2026-06-26",
+          "minutes_error_adjacent": 60.796,
+          "minutes_idle": 55.343
+        },
+        {
+          "day": "2026-06-27",
+          "minutes_error_adjacent": 0.0,
+          "minutes_idle": 78.246
+        },
+        {
+          "day": "2026-06-28",
+          "minutes_error_adjacent": 31.761,
+          "minutes_idle": 43.749
+        },
+        {
+          "day": "2026-06-29",
+          "minutes_error_adjacent": 0.162,
+          "minutes_idle": 41.269
+        },
+        {
+          "day": "2026-06-30",
+          "minutes_error_adjacent": 21.918,
+          "minutes_idle": 173.955
+        },
+        {
+          "day": "2026-07-04",
+          "minutes_error_adjacent": 0.461,
+          "minutes_idle": 181.451
+        },
+        {
+          "day": "2026-07-07",
+          "minutes_error_adjacent": 40.394,
+          "minutes_idle": 489.901
+        },
+        {
+          "day": "2026-07-08",
+          "minutes_error_adjacent": 98.917,
+          "minutes_idle": 1443.781
+        },
+        {
+          "day": "2026-07-09",
+          "minutes_error_adjacent": 199.239,
+          "minutes_idle": 156.539
+        },
+        {
+          "day": "2026-07-10",
+          "minutes_error_adjacent": 17.306,
+          "minutes_idle": 597.065
+        },
+        {
+          "day": "2026-07-11",
+          "minutes_error_adjacent": 2.231,
+          "minutes_idle": 60.883
+        },
+        {
+          "day": "2026-07-12",
+          "minutes_error_adjacent": 0.993,
+          "minutes_idle": 44.096
+        },
+        {
+          "day": "2026-07-13",
+          "minutes_error_adjacent": 17.76,
+          "minutes_idle": 468.708
+        },
+        {
+          "day": "2026-07-14",
+          "minutes_error_adjacent": 57.371,
+          "minutes_idle": 883.908
+        },
+        {
+          "day": "2026-07-15",
+          "minutes_error_adjacent": 262.727,
+          "minutes_idle": 1973.414
+        },
+        {
+          "day": "2026-07-16",
+          "minutes_error_adjacent": 171.229,
+          "minutes_idle": 833.218
+        },
+        {
+          "day": "2026-07-17",
+          "minutes_error_adjacent": 156.707,
+          "minutes_idle": 934.522
+        },
+        {
+          "day": "2026-07-18",
+          "minutes_error_adjacent": 36.354,
+          "minutes_idle": 368.744
+        },
+        {
+          "day": "2026-07-19",
+          "minutes_error_adjacent": 0.092,
+          "minutes_idle": 78.669
+        },
+        {
+          "day": "2026-07-20",
+          "minutes_error_adjacent": 21.242,
+          "minutes_idle": 487.113
+        },
+        {
+          "day": "2026-07-21",
+          "minutes_error_adjacent": 175.719,
+          "minutes_idle": 2225.094
+        },
+        {
+          "day": "2026-07-22",
+          "minutes_error_adjacent": 48.876,
+          "minutes_idle": 1285.322
+        },
+        {
+          "day": "2026-07-23",
+          "minutes_error_adjacent": 24.058,
+          "minutes_idle": 594.414
+        },
+        {
+          "day": "2026-07-24",
+          "minutes_error_adjacent": 51.498,
+          "minutes_idle": 474.239
+        },
+        {
+          "day": "2026-07-25",
+          "minutes_error_adjacent": 34.583,
+          "minutes_idle": 208.863
+        },
+        {
+          "day": "2026-07-27",
+          "minutes_error_adjacent": 132.888,
+          "minutes_idle": 1923.146
+        },
+        {
+          "day": "2026-07-28",
+          "minutes_error_adjacent": 308.007,
+          "minutes_idle": 3517.979
+        },
+        {
+          "day": "2026-07-29",
+          "minutes_error_adjacent": 169.077,
+          "minutes_idle": 2660.357
+        },
+        {
+          "day": "2026-07-30",
+          "minutes_error_adjacent": 110.772,
+          "minutes_idle": 1885.577
+        },
+        {
+          "day": "2026-07-31",
+          "minutes_error_adjacent": 82.796,
+          "minutes_idle": 1727.326
+        },
+        {
+          "day": "2026-08-01",
+          "minutes_error_adjacent": 80.356,
+          "minutes_idle": 698.288
+        },
+        {
+          "day": "2026-08-02",
+          "minutes_error_adjacent": 13.594,
+          "minutes_idle": 513.655
+        },
+        {
+          "day": "2026-08-03",
+          "minutes_error_adjacent": 0.167,
+          "minutes_idle": 38.501
+        },
+        {
+          "day": "2026-08-04",
+          "minutes_error_adjacent": 0.55,
+          "minutes_idle": 8.656
+        },
+        {
+          "day": "2026-08-05",
+          "minutes_error_adjacent": 82.425,
+          "minutes_idle": 1411.758
+        },
+        {
+          "day": "2026-08-06",
+          "minutes_error_adjacent": 10.155,
+          "minutes_idle": 285.836
+        },
+        {
+          "day": "2026-08-07",
+          "minutes_error_adjacent": 0.15,
+          "minutes_idle": 33.815
+        },
+        {
+          "day": "2026-08-13",
+          "minutes_error_adjacent": 5.195,
+          "minutes_idle": 129.457
+        },
+        {
+          "day": "2026-08-14",
+          "minutes_error_adjacent": 2.502,
+          "minutes_idle": 8.948
+        },
+        {
+          "day": "2026-08-18",
+          "minutes_error_adjacent": 5.376,
+          "minutes_idle": 9.334
+        },
+        {
+          "day": "2026-08-19",
+          "minutes_error_adjacent": 0.0,
+          "minutes_idle": 49.324
+        },
+        {
+          "day": "2026-08-20",
+          "minutes_error_adjacent": 39.039,
+          "minutes_idle": 128.704
+        },
+        {
+          "day": "2026-08-21",
+          "minutes_error_adjacent": 0.0,
+          "minutes_idle": 61.738
+        },
+        {
+          "day": "2026-08-22",
+          "minutes_error_adjacent": 32.687,
+          "minutes_idle": 131.223
+        },
+        {
+          "day": "2026-08-27",
+          "minutes_error_adjacent": 7.332,
+          "minutes_idle": 447.53
+        },
+        {
+          "day": "2026-08-28",
+          "minutes_error_adjacent": 0.981,
+          "minutes_idle": 155.009
+        },
+        {
+          "day": "2026-08-29",
+          "minutes_error_adjacent": 0.0,
+          "minutes_idle": 32.236
+        },
+        {
+          "day": "2026-08-31",
+          "minutes_error_adjacent": 0.245,
+          "minutes_idle": 62.76
+        },
+        {
+          "day": "2026-09-01",
+          "minutes_error_adjacent": 31.62,
+          "minutes_idle": 791.878
+        },
+        {
+          "day": "2026-09-02",
+          "minutes_error_adjacent": 0.716,
+          "minutes_idle": 100.819
+        },
+        {
+          "day": "2026-09-03",
+          "minutes_error_adjacent": 77.663,
+          "minutes_idle": 623.482
+        },
+        {
+          "day": "2026-09-04",
+          "minutes_error_adjacent": 72.154,
+          "minutes_idle": 643.083
+        },
+        {
+          "day": "2026-09-05",
+          "minutes_error_adjacent": 39.529,
+          "minutes_idle": 581.265
+        },
+        {
+          "day": "2026-09-07",
+          "minutes_error_adjacent": 38.064,
+          "minutes_idle": 429.176
+        },
+        {
+          "day": "2026-09-08",
+          "minutes_error_adjacent": 5.612,
+          "minutes_idle": 199.162
+        },
+        {
+          "day": "2026-09-09",
+          "minutes_error_adjacent": 2.751,
+          "minutes_idle": 268.879
+        },
+        {
+          "day": "2026-09-10",
+          "minutes_error_adjacent": 7.519,
+          "minutes_idle": 164.775
+        },
+        {
+          "day": "2026-09-11",
+          "minutes_error_adjacent": 2.235,
+          "minutes_idle": 92.643
+        },
+        {
+          "day": "2026-09-14",
+          "minutes_error_adjacent": 28.456,
+          "minutes_idle": 396.341
+        },
+        {
+          "day": "2026-09-15",
+          "minutes_error_adjacent": 54.782,
+          "minutes_idle": 1678.754
+        },
+        {
+          "day": "2026-09-16",
+          "minutes_error_adjacent": 2.094,
+          "minutes_idle": 218.108
+        },
+        {
+          "day": "2026-09-17",
+          "minutes_error_adjacent": 31.76,
+          "minutes_idle": 1729.761
+        },
+        {
+          "day": "2026-09-18",
+          "minutes_error_adjacent": 15.253,
+          "minutes_idle": 701.197
+        },
+        {
+          "day": "2026-09-19",
+          "minutes_error_adjacent": 38.68,
+          "minutes_idle": 720.824
+        },
+        {
+          "day": "2026-09-20",
+          "minutes_error_adjacent": 119.615,
+          "minutes_idle": 2147.817
+        },
+        {
+          "day": "2026-09-21",
+          "minutes_error_adjacent": 19.675,
+          "minutes_idle": 381.444
+        },
+        {
+          "day": "2026-09-23",
+          "minutes_error_adjacent": 0.24,
+          "minutes_idle": 122.829
+        },
+        {
+          "day": "2026-09-24",
+          "minutes_error_adjacent": 24.817,
+          "minutes_idle": 1109.335
+        },
+        {
+          "day": "2026-09-25",
+          "minutes_error_adjacent": 14.809,
+          "minutes_idle": 774.887
+        },
+        {
+          "day": "2026-09-28",
+          "minutes_error_adjacent": 121.359,
+          "minutes_idle": 1729.996
+        },
+        {
+          "day": "2026-09-29",
+          "minutes_error_adjacent": 123.719,
+          "minutes_idle": 2986.183
+        },
+        {
+          "day": "2026-09-30",
+          "minutes_error_adjacent": 172.133,
+          "minutes_idle": 3235.667
+        },
+        {
+          "day": "2026-10-01",
+          "minutes_error_adjacent": 153.424,
+          "minutes_idle": 2762.747
+        },
+        {
+          "day": "2026-10-02",
+          "minutes_error_adjacent": 41.948,
+          "minutes_idle": 1425.381
+        },
+        {
+          "day": "2026-10-03",
+          "minutes_error_adjacent": 169.061,
+          "minutes_idle": 1749.774
+        },
+        {
+          "day": "2026-10-04",
+          "minutes_error_adjacent": 84.896,
+          "minutes_idle": 1127.534
+        },
+        {
+          "day": "2026-10-05",
+          "minutes_error_adjacent": 158.539,
+          "minutes_idle": 3415.9
+        },
+        {
+          "day": "2026-10-06",
+          "minutes_error_adjacent": 36.536,
+          "minutes_idle": 1315.388
+        },
+        {
+          "day": "2026-10-07",
+          "minutes_error_adjacent": 154.073,
+          "minutes_idle": 3672.157
+        },
+        {
+          "day": "2026-10-08",
+          "minutes_error_adjacent": 508.144,
+          "minutes_idle": 5799.757
+        },
+        {
+          "day": "2026-10-09",
+          "minutes_error_adjacent": 304.381,
+          "minutes_idle": 5443.888
+        },
+        {
+          "day": "2026-10-10",
+          "minutes_error_adjacent": 34.277,
+          "minutes_idle": 1559.578
+        },
+        {
+          "day": "2026-10-11",
+          "minutes_error_adjacent": 0.243,
+          "minutes_idle": 43.182
+        },
+        {
+          "day": "2026-10-13",
+          "minutes_error_adjacent": 103.053,
+          "minutes_idle": 2773.898
+        },
+        {
+          "day": "2026-10-14",
+          "minutes_error_adjacent": 293.733,
+          "minutes_idle": 5967.185
+        },
+        {
+          "day": "2026-10-15",
+          "minutes_error_adjacent": 244.916,
+          "minutes_idle": 3813.283
+        },
+        {
+          "day": "2026-10-16",
+          "minutes_error_adjacent": 291.961,
+          "minutes_idle": 4095.075
+        },
+        {
+          "day": "2026-10-17",
+          "minutes_error_adjacent": 223.982,
+          "minutes_idle": 2093.709
+        },
+        {
+          "day": "2026-10-18",
+          "minutes_error_adjacent": 61.478,
+          "minutes_idle": 1339.633
+        },
+        {
+          "day": "2026-10-19",
+          "minutes_error_adjacent": 323.667,
+          "minutes_idle": 5084.233
+        },
+        {
+          "day": "2026-10-20",
+          "minutes_error_adjacent": 287.452,
+          "minutes_idle": 3561.12
+        },
+        {
+          "day": "2026-10-21",
+          "minutes_error_adjacent": 220.633,
+          "minutes_idle": 1369.912
+        },
+        {
+          "day": "2026-10-22",
+          "minutes_error_adjacent": 30.332,
+          "minutes_idle": 144.557
+        },
+        {
+          "day": "2026-10-24",
+          "minutes_error_adjacent": 49.1,
+          "minutes_idle": 968.699
+        },
+        {
+          "day": "2026-10-25",
+          "minutes_error_adjacent": 0.0,
+          "minutes_idle": 30.392
+        },
+        {
+          "day": "2026-10-26",
+          "minutes_error_adjacent": 240.962,
+          "minutes_idle": 3295.036
+        },
+        {
+          "day": "2026-10-27",
+          "minutes_error_adjacent": 129.491,
+          "minutes_idle": 629.565
+        },
+        {
+          "day": "2026-10-28",
+          "minutes_error_adjacent": 169.69,
+          "minutes_idle": 717.567
+        },
+        {
+          "day": "2026-10-29",
+          "minutes_error_adjacent": 6.806,
+          "minutes_idle": 281.164
+        },
+        {
+          "day": "2026-11-01",
+          "minutes_error_adjacent": 0.178,
+          "minutes_idle": 34.529
+        },
+        {
+          "day": "2026-11-02",
+          "minutes_error_adjacent": 115.317,
+          "minutes_idle": 2608.828
+        },
+        {
+          "day": "2026-11-03",
+          "minutes_error_adjacent": 102.793,
+          "minutes_idle": 2141.897
+        },
+        {
+          "day": "2026-11-04",
+          "minutes_error_adjacent": 207.966,
+          "minutes_idle": 3832.175
+        },
+        {
+          "day": "2026-11-05",
+          "minutes_error_adjacent": 317.218,
+          "minutes_idle": 3040.509
+        },
+        {
+          "day": "2026-11-06",
+          "minutes_error_adjacent": 72.207,
+          "minutes_idle": 1254.46
+        },
+        {
+          "day": "2026-11-07",
+          "minutes_error_adjacent": 0.988,
+          "minutes_idle": 40.574
+        },
+        {
+          "day": "2026-11-08",
+          "minutes_error_adjacent": 8.857,
+          "minutes_idle": 918.969
+        },
+        {
+          "day": "2026-11-09",
+          "minutes_error_adjacent": 0.0,
+          "minutes_idle": 177.235
+        },
+        {
+          "day": "2026-11-10",
+          "minutes_error_adjacent": 40.042,
+          "minutes_idle": 1054.269
+        },
+        {
+          "day": "2026-11-11",
+          "minutes_error_adjacent": 250.851,
+          "minutes_idle": 3791.052
+        },
+        {
+          "day": "2026-11-12",
+          "minutes_error_adjacent": 39.384,
+          "minutes_idle": 1403.601
+        },
+        {
+          "day": "2026-11-13",
+          "minutes_error_adjacent": 16.6,
+          "minutes_idle": 1135.146
+        },
+        {
+          "day": "2026-11-15",
+          "minutes_error_adjacent": 1.901,
+          "minutes_idle": 232.31
+        },
+        {
+          "day": "2026-11-16",
+          "minutes_error_adjacent": 34.094,
+          "minutes_idle": 988.861
+        },
+        {
+          "day": "2026-11-17",
+          "minutes_error_adjacent": 15.186,
+          "minutes_idle": 812.168
+        },
+        {
+          "day": "2026-11-18",
+          "minutes_error_adjacent": 55.064,
+          "minutes_idle": 1695.452
+        },
+        {
+          "day": "2026-11-19",
+          "minutes_error_adjacent": 91.229,
+          "minutes_idle": 894.55
+        },
+        {
+          "day": "2026-11-21",
+          "minutes_error_adjacent": 81.819,
+          "minutes_idle": 998.235
+        },
+        {
+          "day": "2026-11-22",
+          "minutes_error_adjacent": 92.173,
+          "minutes_idle": 328.982
+        },
+        {
+          "day": "2026-11-23",
+          "minutes_error_adjacent": 66.937,
+          "minutes_idle": 602.223
+        },
+        {
+          "day": "2026-11-24",
+          "minutes_error_adjacent": 137.002,
+          "minutes_idle": 1269.05
+        },
+        {
+          "day": "2026-11-25",
+          "minutes_error_adjacent": 86.954,
+          "minutes_idle": 1508.645
+        },
+        {
+          "day": "2026-11-26",
+          "minutes_error_adjacent": 33.99,
+          "minutes_idle": 237.737
+        },
+        {
+          "day": "2026-11-27",
+          "minutes_error_adjacent": 57.126,
+          "minutes_idle": 358.111
+        }
+      ],
+      "totals": {
+        "minutes_error_adjacent": 11578.82,
+        "minutes_idle": 174510.705
+      },
+      "provenance": {
+        "stall": "derived"
+      },
+      "coverage": [
+        {
+          "source": "claude-cli",
+          "coverage_pct": 100.0,
+          "reason": null
+        },
+        {
+          "source": "pi",
+          "coverage_pct": 100.0,
+          "reason": null
+        }
+      ]
+    },
+    "queue_wait": {
+      "value": null,
+      "reason": "no_ttft_in_local_logs",
+      "provenance": {
+        "queue_wait": "assumed"
+      }
     }
   }
 }
