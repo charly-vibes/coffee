@@ -414,6 +414,109 @@
       "items": {
         "type": "string"
       }
+    },
+    "ops": {
+      "type": "object",
+      "description": "Métricas de continuidad operativa (agent_metrics_ops.py, epic coffe-a5v). Los hijos del epic agregan claves: latency (coffe-9ia), fallback, quota_events, completion, subscription, concurrency/stall/queue_wait.",
+      "required": ["latency"],
+      "properties": {
+        "latency": {
+          "type": "object",
+          "required": ["sources", "providers", "provenance", "coverage"],
+          "properties": {
+            "sources": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "object",
+                "required": ["turns_total", "turns_with_duration", "coverage_pct", "models"],
+                "properties": {
+                  "turns_total": {"type": "integer", "minimum": 0},
+                  "turns_with_duration": {"type": "integer", "minimum": 0},
+                  "coverage_pct": {"type": "number", "minimum": 0, "maximum": 100},
+                  "reason": {"type": "string"},
+                  "models": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "object",
+                      "required": ["n", "p50_ms", "p90_ms", "p95_ms", "turns_total", "coverage_pct"],
+                      "properties": {
+                        "n": {"type": "integer", "minimum": 0},
+                        "p50_ms": {"type": ["number", "null"]},
+                        "p90_ms": {"type": ["number", "null"]},
+                        "p95_ms": {"type": ["number", "null"]},
+                        "turns_total": {"type": "integer", "minimum": 0},
+                        "coverage_pct": {"type": "number", "minimum": 0, "maximum": 100},
+                        "reason": {"type": "string"}
+                      },
+                      "additionalProperties": false
+                    }
+                  }
+                },
+                "additionalProperties": false
+              }
+            },
+            "providers": {
+              "type": "object",
+              "description": "Roll-up por familia del model_mapping; solo familias con turnos con duración.",
+              "additionalProperties": {
+                "type": "object",
+                "required": ["n", "p50_ms", "p90_ms", "p95_ms", "turns_total", "coverage_pct"],
+                "properties": {
+                  "n": {"type": "integer", "minimum": 0},
+                  "p50_ms": {"type": "number"},
+                  "p90_ms": {"type": "number"},
+                  "p95_ms": {"type": "number"},
+                  "turns_total": {"type": "integer", "minimum": 0},
+                  "coverage_pct": {"type": "number", "minimum": 0, "maximum": 100}
+                },
+                "additionalProperties": false
+              }
+            },
+            "provenance": {
+              "type": "object",
+              "required": ["latency"],
+              "properties": {
+                "latency": {"enum": ["measured"]}
+              },
+              "additionalProperties": false
+            },
+            "coverage": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["source", "coverage_pct"],
+                "properties": {
+                  "source": {"type": "string"},
+                  "coverage_pct": {"type": "number", "minimum": 0, "maximum": 100},
+                  "reason": {"type": ["string", "null"]}
+                },
+                "additionalProperties": false
+              }
+            }
+          },
+          "additionalProperties": false
+        },
+        "provenance": {
+          "type": "object",
+          "description": "Léxico compartido: reported/derived/measured/assumed por clave de ops.",
+          "additionalProperties": {"type": "string"}
+        },
+        "coverage": {
+          "type": "array",
+          "description": "Cobertura por fuente para las claves de ops.",
+          "items": {
+            "type": "object",
+            "required": ["source", "coverage_pct"],
+            "properties": {
+              "source": {"type": "string"},
+              "coverage_pct": {"type": "number", "minimum": 0, "maximum": 100},
+              "reason": {"type": ["string", "null"]}
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
     }
   }
 }

@@ -176,7 +176,8 @@ def build_model(metrics, report):
                      "coverage": meta["coverage"], "reasons": meta["reasons"], "sources": metrics["sources"],
                      "repos_total": len(metrics["repos"]), "min_commit_days": repo_meta["min_commit_days"],
                      "min_returning_months": repo_meta["min_returning_months"],
-                     "bulk_day_interactions": repo_meta.get("bulk_day_interactions"), "talk": TALK},
+                     "bulk_day_interactions": repo_meta.get("bulk_day_interactions"), "talk": TALK,
+                     "ops_latency": (metrics.get("ops") or {}).get("latency")},
             "windows": [{"key": k, "label": lab}
                         for k, lab, _m in windows(sorted(report["monthly"].keys()))],
             "views": views}
@@ -194,6 +195,30 @@ def _coverage_rows(coverage):
     return "\n".join(row(c) for c in coverage)
 def _reason_items(reasons):
     return "\n".join(f"<li><strong>{k}:</strong> {v}</li>" for k, v in reasons.items())
+def _ops_latency_section(metrics, top=12):
+    """Tabla server-side de ops.latency por modelo (sin JS: stats estáticas).
+    Solo fuentes con señal de duración aportan filas; sin bloque ops -> n/a."""
+    lat = (metrics.get("ops") or {}).get("latency")
+    if not lat:
+        return '<p class="reason">n/a: bloque ops ausente (correr scripts/agent_metrics_ops.py después del tracker).</p>'
+    rows = []
+    for source, entry in sorted(lat["sources"].items()):
+        for model, st in sorted((entry.get("models") or {}).items(),
+                                key=lambda kv: -(kv[1]["n"] or 0)):
+            p95 = st.get("p95_ms")
+            rows.append((st["n"] or 0, "<tr><td>{}</td><td>{}</td><td>{}</td><td>{}</td><td>{}</td><td>{}</td></tr>".format(
+                model, source, st["n"], _num_es_ms(st.get("p50_ms")), _num_es_ms(p95),
+                "n/a: {}".format(st["reason"]) if st.get("reason") else f"{st['coverage_pct']}%")))
+    rows.sort(key=lambda r: -r[0])
+    if not rows:
+        return '<p class="reason">n/a: ningún turno con duración.</p>'
+    body = "\n".join(r[1] for r in rows[:top])
+    return ('<table><thead><tr><th>Modelo</th><th>Fuente</th><th>n</th><th>P50</th><th>P95</th><th>Cobertura</th></tr></thead>'
+            f"<tbody>\n{body}\n    </tbody></table>"
+            '<p class="reason">Sobre TODA la población de turnos con duración (sin sampling); '
+            'n = turnos con duración; cobertura = % de turnos assistant de la celda.</p>')
+def _num_es_ms(ms):
+    return "—" if ms is None else f"{ms / 1000:,.1f} s".replace(",", "@").replace(".", ",").replace("@", ".")
 def _page_css():
     return CSS % {"vars": "\n".join(f"{k}: {v};" for k, v in site_theme.TOKENS.items()),
                   "base": site_theme.base_css() + _CSS_RULES}
@@ -207,6 +232,7 @@ _PAGE = """<!DOCTYPE html>
 <section class="block"><h2>Prompts por día activo y horas de agente por mes</h2><figure id="chart-prompts"></figure><figure id="chart-hours"></figure><figcaption>El talk las muestra planas (prompts) y exponenciales (horas): acá se recalculan sobre la ventana.</figcaption></section>
 <section class="block"><h2>Detalle mensual de la ventana</h2><div id="monthly"></div></section>
 <section class="block"><h2>Por modelo (la comparación del talk: pushback por generación)</h2><div id="by-model"></div></section>
+<section class="block"><h2>Latencia p95 por modelo (ops, población completa)</h2>{ops_latency_section}</section>
 <section class="block"><h2>Cobertura por fuente</h2><table><thead><tr><th>Fuente</th><th>Turnos con timestamp</th><th>Señal de aborto</th><th>Sesiones</th><th>Nota</th></tr></thead><tbody>
 {coverage_rows}
     </tbody></table>
@@ -234,6 +260,7 @@ def render(model):
         retry_window_minutes=m["retry_window_minutes"], opts=_period_options(model["windows"]),
         coverage_rows=_coverage_rows(m["coverage"]), task_definition=m["task_definition"],
         reasons=_reason_items(m["reasons"]), orphan_turns=m["orphan_turns"],
+        ops_latency_section=_ops_latency_section({"ops": {"latency": m.get("ops_latency")}}),
         preamble_prompts_skipped=m["preamble_prompts_skipped"],
         repo_roots_missing=", ".join(m["repo_roots_missing"]) or "ninguna", model_json=json.dumps(model, ensure_ascii=False, separators=(",", ":")), js=JS)
 def _num_es(value, digits=1): return "n/a" if value is None else f"{value:.{digits}f}".replace(".", ",")
