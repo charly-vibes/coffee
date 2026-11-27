@@ -1,0 +1,4 @@
+{"type":"model_change","timestamp":"2026-05-11T09:00:00.000Z","provider":"claude-cli","modelId":"claude-sonnet-4-6"}
+{"type":"message","timestamp":"2026-05-11T09:00:01.000Z","provider":"claude-cli","message":{"role":"user","content":[{"type":"text","text":"hola"}]}}
+{"type":"message","timestamp":"2026-05-11T09:00:02.000Z","provider":"claude-cli","message":{"role":"assistant","model":"claude-sonnet-4-6","provider":"claude-cli","usage":{"input":100,"output":50,"cacheRead":0,"cacheWrite":0,"cost":{"input":0,"output":0,"cacheRead":0,"cacheWrite":0,"total":0}}}}
+{"type":"message","timestamp":"2026-05-11T09:00:03.000Z","provider":"claude-cli","message":{"role":"assistant","model":"claude-sonnet-4-6","provider":"claude-cli","usage":{"input":100,"output":50,"cacheRead":0,"cacheWrite":0,"cost":{"input":0,"output":0,"cacheRead":0,"cacheWrite":0,"total":0}}}}

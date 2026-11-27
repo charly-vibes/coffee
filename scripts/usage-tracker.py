@@ -54,6 +54,22 @@ a stderr (una vez por familia/versión) cuando una versión no tiene tarifa
 en model_pricing (usa DEFAULT_RATES — provenance *assumed*); el reporte
 emite metadata.model_mapping_coverage (tokens y filas por familia,
 tokens_other_pct, default_rates_fallbacks contados por fila sin tarifa).
+v4.9 (coffe-dnx.2): session_spend extiende cada fila con señales de
+calidad y enrutamiento (mismo extractor, aditivo). Grupo A: duration_ms
+{n,p50,p90} | null + duration_reason (nunca 0 fake; durationMs solo
+existe en logs de Pi — cobertura medida en metadata.latency_coverage:
+zai/minimax/qwen-token-plan/kimi 100%, openrouter 7,5%,
+openai-codex/claude-cli/google-gemini-cli 0%), stop_reasons por categoría
+(toolUse/stop/error/aborted/length del stopReason del turno) y
+tool_errors {calls,errors,p50_ms} desde toolResult.durationMs+isError
+(atribuidos al turno assistant que los invocó). Grupo B: model_chain
+(modelos en orden de primera aparición) y model_switches (≥2
+model_change ⇒ 1+; el PRIMER model_change fija el modelo inicial y NO
+cuenta — el contador ingenuo reportaba 100% de switching porque 100% de
+las sesiones traen el model_change inicial). Ambos: cache_share
+(cache_read / tokens totales) y cost_provenance reported|estimated|mixed
+("reported" SOLO si todos los turnos traen cost.totalFromProvider;
+corpus real ~1,6%). Schema bump en specs/usage-report-v3.schema.json.
 """
 
 import argparse
@@ -882,12 +898,35 @@ def extract_pi(skipped=None, kinds=None, excluded=None, sessions_dir=None):
             continue
         for f in sd.glob("*.jsonl"):
             try:
+                # coffe-dnx.2: señales por sesión acumuladas durante el parse
+                # (se adjuntan a la fila assistant siguiente — aditivo, no
+                # cambia el shape del row salvo claves nuevas opcionales)
+                pend_calls = pend_errors = 0
+                pend_durs = []       # durationMs de toolResults pendientes
+                mc_count = 0         # model_change acumulados (el 1ro es el modelo inicial)
+                model_chain = []     # modelos en orden de primera aparición
+                last_row = None
                 with open(f) as fh:
                     for line in fh:
                         entry = json.loads(line)
+                        if entry.get("type") == "model_change":
+                            mc_count += 1
+                            mid = entry.get("modelId")
+                            if mid and mid not in model_chain:
+                                model_chain.append(mid)
+                            continue
                         if entry.get("type") != "message": continue
                         msg = entry.get("message", {}) or {}
                         role = msg.get("role")
+                        if role == "toolResult":
+                            # coffe-dnx.2: errores/latencia de tools (se
+                            # atribuyen al turno assistant que las invocó)
+                            pend_calls += 1
+                            if msg.get("isError"): pend_errors += 1
+                            td = msg.get("durationMs")
+                            if isinstance(td, (int, float)):
+                                pend_durs.append(int(td))
+                            continue
                         if role == "user":
                             # FPA-140: user prompts se cuentan, no generan fila de coste
                             ts_u = parse_ts(entry.get("timestamp"))
@@ -928,6 +967,8 @@ def extract_pi(skipped=None, kinds=None, excluded=None, sessions_dir=None):
                             cost = estimate_cost(fam, ver, inp, out,
                                                  cache_r or 0, cache_w or 0,
                                                  when=ts.date())
+                        if model not in model_chain:
+                            model_chain.append(model)
                         rows.append({
                             "source": "pi",
                             "tool": tool,
@@ -944,7 +985,28 @@ def extract_pi(skipped=None, kinds=None, excluded=None, sessions_dir=None):
                             "cost_effective": cost,
                             "kind": "tool_call" if _pi_has_tool_call(msg) else "assistant_turn",
                             "session_file": f.name,  # add-session-spend-report
+                            # coffe-dnx.2: señales de calidad/enrutamiento
+                            "duration_ms": (int(msg["durationMs"])
+                                            if isinstance(msg.get("durationMs"), (int, float))
+                                            else None),
+                            "stop_reason": msg.get("stopReason"),
+                            "cost_reported": (isinstance(cost_info, dict)
+                                              and cost_info.get("totalFromProvider") is True),
+                            "tool_calls": pend_calls,
+                            "tool_errors": pend_errors,
+                            "tool_durations_ms": list(pend_durs),
+                            "model_change_idx": mc_count,
+                            "model_chain": list(model_chain),
                         })
+                        last_row = rows[-1]
+                        pend_calls = pend_errors = 0
+                        pend_durs = []
+                # toolResults de cola (tras el último turno assistant, p.ej.
+                # sesión abortada): se atribuyen al último turno emitido
+                if last_row is not None and (pend_calls or pend_errors or pend_durs):
+                    last_row["tool_calls"] += pend_calls
+                    last_row["tool_errors"] += pend_errors
+                    last_row["tool_durations_ms"] += pend_durs
             except (json.JSONDecodeError, OSError, ValueError, TypeError, KeyError) as e:
                 if skipped is not None:
                     k = f"pi:{f.name}"
@@ -2369,6 +2431,57 @@ def _session_spend(interactions):
             cost_reason = None
         models = {r["model_raw"] for r in rows}
         local_days = {r["hour"][:10] for r in rows}
+        # --- coffe-dnx.2: Grupo A — señales de calidad -------------------
+        # durationMs es solo de logs de Pi (zai/minimax/qwen/kimi 100%,
+        # openrouter 7,5%, resto 0% — ver metadata.latency_coverage).
+        # Ausente → null + razón, NUNCA 0 fake.
+        lat_rows = [r for r in rows if r.get("duration_ms") is not None]
+        if lat_rows:
+            durs = sorted(r["duration_ms"] for r in lat_rows)
+            duration_ms = {"n": len(durs), "p50": _pctl(durs, 0.5),
+                           "p90": _pctl(durs, 0.9)}
+            duration_reason = None
+        else:
+            duration_ms = None
+            duration_reason = (
+                "proveedor reporta durationMs pero ningún turno lo trajo "
+                "(turnos abortados o cobertura parcial de latencia)"
+                if any("duration_ms" in r for r in rows) else
+                "fuente sin telemetría de latencia (durationMs solo existe "
+                "en logs de Pi)")
+        stop_reasons = dict(Counter(
+            r["stop_reason"] for r in rows if r.get("stop_reason")))
+        t_calls = sum(r.get("tool_calls") or 0 for r in rows)
+        t_errs = sum(r.get("tool_errors") or 0 for r in rows)
+        tool_durs = sorted(d for r in rows
+                           for d in (r.get("tool_durations_ms") or []))
+        tool_errors = {"calls": t_calls, "errors": t_errs,
+                       "p50_ms": _pctl(tool_durs, 0.5) if tool_durs else None}
+        # --- Grupo B — enrutamiento de modelos ---------------------------
+        chains = [r["model_chain"] for r in rows if r.get("model_chain")]
+        chain = list(chains[-1]) if chains else list(
+            dict.fromkeys(r["model_raw"] for r in rows))
+        # model_change_idx cuenta TODOS los model_change (el 1ro fija el
+        # modelo inicial y NO es un cambio): switches = idx - 1. Contador
+        # ingenuo reportaba 100% de sesiones con cambio (100% tienen el
+        # model_change inicial); sesión de un solo model_change → 0.
+        idxs = [r["model_change_idx"] for r in rows
+                if r.get("model_change_idx") is not None]
+        model_switches = max(0, max(idxs) - 1) if idxs else 0
+        # --- Ambos grupos -------------------------------------------------
+        total_tok = (tokens_sum["in"] + tokens_sum["out"]
+                     + tokens_sum["cache_read"] + tokens_sum["cache_write"])
+        cache_share = (round(tokens_sum["cache_read"] / total_tok, 4)
+                       if total_tok else None)
+        # reported SOLO si todos los turnos traen cost.totalFromProvider;
+        # mixed si conviven con estimaciones (corpus real: ~1,6% reported).
+        reported_flags = [r.get("cost_reported") for r in rows]
+        if all(v is True for v in reported_flags):
+            cost_provenance = "reported"
+        elif any(v is True for v in reported_flags):
+            cost_provenance = "mixed"
+        else:
+            cost_provenance = "estimated"
         out.append({
             "session_id": session_id,
             "session_id_fallback": fallback,
@@ -2384,9 +2497,31 @@ def _session_spend(interactions):
             "cost_real": cost_real,
             "cost_reason": cost_reason,
             "tokens": tokens_sum,
+            # coffe-dnx.2: señales de calidad (Grupo A)
+            "duration_ms": duration_ms,
+            "duration_reason": duration_reason,
+            "stop_reasons": stop_reasons,
+            "tool_errors": tool_errors,
+            # enrutamiento (Grupo B)
+            "model_chain": chain,
+            "model_switches": model_switches,
+            # ambos grupos
+            "cache_share": cache_share,
+            "cost_provenance": cost_provenance,
         })
     out.sort(key=lambda r: (r["day"], r["project"], r["session_id"]))
     return out
+
+
+# coffe-dnx.2 (CORR-005): cobertura de latencia por fuente — MEDIDA sobre
+# muestra (~400 archivos/provider, nov 2026), nunca extrapolada ni
+# maquillada. Los sources sin durationMs (codex/claude-cli/gemini) reportan
+# 0: session_spend.duration_ms queda null con duration_reason, no 0 fake.
+LATENCY_COVERAGE_MEASURED = {
+    "zai": 100.0, "minimax": 100.0, "qwen-token-plan": 100.0, "kimi": 100.0,
+    "openrouter": 7.5,
+    "openai-codex": 0.0, "claude-cli": 0.0, "google-gemini-cli": 0.0,
+}
 
 
 def _model_mapping_coverage(interactions):
@@ -2776,6 +2911,13 @@ def aggregate(interactions, sessions, skills_total=None, skills_by_project=None,
             # coffe-dnx.1: cobertura del mapeo modelo → familia (visible y
             # contado; el fallback "other" ya no es un agujero silencioso)
             "model_mapping_coverage": _model_mapping_coverage(interactions),
+            # coffe-dnx.2: cobertura de latencia por fuente (medida, CORR-005)
+            "latency_coverage": {
+                "measured": dict(LATENCY_COVERAGE_MEASURED),
+                "method": ("% de turnos con durationMs por provider — muestreo "
+                           "CORR-005 (~400 archivos/provider, nov 2026); "
+                           "medido, nunca extrapolado ni maquillado"),
+            },
         },
         "hourly": {h: b.to_dict() | {"projects_active": getattr(b, "projects_active", 0)}
                    for h, b in hourly.items()},

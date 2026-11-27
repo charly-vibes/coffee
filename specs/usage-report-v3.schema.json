@@ -115,6 +115,19 @@
             }
           }
         },
+        "latency_coverage": {
+          "type": "object",
+          "description": "coffe-dnx.2 (CORR-005): cobertura de latencia por fuente — % de turnos con durationMs por provider, medido sobre muestra (~400 archivos/provider), nunca extrapolado ni maquillado.",
+          "required": ["measured", "method"],
+          "properties": {
+            "measured": {
+              "type": "object",
+              "description": "provider → % de turnos con durationMs (medido)",
+              "additionalProperties": { "type": "number", "minimum": 0, "maximum": 100 }
+            },
+            "method": { "type": "string" }
+          }
+        },
         "charges_total_real": {
           "description": "coffe-a31.2: suma IA total del ledger data/charges.json (USD, provenance reported)",
           "type": "number"
@@ -1232,7 +1245,15 @@
           "cost_real",
           "cost_reason",
           "tokens",
-          "session_id_fallback"
+          "session_id_fallback",
+          "duration_ms",
+          "duration_reason",
+          "stop_reasons",
+          "tool_errors",
+          "model_chain",
+          "model_switches",
+          "cache_share",
+          "cost_provenance"
         ],
         "properties": {
           "session_id": {
@@ -1312,6 +1333,54 @@
           },
           "crosses_midnight": {
             "type": "boolean"
+          },
+          "duration_ms": {
+            "description": "coffe-dnx.2: latencia de turnos {n, p50, p90} en ms. null cuando la fuente no trae durationMs (ver duration_reason) — nunca 0 fake.",
+            "type": ["object", "null"],
+            "required": ["n", "p50", "p90"],
+            "properties": {
+              "n": { "type": "integer", "minimum": 1 },
+              "p50": { "type": "number" },
+              "p90": { "type": "number" }
+            }
+          },
+          "duration_reason": {
+            "description": "coffe-dnx.2: razón de la ausencia de duration_ms (no vacía cuando duration_ms es null).",
+            "type": ["string", "null"]
+          },
+          "stop_reasons": {
+            "description": "coffe-dnx.2: turnos por stopReason de Pi (toolUse/stop/error/aborted/length, tal cual aparece en el log).",
+            "type": "object",
+            "additionalProperties": { "type": "integer", "minimum": 0 }
+          },
+          "tool_errors": {
+            "description": "coffe-dnx.2: llamadas a tools desde toolResult: total, errores (isError) y p50 de durationMs.",
+            "type": "object",
+            "required": ["calls", "errors", "p50_ms"],
+            "properties": {
+              "calls": { "type": "integer", "minimum": 0 },
+              "errors": { "type": "integer", "minimum": 0 },
+              "p50_ms": { "type": ["number", "null"] }
+            }
+          },
+          "model_chain": {
+            "description": "coffe-dnx.2: modelos de la sesión en orden de primera aparición (model_change + message.model).",
+            "type": "array",
+            "items": { "type": "string" },
+            "minItems": 1
+          },
+          "model_switches": {
+            "description": "coffe-dnx.2: cambios de modelo reales (≥2 model_change ⇒ 1+; el PRIMER model_change fija el modelo inicial y NO cuenta).",
+            "type": "integer",
+            "minimum": 0
+          },
+          "cache_share": {
+            "description": "coffe-dnx.2: cache_read / tokens totales (in+out+cache_read+cache_write); null si la sesión no tiene tokens.",
+            "type": ["number", "null"]
+          },
+          "cost_provenance": {
+            "description": "coffe-dnx.2: reported SOLO si todos los turnos traen cost.totalFromProvider; mixed si conviven con estimados (corpus real ~1,6% reported).",
+            "enum": ["reported", "estimated", "mixed"]
           }
         }
       }

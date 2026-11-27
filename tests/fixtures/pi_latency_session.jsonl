@@ -1,0 +1,8 @@
+{"type":"model_change","timestamp":"2026-05-10T14:20:00.000Z","provider":"zai","modelId":"glm-5.3"}
+{"type":"message","timestamp":"2026-05-10T14:20:01.000Z","message":{"role":"user","content":[{"type":"text","text":"hola"}]}}
+{"type":"message","timestamp":"2026-05-10T14:20:02.000Z","message":{"role":"assistant","model":"glm-5.3","provider":"zai","stopReason":"toolUse","durationMs":1000,"usage":{"input":100,"output":50,"cacheRead":10,"cacheWrite":5,"cost":{"input":0.001,"output":0.001,"cacheRead":0.0001,"cacheWrite":0.0001,"total":0.0021,"totalFromProvider":true}}}}
+{"type":"message","timestamp":"2026-05-10T14:20:03.000Z","message":{"role":"toolResult","toolCallId":"t1","toolName":"read","isError":false,"durationMs":120,"content":[{"type":"text","text":"ok"}]}}
+{"type":"message","timestamp":"2026-05-10T14:20:04.000Z","message":{"role":"assistant","model":"glm-5.3","provider":"zai","stopReason":"aborted","durationMs":2000,"usage":{"input":100,"output":50,"cacheRead":10,"cacheWrite":5,"cost":{"input":0.001,"output":0.001,"cacheRead":0.0001,"cacheWrite":0.0001,"total":0.0021,"totalFromProvider":true}}}}
+{"type":"message","timestamp":"2026-05-10T14:20:05.000Z","message":{"role":"toolResult","toolCallId":"t2","toolName":"bash","isError":true,"durationMs":300,"content":[{"type":"text","text":"boom"}]}}
+{"type":"model_change","timestamp":"2026-05-10T14:20:06.000Z","provider":"zai","modelId":"glm-5.3-flash"}
+{"type":"message","timestamp":"2026-05-10T14:20:07.000Z","message":{"role":"assistant","model":"glm-5.3-flash","provider":"zai","stopReason":"stop","durationMs":4000,"usage":{"input":100,"output":50,"cacheRead":10,"cacheWrite":5,"cost":{"input":0.001,"output":0.001,"cacheRead":0.0001,"cacheWrite":0.0001,"total":0.0021,"totalFromProvider":true}}}}
