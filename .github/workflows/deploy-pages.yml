@@ -19,6 +19,7 @@ permissions:
   pages: write
   id-token: write
   contents: read
+  actions: read
 
 concurrency:
   group: pages
@@ -58,6 +59,23 @@ jobs:
       - uses: actions/upload-pages-artifact@v3
         with:
           path: _pages
+
+      # deploy-pages@v4 consulta los artifacts del run justo después del
+      # upload y puede leer 0 por replicación lenta de la API (2 fallos el
+      # 2026-11-27). Espera y reintenta hasta que la lista lo vea.
+      - name: Wait for artifact visibility (deploy-pages race)
+        shell: bash
+        run: |
+          for i in $(seq 1 12); do
+            n=$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID/artifacts" \
+                 --jq '[.artifacts[] | select(.name == "github-pages")] | length' || echo 0)
+            [ "$n" -ge 1 ] && echo "artifact visible tras ${i} intento(s)" && exit 0
+            echo "intento $i: artifact aún no visible; espero 10s"
+            sleep 10
+          done
+          echo "artifact nunca visible" && exit 1
+        env:
+          GH_TOKEN: ${{ github.token }}
 
       - id: deployment
         uses: actions/deploy-pages@v4
