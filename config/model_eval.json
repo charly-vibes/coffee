@@ -1,0 +1,469 @@
+{
+  "schema": {
+    "_comment": "Config de experimento (coffe-dnx.9), no artefacto publicado. Esquema mínimo documentado aquí mismo; el runner (coffe-dnx.7) valida contra esto.",
+    "top_level": {
+      "schema": "int, versión del esquema",
+      "cohort": "lista de modelos evaluados; debe coincidir con benchmark_cohort de coffe-dnx.8",
+      "repos": "mapa nombre → {path, language, test_command}; path se resuelve con $HOME",
+      "selection_criteria": "criterio explícito de selección: clase × dificultad × repo",
+      "tasks": "lista de 30–50 tareas; cada una con repo, base_commit, prompt, acceptance, difficulty",
+      "procedure": "resumen del procedimiento; el detalle normativo vive en docs/model-eval-protocol.md",
+      "risks": "riesgos declarados del diseño"
+    },
+    "task_fields": {
+      "id": "string único, m-e-NN",
+      "repo": "clave de repos",
+      "base_commit": "SHA verificado del repo (git rev-parse <sha> pasa)",
+      "bead": "opcional, id del bead de origen (referencia, no se cierra ni modifica desde acá)",
+      "class": "bugfix | feature | docs | tests",
+      "difficulty": "easy | medium | hard",
+      "prompt": "enunciado literal que recibe el modelo, junto al checkout en base_commit",
+      "acceptance": {
+        "type": "command | criterion",
+        "check": "si type=command: comando que debe terminar en 0; si type=criterion: condición escrita verificable por un evaluador sin contexto de coffee"
+      }
+    }
+  },
+  "cohort": [
+    { "name": "glm-5.3-flash", "role": "subject" },
+    { "name": "deepseek-v4-flash", "role": "subject" },
+    { "name": "qwen3.8-flash", "role": "subject" },
+    { "name": "qwen3.8-max", "role": "subject" },
+    { "name": "claude-opus-4.5", "role": "reference", "_note": "referencia frontier: única, no participa del ranking; sirve de techo comparativo" }
+  ],
+  "repos": {
+    "coffee": { "path": "~/para/areas/dev/gh/charly/coffee", "language": "python", "test_command": "python3 -m pytest -q" },
+    "tambor": { "path": "~/para/areas/dev/gh/charly/tambor", "language": "rust", "test_command": "cargo test" },
+    "wai": { "path": "~/para/areas/dev/gh/charly/wai", "language": "rust", "test_command": "cargo test" },
+    "dont": { "path": "~/para/areas/dev/gh/charly/dont", "language": "rust", "test_command": "cargo test" },
+    "genesis": { "path": "~/para/areas/dev/gh/charly/genesis", "language": "rust", "test_command": "cargo test" },
+    "whisper": { "path": "~/para/areas/dev/gh/charly/whisper", "language": "rust", "test_command": "cargo test" }
+  },
+  "selection_criteria": {
+    "source": "beads abiertas reales de .beads/issues.jsonl del repo coffee y de los siblings bajo agent_behavior.repo_roots (config/fpa.json); ningún bead se cierra ni modifica por armar esta cohorte",
+    "grid": "clase (bugfix|feature|docs|tests) × dificultad (easy|medium|hard) × repo (coffee + 5 siblings)",
+    "rules": [
+      "toda tarea proviene de una issue/bead real o de un defecto verificable observado en el repo; nada sintético tipo SWE-bench",
+      "cada tarea cruza como máximo un bead; si el trabajo tocaría dos, se declara en notes",
+      "acceptance siempre ejecutable (comando) o criterio escrito verificable; nunca 'que funcione'",
+      "base_commit verificado con git rev-parse; para coffee se usa HEAD del día de corte",
+      "cobertura mínima: cada dificultad aparece en cada clase presente, y coffee aporta la mayoría por ser el repo más verificable"
+    ],
+    "coverage": {
+      "bugfix": "easy/medium/hard cubiertos",
+      "feature": "easy/medium/hard cubiertos",
+      "docs": "easy/medium cubiertos; hard vacío a propósito (los docs duros del repo ya están beadados como feature)",
+      "tests": "medium cubierto; easy/hard vacíos a propósito (no hay beads de tests triviales abiertas)"
+    }
+  },
+  "procedure_summary": "Checkout del repo en base_commit, prompt literal, mismo harness y versión para todos los modelos, orden aleatorizado, evaluación a ciegas. Detalle normativo: docs/model-eval-protocol.md",
+  "risks": [
+    "contaminación: los repos son del autor y los modelos pueden haberlos visto en entrenamiento o en sesiones previas; se declara y se mide comparando contra la referencia frontier",
+    "tareas que cruzan beads: algunas tareas tocan archivos compartidos con otras; se declara por tarea en notes y se ordena la corrida de modo que ninguna dependa del resultado de otra",
+    "sesgo de selección: las tareas provienen de beads que el autor consideró vale la pena abrir; se mitiga con la cuadrícula clase × dificultad × repo y reportando el criterio, no ocultándolo"
+  ],
+  "tasks": [
+    {
+      "id": "m-e-01",
+      "repo": "coffee",
+      "base_commit": "13bc5fff7dc723e65ed669b13b95fa0e1717e10b",
+      "bead": "coffe-c15.11",
+      "class": "docs",
+      "difficulty": "easy",
+      "prompt": "El README de este repo está desactualizado: la tabla de datos generados repite la fila de data/usage_report_v3.json, los tamaños documentados no coinciden con los bytes reales de data/, la línea que dice '4 fuentes' omite omp y hay una lista de herramientas stale. Corregí el README para que cada dato documentado coincida con el estado real del repo (verificá tamaños con stat/ls -l y fuentes contando los extractores de scripts/).",
+      "acceptance": { "type": "criterion", "check": "En el README: (1) ninguna fila de la tabla de datos generados está repetida, (2) cada tamaño listado coincide con el tamaño real del archivo en data/ (±5%), (3) la lista de fuentes incluye todas las herramientas que scripts/ extrae hoy (incluida omp). Además `python3 -m pytest tests/test_repo_links.py -q` termina en 0." }
+    },
+    {
+      "id": "m-e-02",
+      "repo": "coffee",
+      "base_commit": "13bc5fff7dc723e65ed669b13b95fa0e1717e10b",
+      "bead": "coffe-9ka",
+      "class": "bugfix",
+      "difficulty": "easy",
+      "prompt": "El bridge PVM en scripts/viz-fpa.py (sección n_a_reason, cerca de la línea 555) declara n/a 'el reporte no desglosa coste por modelo', pero data/usage_report_v3.json → monthly[*].models sí trae {interactions, cost_effective} por modelo. Hacé que el bridge use esas cifras cuando existan y solo caiga a n/a cuando el mes no tenga desglose por modelo.",
+      "acceptance": { "type": "command", "check": "python3 -m pytest tests/test_fpa.py tests/test_fpa_f6.py -q" }
+    },
+    {
+      "id": "m-e-03",
+      "repo": "coffee",
+      "base_commit": "13bc5fff7dc723e65ed669b13b95fa0e1717e10b",
+      "bead": "coffe-c15.7",
+      "class": "bugfix",
+      "difficulty": "medium",
+      "prompt": "metadata.date_range del reporte se deriva del timestamp ISO UTC de las filas, pero los buckets daily/hourly usan la zona local (timezone: -03). Resultado: date_range.end = 2026-11-16 mientras daily termina el 2026-11-15 y README e index publican fechas distintas. Derivá el período reportado de los buckets locales para que README, index y metadata digan lo mismo.",
+      "acceptance": { "type": "criterion", "check": "Tras regenerar el reporte, metadata.date_range.end coincide con la última fecha de daily[].date (TZ local) y README CHECK-DOCS e index.html publican esa misma fecha. `python3 -m pytest tests/test_tracker_window.py tests/test_report_refresh.py -q` termina en 0." }
+    },
+    {
+      "id": "m-e-04",
+      "repo": "coffee",
+      "base_commit": "13bc5fff7dc723e65ed669b13b95fa0e1717e10b",
+      "bead": "coffe-c15.2",
+      "class": "bugfix",
+      "difficulty": "medium",
+      "prompt": "Pi reporta usage.cost.total = 0 para modelos free y planes. extract_pi() en scripts/usage-tracker.py hace `if not cost and (inp or out or cache_r): cost = estimate_cost(...)`, lo que convierte un 0 real en una estimación a precio de lista ($3/$15 por M). Separá 'costo ausente' de 'costo 0 reportado': un 0 reportado debe quedar en 0 con provenance reported; solo la ausencia se estima con provenance assumed.",
+      "acceptance": { "type": "criterion", "check": "Filas con costo 0 reportado quedan con cost=0 y provenance reported; filas sin costo conservan estimate_cost con provenance assumed; el total estimado de Pi baja de ~$1.443 proporcionalmente a los ceros reales. `python3 -m pytest tests/test_tracker.py tests/test_tracker_charges.py -q` termina en 0." }
+    },
+    {
+      "id": "m-e-05",
+      "repo": "coffee",
+      "base_commit": "13bc5fff7dc723e65ed669b13b95fa0e1717e10b",
+      "bead": "coffe-c15.3",
+      "class": "feature",
+      "difficulty": "medium",
+      "prompt": "build_headlines() en scripts/viz-fpa.py etiqueta el KPI 'Coste efectivo' como reported, pero ~54% del total es estimado (fallback Pi, Codex standalone, cache de Claude). Agregá provenance por cifra (reported | assumed | mixed) en las cifras del tracker y del dashboard, y que el KPI declare el provenance real en lugar de un reported fijo.",
+      "acceptance": { "type": "criterion", "check": "Cada cifra de coste emitida por el tracker y el dashboard carry un campo provenance ∈ {reported, assumed, mixed}; el KPI 'Coste efectivo' muestra mixed (no reported) con la mezcla actual de datos. `python3 -m pytest tests/test_tracker_charges.py tests/test_fpa.py -q` termina en 0." }
+    },
+    {
+      "id": "m-e-06",
+      "repo": "coffee",
+      "base_commit": "13bc5fff7dc723e65ed669b13b95fa0e1717e10b",
+      "bead": "coffe-c15.4",
+      "class": "bugfix",
+      "difficulty": "medium",
+      "prompt": "La vista Gasto diario (#gasto) no está en la regla CSS que oculta vistas (enumera #summary, #cost, #breakdown, #habits, #outlook, #energy, #data) ni tiene su regla body[data-view=\"gasto\"] #gasto, así que queda siempre visible encima de las demás. Hacé que #gasto se comporte como las otras vistas: una a la vez, con su selector en el tab bar.",
+      "acceptance": { "type": "command", "check": "python3 -m pytest tests/test_fpa_gasto.py -q  (la suite de esta vista está roja en el base_commit; debe quedar verde)" }
+    },
+    {
+      "id": "m-e-07",
+      "repo": "coffee",
+      "base_commit": "13bc5fff7dc723e65ed669b13b95fa0e1717e10b",
+      "bead": "coffe-c15.12",
+      "class": "bugfix",
+      "difficulty": "medium",
+      "prompt": "Las alertas verify-plan del dashboard calculan el múltiplo contra fees de config/fpa.json, pero config/fpa.json para mayo 2026 registra claude $20 mientras el ledger real registra claude Max $100 (total mayo: $139,99 vs $59,99). Hacé que verify-plan use el fee del ledger del mes correspondiente (y caiga a config/fpa.json solo si el mes no está en el ledger), documentando la fuente en la alerta.",
+      "acceptance": { "type": "criterion", "check": "La alerta de mayo 2026 usa fee $100 para claude (múltiplo ~9×, no 45×), cita 'ledger' como fuente y solo usa config/fpa.json como fallback explícito. `python3 -m pytest tests/test_charges.py tests/test_fpa_charges.py -q` termina en 0." }
+    },
+    {
+      "id": "m-e-08",
+      "repo": "coffee",
+      "base_commit": "13bc5fff7dc723e65ed669b13b95fa0e1717e10b",
+      "bead": "coffe-c15.10",
+      "class": "bugfix",
+      "difficulty": "medium",
+      "prompt": "aggregate() suma fee/30.0 a daily[].cost_real por cada día activo (no calendario), así que la suma de daily no reconcilia con monthly (diferencia $48,55 en el dataset actual). Corregí la prorrata para que la suma de daily[].cost_real reconcilie con monthly[].cost_real dentro del redondeo, sin cambiar el significado de 'día activo'.",
+      "acceptance": { "type": "criterion", "check": "Tras regenerar: sum(daily[].cost_real) == monthly[].cost_real por mes (diferencia < $0,05 por mes) y el total diario = total mensual = $1.806,24 con los datos vigentes. `python3 -m pytest tests/test_tracker_window.py tests/test_fpa.py -q` termina en 0." }
+    },
+    {
+      "id": "m-e-09",
+      "repo": "coffee",
+      "base_commit": "13bc5fff7dc723e65ed669b13b95fa0e1717e10b",
+      "bead": "coffe-c15.8",
+      "class": "bugfix",
+      "difficulty": "medium",
+      "prompt": "extract_context_metrics() usa el nombre crudo del directorio de sesión como project, y el dashboard de contexto renderiza labels como --var-home-sasha-para-areas-dev-gh-ak-catitas--. Reutilizá la limpieza de nombres de proyecto que ya existe en el tracker (clean_proj_name o equivalente) para que las tablas del dashboard muestren el nombre corto del repo.",
+      "acceptance": { "type": "criterion", "check": "Ningún label de proyecto en data/context-dashboard.html contiene '--var-home-'; los proyectos se muestran como nombre corto (ej. 'ak/catitas'). `python3 -m pytest tests/test_tracker_context.py -q` termina en 0." }
+    },
+    {
+      "id": "m-e-10",
+      "repo": "coffee",
+      "base_commit": "13bc5fff7dc723e65ed669b13b95fa0e1717e10b",
+      "bead": "coffe-c15.5",
+      "class": "feature",
+      "difficulty": "hard",
+      "prompt": "El campo 'tool' mezcla dos dimensiones: proveedor/router/plan (openrouter, codex, claude-cli, omp, qwen-token-plan-individual…) cuando el lector necesita saber la fuente (harness) separada del proveedor. Diseñá y aplicá la separación: source = harness (pi, amp, claude-code, omp, codex), provider = router/plan (openrouter, minimax, kimi-coding, directo…), actualizando reporte, dashboards y README sin perder datos históricos.",
+      "acceptance": { "type": "criterion", "check": "El reporte emite source y provider por separado (ni monthly, projects ni session_spend usan 'tool' como dimensión única); el total de interacciones por mes no cambia respecto al base; el README documenta la nueva dimensión. `python3 -m pytest -q` (suite completa) termina en 0." }
+    },
+    {
+      "id": "m-e-11",
+      "repo": "coffee",
+      "base_commit": "13bc5fff7dc723e65ed669b13b95fa0e1717e10b",
+      "bead": "coffe-c15.6",
+      "class": "bugfix",
+      "difficulty": "hard",
+      "prompt": "filtered_out.interactions = 5.868 mezcla unidades: para Claude cuenta interacciones y para Pi cuenta archivos (*.jsonl), y el share 2,05% se calcula contra bases distintas. Hacé que filtered_out cuente interacciones (mensajes assistant) de forma uniforme por fuente, que by_tool sume al total, y que el share se calcule contra una sola base.",
+      "acceptance": { "type": "criterion", "check": "En el reporte regenerado: filtered_out.interactions == suma de filtered_out.by_tool, todas las entradas de by_tool cuentan llamadas (no archivos), y el share de excluidos se calcula contra el total de interacciones (el share de Pi sube a ~7%, no 2,05%). `python3 -m pytest tests/test_tracker_sessions.py -q` termina en 0." }
+    },
+    {
+      "id": "m-e-12",
+      "repo": "coffee",
+      "base_commit": "13bc5fff7dc723e65ed669b13b95fa0e1717e10b",
+      "bead": "coffe-c15.9",
+      "class": "bugfix",
+      "difficulty": "hard",
+      "prompt": "session_spend promete 'una fila por sesión' pero hilos Amp que tocan varios repos generan 2–4 filas con el mismo session_id, y el dedupe global (timestamp, tool, model_raw, source, project) descarta 315 filas legítimas de Pi y Claude. Rediseñá la clave de sesión y el dedupe: una fila por session_id (agregando proyectos si hace falta, con la lista de proyectos en la fila) y un dedupe que no descarte interacciones reales.",
+      "acceptance": { "type": "criterion", "check": "Tras regenerar: session_spend tiene exactamente una fila por session_id (0 duplicados), cada fila declara sus proyectos, y el dedupe global baja las filas descartadas de 315 a solo duplicados verdaderos (mismo timestamp+payload). `python3 -m pytest tests/test_tracker_spend.py tests/test_tracker_sessions.py -q` termina en 0." }
+    },
+    {
+      "id": "m-e-13",
+      "repo": "coffee",
+      "base_commit": "13bc5fff7dc723e65ed669b13b95fa0e1717e10b",
+      "bead": "coffe-c15.1",
+      "class": "feature",
+      "difficulty": "hard",
+      "prompt": "extract_omp() itera sessions_dir/<cwd>/*.jsonl y pierde las sesiones de subagente anidadas en sessions/<cwd>/<parent-uuid>/<Subagent>.jsonl (~54% de las llamadas omp). Extendé la ingesta para leer los archivos anidados, vinculando cada fila de subagente a su sesión padre (parent session id en la fila o en un índice), sin duplicar las llamadas de la sesión padre.",
+      "acceptance": { "type": "criterion", "check": "Tras regenerar: el conteo de sesiones omp crece de 19 directas a ~122 (incluye las anidadas en scope), ninguna llamada aparece dos veces, y cada fila de subagente referencia su parent session id. `python3 -m pytest tests/test_tracker_omp.py tests/test_agent_metrics.py -q` termina en 0." }
+    },
+    {
+      "id": "m-e-14",
+      "repo": "coffee",
+      "base_commit": "13bc5fff7dc723e65ed669b13b95fa0e1717e10b",
+      "bead": "coffe-0l5",
+      "class": "feature",
+      "difficulty": "hard",
+      "prompt": "La fuente de datos de Claude Code (dashboard-cache) es frágil: trunca turns viejos sin aviso (pérdida mar–may 2026, irrecuperable). Diseñá e implementá la fuente estable: Pi vía cache de toolpath como fuente primaria para claude-cli, dashboard-cache solo como fallback declarado con provenance. Actualizá el extractor, el README y los tests de charges.",
+      "acceptance": { "type": "criterion", "check": "Las filas claude-cli provienen de la fuente estable con provenance declarado; el dashboard-cache queda como fallback con aviso cuando se usa; README documenta la decisión y el período perdido mar–may queda flaggeado como gap. `python3 -m pytest -q` (suite completa) termina en 0." }
+    },
+    {
+      "id": "m-e-15",
+      "repo": "coffee",
+      "base_commit": "13bc5fff7dc723e65ed669b13b95fa0e1717e10b",
+      "bead": "coffe-4y8",
+      "class": "docs",
+      "difficulty": "medium",
+      "prompt": "Aplicá el estándar README front-door v0.4 (§5.1 del estándar de dulce-de-leche) a este README: scope statement (repo personal de datos/análisis, uso = reproducibilidad, no onboarding), front matter al inicio, y las secciones mínimas del contrato §5.1, sin borrar el contenido analítico existente.",
+      "acceptance": { "type": "criterion", "check": "El README tiene: statement de scope en las primeras 20 líneas, las secciones exigidas por §5.1 y ningún link roto nuevo; `python3 -m pytest tests/test_repo_links.py -q` termina en 0." }
+    },
+    {
+      "id": "m-e-16",
+      "repo": "coffee",
+      "base_commit": "13bc5fff7dc723e65ed669b13b95fa0e1717e10b",
+      "bead": "coffe-tmm.9",
+      "class": "bugfix",
+      "difficulty": "easy",
+      "prompt": "La navegación del índice del sitio deja los títulos ilegibles en móvil (se solapan o recortan). Corregí la legibilidad de los títulos de la navegación al índice en viewport móvil (≤ 400px), manteniendo el tema del sitio.",
+      "acceptance": { "type": "command", "check": "python3 -m pytest tests/test_index.py tests/test_site_nav.py -q" }
+    },
+    {
+      "id": "m-e-17",
+      "repo": "coffee",
+      "base_commit": "13bc5fff7dc723e65ed669b13b95fa0e1717e10b",
+      "bead": "coffe-tmm.7",
+      "class": "feature",
+      "difficulty": "medium",
+      "prompt": "El botón Compartir de los dashboards no conserva la vista ni el período: al abrir la URL compartida en otro navegador cae a la vista por defecto. Hacé que el share URL encode vista y período activos y que al abrirla se restauren ambos.",
+      "acceptance": { "type": "criterion", "check": "La URL generada por Compartir contiene vista y período; al abrirla en un contexto sin estado local se restauran la vista y el período originales (sin JS errors en consola). `python3 -m pytest -q` termina en 0." }
+    },
+    {
+      "id": "m-e-18",
+      "repo": "coffee",
+      "base_commit": "13bc5fff7dc723e65ed669b13b95fa0e1717e10b",
+      "bead": "coffe-tmm.10",
+      "class": "feature",
+      "difficulty": "medium",
+      "prompt": "Los gráficos descargados (PNG/SVG) pierden colores, ejes o significado respecto de la vista en pantalla. Hacé que la descarga conserve colores, ejes y etiquetas de la vista tal como se ve.",
+      "acceptance": { "type": "criterion", "check": "El archivo descargado incluye fondo del tema, ejes con escalas y labels legibles idénticos a la vista renderizada (no un canvas vacío ni monocromo). `python3 -m pytest -q` termina en 0." }
+    },
+    {
+      "id": "m-e-19",
+      "repo": "coffee",
+      "base_commit": "13bc5fff7dc723e65ed669b13b95fa0e1717e10b",
+      "bead": "coffe-tmm.12",
+      "class": "feature",
+      "difficulty": "medium",
+      "prompt": "Los botones atrás/adelante del navegador no restauran la vista de los dashboards. Sincronizá la vista y el período con el history del navegador (pushState/replaceState + popstate) para que atrás y adelante restauran la vista con navegación por query.",
+      "acceptance": { "type": "criterion", "check": "Cambiar de vista pushState la query; atrás/adelante restauran vista y período; deep-link directo a una query funciona sin estado intermedio. `python3 -m pytest -q` termina en 0." }
+    },
+    {
+      "id": "m-e-20",
+      "repo": "coffee",
+      "base_commit": "13bc5fff7dc723e65ed669b13b95fa0e1717e10b",
+      "bead": "coffe-tmm.13",
+      "class": "feature",
+      "difficulty": "medium",
+      "prompt": "Los anuncios retro del dashboard ignoran la preferencia de movimiento reducido del sistema. Respetá prefers-reduced-motion en los anuncios (movimiento reducido) y permití pausarlos manualmente.",
+      "acceptance": { "type": "criterion", "check": "Con prefers-reduced-motion: reduce los anuncios no animan (o animan por debajo del umbral WCAG) y hay control de pausa funcional; sin la preferencia el comportamiento actual se mantiene. `python3 -m pytest -q` termina en 0." }
+    },
+    {
+      "id": "m-e-21",
+      "repo": "coffee",
+      "base_commit": "13bc5fff7dc723e65ed669b13b95fa0e1717e10b",
+      "bead": "coffe-tmm.11",
+      "class": "feature",
+      "difficulty": "medium",
+      "prompt": "La vista DDL muestra ausencias y métricas sin explicación legible (números sueltos que el lector no puede interpretar). Agregá explicaciones legibles por métrica y por ausencia: qué mide, período, y qué significa el valor en el contexto del repo.",
+      "acceptance": { "type": "criterion", "check": "Cada métrica y cada marcador de ausencia de la vista DDL tiene texto explicativo visible (tooltip o inline) que nombra la definición y el período; no queda ninguna cifra sin explicación. `python3 -m pytest -q` termina en 0." }
+    },
+    {
+      "id": "m-e-22",
+      "repo": "coffee",
+      "base_commit": "13bc5fff7dc723e65ed669b13b95fa0e1717e10b",
+      "bead": "coffe-tmm.6",
+      "class": "feature",
+      "difficulty": "medium",
+      "prompt": "El detalle de cada barra del Gantt no se puede consultar por toque (móvil) ni teclado. Hacé el detalle accesible: abrir/cerrar por toque y por teclado (Enter/Escape, foco visible), sin depender de hover.",
+      "acceptance": { "type": "criterion", "check": "Cada barra del Gantt es enfocable (tab order), abre su detalle con Enter, lo cierra con Escape, y el mismo detalle abre por toque; no hay información accesible solo por hover. `python3 -m pytest -q` termina en 0." }
+    },
+    {
+      "id": "m-e-23",
+      "repo": "coffee",
+      "base_commit": "13bc5fff7dc723e65ed669b13b95fa0e1717e10b",
+      "bead": "coffe-tmm.5",
+      "class": "docs",
+      "difficulty": "easy",
+      "prompt": "El resumen del dashboard DDL no declara qué hallazgos debe explicar. Definí y documentá la lista de hallazgos que el resumen debe explicar (los que emergen del talk de DDL), con su definición operativa, y dejá la lista en el repo donde el generador del resumen pueda consumirla.",
+      "acceptance": { "type": "criterion", "check": "Existe una lista de hallazgos aprobada (≥5) con definición operativa por hallazgo, ubicada en docs/ o specs/ y referenciada desde el generador del resumen o su spec; el README o la guía la menciona." }
+    },
+    {
+      "id": "m-e-24",
+      "repo": "tambor",
+      "base_commit": "b95115299aca4684333371aa64baf5e09f0cb846",
+      "bead": "tambor-flq",
+      "class": "bugfix",
+      "difficulty": "medium",
+      "prompt": "En los demos del bench, el texto de las hojas se dibuja fuera del root de 300px dibujado (queda recortado o flotando fuera del lienzo). Corregí el layout del demo para que el texto de hojas quede dentro del área dibujada de 300px.",
+      "acceptance": { "type": "command", "check": "cargo test  (incluye los tests de layout del bench) termina en 0" }
+    },
+    {
+      "id": "m-e-25",
+      "repo": "tambor",
+      "base_commit": "b95115299aca4684333371aa64baf5e09f0cb846",
+      "bead": "tambor-uro",
+      "class": "feature",
+      "difficulty": "medium",
+      "prompt": "Los ejemplos publicados usan stubs indexForPosition() => 0 (cualquier toque cae en el índice 0). Reemplazá los stubs de los ejemplos shipped por una implementación real de hit-testing multi-línea coherente con el rendering.",
+      "acceptance": { "type": "criterion", "check": "Ningún ejemplo shipped contiene `indexForPosition` como stub constante `=> 0`; el hit-testing devuelve el índice de línea/char bajo la posición y `cargo test` termina en 0." }
+    },
+    {
+      "id": "m-e-26",
+      "repo": "tambor",
+      "base_commit": "b95115299aca4684333371aa64baf5e09f0cb846",
+      "bead": "tambor-1iv",
+      "class": "bugfix",
+      "difficulty": "medium",
+      "prompt": "El heavy-lock instala un lock demo-dist always-on que entra en conflicto con la co-selección de batches de ah. Hacé que el lock solo se tome cuando la demo corre de verdad (no always-on) y que la co-selección de batch no lo dispare.",
+      "acceptance": { "type": "command", "check": "cargo test  (incluye tests de co-selección/lock) termina en 0" }
+    },
+    {
+      "id": "m-e-27",
+      "repo": "tambor",
+      "base_commit": "b95115299aca4684333371aa64baf5e09f0cb846",
+      "bead": "tambor-rtt",
+      "class": "feature",
+      "difficulty": "hard",
+      "prompt": "Existe un bridge de soft-keyboard (input in-process) sin conectar al host SPA. Conectá el bridge al host SPA: eventos de teclado virtual llegan al estado del editor, IME composing incluido, sin romper el teclado físico.",
+      "acceptance": { "type": "criterion", "check": "El host SPA recibe los eventos del bridge (teclas virtuales insertan texto en el editor), hay manejo de composing, y `cargo test` más la suite del host terminan en 0." },
+      "notes": "puede cruzar con tambor-uro (ejemplos shipped); implementar solo el bridge, sin depender de cambios de otros beads"
+    },
+    {
+      "id": "m-e-28",
+      "repo": "tambor",
+      "base_commit": "b95115299aca4684333371aa64baf5e09f0cb846",
+      "bead": "tambor-pwq",
+      "class": "bugfix",
+      "difficulty": "easy",
+      "prompt": "sad corre sin sad.toml y el commit de adopción (4c223bcb) no lleva el trailer de atribución, así que la atribución sale 'unconfigured'. Agregá el sad.toml que falta y asegurá que los commits lleven el trailer de atribución configurado.",
+      "acceptance": { "type": "criterion", "check": "Existe sad.toml en la raíz con la configuración de atribución; un commit nuevo generado tras el cambio incluye el trailer; `cargo test` termina en 0." }
+    },
+    {
+      "id": "m-e-29",
+      "repo": "wai",
+      "base_commit": "789e21a7019405a7b1a1590296b9b46bce1926f1",
+      "bead": "wai-40t2",
+      "class": "feature",
+      "difficulty": "easy",
+      "prompt": "wai rechaza flags desconocidos con un error seco. Agregá sugerencias 'did you mean' (similitud simple, ej. Levenshtein) cuando el flag desconocido se parezca a uno válido: `wai --stauts` → 'did you mean --status?'.",
+      "acceptance": { "type": "command", "check": "cargo test  (incluye tests del parser de flags) termina en 0" }
+    },
+    {
+      "id": "m-e-30",
+      "repo": "wai",
+      "base_commit": "789e21a7019405a7b1a1590296b9b46bce1926f1",
+      "bead": "wai-wyed",
+      "class": "feature",
+      "difficulty": "medium",
+      "prompt": "wai falla con 'Multiple projects found' cuando hay ambigüedad. Inferí el proyecto del cwd: si el cwd está dentro de un proyecto conocido, elegilo automáticamente; solo si sigue ambiguo, el error debe listar las opciones y sugerir cómo desambiguar.",
+      "acceptance": { "type": "criterion", "check": "Corriendo wai dentro de un directorio de proyecto único, el proyecto se infiere sin error; ambigüedad real produce error con la lista de candidatos; `cargo test` termina en 0." }
+    },
+    {
+      "id": "m-e-31",
+      "repo": "wai",
+      "base_commit": "789e21a7019405a7b1a1590296b9b46bce1926f1",
+      "bead": "wai-135y",
+      "class": "bugfix",
+      "difficulty": "medium",
+      "prompt": "`wai feedback --from-last-error` resuelve el texto del error como si fuera un argumento (crashea o busca un comando inexistente). Corregí el flag para que lea el último error registrado y lo pase como contenido del feedback.",
+      "acceptance": { "type": "command", "check": "cargo test  (incluye tests del subcomando feedback) termina en 0" }
+    },
+    {
+      "id": "m-e-32",
+      "repo": "wai",
+      "base_commit": "789e21a7019405a7b1a1590296b9b46bce1926f1",
+      "bead": "wai-g2iv",
+      "class": "bugfix",
+      "difficulty": "easy",
+      "prompt": "El gate spk-lint de lefthook llama el linter equivocado para el árbol openspec. Corregí lefthook.yml para que el gate del árbol openspec invoque el linter correcto y el gate quede verde en un checkout limpio.",
+      "acceptance": { "type": "criterion", "check": "El comando del gate en lefthook.yml apunta al linter correcto para *.md de openspec (no el de código Rust) y correr el gate manualmente sobre el árbol openspec termina en 0 en un checkout limpio." }
+    },
+    {
+      "id": "m-e-33",
+      "repo": "wai",
+      "base_commit": "789e21a7019405a7b1a1590296b9b46bce1926f1",
+      "bead": "wai-1s8i",
+      "class": "bugfix",
+      "difficulty": "medium",
+      "prompt": "ddl doctor valida repo.gates pero solo verifica que lefthook.yml exista: nunca verifica que los hooks estén activados (core.hooksPath / lefthook install), así que el check pasa en falso. Extendé el check para verificar activación real de hooks y fallar con instrucciones de fix cuando no estén.",
+      "acceptance": { "type": "criterion", "check": "Con hooks no instalados, `ddl doctor` (o el subcomando equivalente) falla el check repo.gates con mensaje de fix; con hooks activos pasa; `cargo test` termina en 0." }
+    },
+    {
+      "id": "m-e-34",
+      "repo": "dont",
+      "base_commit": "1f8f24c0fd08d9393bbb83ef0ede3f362e5b09da",
+      "bead": "dont-72gk",
+      "class": "feature",
+      "difficulty": "easy",
+      "prompt": "dont doctor no tiene un check para db.cozo trackeado por git. Agregá el check: si db.cozo está en el working tree y trackeado por git, avisar con el riesgo (el historial guarda entradas que 'dont log remove' borra del HEAD) y sugerir la práctica correcta.",
+      "acceptance": { "type": "command", "check": "cargo test  (incluye tests de doctor) termina en 0" }
+    },
+    {
+      "id": "m-e-35",
+      "repo": "dont",
+      "base_commit": "1f8f24c0fd08d9393bbb83ef0ede3f362e5b09da",
+      "bead": "dont-a2sk",
+      "class": "tests",
+      "difficulty": "medium",
+      "prompt": "Export/import de la base de dont no tiene tests de integración round-trip. Agregá tests de integración: export a archivo, import en store vacío, y verificación de que el contenido y los ids sobreviven el ciclo (incluyendo entradas con caracteres no-ASCII y multi-línea).",
+      "acceptance": { "type": "criterion", "check": "Existen ≥3 tests de integración round-trip export/import que cubren round-trip puro, ids únicos preservados y entradas no-ASCII/multi-línea; `cargo test` termina en 0 con esos tests incluidos." }
+    },
+    {
+      "id": "m-e-36",
+      "repo": "dont",
+      "base_commit": "1f8f24c0fd08d9393bbb83ef0ede3f362e5b09da",
+      "bead": "dont-ikmi",
+      "class": "tests",
+      "difficulty": "medium",
+      "prompt": "El test tx_ids_are_unique_across_concurrent_store_instances falla determinísticamente por un problema de concurrencia real en el store (no es flaky del test): los ids generados en instancias concurrentes colisionan. Encontrá la causa (semilla/orden de inicialización compartida) y corregila para que ids generados concurrentemente sean únicos.",
+      "acceptance": { "type": "criterion", "check": "El test corre 20 veces seguidas (`cargo test tx_ids_are_unique -- --test-threads=8` repetido) sin fallar, y la corrección está en el store (no en relajar el assertion). `cargo test` termina en 0." }
+    },
+    {
+      "id": "m-e-37",
+      "repo": "dont",
+      "base_commit": "1f8f24c0fd08d9393bbb83ef0ede3f362e5b09da",
+      "bead": "dont-6vv9",
+      "class": "feature",
+      "difficulty": "hard",
+      "prompt": "Agregá los subcomandos `dont log export` y `dont log import` a la CLI: export escribe la base a un archivo portátil (formato elegible, ej. JSONL) y import la restaura desde ese archivo, con validación de schema y refusal de importar sobre una base no vacía sin --force.",
+      "acceptance": { "type": "criterion", "check": "`dont log export -o file` y `dont log import file` completan un round-trip sin pérdida; import sin --force sobre base no vacía falla con error claro; import valida schema y falla con archivo corrupto; `cargo test` termina en 0." }
+    },
+    {
+      "id": "m-e-38",
+      "repo": "genesis",
+      "base_commit": "a9b53adce876178bcfcc1425883f3b6f88c7506d",
+      "bead": "genesis-mqt",
+      "class": "feature",
+      "difficulty": "hard",
+      "prompt": "Hay ~12 sitios en 7 tools que implementan atomic-write a mano (write-then-rename con variaciones). Extraé un módulo fs compartido con primitivas de escritura atómica (write + rename temp, fsync opcional) y migrá al menos los sitios del workspace genesis, sin cambiar el comportamiento observable.",
+      "acceptance": { "type": "criterion", "check": "Existe el módulo fs compartido con las primitivas documentadas; los sitios migrados ya no contienen su implementación local de write-then-rename; `cargo test` a nivel workspace termina en 0." },
+      "notes": "cruza varios tools del workspace genesis; migrar solo los sitios necesarios para el bead"
+    },
+    {
+      "id": "m-e-39",
+      "repo": "genesis",
+      "base_commit": "a9b53adce876178bcfcc1425883f3b6f88c7506d",
+      "bead": "genesis-7mi",
+      "class": "docs",
+      "difficulty": "easy",
+      "prompt": "El review de fleet adoption necesita un índice de los tickets de adopción (12 repos): qué repo, qué ticket, estado. Creá el documento índice con una fila por repo (repo, ticket id, estado, gap principal) a partir de los beads existentes del workspace.",
+      "acceptance": { "type": "criterion", "check": "Existe el documento índice con las 12 filas de repos declaradas en el bead, cada fila con ticket id y estado verificables contra .beads/issues.jsonl del repo correspondiente." }
+    },
+    {
+      "id": "m-e-40",
+      "repo": "whisper",
+      "base_commit": "5e99fc798ff4c6185e9a622fc11758a62b8d0658",
+      "bead": "whisper-11e",
+      "class": "bugfix",
+      "difficulty": "medium",
+      "prompt": "El upgrade a openspec 1.x está bloqueado por 4 validation failures bajo @fission-ai/openspec@1.14.2. Corregí los 4 cambios en el árbol openspec (formato/estructura que la versión nueva exige) para que la validación pase con la versión 1.x, sin perder cambios existentes.",
+      "acceptance": { "type": "criterion", "check": "La validación de openspec (el comando que el repo usa en su gate) pasa con @fission-ai/openspec@1.14.2 sin errores, y ningún cambio activo fue borrado para lograrlo." }
+    }
+  ]
+}
